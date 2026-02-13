@@ -3,26 +3,17 @@
  */
 export const REST_CLIENT_TYPE_ENUM = {
   /** Spot */
-  main: 'main',
-  /** Futures */
-  derivatives: 'derivatives',
-  /** Futures Demo */
-  derivativesDemo: 'derivativesDemo',
-  /** Institutional */
-  institutional: 'institutional',
-  /** Partner */
-  partner: 'partner',
+  spot: 'spot',
+  /** Spot AWS */
+  spotAWS: 'spotAWS',
 } as const;
 
 export type RestClientType =
   (typeof REST_CLIENT_TYPE_ENUM)[keyof typeof REST_CLIENT_TYPE_ENUM];
 
 const krakenURLMap = {
-  [REST_CLIENT_TYPE_ENUM.main]: 'https://api.kraken.com',
-  [REST_CLIENT_TYPE_ENUM.derivatives]: 'https://futures.kraken.com',
-  [REST_CLIENT_TYPE_ENUM.derivativesDemo]: 'https://demo-futures.kraken.com',
-  [REST_CLIENT_TYPE_ENUM.institutional]: 'https://api.kraken.com',
-  [REST_CLIENT_TYPE_ENUM.partner]: 'https://embed.kraken.com',
+  [REST_CLIENT_TYPE_ENUM.spot]: 'https://api.huobi.pro',
+  [REST_CLIENT_TYPE_ENUM.spotAWS]: 'https://api-aws.huobi.pro',
 } as const;
 
 export interface RestClientOptions {
@@ -146,16 +137,5 @@ export function getRestBaseUrl(
   if (restClientOptions.baseUrl) {
     return restClientOptions.baseUrl;
   }
-
-  if (restClientOptions.testnet) {
-    if (restClientType === REST_CLIENT_TYPE_ENUM.derivatives) {
-      return krakenURLMap[REST_CLIENT_TYPE_ENUM.derivativesDemo];
-    }
-
-    throw new Error(
-      `Testnet is not supported for this environment: ${restClientType}. Refer to Kraken's API documentation for more information. If you believe this is incorrect, please open an issue on GitHub.`,
-    );
-  }
-
   return krakenURLMap[restClientType];
 }

@@ -15,14 +15,19 @@ export type DerivativesAPIResponse<TData> =
   | DerivativesAPISuccessResponse<TData>
   | DerivativesAPIErrorResponse;
 
+/** HTX spot API response. TData is the payload inside the data field. */
 export type SpotAPISuccessResponse<TData> = {
-  error: string[];
-  result: TData;
+  status: string;
+  code?: string;
+  ch?: string;
+  ts?: number;
+  data: TData;
 };
 
 export interface SpotAPIErrorResponse {
-  // e.g.{ error: [ 'EGeneral:Invalid arguments:ordertype' ] },
-  error: string[];
+  message?: string;
+  'err-code'?: string;
+  'err-msg'?: string;
 }
 
 export type SpotAPIResponse<TData> =

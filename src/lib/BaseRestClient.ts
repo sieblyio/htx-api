@@ -297,10 +297,16 @@ export abstract class BaseRestClient {
     params?: ParamsInQueryBodyOrHeader,
     isPublicApi?: boolean,
   ): Promise<any> {
-    const path = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+    const isFullUrl =
+      endpoint.startsWith('http://') || endpoint.startsWith('https://');
+    const path = isFullUrl
+      ? endpoint
+      : endpoint.startsWith('/')
+        ? endpoint
+        : '/' + endpoint;
 
     // Sanity check to make sure it's only ever prefixed by one forward slash
-    const requestUrl = this.baseUrl + path;
+    const requestUrl = isFullUrl ? endpoint : this.baseUrl + path;
 
     // Build a request and handle signature process
     const options = await this.buildRequest(
@@ -339,7 +345,7 @@ export abstract class BaseRestClient {
           }
 
           switch (this.getClientType()) {
-            case REST_CLIENT_TYPE_ENUM.main: {
+            case REST_CLIENT_TYPE_ENUM.spot: {
               if (response.data?.error?.length) {
                 throw throable;
               }
@@ -522,7 +528,7 @@ export abstract class BaseRestClient {
       const clientType = this.getClientType();
 
       switch (clientType) {
-        case REST_CLIENT_TYPE_ENUM.main: {
+        case REST_CLIENT_TYPE_ENUM.spot: {
           // Set default nonce, if not set yet
           if (!Array.isArray(res.requestData)) {
             if (!(res.requestData as any)?.nonce) {
@@ -768,7 +774,7 @@ export abstract class BaseRestClient {
     let signHeaders: Record<string, string> = {};
 
     switch (this.getClientType()) {
-      case REST_CLIENT_TYPE_ENUM.main: {
+      case REST_CLIENT_TYPE_ENUM.spot: {
         signHeaders = {
           'API-Key': this.apiKey,
           'API-Sign': signResult.sign,

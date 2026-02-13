@@ -1,19 +1,34 @@
 import { BaseRestClient } from './lib/BaseRestClient.js';
 import { REST_CLIENT_TYPE_ENUM, RestClientType } from './lib/requestUtils.js';
+import type {
+  SpotGetChainsParams,
+  SpotGetCurrenciesParams,
+  SpotGetCurrencysSettingsParams,
+  SpotGetMarketSymbolsParams,
+  SpotGetReferenceCurrenciesParams,
+  SpotGetSymbolsSettingsParams,
+  SpotGetTradingSymbolsParams,
+} from './types/request/spot.types.js';
 import { SpotAPISuccessResponse } from './types/response/shared.types.js';
-import { SpotSystemStatus } from './types/response/spot.types.js';
+import {
+  SpotCurrency,
+  SpotMarketStatusResponse,
+  SpotSystemStatusPage,
+  SpotTradingSymbol,
+  SpotV1ChainInfo,
+  SpotV1CurrencySettings,
+  SpotV1MarketSymbolSettings,
+  SpotV1SymbolSettings,
+  SpotV2CurrencyReference,
+} from './types/response/spot.types.js';
 
 /**
- * The SpotClient provides integration to the Kraken Spot API.
- *
- * Docs:
- * - https://docs.kraken.com/api/docs/guides/spot-rest-intro/
- * - https://docs.kraken.com/api/docs/rest-api/get-server-time
+ * The SpotClient provides integration to the HTX Spot API.
  */
 export class SpotClient extends BaseRestClient {
   getClientType(): RestClientType {
-    // Points to api.kraken.com
-    return REST_CLIENT_TYPE_ENUM.main;
+    // Points to api.huobi.pro
+    return REST_CLIENT_TYPE_ENUM.spot;
   }
 
   /**
@@ -35,30 +50,113 @@ export class SpotClient extends BaseRestClient {
 
   /**
    *
-   * Spot REST API - Market Data
+   * Reference Data
    *
    */
-
-  /**
-   * Get Server Time
-   *
-   * Get the server's time.
-   */
-  getServerTime(): Promise<
-    SpotAPISuccessResponse<{
-      unixtime: number;
-      rfc1123: string;
-    }>
-  > {
-    return this.get('0/public/Time');
-  }
 
   /**
    * Get System Status
    *
-   * Get the current system status or trading mode.
+   * Get system status, incidents and planned maintenance.
+   * Uses status.huobigroup.com (no signature, different base URL).
    */
-  getSystemStatus(): Promise<SpotAPISuccessResponse<SpotSystemStatus>> {
-    return this.get('0/public/SystemStatus');
+  getSystemStatus(): Promise<SpotSystemStatusPage> {
+    return this.get('https://status.huobigroup.com/api/v2/summary.json');
+  }
+
+  /**
+   * Get Market Status
+   *
+   * Returns current market status.
+   * 1=normal, 2=halted, 3=cancel-only.
+   */
+  getMarketStatus(): Promise<SpotMarketStatusResponse> {
+    return this.get('/v2/market-status');
+  }
+
+  /**
+   * Get Current Timestamp (V1)
+   *
+   * Returns current server time in milliseconds since epoch. No signature required.
+   */
+  getTimestamp(): Promise<SpotAPISuccessResponse<number>> {
+    return this.get('/v1/common/timestamp');
+  }
+
+  /**
+   * Get all Supported Trading Symbols (V2)
+   *
+   * Returns all supported trading symbols. Pass ts for incremental updates.
+   */
+  getTradingSymbols(
+    params?: SpotGetTradingSymbolsParams,
+  ): Promise<SpotAPISuccessResponse<SpotTradingSymbol[]>> {
+    return this.get('/v2/settings/common/symbols', params);
+  }
+
+  /**
+   * Get all Supported Currencies (V2)
+   *
+   * Returns all supported currencies. Pass ts for incremental updates.
+   */
+  getCurrencies(
+    params?: SpotGetCurrenciesParams,
+  ): Promise<SpotAPISuccessResponse<SpotCurrency[]>> {
+    return this.get('/v2/settings/common/currencies', params);
+  }
+
+  /**
+   * Get Currencys Settings (V1)
+   *
+   * Returns currency settings. No signature required. Pass ts for incremental updates.
+   */
+  getCurrencysSettings(
+    params?: SpotGetCurrencysSettingsParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1CurrencySettings[]>> {
+    return this.get('/v1/settings/common/currencys', params);
+  }
+
+  /**
+   * Get Symbols Settings (V1)
+   *
+   * Returns symbol settings. No signature required. Pass ts for incremental updates.
+   */
+  getSymbolsSettings(
+    params?: SpotGetSymbolsSettingsParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1SymbolSettings[]>> {
+    return this.get('/v1/settings/common/symbols', params);
+  }
+
+  /**
+   * Get Market Symbols Settings (V1)
+   *
+   * Returns market symbol settings. No signature required. Pass symbols (NA=all) and/or ts for incremental updates.
+   */
+  getMarketSymbolsSettings(
+    params?: SpotGetMarketSymbolsParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1MarketSymbolSettings[]>> {
+    return this.get('/v1/settings/common/market-symbols', params);
+  }
+
+  /**
+   * Get Chains Information (V1)
+   *
+   * Returns chain info per currency. No signature required. Pass show-desc, currency, and/or ts for incremental updates.
+   */
+  getChains(
+    params?: SpotGetChainsParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1ChainInfo[]>> {
+    return this.get('/v1/settings/common/chains', params);
+  }
+
+  /**
+   * Get Reference Currencies & Chains (V2)
+   *
+   * Returns static reference info for each currency and its chains. No signature required.
+   */
+  getReferenceCurrencies(
+    params?: SpotGetReferenceCurrenciesParams,
+  ): Promise<SpotAPISuccessResponse<SpotV2CurrencyReference[]>> {
+    return this.get('/v2/reference/currencies', params);
   }
 }
