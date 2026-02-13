@@ -1,7 +1,7 @@
 {
-  "name": "@siebly/kraken-api",
-  "version": "1.0.4",
-  "description": "Complete & robust Node.js SDK for Kraken's REST APIs and WebSockets, with TypeScript & strong end to end tests.",
+  "name": "@siebly/htx-api",
+  "version": "1.0.0",
+  "description": "Complete & robust Node.js SDK for HTX's REST APIs and WebSockets, with TypeScript & strong end to end tests.",
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && bash ./postBuild.sh",
@@ -58,13 +58,13 @@
     "webpack-bundle-analyzer": "^4.10.2"
   },
   "keywords": [
-    "kraken",
-    "kraken api",
-    "kraken nodejs",
-    "kraken javascript",
-    "kraken typescript",
-    "kraken websocket api",
-    "kraken websocket api javascript",
+    "htx",
+    "htx api",
+    "htx nodejs",
+    "htx javascript",
+    "htx typescript",
+    "htx websocket api",
+    "htx websocket api javascript",
     "algo trading",
     "api",
     "websocket",
@@ -86,10 +86,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sieblyio/kraken-api"
+    "url": "https://github.com/sieblyio/htx-api"
   },
   "bugs": {
-    "url": "https://github.com/sieblyio/kraken-api/issues"
+    "url": "https://github.com/sieblyio/htx-api/issues"
   },
-  "homepage": "https://github.com/sieblyio/kraken-api#readme"
+  "homepage": "https://github.com/sieblyio/htx-api#readme"
 }
