@@ -44,6 +44,12 @@ export interface SpotGetReferenceCurrenciesParams {
   authorizedUser?: boolean;
 }
 
+/** Params for GET /v2/reference/transact-fee-rate. Max 10 symbols. */
+export interface SpotGetTransactFeeRateParams {
+  /** Trading symbols comma-separated (e.g. btcusdt, ethusdt). Max 10 */
+  symbols: string;
+}
+
 /**
  * Market Data
  */
@@ -216,6 +222,210 @@ export interface SpotV2PointTransferParams {
   groupId: number;
   /** Transfer amount (max 8 decimal places) */
   amount: string;
+}
+
+/**
+ * Trading
+ */
+
+/** Order type: direction-type. market=no price; limit=price+amount; limit-maker=maker only; ioc=immediately or cancel; limit-fok=fill or kill; stop-*=trigger price */
+export type SpotOrderType =
+  | 'buy-market'
+  | 'sell-market'
+  | 'buy-limit'
+  | 'sell-limit'
+  | 'buy-ioc'
+  | 'sell-ioc'
+  | 'buy-limit-maker'
+  | 'sell-limit-maker'
+  | 'buy-stop-limit'
+  | 'sell-stop-limit'
+  | 'buy-limit-fok'
+  | 'sell-limit-fok'
+  | 'buy-stop-limit-fok'
+  | 'sell-stop-limit-fok';
+
+/** Order source: spot-api, margin-api, super-margin-api, c2c-margin-api */
+export type SpotOrderSource =
+  | 'spot-api'
+  | 'margin-api'
+  | 'super-margin-api'
+  | 'c2c-margin-api';
+
+/** Params for POST /v1/order/orders/place */
+export interface SpotV1OrderPlaceParams {
+  /** Account ID from GET /v1/account/accounts. Required for trading. */
+  'account-id': string;
+  /** Trading symbol (e.g. ethusdt) */
+  symbol: string;
+  /** Order type (e.g. buy-limit, sell-market) */
+  type: SpotOrderType;
+  /** Order size. For buy-market = order value in quote currency. */
+  amount: string;
+  /** Order price. Not used for market orders. Required for limit types. */
+  price?: string;
+  /** Order source. Default spot-api */
+  source?: SpotOrderSource;
+  /** Client order ID. Max 64 chars. Valid 8h for open, 2h for completed. */
+  'client-order-id'?: string;
+  /** 0=allow self-trade, 1=prevent. Default 0 */
+  'self-match-prevent'?: 0 | 1;
+  /** Trigger price for stop-limit orders */
+  'stop-price'?: string;
+  /** Operator for stop price (lte, gte, etc) */
+  operator?: string;
+}
+
+/** Batch of orders for POST /v1/order/batch-orders. Max 10 orders. */
+export type SpotV1OrderBatchPlaceParams = SpotV1OrderPlaceParams[];
+
+/** Margin order with auto borrow/repay for POST /v1/order/auto/place. Sub-accounts not supported. */
+export interface SpotV1OrderAutoPlaceParams {
+  symbol: string;
+  'account-id': string;
+  type: SpotOrderType;
+  /** 1: automatic loan, 2: automatic repayment */
+  'trade-purpose': '1' | '2';
+  source: SpotOrderSource;
+  /** Order volume. For market buy = order value. Use amount or market-amount, not both. */
+  amount?: string;
+  /** Market buy = order volume, market sell = order amount. Use amount or market-amount, not both. */
+  'market-amount'?: string;
+  /** Amount/quantity to borrow when trade-purpose=1. Max 3 decimal precision. */
+  'borrow-amount'?: string;
+  price?: string;
+  'stop-price'?: string;
+  operator?: string;
+}
+
+/** Params for POST /v1/order/orders/{order-id}/submitcancel. order-id in path. */
+export interface SpotV1OrderCancelParams {
+  /** Order ID to cancel (path param) */
+  orderId: string;
+  /** Symbol (e.g. btcusdt). Sent in request body. */
+  symbol?: string;
+}
+
+/** Params for POST /v1/order/orders/submitCancelClientOrder */
+export interface SpotV1OrderCancelByClientOrderIdParams {
+  /** Client order ID to cancel */
+  'client-order-id': string;
+}
+
+/** Params for GET /v1/order/cancelAllOrders */
+export interface SpotV1OrderCancelAllParams {
+  /** Comma-separated symbols. Omit or empty = cancel all spot orders. */
+  symbol?: string;
+}
+
+/** Params for POST /v1/order/orders/batchCancelOpenOrders */
+export interface SpotV1OrderBatchCancelOpenOrdersParams {
+  /** Account ID from GET /v1/account/accounts */
+  'account-id'?: string;
+  /** Comma-separated symbols (max 10). Default all */
+  symbol?: string;
+  /** Order types comma-separated */
+  types?: string;
+  /** Filter: buy, sell */
+  side?: 'buy' | 'sell';
+  /** Orders to cancel [1-100]. Default 100 */
+  size?: number;
+}
+
+/** Params for POST /v1/order/orders/batchcancel. Use order-ids or client-order-ids (max 50 each). */
+export interface SpotV1OrderBatchCancelParams {
+  /** Order IDs to cancel. Prefer over client-order-ids. Max 50 */
+  'order-ids'?: string[];
+  /** Client order IDs to cancel. Max 50 */
+  'client-order-ids'?: string[];
+}
+
+/** Params for GET /v1/order/orders/{order-id} */
+export interface SpotGetOrderDetailParams {
+  /** Order ID (path param) */
+  orderId: string;
+}
+
+/** Params for GET /v1/order/orders/getClientOrder */
+export interface SpotGetOrderByClientOrderIdParams {
+  /** Client order ID */
+  clientOrderId: string;
+}
+
+/** Params for GET /v1/order/orders (search past orders) */
+export interface SpotGetOrderHistoryParams {
+  /** Trading symbol (required) */
+  symbol: string;
+  /** Order types comma-separated */
+  types?: string;
+  /** Start time (unix ms). Max 48h window. */
+  'start-time'?: number;
+  /** End time (unix ms). Max 48h window, within 180 days. */
+  'end-time'?: number;
+  /** States: filled, partial-canceled, canceled (comma-separated, required) */
+  states: string;
+  /** Start order ID for pagination */
+  from?: string;
+  /** next=desc, prev=asc. Default both */
+  direct?: 'next' | 'prev';
+  /** Orders to return [1-100]. Default 100 */
+  size?: number;
+}
+
+/** Params for GET /v1/order/history (48h historical orders) */
+export interface SpotGetOrderHistory48hParams {
+  /** Trading symbol */
+  symbol?: string;
+  /** Start time (unix ms). Default 48h ago */
+  'start-time'?: number;
+  /** End time (unix ms). Default now */
+  'end-time'?: number;
+  /** prev=asc, next=desc. Default next */
+  direct?: 'prev' | 'next';
+  /** Items per response [10-1000]. Default 100 */
+  size?: number;
+}
+
+/** Params for GET /v1/order/matchresults (search match results) */
+export interface SpotGetMatchResultsParams {
+  /** Trading symbol */
+  symbol?: string;
+  /** Order types comma-separated */
+  types?: string;
+  /** Start time (unix ms). 48h window, 120 days range */
+  'start-time'?: number;
+  /** End time (unix ms). 48h window */
+  'end-time'?: number;
+  /** Internal id to begin pagination (use last id of prev page) */
+  from?: string;
+  /** next or prev. Default next */
+  direct?: 'next' | 'prev';
+  /** Items to return [1-500]. Default 100 */
+  size?: number;
+}
+
+/** Params for GET /v1/order/openOrders */
+export interface SpotGetOpenOrdersParams {
+  /** Account ID from GET /v1/account/accounts */
+  'account-id'?: string;
+  /** Trading symbol (e.g. ethusdt) */
+  symbol?: string;
+  /** Filter: buy, sell */
+  side?: 'buy' | 'sell';
+  /** Order types comma-separated */
+  types?: string;
+  /** Start order ID for pagination */
+  from?: string;
+  /** prev=asc from start, next=desc from start */
+  direct?: 'prev' | 'next';
+  /** Orders to return [1-500]. Default 100 */
+  size?: number;
+}
+
+/** Params for POST /v2/algo-orders/cancel-all-after (Dead man's switch). 0=off, >=5=on with timeout seconds */
+export interface SpotV2AlgoOrdersCancelAllAfterParams {
+  /** Timeout in seconds. 0=turn off, >=5=turn on. Must ping twice within timeout or all spot orders (max 500) are canceled. */
+  timeout: number;
 }
 
 /** Params for GET /v2/account/ledger */

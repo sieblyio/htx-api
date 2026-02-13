@@ -15,16 +15,32 @@ import type {
   SpotGetHistoryTradeParams,
   SpotGetKlineParams,
   SpotGetMarketSymbolsParams,
+  SpotGetMatchResultsParams,
   SpotGetMergedTickerParams,
+  SpotGetOpenOrdersParams,
+  SpotGetOrderByClientOrderIdParams,
+  SpotGetOrderDetailParams,
+  SpotGetOrderHistory48hParams,
+  SpotGetOrderHistoryParams,
   SpotGetPointAccountParams,
   SpotGetReferenceCurrenciesParams,
   SpotGetSymbolsSettingsParams,
   SpotGetTradeParams,
   SpotGetTradingSymbolsParams,
+  SpotGetTransactFeeRateParams,
   SpotGetValuationParams,
   SpotV1AccountFeeSwitchParams,
   SpotV1FuturesTransferParams,
+  SpotV1OrderAutoPlaceParams,
+  SpotV1OrderBatchCancelOpenOrdersParams,
+  SpotV1OrderBatchCancelParams,
+  SpotV1OrderBatchPlaceParams,
+  SpotV1OrderCancelAllParams,
+  SpotV1OrderCancelByClientOrderIdParams,
+  SpotV1OrderCancelParams,
+  SpotV1OrderPlaceParams,
   SpotV2AccountTransferParams,
+  SpotV2AlgoOrdersCancelAllAfterParams,
   SpotV2PointTransferParams,
 } from './types/request/spot.types.js';
 import { SpotAPISuccessResponse } from './types/response/shared.types.js';
@@ -49,13 +65,27 @@ import {
   SpotV1ChainInfo,
   SpotV1CurrencySettings,
   SpotV1MarketSymbolSettings,
+  SpotV1OpenOrder,
+  SpotV1OrderAutoPlaceData,
+  SpotV1OrderBatchCancelData,
+  SpotV1OrderBatchCancelOpenOrdersData,
+  SpotV1OrderBatchPlaceItem,
+  SpotV1OrderCancelByClientOrderIdData,
+  SpotV1OrderCancelData,
+  SpotV1OrderDetail,
+  SpotV1OrderHistory48hItem,
+  SpotV1OrderHistoryItem,
+  SpotV1OrderMatchResult,
+  SpotV1OrderPlaceData,
   SpotV1SymbolSettings,
   SpotV2AccountLedgerItem,
   SpotV2AccountValuation,
+  SpotV2AlgoOrdersCancelAllAfterData,
   SpotV2AssetValuation,
   SpotV2CurrencyReference,
   SpotV2PointAccount,
   SpotV2PointTransferData,
+  SpotV2TransactFeeRateItem,
 } from './types/response/spot.types.js';
 
 /**
@@ -448,5 +478,207 @@ export class SpotClient extends BaseRestClient {
     params: SpotV1AccountFeeSwitchParams,
   ): Promise<SpotAPISuccessResponse<{}>> {
     return this.postPrivate('/v1/account/fee/switch', { body: params });
+  }
+
+  /**
+   *
+   * Trading
+   *
+   */
+
+  /**
+   * Place a New Order
+   *
+   * Places order to be matched. Set account-id and source per account type. Signature required. Trade permission. Rate: 100/2s.
+   */
+  submitOrder(
+    params: SpotV1OrderPlaceParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderPlaceData>> {
+    return this.postPrivate('/v1/order/orders/place', { body: params });
+  }
+
+  /**
+   * Place a Batch of Orders
+   *
+   * Max 10 orders per batch. Each returns order-id or err-code/err-msg. Signature required. Trade permission. Rate: 50/2s.
+   */
+  submitBatchOrders(
+    params: SpotV1OrderBatchPlaceParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderBatchPlaceItem[]>> {
+    return this.postPrivate('/v1/order/batch-orders', { body: params });
+  }
+
+  /**
+   * Margin Order (Auto Borrow/Repay)
+   *
+   * Auto borrow to place or auto repay. Sub-accounts not supported. Use amount or market-amount. Signature required. Trade permission. Rate: 100/2s.
+   */
+  submitMarginOrder(
+    params: SpotV1OrderAutoPlaceParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderAutoPlaceData>> {
+    return this.postPrivate('/v1/order/auto/place', { body: params });
+  }
+
+  /**
+   * Cancel Order by Order ID
+   *
+   * Submits cancel request. Verify via order status or match result. Signature required. Trade permission. Rate: 100/2s.
+   */
+  cancelOrderByOrderId(
+    params: SpotV1OrderCancelParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderCancelData>> {
+    const { orderId, ...body } = params;
+    return this.postPrivate(`/v1/order/orders/${orderId}/submitcancel`, {
+      body: body,
+    });
+  }
+
+  /**
+   * Cancel Order by Client Order ID
+   *
+   * Prefer cancelOrder (by order-id) when possible. Submits cancel request; verify via order status. Signature required. Trade permission. Rate: 100/2s.
+   */
+  cancelOrderByClientOrderId(
+    params: SpotV1OrderCancelByClientOrderIdParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderCancelByClientOrderIdData>> {
+    return this.postPrivate('/v1/order/orders/submitCancelClientOrder', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel All Spot Orders
+   *
+   * Cancel all open spot orders. Pass symbol for specific pair(s), comma-separated; omit for all. Signature required. Trade permission. Rate: 1/2s.
+   */
+  cancelAllOrders(
+    params?: SpotV1OrderCancelAllParams,
+  ): Promise<SpotAPISuccessResponse<null>> {
+    return this.getPrivate('/v1/order/cancelAllOrders', params);
+  }
+
+  /**
+   * Get All Open Orders
+   *
+   * Returns unfilled orders. Filter by account-id, symbol, side. Signature required. Read permission. Rate: 50/2s.
+   */
+  getOpenOrders(
+    params?: SpotGetOpenOrdersParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OpenOrder[]>> {
+    return this.getPrivate('/v1/order/openOrders', params);
+  }
+
+  /**
+   * Cancel Multiple Orders by Criteria
+   *
+   * Cancel up to 100 orders matching account-id, symbol, types, side. Submit only; verify via order status. Signature required. Trade permission. Rate: 50/2s.
+   */
+  batchCancelOpenOrders(
+    params?: SpotV1OrderBatchCancelOpenOrdersParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderBatchCancelOpenOrdersData>> {
+    return this.postPrivate('/v1/order/orders/batchCancelOpenOrders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel Multiple Orders by IDs
+   *
+   * Cancel by order-ids or client-order-ids (max 50). Prefer order-ids. Signature required. Trade permission. Rate: 50/2s.
+   */
+  batchCancelOrders(
+    params: SpotV1OrderBatchCancelParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderBatchCancelData>> {
+    return this.postPrivate('/v1/order/orders/batchcancel', { body: params });
+  }
+
+  /**
+   * Dead Man's Switch (Cancel All After)
+   *
+   * Turn on/off. timeout=0 to turn off. timeout>=5 to turn on: must call twice within timeout seconds or all spot orders (max 500) are canceled. Signature required. Trade permission.
+   */
+  setCancelAllAfter(
+    params: SpotV2AlgoOrdersCancelAllAfterParams,
+  ): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancelAllAfterData>> {
+    return this.postPrivate('/v2/algo-orders/cancel-all-after', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Order Detail by Order ID
+   *
+   * Returns order detail. API-created orders not queryable 2h after cancel. Signature required. Read permission. Rate: 50/2s.
+   */
+  getOrder(
+    params: SpotGetOrderDetailParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderDetail>> {
+    return this.getPrivate(`/v1/order/orders/${params.orderId}`);
+  }
+
+  /**
+   * Get Order Detail by Client Order ID
+   *
+   * Returns latest status of order with given client order ID. Signature required. Read permission. Rate: 50/2s.
+   */
+  getOrderByClientId(
+    params: SpotGetOrderByClientOrderIdParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderDetail>> {
+    return this.getPrivate('/v1/order/orders/getClientOrder', params);
+  }
+
+  /**
+   * Get Match Results of an Order
+   *
+   * Returns match/trade results for a specific order. Signature required. Read permission. Rate: 50/2s.
+   */
+  getOrderMatchResults(
+    params: SpotGetOrderDetailParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderMatchResult[]>> {
+    return this.getPrivate(`/v1/order/orders/${params.orderId}/matchresults`);
+  }
+
+  /**
+   * Search Past Orders
+   *
+   * Historical orders by symbol, states, time range. Max 48h window, 180 days range. API orders not queryable 2h after cancel. Signature required. Read permission. Rate: 50/2s.
+   */
+  getOrderHistory(
+    params: SpotGetOrderHistoryParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderHistoryItem[]>> {
+    return this.getPrivate('/v1/order/orders', params);
+  }
+
+  /**
+   * Search Historical Orders within 48 Hours
+   *
+   * Orders by time range. Default: last 48h. next-time in last item when more exist. API orders not queryable 2h after cancel. Signature required. Read permission. Rate: 20/2s.
+   */
+  getOrderHistory48h(
+    params?: SpotGetOrderHistory48hParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderHistory48hItem[]>> {
+    return this.getPrivate('/v1/order/history', params);
+  }
+
+  /**
+   * Search Match Results
+   *
+   * Match results of filled/partial orders by symbol, types, time. 48h window, 120 days range. Signature required. Read permission. Rate: 20/2s.
+   */
+  getMatchResults(
+    params?: SpotGetMatchResultsParams,
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderMatchResult[]>> {
+    return this.getPrivate('/v1/order/matchresults', params);
+  }
+
+  /**
+   * Get Transact Fee Rate
+   *
+   * Query fee rates for trading pairs. Max 10 symbols. Signature required. Read permission. Rate: 50/2s.
+   */
+  getTransactFeeRate(
+    params: SpotGetTransactFeeRateParams,
+  ): Promise<SpotAPISuccessResponse<SpotV2TransactFeeRateItem[]>> {
+    return this.getPrivate('/v2/reference/transact-fee-rate', params);
   }
 }

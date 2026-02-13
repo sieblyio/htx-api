@@ -302,6 +302,15 @@ export interface SpotV2ChainReference {
   withdrawStatus?: string;
 }
 
+/** Fee rate item from GET /v2/reference/transact-fee-rate */
+export interface SpotV2TransactFeeRateItem {
+  symbol: string;
+  makerFeeRate: string;
+  takerFeeRate: string;
+  actualMakerRate: string;
+  actualTakerRate: string;
+}
+
 /** Currency reference item from /v2/reference/currencies */
 export interface SpotV2CurrencyReference {
   currency?: string;
@@ -531,4 +540,152 @@ export interface SpotV2AccountLedgerItem {
   transactTime: number;
   transferer: number;
   transferee: number;
+}
+
+/** Order id from POST /v1/order/orders/place. Response data is the order id. */
+export type SpotV1OrderPlaceData = string;
+
+/** Batch order result item. Success: order-id, client-order-id. Error: err-code, err-msg. */
+export interface SpotV1OrderBatchPlaceItem {
+  'order-id'?: number;
+  'client-order-id'?: string;
+  'err-code'?: string;
+  'err-msg'?: string;
+}
+
+/** Margin order result from POST /v1/order/auto/place */
+export interface SpotV1OrderAutoPlaceData {
+  'order-id': number;
+}
+
+/** Canceled order id from POST /v1/order/orders/{order-id}/submitcancel */
+export type SpotV1OrderCancelData = string;
+
+/** Order status from POST /v1/order/orders/submitCancelClientOrder. 1:ready, 2:created, 3:submitted, 4:partial-filled, 5:partial-canceled, 6:filled, 7:canceled, 10:canceling */
+export type SpotV1OrderCancelByClientOrderIdData = number;
+
+/** Result from POST /v1/order/orders/batchCancelOpenOrders */
+export interface SpotV1OrderBatchCancelOpenOrdersData {
+  'success-count': number;
+  'failed-count': number;
+  /** Next order id to cancel, -1 = none */
+  'next-id': number;
+}
+
+/** Failed cancel item from POST /v1/order/orders/batchcancel */
+export interface SpotV1OrderBatchCancelFailedItem {
+  'order-id'?: string;
+  'client-order-id'?: string;
+  'err-code'?: string;
+  'err-msg'?: string;
+  'order-state'?: string;
+}
+
+/** Result from POST /v2/algo-orders/cancel-all-after (Dead man's switch) */
+export interface SpotV2AlgoOrdersCancelAllAfterData {
+  currentTime: number;
+  triggerTime: number;
+}
+
+/** Result from POST /v1/order/orders/batchcancel */
+export interface SpotV1OrderBatchCancelData {
+  /** Successfully canceled order ids or client-order-ids */
+  success: string[];
+  /** Failed cancel requests */
+  failed: SpotV1OrderBatchCancelFailedItem[];
+}
+
+/** Match result item from GET /v1/order/orders/{order-id}/matchresults */
+export interface SpotV1OrderMatchResult {
+  id: number;
+  symbol: string;
+  'order-id': number;
+  'match-id': number;
+  'trade-id': number;
+  price: string;
+  'created-at': number;
+  type: string;
+  'filled-amount': string;
+  'filled-fees': string;
+  'fee-currency'?: string;
+  source?: string;
+  role?: string;
+  'filled-points'?: string;
+  'fee-deduct-currency'?: string;
+  'fee-deduct-state'?: string;
+}
+
+/** Historical order from GET /v1/order/orders (search past orders) */
+export interface SpotV1OrderHistoryItem {
+  id: number;
+  'client-order-id'?: string;
+  'account-id'?: number;
+  amount?: string;
+  symbol: string;
+  price?: string;
+  'created-at': number;
+  'canceled-at'?: number;
+  'finished-at'?: number;
+  type?: string;
+  'field-amount'?: string;
+  'field-cash-amount'?: string;
+  'field-fees'?: string;
+  source?: string;
+  state: string;
+  'stop-price'?: string;
+  operator?: string;
+  role?: string;
+  'canceled-source'?: number | string;
+  'canceled-source-desc'?: string;
+  'market-amount'?: string;
+  'ice-amount'?: string;
+  'is-ice'?: boolean;
+  'updated-at'?: number;
+}
+
+/** Historical order from GET /v1/order/history (48h). Includes next-time when more results exist. */
+export interface SpotV1OrderHistory48hItem extends SpotV1OrderHistoryItem {
+  /** Next start-time or end-time for pagination. Only when results exceed size. */
+  'next-time'?: number;
+}
+
+/** Order detail from GET /v1/order/orders/{order-id} and getClientOrder */
+export interface SpotV1OrderDetail {
+  id: number;
+  'client-order-id': string;
+  symbol: string;
+  'account-id': number;
+  amount: string;
+  price: string;
+  'created-at': number;
+  'finished-at': number;
+  'canceled-at': number;
+  type: string;
+  'field-amount': string;
+  'field-cash-amount': string;
+  'field-fees': string;
+  source: string;
+  'canceled-source'?: string;
+  state: string;
+  'stop-price'?: string;
+  operator?: string;
+}
+
+/** Open order from GET /v1/order/openOrders */
+export interface SpotV1OpenOrder {
+  id: number;
+  'client-order-id'?: string;
+  symbol: string;
+  'account-id'?: number;
+  price?: string;
+  amount?: string;
+  'created-at': number;
+  type: string;
+  'filled-amount': string;
+  'filled-cash-amount': string;
+  'filled-fees': string;
+  source?: string;
+  state: string;
+  'stop-price'?: string;
+  operator?: string;
 }
