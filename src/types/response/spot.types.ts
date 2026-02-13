@@ -320,3 +320,101 @@ export interface SpotV2CurrencyReference {
 /**
  * Market Data
  */
+
+/** Kline/candlestick item from /market/history/kline */
+export interface SpotKlineItem {
+  id: number;
+  open: number;
+  close: number;
+  low: number;
+  high: number;
+  amount: number;
+  vol: number;
+  count: number;
+  [key: string]: unknown;
+}
+
+/** Merged ticker from /market/detail/merged (payload is in "tick" not "data"). */
+export interface SpotMergedTicker {
+  id: number;
+  version?: number;
+  open: number;
+  close: number;
+  low: number;
+  high: number;
+  amount: number;
+  vol: number;
+  count: number;
+  /** [price, size] */
+  bid: [number, number];
+  /** [price, size] */
+  ask: [number, number];
+  [key: string]: unknown;
+}
+
+/** Ticker item from /market/tickers */
+export interface SpotTickerItem {
+  symbol: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  amount: number;
+  vol: number;
+  count: number;
+  bid: number;
+  bidSize: number;
+  ask: number;
+  askSize: number;
+  [key: string]: unknown;
+}
+
+/** Depth tick from /market/depth and /market/fullMbp (payload is in "tick" not "data"). */
+export interface SpotDepthTick {
+  ts: number;
+  version: number;
+  bids: [number, number][];
+  asks: [number, number][];
+  [key: string]: unknown;
+}
+
+/** 24h market summary tick from /market/detail (payload is in "tick" not "data"). */
+export interface SpotDetailTick {
+  id: number;
+  low: number;
+  high: number;
+  open: number;
+  close: number;
+  vol: number;
+  amount: number;
+  version: number;
+  count: number;
+  [key: string]: unknown;
+}
+
+/** Trade item (shared by /market/trade and /market/history/trade) */
+export interface SpotTradeItem {
+  id: number;
+  ts: number;
+  'trade-id': number;
+  amount: number;
+  price: number;
+  direction: string;
+  [key: string]: unknown;
+}
+
+/** Trade tick from /market/trade (payload is in "tick" not "data"). */
+export interface SpotTradeTick {
+  id: number;
+  ts: number;
+  data: SpotTradeItem[];
+  [key: string]: unknown;
+}
+
+/** Timestamp group from /market/history/trade. Each element in data array. */
+export interface SpotTradeTimestampGroup {
+  id: number;
+  ts: number;
+  data: SpotTradeItem[];
+  [key: string]: unknown;
+}

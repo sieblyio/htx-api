@@ -43,3 +43,59 @@ export interface SpotGetReferenceCurrenciesParams {
   /** Authorized user. Default true. */
   authorizedUser?: boolean;
 }
+
+/**
+ * Market Data
+ */
+
+/** Params for /market/history/kline */
+export interface SpotGetKlineParams {
+  /** Trading symbol (e.g. btcusdt, btc3lusdtnav for ETP NAV) */
+  symbol: string;
+  /** Candle period. Default 1day. */
+  period?: string;
+  /** Number of data points [1-2000]. Default 150. */
+  size?: number;
+}
+
+/** Params for /market/detail/merged */
+export interface SpotGetMergedTickerParams {
+  /** Trading symbol (e.g. btcusdt, ethusdt) */
+  symbol: string;
+}
+
+/** Params for /market/depth */
+export interface SpotGetDepthParams {
+  /** Trading symbol (e.g. btcusdt) */
+  symbol: string;
+  /** Depth levels per side. 5, 10, 20, 30. Default 20. step0 uses 150 if omitted. */
+  depth?: number;
+  /** step0=no agg, step1-5=aggregation levels. Default step0. */
+  type?: string;
+}
+
+/** Params for /market/trade */
+export interface SpotGetTradeParams {
+  /** Trading symbol (e.g. btcusdt) */
+  symbol: string;
+}
+
+/** Params for /market/history/trade */
+export interface SpotGetHistoryTradeParams {
+  /** Trading symbol (e.g. btcusdt) */
+  symbol: string;
+  /** Number of data points [1-2000]. Default 1. */
+  size?: number;
+}
+
+/** Params for /market/detail */
+export interface SpotGetDetailParams {
+  /** Trading symbol (e.g. btcusdt, ethusdt) */
+  symbol: string;
+}
+
+/** Params for /market/fullMbp */
+export interface SpotGetFullOrderbookParams {
+  /** Trading symbol (e.g. btcusdt, ethusdt). Up to 5000 levels. */
+  symbol: string;
+}

@@ -4,16 +4,30 @@ import type {
   SpotGetChainsParams,
   SpotGetCurrenciesParams,
   SpotGetCurrencysSettingsParams,
+  SpotGetDepthParams,
+  SpotGetDetailParams,
+  SpotGetFullOrderbookParams,
+  SpotGetHistoryTradeParams,
+  SpotGetKlineParams,
   SpotGetMarketSymbolsParams,
+  SpotGetMergedTickerParams,
   SpotGetReferenceCurrenciesParams,
   SpotGetSymbolsSettingsParams,
+  SpotGetTradeParams,
   SpotGetTradingSymbolsParams,
 } from './types/request/spot.types.js';
 import { SpotAPISuccessResponse } from './types/response/shared.types.js';
 import {
   SpotCurrency,
+  SpotDepthTick,
+  SpotDetailTick,
+  SpotKlineItem,
   SpotMarketStatusResponse,
+  SpotMergedTicker,
   SpotSystemStatusPage,
+  SpotTickerItem,
+  SpotTradeTick,
+  SpotTradeTimestampGroup,
   SpotTradingSymbol,
   SpotV1ChainInfo,
   SpotV1CurrencySettings,
@@ -158,5 +172,97 @@ export class SpotClient extends BaseRestClient {
     params?: SpotGetReferenceCurrenciesParams,
   ): Promise<SpotAPISuccessResponse<SpotV2CurrencyReference[]>> {
     return this.get('/v2/reference/currencies', params);
+  }
+
+  /**
+   *
+   * Market Data
+   *
+   */
+
+  /**
+   * Get Klines (Candles)
+   *
+   * Returns candlestick data for a symbol. No signature required.
+   */
+  getKlines(
+    params: SpotGetKlineParams,
+  ): Promise<SpotAPISuccessResponse<SpotKlineItem[]>> {
+    return this.get('/market/history/kline', params);
+  }
+
+  /**
+   * Get Latest Aggregated Ticker
+   *
+   * Returns latest ticker with 24h aggregated market data. No signature required.
+   */
+  getMergedTicker(
+    params: SpotGetMergedTickerParams,
+  ): Promise<SpotAPISuccessResponse<SpotMergedTicker, 'tick'>> {
+    return this.get('/market/detail/merged', params);
+  }
+
+  /**
+   * Get Latest Tickers for All Pairs
+   *
+   * Returns latest tickers for all supported pairs. No signature required.
+   */
+  getTickers(): Promise<SpotAPISuccessResponse<SpotTickerItem[]>> {
+    return this.get('/market/tickers');
+  }
+
+  /**
+   * Get Market Depth
+   *
+   * Returns order book for a symbol. No signature required.
+   */
+  getMarketDepth(
+    params: SpotGetDepthParams,
+  ): Promise<SpotAPISuccessResponse<SpotDepthTick, 'tick'>> {
+    return this.get('/market/depth', params);
+  }
+
+  /**
+   * Get the Last Trade
+   *
+   * Returns latest trade with price, volume, direction. No signature required.
+   */
+  getTrade(
+    params: SpotGetTradeParams,
+  ): Promise<SpotAPISuccessResponse<SpotTradeTick, 'tick'>> {
+    return this.get('/market/trade', params);
+  }
+
+  /**
+   * Get the Most Recent Trades
+   *
+   * Returns recent trades grouped by timestamp. No signature required.
+   */
+  getHistoryTrade(
+    params: SpotGetHistoryTradeParams,
+  ): Promise<SpotAPISuccessResponse<SpotTradeTimestampGroup[]>> {
+    return this.get('/market/history/trade', params);
+  }
+
+  /**
+   * Get the Last 24h Market Summary
+   *
+   * Returns 24h trading summary for a symbol. No signature required.
+   */
+  getMarketDetail(
+    params: SpotGetDetailParams,
+  ): Promise<SpotAPISuccessResponse<SpotDetailTick, 'tick'>> {
+    return this.get('/market/detail', params);
+  }
+
+  /**
+   * Get Full Order Book
+   *
+   * Returns complete market depth, up to 5000 levels. Updated once per second. No signature required.
+   */
+  getFullOrderBook(
+    params: SpotGetFullOrderbookParams,
+  ): Promise<SpotAPISuccessResponse<SpotDepthTick, 'tick'>> {
+    return this.get('/market/fullMbp', params);
   }
 }

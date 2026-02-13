@@ -15,14 +15,16 @@ export type DerivativesAPIResponse<TData> =
   | DerivativesAPISuccessResponse<TData>
   | DerivativesAPIErrorResponse;
 
-/** HTX spot API response. TData is the payload inside the data field. */
-export type SpotAPISuccessResponse<TData> = {
+/** HTX spot API success response. TData is the payload. TPayloadKey defaults to "data" but can be overridden (e.g. "tick"). */
+export type SpotAPISuccessResponse<
+  TData,
+  TPayloadKey extends string = 'data',
+> = {
   status: string;
   code?: string;
   ch?: string;
   ts?: number;
-  data: TData;
-};
+} & Record<TPayloadKey, TData>;
 
 export interface SpotAPIErrorResponse {
   message?: string;
