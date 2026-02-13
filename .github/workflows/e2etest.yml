@@ -1,0 +1,63 @@
+name: E2ETests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  PROXY_ENABLED: ${{ secrets.PROXY_ENABLED }}
+  PROXY_HOST: ${{ secrets.PROXY_HOST }}
+  PROXY_PASS: ${{ secrets.PROXY_PASS }}
+  PROXY_PORT: ${{ secrets.PROXY_PORT }}
+  PROXY_USER: ${{ secrets.PROXY_USER }}
+
+jobs:
+  E2ETests:
+    name: 'Build & Test'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'Checkout source code'
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org/'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci --ignore-scripts
+
+      - name: Build
+        run: npm run build
+
+      - name: Test Public REST API Calls
+        run: npm run test -- public.test.ts
+
+      - name: Test Private Futures Read API Calls
+        run: npm run test -- private.futures.read.test.ts
+        env:
+          API_FUTURES_KEY: ${{ secrets.API_FUTURES_KEY }}
+          API_FUTURES_SECRET: ${{ secrets.API_FUTURES_SECRET }}
+          API_FUTURES_TESTNET: ${{ secrets.API_FUTURES_TESTNET }}
+
+      - name: Test Private Futures Write API Calls
+        run: npm run test -- private.futures.write.test.ts
+        env:
+          API_FUTURES_KEY: ${{ secrets.API_FUTURES_KEY }}
+          API_FUTURES_SECRET: ${{ secrets.API_FUTURES_SECRET }}
+          API_FUTURES_TESTNET: ${{ secrets.API_FUTURES_TESTNET }}
+
+      - name: Test Private Spot Read API Calls
+        run: npm run test -- private.spot.read.test.ts
+        env:
+          API_SPOT_KEY: ${{ secrets.API_SPOT_KEY }}
+          API_SPOT_SECRET: ${{ secrets.API_SPOT_SECRET }}
+
+      - name: Test Private Spot Write API Calls
+        run: npm run test -- private.spot.write.test.ts
+        env:
+          API_SPOT_KEY: ${{ secrets.API_SPOT_KEY }}
+          API_SPOT_SECRET: ${{ secrets.API_SPOT_SECRET }}

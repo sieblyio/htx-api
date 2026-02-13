@@ -21,6 +21,8 @@ export type SpotAPISuccessResponse<
   TPayloadKey extends string = 'data',
 > = {
   status: string;
+  success?: boolean;
+  ok?: boolean;
   code?: string;
   ch?: string;
   ts?: number;

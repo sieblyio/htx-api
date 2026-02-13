@@ -1,0 +1,20 @@
+const { DerivativesClient } = require('@siebly/kraken-api');
+
+// This example shows how to call this Kraken API endpoint with either node.js, javascript (js) or typescript (ts) with the npm module "@siebly/kraken-api" for Kraken exchange
+// This Kraken API SDK is available on npm via "npm install @siebly/kraken-api"
+// ENDPOINT: derivatives/api/v3/pnlpreferences
+// METHOD: PUT
+// PUBLIC: NO
+
+const client = new DerivativesClient({
+  apiKey: 'insert_api_key_here',
+  apiSecret: 'insert_api_secret_here',
+});
+
+client.setPnlPreference(params)
+  .then((response) => {
+    console.log(response);
+  })
+  .catch((error) => {
+    console.error(error);
+  });

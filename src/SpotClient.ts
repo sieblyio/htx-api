@@ -1,6 +1,11 @@
 import { BaseRestClient } from './lib/BaseRestClient.js';
 import { REST_CLIENT_TYPE_ENUM, RestClientType } from './lib/requestUtils.js';
 import type {
+  SpotAccountTransferParams,
+  SpotGetAccountBalanceParams,
+  SpotGetAccountHistoryParams,
+  SpotGetAccountLedgerParams,
+  SpotGetAssetValuationParams,
   SpotGetChainsParams,
   SpotGetCurrenciesParams,
   SpotGetCurrencysSettingsParams,
@@ -11,13 +16,23 @@ import type {
   SpotGetKlineParams,
   SpotGetMarketSymbolsParams,
   SpotGetMergedTickerParams,
+  SpotGetPointAccountParams,
   SpotGetReferenceCurrenciesParams,
   SpotGetSymbolsSettingsParams,
   SpotGetTradeParams,
   SpotGetTradingSymbolsParams,
+  SpotGetValuationParams,
+  SpotV1AccountFeeSwitchParams,
+  SpotV1FuturesTransferParams,
+  SpotV2AccountTransferParams,
+  SpotV2PointTransferParams,
 } from './types/request/spot.types.js';
 import { SpotAPISuccessResponse } from './types/response/shared.types.js';
 import {
+  SpotAccount,
+  SpotAccountBalance,
+  SpotAccountHistoryItem,
+  SpotAccountTransferData,
   SpotCurrency,
   SpotDepthTick,
   SpotDetailTick,
@@ -29,11 +44,18 @@ import {
   SpotTradeTick,
   SpotTradeTimestampGroup,
   SpotTradingSymbol,
+  SpotV1AccountOverviewInfo,
+  SpotV1AccountSwitchUserInfo,
   SpotV1ChainInfo,
   SpotV1CurrencySettings,
   SpotV1MarketSymbolSettings,
   SpotV1SymbolSettings,
+  SpotV2AccountLedgerItem,
+  SpotV2AccountValuation,
+  SpotV2AssetValuation,
   SpotV2CurrencyReference,
+  SpotV2PointAccount,
+  SpotV2PointTransferData,
 } from './types/response/spot.types.js';
 
 /**
@@ -264,5 +286,167 @@ export class SpotClient extends BaseRestClient {
     params: SpotGetFullOrderbookParams,
   ): Promise<SpotAPISuccessResponse<SpotDepthTick, 'tick'>> {
     return this.get('/market/fullMbp', params);
+  }
+
+  /**
+   *
+   * Account
+   *
+   */
+
+  /**
+   * Get all Accounts of the Current User
+   *
+   * Returns list of accounts owned by this API user. Signature required.
+   */
+  getAccounts(): Promise<SpotAPISuccessResponse<SpotAccount[]>> {
+    return this.getPrivate('/v1/account/accounts');
+  }
+
+  /**
+   * Get Account Balance of a Specific Account
+   *
+   * Returns balance for account specified by account id. Signature required. OTC not supported.
+   */
+  getAccountBalance(
+    params: SpotGetAccountBalanceParams,
+  ): Promise<SpotAPISuccessResponse<SpotAccountBalance>> {
+    return this.getPrivate(`/v1/account/accounts/${params.accountId}/balance`);
+  }
+
+  /**
+   * Get The Total Valuation of Platform Assets
+   *
+   * Returns total asset valuation in BTC or fiat. Signature required.
+   */
+  getAccountValuation(
+    params?: SpotGetValuationParams,
+  ): Promise<SpotAPISuccessResponse<SpotV2AccountValuation>> {
+    return this.getPrivate('/v2/account/valuation', params);
+  }
+
+  /**
+   * Get Asset Valuation
+   *
+   * Returns valuation of total assets in BTC or fiat. Signature required.
+   */
+  getAssetValuation(
+    params?: SpotGetAssetValuationParams,
+  ): Promise<SpotAPISuccessResponse<SpotV2AssetValuation>> {
+    return this.getPrivate('/v2/account/asset-valuation', params);
+  }
+
+  /**
+   * Asset Transfer
+   *
+   * Transfer asset between accounts (spot, margin, sub-users). Signature required. Trade permission.
+   */
+  submitTransfer(
+    params: SpotAccountTransferParams,
+  ): Promise<SpotAPISuccessResponse<SpotAccountTransferData>> {
+    return this.postPrivate('/v1/account/transfer', { body: params });
+  }
+
+  /**
+   * Get Account History
+   *
+   * Returns amount changes of specified account. Signature required. Max 1h query window, 30 days range.
+   */
+  getAccountHistory(
+    params: SpotGetAccountHistoryParams,
+  ): Promise<
+    SpotAPISuccessResponse<SpotAccountHistoryItem[]> & { 'next-id'?: number }
+  > {
+    return this.getPrivate('/v1/account/history', params);
+  }
+
+  /**
+   * Get Account Ledger
+   *
+   * Returns amount changes (phase 1: transfer only). Max 10-day window, 180 days range. Signature required.
+   */
+  getAccountLedger(
+    params?: SpotGetAccountLedgerParams,
+  ): Promise<
+    SpotAPISuccessResponse<SpotV2AccountLedgerItem[]> & { nextId?: number }
+  > {
+    return this.getPrivate('/v2/account/ledger', params);
+  }
+
+  /**
+   * V2 Account Transfer
+   *
+   * Transfer funds between spot, linear-swap, otc, futures, swap. Signature required. Trade permission.
+   */
+  submitV2AccountTransfer(
+    params: SpotV2AccountTransferParams,
+  ): Promise<SpotAPISuccessResponse<number>> {
+    return this.postPrivate('/v2/account/transfer', { body: params });
+  }
+
+  /**
+   * Futures Transfer
+   *
+   * Transfer between spot and future contract account. pro-to-futures = spot -> contract, futures-to-pro = contract -> spot. Signature required. Trade permission.
+   */
+  submitFuturesTransfer(
+    params: SpotV1FuturesTransferParams,
+  ): Promise<SpotAPISuccessResponse<number>> {
+    return this.postPrivate('/v1/futures/transfer', { body: params });
+  }
+
+  /**
+   * Get Point Balance
+   *
+   * Query termless and terminable point balance. Parent can query sub user via subUid. Signature required. Read permission. Rate: 2/s.
+   */
+  getPointAccount(
+    params?: SpotGetPointAccountParams,
+  ): Promise<SpotAPISuccessResponse<SpotV2PointAccount>> {
+    return this.getPrivate('/v2/point/account', params);
+  }
+
+  /**
+   * Point Transfer
+   *
+   * Transfer points between parent and sub user. groupId=0 for termless; for terminable query sub balance first. Signature required. Trade permission. Rate: 2/s.
+   */
+  submitPointTransfer(
+    params: SpotV2PointTransferParams,
+  ): Promise<SpotAPISuccessResponse<SpotV2PointTransferData>> {
+    return this.postPrivate('/v2/point/transfer', { body: params });
+  }
+
+  /**
+   * Get User Deduction Info
+   *
+   * Query point card vs HTX deduction settings. Signature required. Read permission. Rate: 5/s.
+   */
+  getAccountSwitchUserInfo(): Promise<
+    SpotAPISuccessResponse<SpotV1AccountSwitchUserInfo>
+  > {
+    return this.getPrivate('/v1/account/switch/user/info');
+  }
+
+  /**
+   * Get Deductible Currency Overview
+   *
+   * Query asset that can be used to deduct fees. Signature required. Read permission. Rate: 5/s.
+   */
+  getAccountOverviewInfo(): Promise<
+    SpotAPISuccessResponse<SpotV1AccountOverviewInfo>
+  > {
+    return this.getPrivate('/v1/account/overview/info');
+  }
+
+  /**
+   * Set Spot/Margin Fee Deduction Method
+   *
+   * switchType: 0=point card, 1=currency (pass deductionCurrency), 2=close. Signature required. Read permission. Rate: 2/s.
+   */
+  submitAccountFeeSwitch(
+    params: SpotV1AccountFeeSwitchParams,
+  ): Promise<SpotAPISuccessResponse<{}>> {
+    return this.postPrivate('/v1/account/fee/switch', { body: params });
   }
 }
