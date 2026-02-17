@@ -323,7 +323,7 @@ export interface SpotV2CurrencyReference {
  */
 
 /** Kline/candlestick item from /market/history/kline */
-export interface SpotKlineItem {
+export interface SpotKline {
   id: number;
   open: number;
   close: number;
@@ -368,7 +368,7 @@ export interface SpotTickerItem {
 }
 
 /** Depth tick from /market/depth and /market/fullMbp (payload is in "tick" not "data"). */
-export interface SpotDepthTick {
+export interface SpotDepth {
   ts: number;
   version: number;
   bids: [number, number][];
@@ -399,7 +399,7 @@ export interface SpotTradeItem {
 }
 
 /** Trade tick from /market/trade (payload is in "tick" not "data"). */
-export interface SpotTradeTick {
+export interface SpotLastTrade {
   id: number;
   ts: number;
   data: SpotTradeItem[];

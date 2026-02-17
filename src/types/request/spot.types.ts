@@ -2,7 +2,7 @@
  * Reference Data
  */
 
-export interface SpotGetChainsParams {
+export interface SpotGetChainsReq {
   /** Show desc: 0=no, 1=all, 2=suspend deposit/withdrawal and chain exchange */
   'show-desc'?: string;
   /** Currency filter */
@@ -11,8 +11,8 @@ export interface SpotGetChainsParams {
   ts?: number;
 }
 
-/** Params for /v2/reference/currencies */
-export interface SpotGetReferenceCurrenciesParams {
+/** Req for /v2/reference/currencies */
+export interface SpotGetReferenceCurrenciesReq {
   /** Currency filter (btc, ltc, usdt, etc) */
   currency?: string;
   /** Authorized user. Default true. */
@@ -23,8 +23,8 @@ export interface SpotGetReferenceCurrenciesParams {
  * Market Data
  */
 
-/** Params for /market/history/kline */
-export interface SpotGetKlineParams {
+/** Req for /market/history/kline */
+export interface SpotGetKlineReq {
   /** Trading symbol (e.g. btcusdt, btc3lusdtnav for ETP NAV) */
   symbol: string;
   /** Candle period. Default 1day. */
@@ -33,7 +33,7 @@ export interface SpotGetKlineParams {
   size?: number;
 }
 
-export interface SpotGetDepthParams {
+export interface SpotGetDepthReq {
   /** Trading symbol (e.g. btcusdt) */
   symbol: string;
   /** Depth levels per side. 5, 10, 20, 30. Default 20. step0 uses 150 if omitted. */
@@ -44,7 +44,7 @@ export interface SpotGetDepthParams {
 
 /**
  * Account
- */ export interface SpotGetAssetValuationParams {
+ */ export interface SpotGetAssetValuationReq {
   /** Account type: spot, margin, otc, super-margin. Default spot. */
   accountType?: string;
   /** Valuation currency: BTC, CNY, USD, JPY, etc. Case sensitive. Default BTC. */
@@ -53,8 +53,8 @@ export interface SpotGetDepthParams {
   subUid?: number;
 }
 
-/** Params for POST /v2/account/transfer - transfer between spot, linear-swap, otc, futures, swap */
-export interface SpotV2AccountTransferParams {
+/** Req for POST /v2/account/transfer - transfer between spot, linear-swap, otc, futures, swap */
+export interface SpotV2AccountTransferReq {
   /** Source: spot, linear-swap, otc, futures, swap */
   from: string;
   /** Destination: spot, linear-swap, otc, futures, swap */
@@ -67,8 +67,8 @@ export interface SpotV2AccountTransferParams {
   'margin-account': string;
 }
 
-/** Params for POST /v1/futures/transfer - transfer between spot and future contract account */
-export interface SpotV1FuturesTransferParams {
+/** Req for POST /v1/futures/transfer - transfer between spot and future contract account */
+export interface SpotV1FuturesTransferReq {
   /** Currency name */
   currency: string;
   /** Amount to transfer */
@@ -77,8 +77,8 @@ export interface SpotV1FuturesTransferParams {
   type: 'futures-to-pro' | 'pro-to-futures';
 }
 
-/** Params for POST /v1/account/transfer */
-export interface SpotAccountTransferParams {
+/** Req for POST /v1/account/transfer */
+export interface SpotAccountTransferReq {
   /** Transfer out user uid */
   'from-user': number;
   /** Transfer out account type: spot, margin */
@@ -97,8 +97,8 @@ export interface SpotAccountTransferParams {
   amount: string;
 }
 
-/** Params for GET /v1/account/history */
-export interface SpotGetAccountHistoryParams {
+/** Req for GET /v1/account/history */
+export interface SpotGetAccountHistoryReq {
   /** Account ID from GET /v1/account/accounts */
   'account-id': string;
   /** Currency filter */
@@ -117,7 +117,7 @@ export interface SpotGetAccountHistoryParams {
   'from-id'?: number;
 }
 
-export interface SpotV2PointTransferParams {
+export interface SpotV2PointTransferReq {
   /** Transferer UID */
   fromUid: string;
   /** Transferee UID */
@@ -156,8 +156,8 @@ export type SpotOrderSource =
   | 'super-margin-api'
   | 'c2c-margin-api';
 
-/** Params for POST /v1/order/orders/place */
-export interface SpotV1OrderPlaceParams {
+/** Req for POST /v1/order/orders/place */
+export interface SpotV1OrderPlaceReq {
   /** Account ID from GET /v1/account/accounts. Required for trading. */
   'account-id': string;
   /** Trading symbol (e.g. ethusdt) */
@@ -181,10 +181,10 @@ export interface SpotV1OrderPlaceParams {
 }
 
 /** Batch of orders for POST /v1/order/batch-orders. Max 10 orders. */
-export type SpotV1OrderBatchPlaceParams = SpotV1OrderPlaceParams[];
+export type SpotV1OrderBatchPlaceReq = SpotV1OrderPlaceReq[];
 
 /** Margin order with auto borrow/repay for POST /v1/order/auto/place. Sub-accounts not supported. */
-export interface SpotV1OrderAutoPlaceParams {
+export interface SpotV1OrderAutoPlaceReq {
   symbol: string;
   'account-id': string;
   type: SpotOrderType;
@@ -202,8 +202,8 @@ export interface SpotV1OrderAutoPlaceParams {
   operator?: string;
 }
 
-/** Params for POST /v1/order/orders/batchCancelOpenOrders */
-export interface SpotV1OrderBatchCancelOpenOrdersParams {
+/** Req for POST /v1/order/orders/batchCancelOpenOrders */
+export interface SpotV1OrderBatchCancelOpenOrdersReq {
   /** Account ID from GET /v1/account/accounts */
   'account-id'?: string;
   /** Comma-separated symbols (max 10). Default all */
@@ -215,8 +215,8 @@ export interface SpotV1OrderBatchCancelOpenOrdersParams {
   /** Orders to cancel [1-100]. Default 100 */
   size?: number;
 }
-/** Params for GET /v1/order/orders (search past orders) */
-export interface SpotGetOrderHistoryParams {
+/** Req for GET /v1/order/orders (search past orders) */
+export interface SpotGetOrderHistoryReq {
   /** Trading symbol (required) */
   symbol: string;
   /** Order types comma-separated */
@@ -235,8 +235,8 @@ export interface SpotGetOrderHistoryParams {
   size?: number;
 }
 
-/** Params for GET /v1/order/history (48h historical orders) */
-export interface SpotGetOrderHistory48hParams {
+/** Req for GET /v1/order/history (48h historical orders) */
+export interface SpotGetOrderHistory48hReq {
   /** Trading symbol */
   symbol?: string;
   /** Start time (unix ms). Default 48h ago */
@@ -249,8 +249,8 @@ export interface SpotGetOrderHistory48hParams {
   size?: number;
 }
 
-/** Params for GET /v1/order/matchresults (search match results) */
-export interface SpotGetMatchResultsParams {
+/** Req for GET /v1/order/matchresults (search match results) */
+export interface SpotGetMatchResultsReq {
   /** Trading symbol */
   symbol?: string;
   /** Order types comma-separated */
@@ -267,8 +267,8 @@ export interface SpotGetMatchResultsParams {
   size?: number;
 }
 
-/** Params for GET /v1/order/openOrders */
-export interface SpotGetOpenOrdersParams {
+/** Req for GET /v1/order/openOrders */
+export interface SpotGetOpenOrdersReq {
   /** Account ID from GET /v1/account/accounts */
   'account-id'?: string;
   /** Trading symbol (e.g. ethusdt) */
@@ -289,7 +289,7 @@ export interface SpotGetOpenOrdersParams {
  * Conditional Order
  */
 
-/** Params for POST /v2/algo-orders (Place a conditional order). Conditional orders only via this endpoint, not Trading section. */
+/** Req for POST /v2/algo-orders (Place a conditional order). Conditional orders only via this endpoint, not Trading section. */
 export interface SpotV2AlgoOrdersPlaceReq {
   /** Account ID. Spot, margin, super-margin. C2C margin not supported. */
   accountId?: number;
@@ -332,7 +332,7 @@ export interface SpotV2AlgoOrdersOpeningReq {
   fromId?: number;
 }
 
-/** Params for GET /v2/algo-orders/history (Query conditional order history). orderStatus: canceled, rejected, triggered. */
+/** Req for GET /v2/algo-orders/history (Query conditional order history). orderStatus: canceled, rejected, triggered. */
 export interface SpotV2AlgoOrdersHistoryReq {
   /** Account ID */
   accountId?: number;
@@ -360,7 +360,7 @@ export interface SpotV2AlgoOrdersHistoryReq {
  * Margin Loan (Cross/Isolated)
  */
 
-/** Params for GET /v2/account/repayment (Repayment Record Reference). Sorted by repayTime. */
+/** Req for GET /v2/account/repayment (Repayment Record Reference). Sorted by repayTime. */
 export interface SpotRepaymentRecordReq {
   /** Repayment transaction ID */
   repayId?: string;
@@ -380,7 +380,7 @@ export interface SpotRepaymentRecordReq {
   fromId?: number;
 }
 
-/** Params for POST /v2/account/repayment (Repay Margin Loan). Loan interest paid first if no transactId. */
+/** Req for POST /v2/account/repayment (Repay Margin Loan). Loan interest paid first if no transactId. */
 export interface SpotMarginRepaymentReq {
   /** Repayment account ID */
   accountId?: string;
@@ -392,7 +392,7 @@ export interface SpotMarginRepaymentReq {
   transactId?: string;
 }
 
-/** Params for POST /v1/dw/transfer-in/margin (Transfer Spot -> Isolated Margin). */
+/** Req for POST /v1/dw/transfer-in/margin (Transfer Spot -> Isolated Margin). */
 export interface SpotMarginTransferInIsolatedReq {
   /** Trading symbol (e.g. btcusdt, ethusdt) */
   symbol?: string;
@@ -402,7 +402,7 @@ export interface SpotMarginTransferInIsolatedReq {
   amount?: string;
 }
 
-/** Params for POST /v1/dw/transfer-out/margin (Transfer Isolated Margin -> Spot). */
+/** Req for POST /v1/dw/transfer-out/margin (Transfer Isolated Margin -> Spot). */
 export interface SpotMarginTransferOutIsolatedReq {
   /** Trading symbol (e.g. btcusdt, ethusdt) */
   symbol?: string;
@@ -412,13 +412,13 @@ export interface SpotMarginTransferOutIsolatedReq {
   amount?: string;
 }
 
-/** Params for GET /v1/margin/loan-info (Get Loan Interest Rate and Quota, Isolated) */
+/** Req for GET /v1/margin/loan-info (Get Loan Interest Rate and Quota, Isolated) */
 export interface SpotMarginLoanInfoReq {
   /** Trading symbols comma-separated (e.g. btcusdt,ethusdt). Use "all" for all. */
   symbols?: string;
 }
 
-/** Params for POST /v1/margin/orders (Request a Margin Loan, Isolated) */
+/** Req for POST /v1/margin/orders (Request a Margin Loan, Isolated) */
 export interface SpotMarginLoanOrderReq {
   /** Trading symbol to borrow margin (e.g. btcusdt, ethusdt) */
   symbol?: string;
@@ -428,7 +428,7 @@ export interface SpotMarginLoanOrderReq {
   amount?: string;
 }
 
-/** Params for GET /v1/margin/loan-orders (Search Past Margin Orders, Isolated) */
+/** Req for GET /v1/margin/loan-orders (Search Past Margin Orders, Isolated) */
 export interface SpotMarginLoanOrdersReq {
   /** Trading symbol (e.g. btcusdt) */
   symbol?: string;
@@ -448,7 +448,7 @@ export interface SpotMarginLoanOrdersReq {
   'sub-uid'?: number;
 }
 
-/** Params for GET /v1/cross-margin/loan-orders (Search Past Margin Orders, Cross) */
+/** Req for GET /v1/cross-margin/loan-orders (Search Past Margin Orders, Cross) */
 export interface SpotCrossMarginLoanOrdersReq {
   /** Start date yyyy-mm-dd. Default -61d */
   'start-date'?: string;
@@ -468,8 +468,8 @@ export interface SpotCrossMarginLoanOrdersReq {
   'sub-uid'?: number;
 }
 
-/** Params for GET /v2/account/ledger */
-export interface SpotGetAccountLedgerParams {
+/** Req for GET /v2/account/ledger */
+export interface SpotGetAccountLedgerReq {
   /** Account ID */
   accountId?: string;
   /** Currency. Default all. */

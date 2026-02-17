@@ -1,34 +1,34 @@
 import { BaseRestClient } from './lib/BaseRestClient.js';
 import { REST_CLIENT_TYPE_ENUM, RestClientType } from './lib/requestUtils.js';
 import type {
-  SpotAccountTransferParams,
+  SpotAccountTransferReq,
   SpotCrossMarginLoanOrdersReq,
-  SpotGetAccountHistoryParams,
-  SpotGetAccountLedgerParams,
-  SpotGetAssetValuationParams,
-  SpotGetChainsParams,
-  SpotGetDepthParams,
-  SpotGetKlineParams,
-  SpotGetMatchResultsParams,
-  SpotGetOpenOrdersParams,
-  SpotGetOrderHistory48hParams,
-  SpotGetOrderHistoryParams,
+  SpotGetAccountHistoryReq,
+  SpotGetAccountLedgerReq,
+  SpotGetAssetValuationReq,
+  SpotGetChainsReq,
+  SpotGetDepthReq,
+  SpotGetKlineReq,
+  SpotGetMatchResultsReq,
+  SpotGetOpenOrdersReq,
+  SpotGetOrderHistory48hReq,
+  SpotGetOrderHistoryReq,
   SpotMarginLoanOrderReq,
   SpotMarginLoanOrdersReq,
   SpotMarginRepaymentReq,
   SpotMarginTransferInIsolatedReq,
   SpotMarginTransferOutIsolatedReq,
   SpotRepaymentRecordReq,
-  SpotV1FuturesTransferParams,
-  SpotV1OrderAutoPlaceParams,
-  SpotV1OrderBatchCancelOpenOrdersParams,
-  SpotV1OrderBatchPlaceParams,
-  SpotV1OrderPlaceParams,
-  SpotV2AccountTransferParams,
+  SpotV1FuturesTransferReq,
+  SpotV1OrderAutoPlaceReq,
+  SpotV1OrderBatchCancelOpenOrdersReq,
+  SpotV1OrderBatchPlaceReq,
+  SpotV1OrderPlaceReq,
+  SpotV2AccountTransferReq,
   SpotV2AlgoOrdersHistoryReq,
   SpotV2AlgoOrdersOpeningReq,
   SpotV2AlgoOrdersPlaceReq,
-  SpotV2PointTransferParams,
+  SpotV2PointTransferReq,
 } from './types/request/spot.types.js';
 import { SpotAPISuccessResponse } from './types/response/shared.types.js';
 import {
@@ -39,9 +39,10 @@ import {
   SpotCrossMarginAccountBalance,
   SpotCrossMarginLoanOrder,
   SpotCurrency,
-  SpotDepthTick,
+  SpotDepth,
   SpotDetailTick,
-  SpotKlineItem,
+  SpotKline,
+  SpotLastTrade,
   SpotMarginAccountBalance,
   SpotMarginLimitItem,
   SpotMarginLoanInfoCurrency,
@@ -53,7 +54,6 @@ import {
   SpotRepaymentRecordItem,
   SpotSystemStatusPage,
   SpotTickerItem,
-  SpotTradeTick,
   SpotTradeTimestampGroup,
   SpotTradingSymbol,
   SpotV1AccountOverviewInfo,
@@ -210,7 +210,7 @@ export class SpotClient extends BaseRestClient {
    * Returns chain info per currency. No signature required. Pass show-desc, currency, and/or ts for incremental updates.
    */
   getChainsInfo(
-    params?: SpotGetChainsParams,
+    params?: SpotGetChainsReq,
   ): Promise<SpotAPISuccessResponse<SpotV1ChainInfo[]>> {
     return this.get('/v1/settings/common/chains', params);
   }
@@ -239,8 +239,8 @@ export class SpotClient extends BaseRestClient {
    * Returns candlestick data for a symbol. No signature required.
    */
   getKlines(
-    params: SpotGetKlineParams,
-  ): Promise<SpotAPISuccessResponse<SpotKlineItem[]>> {
+    params: SpotGetKlineReq,
+  ): Promise<SpotAPISuccessResponse<SpotKline[]>> {
     return this.get('/market/history/kline', params);
   }
 
@@ -270,8 +270,8 @@ export class SpotClient extends BaseRestClient {
    * Returns order book for a symbol. No signature required.
    */
   getMarketDepth(
-    params: SpotGetDepthParams,
-  ): Promise<SpotAPISuccessResponse<SpotDepthTick, 'tick'>> {
+    params: SpotGetDepthReq,
+  ): Promise<SpotAPISuccessResponse<SpotDepth, 'tick'>> {
     return this.get('/market/depth', params);
   }
 
@@ -282,7 +282,7 @@ export class SpotClient extends BaseRestClient {
    */
   getLastTrade(params: {
     symbol: string;
-  }): Promise<SpotAPISuccessResponse<SpotTradeTick, 'tick'>> {
+  }): Promise<SpotAPISuccessResponse<SpotLastTrade, 'tick'>> {
     return this.get('/market/trade', params);
   }
 
@@ -316,7 +316,7 @@ export class SpotClient extends BaseRestClient {
    */
   getFullOrderBook(params: {
     symbol: string;
-  }): Promise<SpotAPISuccessResponse<SpotDepthTick, 'tick'>> {
+  }): Promise<SpotAPISuccessResponse<SpotDepth, 'tick'>> {
     return this.get('/market/fullMbp', params);
   }
 
@@ -364,7 +364,7 @@ export class SpotClient extends BaseRestClient {
    * Returns valuation of total assets in BTC or fiat. Signature required.
    */
   getAssetValuation(
-    params?: SpotGetAssetValuationParams,
+    params?: SpotGetAssetValuationReq,
   ): Promise<SpotAPISuccessResponse<SpotV2AssetValuation>> {
     return this.getPrivate('/v2/account/asset-valuation', params);
   }
@@ -375,7 +375,7 @@ export class SpotClient extends BaseRestClient {
    * Transfer asset between accounts (spot, margin, sub-users). Signature required. Trade permission.
    */
   submitTransfer(
-    params: SpotAccountTransferParams,
+    params: SpotAccountTransferReq,
   ): Promise<SpotAPISuccessResponse<SpotAccountTransferData>> {
     return this.postPrivate('/v1/account/transfer', { body: params });
   }
@@ -386,7 +386,7 @@ export class SpotClient extends BaseRestClient {
    * Returns amount changes of specified account. Signature required. Max 1h query window, 30 days range.
    */
   getAccountHistory(
-    params: SpotGetAccountHistoryParams,
+    params: SpotGetAccountHistoryReq,
   ): Promise<
     SpotAPISuccessResponse<SpotAccountHistoryItem[]> & { 'next-id'?: number }
   > {
@@ -399,7 +399,7 @@ export class SpotClient extends BaseRestClient {
    * Returns amount changes (phase 1: transfer only). Max 10-day window, 180 days range. Signature required.
    */
   getAccountLedger(
-    params?: SpotGetAccountLedgerParams,
+    params?: SpotGetAccountLedgerReq,
   ): Promise<
     SpotAPISuccessResponse<SpotV2AccountLedgerItem[]> & { nextId?: number }
   > {
@@ -412,7 +412,7 @@ export class SpotClient extends BaseRestClient {
    * Transfer funds between spot, linear-swap, otc, futures, swap. Signature required. Trade permission.
    */
   submitV2AccountTransfer(
-    params: SpotV2AccountTransferParams,
+    params: SpotV2AccountTransferReq,
   ): Promise<SpotAPISuccessResponse<number>> {
     return this.postPrivate('/v2/account/transfer', { body: params });
   }
@@ -423,7 +423,7 @@ export class SpotClient extends BaseRestClient {
    * Transfer between spot and future contract account. pro-to-futures = spot -> contract, futures-to-pro = contract -> spot. Signature required. Trade permission.
    */
   submitFuturesTransfer(
-    params: SpotV1FuturesTransferParams,
+    params: SpotV1FuturesTransferReq,
   ): Promise<SpotAPISuccessResponse<number>> {
     return this.postPrivate('/v1/futures/transfer', { body: params });
   }
@@ -445,7 +445,7 @@ export class SpotClient extends BaseRestClient {
    * Transfer points between parent and sub user. groupId=0 for termless; for terminable query sub balance first. Signature required. Trade permission. Rate: 2/s.
    */
   submitPointTransfer(
-    params: SpotV2PointTransferParams,
+    params: SpotV2PointTransferReq,
   ): Promise<SpotAPISuccessResponse<SpotV2PointTransferData>> {
     return this.postPrivate('/v2/point/transfer', { body: params });
   }
@@ -496,7 +496,7 @@ export class SpotClient extends BaseRestClient {
    * Places order to be matched. Set account-id and source per account type. Signature required. Trade permission. Rate: 100/2s.
    */
   submitOrder(
-    params: SpotV1OrderPlaceParams,
+    params: SpotV1OrderPlaceReq,
   ): Promise<SpotAPISuccessResponse<SpotV1OrderPlaceData>> {
     return this.postPrivate('/v1/order/orders/place', { body: params });
   }
@@ -507,7 +507,7 @@ export class SpotClient extends BaseRestClient {
    * Max 10 orders per batch. Each returns order-id or err-code/err-msg. Signature required. Trade permission. Rate: 50/2s.
    */
   submitBatchOrders(
-    params: SpotV1OrderBatchPlaceParams,
+    params: SpotV1OrderBatchPlaceReq,
   ): Promise<SpotAPISuccessResponse<SpotV1OrderBatchPlaceItem[]>> {
     return this.postPrivate('/v1/order/batch-orders', { body: params });
   }
@@ -518,7 +518,7 @@ export class SpotClient extends BaseRestClient {
    * Auto borrow to place or auto repay. Sub-accounts not supported. Use amount or market-amount. Signature required. Trade permission. Rate: 100/2s.
    */
   submitMarginOrder(
-    params: SpotV1OrderAutoPlaceParams,
+    params: SpotV1OrderAutoPlaceReq,
   ): Promise<SpotAPISuccessResponse<SpotV1OrderAutoPlaceData>> {
     return this.postPrivate('/v1/order/auto/place', { body: params });
   }
@@ -568,7 +568,7 @@ export class SpotClient extends BaseRestClient {
    * Returns unfilled orders. Filter by account-id, symbol, side. Signature required. Read permission. Rate: 50/2s.
    */
   getOpenOrders(
-    params?: SpotGetOpenOrdersParams,
+    params?: SpotGetOpenOrdersReq,
   ): Promise<SpotAPISuccessResponse<SpotV1OpenOrder[]>> {
     return this.getPrivate('/v1/order/openOrders', params);
   }
@@ -579,7 +579,7 @@ export class SpotClient extends BaseRestClient {
    * Cancel up to 100 orders matching account-id, symbol, types, side. Submit only; verify via order status. Signature required. Trade permission. Rate: 50/2s.
    */
   batchCancelOpenOrders(
-    params?: SpotV1OrderBatchCancelOpenOrdersParams,
+    params?: SpotV1OrderBatchCancelOpenOrdersReq,
   ): Promise<SpotAPISuccessResponse<SpotV1OrderBatchCancelOpenOrdersData>> {
     return this.postPrivate('/v1/order/orders/batchCancelOpenOrders', {
       body: params,
@@ -650,7 +650,7 @@ export class SpotClient extends BaseRestClient {
    * Historical orders by symbol, states, time range. Max 48h window, 180 days range. API orders not queryable 2h after cancel. Signature required. Read permission. Rate: 50/2s.
    */
   getOrderHistory(
-    params: SpotGetOrderHistoryParams,
+    params: SpotGetOrderHistoryReq,
   ): Promise<SpotAPISuccessResponse<SpotV1OrderHistoryItem[]>> {
     return this.getPrivate('/v1/order/orders', params);
   }
@@ -661,7 +661,7 @@ export class SpotClient extends BaseRestClient {
    * Orders by time range. Default: last 48h. next-time in last item when more exist. API orders not queryable 2h after cancel. Signature required. Read permission. Rate: 20/2s.
    */
   getOrderHistory48h(
-    params?: SpotGetOrderHistory48hParams,
+    params?: SpotGetOrderHistory48hReq,
   ): Promise<SpotAPISuccessResponse<SpotV1OrderHistory48hItem[]>> {
     return this.getPrivate('/v1/order/history', params);
   }
@@ -672,7 +672,7 @@ export class SpotClient extends BaseRestClient {
    * Match results of filled/partial orders by symbol, types, time. 48h window, 120 days range. Signature required. Read permission. Rate: 20/2s.
    */
   getMatchResults(
-    params?: SpotGetMatchResultsParams,
+    params?: SpotGetMatchResultsReq,
   ): Promise<SpotAPISuccessResponse<SpotV1OrderMatchResult[]>> {
     return this.getPrivate('/v1/order/matchresults', params);
   }
