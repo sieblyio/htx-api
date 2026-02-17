@@ -2,6 +2,12 @@ import { BaseRestClient } from './lib/BaseRestClient.js';
 import { REST_CLIENT_TYPE_ENUM, RestClientType } from './lib/requestUtils.js';
 import type {
   SpotAccountTransferParams,
+  SpotCrossMarginAccountsBalanceReq,
+  SpotCrossMarginLoanOrderReq,
+  SpotCrossMarginLoanOrdersReq,
+  SpotCrossMarginRepayReq,
+  SpotCrossMarginTransferInReq,
+  SpotCrossMarginTransferOutReq,
   SpotGetAccountBalanceParams,
   SpotGetAccountHistoryParams,
   SpotGetAccountLedgerParams,
@@ -29,6 +35,16 @@ import type {
   SpotGetTradingSymbolsParams,
   SpotGetTransactFeeRateParams,
   SpotGetValuationParams,
+  SpotMarginAccountsBalanceReq,
+  SpotMarginLimitReq,
+  SpotMarginLoanInfoReq,
+  SpotMarginLoanOrderReq,
+  SpotMarginLoanOrdersReq,
+  SpotMarginRepayIsolatedReq,
+  SpotMarginRepaymentReq,
+  SpotMarginTransferInIsolatedReq,
+  SpotMarginTransferOutIsolatedReq,
+  SpotRepaymentRecordReq,
   SpotV1AccountFeeSwitchParams,
   SpotV1FuturesTransferParams,
   SpotV1OrderAutoPlaceParams,
@@ -41,6 +57,11 @@ import type {
   SpotV1OrderPlaceParams,
   SpotV2AccountTransferParams,
   SpotV2AlgoOrdersCancelAllAfterParams,
+  SpotV2AlgoOrdersCancellationReq,
+  SpotV2AlgoOrdersHistoryReq,
+  SpotV2AlgoOrdersOpeningReq,
+  SpotV2AlgoOrdersPlaceReq,
+  SpotV2AlgoOrdersSpecificReq,
   SpotV2PointTransferParams,
 } from './types/request/spot.types.js';
 import { SpotAPISuccessResponse } from './types/response/shared.types.js';
@@ -49,12 +70,21 @@ import {
   SpotAccountBalance,
   SpotAccountHistoryItem,
   SpotAccountTransferData,
+  SpotCrossMarginAccountBalance,
+  SpotCrossMarginLoanOrder,
   SpotCurrency,
   SpotDepthTick,
   SpotDetailTick,
   SpotKlineItem,
+  SpotMarginAccountBalance,
+  SpotMarginLimitItem,
+  SpotMarginLoanInfoCurrency,
+  SpotMarginLoanInfoItem,
+  SpotMarginLoanOrder,
+  SpotMarginRepaymentResp,
   SpotMarketStatusResponse,
   SpotMergedTicker,
+  SpotRepaymentRecordItem,
   SpotSystemStatusPage,
   SpotTickerItem,
   SpotTradeTick,
@@ -80,7 +110,10 @@ import {
   SpotV1SymbolSettings,
   SpotV2AccountLedgerItem,
   SpotV2AccountValuation,
+  SpotV2AlgoOrder,
   SpotV2AlgoOrdersCancelAllAfterData,
+  SpotV2AlgoOrdersCancellationResp,
+  SpotV2AlgoOrdersPlaceResp,
   SpotV2AssetValuation,
   SpotV2CurrencyReference,
   SpotV2PointAccount,
@@ -680,5 +713,267 @@ export class SpotClient extends BaseRestClient {
     params: SpotGetTransactFeeRateParams,
   ): Promise<SpotAPISuccessResponse<SpotV2TransactFeeRateItem[]>> {
     return this.getPrivate('/v2/reference/transact-fee-rate', params);
+  }
+
+  /**
+   *
+   * Conditional Order
+   *
+   */
+
+  /**
+   * Place a Conditional Order
+   *
+   * Conditional orders only via this endpoint (not Trading section). Signature required. Trade permission. Rate: 20/2s.
+   */
+  placeConditionalOrder(
+    params: SpotV2AlgoOrdersPlaceReq,
+  ): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersPlaceResp>> {
+    return this.postPrivate('/v2/algo-orders', { body: params });
+  }
+
+  /**
+   * Cancel Conditional Orders (before triggering)
+   *
+   * Only cancels conditional orders that have not triggered yet. Max 50 orders. Signature required. Trade permission. Rate: 20/2s.
+   */
+  cancelConditionalOrders(
+    params: SpotV2AlgoOrdersCancellationReq,
+  ): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancellationResp>> {
+    return this.postPrivate('/v2/algo-orders/cancellation', { body: params });
+  }
+
+  /**
+   * Query Open Conditional Orders (before triggering)
+   *
+   * Returns conditional orders with orderStatus=created. Signature required. Read permission. Rate: 20/2s.
+   */
+  getOpenConditionalOrders(
+    params?: SpotV2AlgoOrdersOpeningReq,
+  ): Promise<SpotAPISuccessResponse<SpotV2AlgoOrder[]> & { nextId?: number }> {
+    return this.getPrivate('/v2/algo-orders/opening', params);
+  }
+
+  /**
+   * Query Conditional Order History
+   *
+   * Returns canceled/rejected/triggered conditional orders. For triggered, use Trading section for latest status. Signature required. Read permission. Rate: 20/2s.
+   */
+  getConditionalOrderHistory(
+    params?: SpotV2AlgoOrdersHistoryReq,
+  ): Promise<SpotAPISuccessResponse<SpotV2AlgoOrder[]> & { nextId?: number }> {
+    return this.getPrivate('/v2/algo-orders/history', params);
+  }
+
+  /**
+   * Query a Specific Conditional Order
+   *
+   * By clientOrderId. Covers created, triggered, canceled, rejected. Signature required. Read permission. Rate: 20/2s.
+   */
+  getConditionalOrder(
+    params: SpotV2AlgoOrdersSpecificReq,
+  ): Promise<SpotAPISuccessResponse<SpotV2AlgoOrder>> {
+    return this.getPrivate('/v2/algo-orders/specific', params);
+  }
+
+  /**
+   *
+   * Margin Loan (Cross/Isolated)
+   *
+   */
+
+  /**
+   * Repayment Record Reference
+   *
+   * Query repayment records. Sorted by repayTime. Main and sub-accounts. Signature required. Read permission. Rate: 2/2s.
+   */
+  getRepaymentRecords(
+    params?: SpotRepaymentRecordReq,
+  ): Promise<
+    SpotAPISuccessResponse<SpotRepaymentRecordItem[]> & { nextId?: number }
+  > {
+    return this.getPrivate('/v2/account/repayment', params);
+  }
+
+  /**
+   * Repay Margin Loan (Cross/Isolated)
+   *
+   * Loan interest paid first if no transactId. Main and sub-accounts. Signature required. Trade permission. Rate: 2/s.
+   */
+  repayMarginLoan(
+    params: SpotMarginRepaymentReq,
+  ): Promise<SpotAPISuccessResponse<SpotMarginRepaymentResp[]>> {
+    return this.postPrivate('/v2/account/repayment', { body: params });
+  }
+
+  /**
+   * Transfer Asset from Spot Trading Account to Isolated Margin Account
+   *
+   * Signature required. Trade permission. Rate: 2/2s.
+   */
+  transferSpotToIsolatedMargin(
+    params: SpotMarginTransferInIsolatedReq,
+  ): Promise<SpotAPISuccessResponse<number>> {
+    return this.postPrivate('/v1/dw/transfer-in/margin', { body: params });
+  }
+
+  /**
+   * Transfer Asset from Isolated Margin Account to Spot Trading Account
+   *
+   * Signature required. Trade permission. Rate: 2/2s.
+   */
+  transferIsolatedMarginToSpot(
+    params: SpotMarginTransferOutIsolatedReq,
+  ): Promise<SpotAPISuccessResponse<number>> {
+    return this.postPrivate('/v1/dw/transfer-out/margin', { body: params });
+  }
+
+  /**
+   * Get Loan Interest Rate and Quota (Isolated)
+   *
+   * Returns loan interest rates and quota per symbol. Signature required. Read permission. Rate: 20/2s.
+   */
+  getMarginLoanInfo(
+    params?: SpotMarginLoanInfoReq,
+  ): Promise<SpotAPISuccessResponse<SpotMarginLoanInfoItem[]>> {
+    return this.getPrivate('/v1/margin/loan-info', params);
+  }
+
+  /**
+   * Request a Margin Loan (Isolated)
+   *
+   * Places order to borrow margin. Signature required. Trade permission. Rate: 2/2s.
+   */
+  requestMarginLoan(
+    params: SpotMarginLoanOrderReq,
+  ): Promise<SpotAPISuccessResponse<number>> {
+    return this.postPrivate('/v1/margin/orders', { body: params });
+  }
+
+  /**
+   * Repay Margin Loan (Isolated)
+   *
+   * Repays with asset in margin account. Signature required. Trade permission. Rate: 2/2s.
+   */
+  repayMarginLoanIsolated(
+    params: SpotMarginRepayIsolatedReq,
+  ): Promise<SpotAPISuccessResponse<number>> {
+    const { orderId, amount } = params;
+    return this.postPrivate(`/v1/margin/orders/${orderId}/repay`, {
+      body: { amount },
+    });
+  }
+
+  /**
+   * Search Past Margin Orders (Isolated)
+   *
+   * Returns margin loan orders by criteria. Signature required. Read permission. Rate: 100/2s.
+   */
+  getMarginLoanOrders(
+    params?: SpotMarginLoanOrdersReq,
+  ): Promise<SpotAPISuccessResponse<SpotMarginLoanOrder[]>> {
+    return this.getPrivate('/v1/margin/loan-orders', params);
+  }
+
+  /**
+   * Get the Balance of the Margin Loan Account (Isolated)
+   *
+   * Signature required. Read permission. Rate: 100/2s.
+   */
+  getMarginAccountBalance(
+    params?: SpotMarginAccountsBalanceReq,
+  ): Promise<SpotAPISuccessResponse<SpotMarginAccountBalance[]>> {
+    return this.getPrivate('/v1/margin/accounts/balance', params);
+  }
+
+  /**
+   * Transfer Asset from Spot Trading Account to Cross Margin Account
+   *
+   * Signature required. Trade permission.
+   */
+  transferSpotToCrossMargin(
+    params: SpotCrossMarginTransferInReq,
+  ): Promise<SpotAPISuccessResponse<number>> {
+    return this.postPrivate('/v1/cross-margin/transfer-in', { body: params });
+  }
+
+  /**
+   * Transfer Asset from Cross Margin Account to Spot Trading Account
+   *
+   * Signature required. Trade permission.
+   */
+  transferCrossMarginToSpot(
+    params: SpotCrossMarginTransferOutReq,
+  ): Promise<SpotAPISuccessResponse<number>> {
+    return this.postPrivate('/v1/cross-margin/transfer-out', { body: params });
+  }
+
+  /**
+   * Get Loan Interest Rate and Quota (Cross)
+   *
+   * Returns loan interest rates and quota per currency. No params. Signature required. Read permission. Rate: 2/2s.
+   */
+  getCrossMarginLoanInfo(): Promise<
+    SpotAPISuccessResponse<SpotMarginLoanInfoCurrency[]>
+  > {
+    return this.getPrivate('/v1/cross-margin/loan-info');
+  }
+
+  /**
+   * Request a Margin Loan (Cross)
+   *
+   * Places order to borrow margin. Signature required. Trade permission. Rate: 2/2s.
+   */
+  requestCrossMarginLoan(
+    params: SpotCrossMarginLoanOrderReq,
+  ): Promise<SpotAPISuccessResponse<number>> {
+    return this.postPrivate('/v1/cross-margin/orders', { body: params });
+  }
+
+  /**
+   * Repay Margin Loan (Cross)
+   *
+   * Repays with asset in cross margin account. Signature required. Trade permission. Rate: 2/2s.
+   */
+  repayCrossMarginLoan(
+    params: SpotCrossMarginRepayReq,
+  ): Promise<SpotAPISuccessResponse<null>> {
+    const { orderId, amount } = params;
+    return this.postPrivate(`/v1/cross-margin/orders/${orderId}/repay`, {
+      body: { amount },
+    });
+  }
+
+  /**
+   * Search Past Margin Orders (Cross)
+   *
+   * Returns margin loan orders by criteria. Signature required. Read permission. Rate: 2/2s.
+   */
+  getCrossMarginLoanOrders(
+    params?: SpotCrossMarginLoanOrdersReq,
+  ): Promise<SpotAPISuccessResponse<SpotCrossMarginLoanOrder[]>> {
+    return this.getPrivate('/v1/cross-margin/loan-orders', params);
+  }
+
+  /**
+   * Get the Balance of the Margin Loan Account (Cross)
+   *
+   * Returns single account object. Signature required. Read permission. Rate: 2/2s.
+   */
+  getCrossMarginAccountBalance(
+    params?: SpotCrossMarginAccountsBalanceReq,
+  ): Promise<SpotAPISuccessResponse<SpotCrossMarginAccountBalance>> {
+    return this.getPrivate('/v1/cross-margin/accounts/balance', params);
+  }
+
+  /**
+   * Obtain Leverage Position Limit (Cross)
+   *
+   * Returns position limit at user level per currency. Signature required. Read permission. Rate: 2/2s.
+   */
+  getMarginLimit(
+    params?: SpotMarginLimitReq,
+  ): Promise<SpotAPISuccessResponse<SpotMarginLimitItem[]>> {
+    return this.getPrivate('/v2/margin/limit', params);
   }
 }

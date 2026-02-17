@@ -428,6 +428,262 @@ export interface SpotV2AlgoOrdersCancelAllAfterParams {
   timeout: number;
 }
 
+/**
+ * Conditional Order
+ */
+
+/** Params for POST /v2/algo-orders (Place a conditional order). Conditional orders only via this endpoint, not Trading section. */
+export interface SpotV2AlgoOrdersPlaceReq {
+  /** Account ID. Spot, margin, super-margin. C2C margin not supported. */
+  accountId?: number;
+  /** Trading symbol */
+  symbol?: string;
+  /** Order price (invalid for market order) */
+  orderPrice?: string;
+  /** Order side: buy, sell */
+  orderSide?: 'buy' | 'sell';
+  /** Order size (invalid for market buy order) */
+  orderSize?: string;
+  /** Order value (only valid for market buy order) */
+  orderValue?: string;
+  /** Time in force: gtc, boc, ioc, fok. gtc=good till cancel, boc=book or cancel, ioc=immediate or cancel, fok=fill or kill. gtc for limit; ioc for market. */
+  timeInForce?: 'gtc' | 'boc' | 'ioc' | 'fok';
+  /** Order type: limit, market */
+  orderType?: 'limit' | 'market';
+  /** Client order ID (max 64 chars). Must be unique within 24h for same user. */
+  clientOrderId?: string;
+  /** Stop price */
+  stopPrice?: string;
+  /** Trailing rate [0.001-0.050]. Only valid for trailing stop order */
+  trailingRate?: string;
+}
+
+/** Params for POST /v2/algo-orders/cancellation (Cancel conditional orders before triggering). Max 50 orders. */
+export interface SpotV2AlgoOrdersCancellationReq {
+  /** Client order IDs to cancel (max 50) */
+  clientOrderIds: string[];
+}
+
+/** Params for GET /v2/algo-orders/opening (Query open conditional orders before triggering). orderStatus=created only. */
+export interface SpotV2AlgoOrdersOpeningReq {
+  /** Account ID */
+  accountId?: number;
+  /** Trading symbol */
+  symbol?: string;
+  /** Order side: buy, sell */
+  orderSide?: 'buy' | 'sell';
+  /** Order type: limit, market */
+  orderType?: 'limit' | 'market';
+  /** Sort: asc, desc. Default desc */
+  sort?: 'asc' | 'desc';
+  /** Max items [1-500]. Default 100 */
+  limit?: number;
+  /** First record ID for next-page pagination */
+  fromId?: number;
+}
+
+/** Params for GET /v2/algo-orders/history (Query conditional order history). orderStatus: canceled, rejected, triggered. */
+export interface SpotV2AlgoOrdersHistoryReq {
+  /** Account ID */
+  accountId?: number;
+  /** Trading symbol */
+  symbol?: string;
+  /** Order side: buy, sell */
+  orderSide?: 'buy' | 'sell';
+  /** Order type: limit, market */
+  orderType?: 'limit' | 'market';
+  /** Order status: canceled, rejected, triggered */
+  orderStatus?: 'canceled' | 'rejected' | 'triggered';
+  /** Start time (unix ms) */
+  startTime?: number;
+  /** End time (unix ms) */
+  endTime?: number;
+  /** Sort: asc, desc */
+  sort?: 'asc' | 'desc';
+  /** Max items [1-500] */
+  limit?: number;
+  /** First record ID for next-page pagination */
+  fromId?: number;
+}
+
+/** Params for GET /v2/algo-orders/specific (Query a specific conditional order by clientOrderId) */
+export interface SpotV2AlgoOrdersSpecificReq {
+  /** Client order ID */
+  clientOrderId: string;
+}
+
+/**
+ * Margin Loan (Cross/Isolated)
+ */
+
+/** Params for GET /v2/account/repayment (Repayment Record Reference). Sorted by repayTime. */
+export interface SpotRepaymentRecordReq {
+  /** Repayment transaction ID */
+  repayId?: string;
+  /** Account ID. Default all accounts */
+  accountId?: string;
+  /** Borrowing/lending currency. Default all currencies */
+  currency?: string;
+  /** Start time (unix ms). Range: [(endTime – x D), endTime] */
+  startTime?: number;
+  /** End time (unix ms). Range: [(now – y D), now]. Default now */
+  endTime?: number;
+  /** Sort: asc, desc. Default desc */
+  sort?: 'asc' | 'desc';
+  /** Max items [1-100]. Default 50 */
+  limit?: number;
+  /** Search ID for next-page pagination */
+  fromId?: number;
+}
+
+/** Params for POST /v2/account/repayment (Repay Margin Loan). Loan interest paid first if no transactId. */
+export interface SpotMarginRepaymentReq {
+  /** Repayment account ID */
+  accountId?: string;
+  /** Repayment currency */
+  currency?: string;
+  /** Repayment amount */
+  amount?: string;
+  /** Loan transaction ID. When specified, repay that loan; otherwise interest paid first. */
+  transactId?: string;
+}
+
+/** Params for POST /v1/dw/transfer-in/margin (Transfer Spot -> Isolated Margin). */
+export interface SpotMarginTransferInIsolatedReq {
+  /** Trading symbol (e.g. btcusdt, ethusdt) */
+  symbol?: string;
+  /** Currency to transfer */
+  currency?: string;
+  /** Amount to transfer */
+  amount?: string;
+}
+
+/** Params for POST /v1/dw/transfer-out/margin (Transfer Isolated Margin -> Spot). */
+export interface SpotMarginTransferOutIsolatedReq {
+  /** Trading symbol (e.g. btcusdt, ethusdt) */
+  symbol?: string;
+  /** Currency to transfer */
+  currency?: string;
+  /** Amount to transfer */
+  amount?: string;
+}
+
+/** Params for GET /v1/margin/loan-info (Get Loan Interest Rate and Quota, Isolated) */
+export interface SpotMarginLoanInfoReq {
+  /** Trading symbols comma-separated (e.g. btcusdt,ethusdt). Use "all" for all. */
+  symbols?: string;
+}
+
+/** Params for POST /v1/margin/orders (Request a Margin Loan, Isolated) */
+export interface SpotMarginLoanOrderReq {
+  /** Trading symbol to borrow margin (e.g. btcusdt, ethusdt) */
+  symbol?: string;
+  /** Currency to borrow */
+  currency?: string;
+  /** Amount to borrow (max 3 decimal places) */
+  amount?: string;
+}
+
+/** Params for POST /v1/margin/orders/{order-id}/repay (Repay Margin Loan, Isolated). order-id in path. */
+export interface SpotMarginRepayIsolatedReq {
+  /** Loan order ID (path param) */
+  orderId: string;
+  /** Amount of currency to repay */
+  amount: string;
+}
+
+/** Params for GET /v1/margin/loan-orders (Search Past Margin Orders, Isolated) */
+export interface SpotMarginLoanOrdersReq {
+  /** Trading symbol (e.g. btcusdt) */
+  symbol?: string;
+  /** Order states comma-separated: created, accrual, cleared, invalid, failed */
+  states?: string;
+  /** Start date yyyy-mm-dd. Default -61d */
+  'start-date'?: string;
+  /** End date yyyy-mm-dd. Default today */
+  'end-date'?: string;
+  /** Search order id to begin with */
+  from?: string;
+  /** Search direction when from is used: next, prev */
+  direct?: 'next' | 'prev';
+  /** Orders to return [1-100]. Default 100 */
+  size?: number;
+  /** Sub user ID (required when parent queries sub user's orders) */
+  'sub-uid'?: number;
+}
+
+/** Params for GET /v1/margin/accounts/balance (Get Margin Loan Account Balance, Isolated) */
+export interface SpotMarginAccountsBalanceReq {
+  /** Trading symbol (e.g. btcusdt). If empty, transfer-out-available and loan-available won't be returned */
+  symbol?: string;
+  /** Sub user ID (required when parent queries sub user's account) */
+  'sub-uid'?: number;
+}
+
+/** Params for POST /v1/cross-margin/transfer-in (Transfer Spot -> Cross Margin) */
+export interface SpotCrossMarginTransferInReq {
+  /** Currency to transfer */
+  currency?: string;
+  /** Transfer amount */
+  amount?: string;
+}
+
+/** Params for POST /v1/cross-margin/transfer-out (Transfer Cross Margin -> Spot) */
+export interface SpotCrossMarginTransferOutReq {
+  /** Currency to transfer */
+  currency?: string;
+  /** Transfer amount */
+  amount?: string;
+}
+
+/** Params for POST /v1/cross-margin/orders (Request a Margin Loan, Cross) */
+export interface SpotCrossMarginLoanOrderReq {
+  /** Currency to borrow */
+  currency?: string;
+  /** Amount to borrow (max 3 decimal places) */
+  amount?: string;
+}
+
+/** Params for POST /v1/cross-margin/orders/{order-id}/repay (Repay Margin Loan, Cross). order-id in path. */
+export interface SpotCrossMarginRepayReq {
+  /** Loan order ID (path param) */
+  orderId: string;
+  /** Amount of currency to repay */
+  amount: string;
+}
+
+/** Params for GET /v1/cross-margin/accounts/balance (Get Margin Loan Account Balance, Cross) */
+export interface SpotCrossMarginAccountsBalanceReq {
+  /** Sub user UID */
+  'sub-uid'?: number;
+}
+
+/** Params for GET /v1/cross-margin/loan-orders (Search Past Margin Orders, Cross) */
+export interface SpotCrossMarginLoanOrdersReq {
+  /** Start date yyyy-mm-dd. Default -61d */
+  'start-date'?: string;
+  /** End date yyyy-mm-dd. Default today */
+  'end-date'?: string;
+  /** Currency filter */
+  currency?: string;
+  /** Order state: created, accrual, cleared, invalid. Default all */
+  state?: string;
+  /** Search order id to begin with. Default 0 */
+  from?: string;
+  /** Search direction when from is used: next, prev. Default next */
+  direct?: 'next' | 'prev';
+  /** Orders to return [10-100]. Default 10 */
+  size?: number;
+  /** Sub user UID */
+  'sub-uid'?: number;
+}
+
+/** Params for GET /v2/margin/limit (Obtain leverage position limit, Cross) */
+export interface SpotMarginLimitReq {
+  /** Currency filter. If empty, all currencies. */
+  currency?: string;
+}
+
 /** Params for GET /v2/account/ledger */
 export interface SpotGetAccountLedgerParams {
   /** Account ID */

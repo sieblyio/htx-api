@@ -587,6 +587,171 @@ export interface SpotV2AlgoOrdersCancelAllAfterData {
   triggerTime: number;
 }
 
+/**
+ * Conditional Order
+ */
+
+/** Data from POST /v2/algo-orders (Place a conditional order) */
+export interface SpotV2AlgoOrdersPlaceResp {
+  clientOrderId: string;
+}
+
+/** Data from POST /v2/algo-orders/cancellation (Cancel conditional orders before triggering) */
+export interface SpotV2AlgoOrdersCancellationResp {
+  accepted: string[];
+  rejected: string[];
+}
+
+/** Conditional order item from GET /v2/algo-orders/opening (orderStatus=created) and /history and /specific */
+export interface SpotV2AlgoOrder {
+  accountId: number;
+  source: string;
+  clientOrderId: string;
+  symbol?: string;
+  orderPrice?: string;
+  orderSize?: string;
+  orderValue?: string;
+  orderSide: string;
+  orderType: string;
+  timeInForce?: string;
+  stopPrice?: string;
+  trailingRate?: string;
+  orderOrigTime: number;
+  lastActTime: number;
+  orderStatus: string;
+  /** Only for orderStatus=triggered */
+  orderId?: string;
+  /** Order trigger time. Only for orderStatus=triggered */
+  orderCreateTime?: number;
+  /** Only for orderStatus=rejected */
+  errCode?: number;
+  /** Only for orderStatus=rejected */
+  errMessage?: string;
+}
+
+/**
+ * Margin Loan (Cross/Isolated)
+ */
+
+/** Repayment item from POST /v2/account/repayment. Check transaction record to confirm status. */
+export interface SpotMarginRepaymentResp {
+  repayId: string | number;
+  repayTime: number;
+}
+
+/** Transact ID detail from GET /v2/account/repayment (Repayment Record Reference) */
+export interface SpotRepaymentRecordTransactId {
+  transactId: number;
+  repaidPrincipal?: string;
+  repaidInterest?: string;
+  paidHt?: string;
+  paidPoint?: string;
+}
+
+/** Repayment record item from GET /v2/account/repayment (Repayment Record Reference) */
+export interface SpotRepaymentRecordItem {
+  repayId: string | number;
+  repayTime: number;
+  accountId: string;
+  currency: string;
+  repaidAmount: string;
+  transactIds?: SpotRepaymentRecordTransactId | SpotRepaymentRecordTransactId[];
+}
+
+/** Currency item from GET /v1/margin/loan-info */
+export interface SpotMarginLoanInfoCurrency {
+  currency: string;
+  'interest-rate': string;
+  'min-loan-amt': string;
+  'max-loan-amt': string;
+  'loanable-amt': string;
+  'actual-rate': string;
+}
+
+/** Symbol item from GET /v1/margin/loan-info */
+export interface SpotMarginLoanInfoItem {
+  symbol: string;
+  currencies: SpotMarginLoanInfoCurrency[];
+}
+
+/** Loan order item from GET /v1/margin/loan-orders */
+export interface SpotMarginLoanOrder {
+  id: number;
+  'account-id': number;
+  'user-id': number;
+  symbol: string;
+  currency: string;
+  'created-at': string;
+  'accrued-at'?: string;
+  'loan-amount': string;
+  'loan-balance': string;
+  'interest-rate': string;
+  'interest-amount'?: string;
+  'interest-balance'?: string;
+  state: string;
+  'paid-point'?: string;
+  'paid-coin'?: string;
+  'deduct-rate'?: string;
+  'deduct-currency'?: string;
+  'deduct-amount'?: string;
+  'updated-at'?: number;
+  'hour-interest-rate'?: string;
+  'day-interest-rate'?: string;
+}
+
+/** Balance list item from GET /v1/margin/accounts/balance */
+export interface SpotMarginAccountBalanceItem {
+  currency: string;
+  type: string;
+  balance: string;
+}
+
+/** Account item from GET /v1/margin/accounts/balance */
+export interface SpotMarginAccountBalance {
+  id: number;
+  type: string;
+  symbol: string;
+  state: string;
+  'risk-rate'?: string;
+  'fl-type'?: string;
+  'fl-price'?: string;
+  list: SpotMarginAccountBalanceItem[];
+}
+
+/** Account balance from GET /v1/cross-margin/accounts/balance. Single object (unlike isolated which returns array). */
+export interface SpotCrossMarginAccountBalance {
+  id: number;
+  type: string;
+  state: string;
+  'risk-rate'?: string;
+  'acct-balance-sum'?: string;
+  'debt-balance-sum'?: string;
+  list: SpotMarginAccountBalanceItem[];
+}
+
+/** Loan order item from GET /v1/cross-margin/loan-orders */
+export interface SpotCrossMarginLoanOrder {
+  id: number;
+  'account-id': number;
+  'user-id': number;
+  currency: string;
+  'filled-points'?: string;
+  'filled-ht'?: string;
+  'created-at': string | number;
+  'accrued-at'?: string | number;
+  'loan-amount': string;
+  'loan-balance': string;
+  'interest-amount'?: string;
+  'interest-balance'?: string;
+  state: string;
+}
+
+/** Position limit item from GET /v2/margin/limit */
+export interface SpotMarginLimitItem {
+  currency: string;
+  'max-holdings': string;
+}
+
 /** Result from POST /v1/order/orders/batchcancel */
 export interface SpotV1OrderBatchCancelData {
   /** Successfully canceled order ids or client-order-ids */
