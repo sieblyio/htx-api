@@ -2,31 +2,6 @@
  * Reference Data
  */
 
-export interface SpotGetTradingSymbolsParams {
-  /** Timestamp for incremental data. Returns updates from ts to now. If no update, data is []. */
-  ts?: number;
-}
-
-export interface SpotGetCurrenciesParams {
-  /** Timestamp for incremental data. Returns updates from ts to now. If no update, data is []. */
-  ts?: number;
-}
-
-/** Params for /v1/settings/common/currencys. Same as V2 (ts optional). */
-export type SpotGetCurrencysSettingsParams = SpotGetCurrenciesParams;
-
-/** Params for /v1/settings/common/symbols. Same as V2 (ts optional). */
-export type SpotGetSymbolsSettingsParams = SpotGetTradingSymbolsParams;
-
-/** Params for /v1/settings/common/market-symbols */
-export interface SpotGetMarketSymbolsParams {
-  /** Symbols. NA = all. Multiple comma-separated. */
-  symbols?: string;
-  /** Timestamp for incremental data. Returns updates from ts to now. If no update, data is []. */
-  ts?: number;
-}
-
-/** Params for /v1/settings/common/chains */
 export interface SpotGetChainsParams {
   /** Show desc: 0=no, 1=all, 2=suspend deposit/withdrawal and chain exchange */
   'show-desc'?: string;
@@ -44,12 +19,6 @@ export interface SpotGetReferenceCurrenciesParams {
   authorizedUser?: boolean;
 }
 
-/** Params for GET /v2/reference/transact-fee-rate. Max 10 symbols. */
-export interface SpotGetTransactFeeRateParams {
-  /** Trading symbols comma-separated (e.g. btcusdt, ethusdt). Max 10 */
-  symbols: string;
-}
-
 /**
  * Market Data
  */
@@ -64,13 +33,6 @@ export interface SpotGetKlineParams {
   size?: number;
 }
 
-/** Params for /market/detail/merged */
-export interface SpotGetMergedTickerParams {
-  /** Trading symbol (e.g. btcusdt, ethusdt) */
-  symbol: string;
-}
-
-/** Params for /market/depth */
 export interface SpotGetDepthParams {
   /** Trading symbol (e.g. btcusdt) */
   symbol: string;
@@ -80,52 +42,9 @@ export interface SpotGetDepthParams {
   type?: string;
 }
 
-/** Params for /market/trade */
-export interface SpotGetTradeParams {
-  /** Trading symbol (e.g. btcusdt) */
-  symbol: string;
-}
-
-/** Params for /market/history/trade */
-export interface SpotGetHistoryTradeParams {
-  /** Trading symbol (e.g. btcusdt) */
-  symbol: string;
-  /** Number of data points [1-2000]. Default 1. */
-  size?: number;
-}
-
-/** Params for /market/detail */
-export interface SpotGetDetailParams {
-  /** Trading symbol (e.g. btcusdt, ethusdt) */
-  symbol: string;
-}
-
-/** Params for /market/fullMbp */
-export interface SpotGetFullOrderbookParams {
-  /** Trading symbol (e.g. btcusdt, ethusdt). Up to 5000 levels. */
-  symbol: string;
-}
-
 /**
  * Account
- */
-
-/** Params for /v1/account/accounts/{account-id}/balance */
-export interface SpotGetAccountBalanceParams {
-  /** Account ID from GET /v1/account/accounts */
-  accountId: string;
-}
-
-/** Params for /v2/account/valuation */
-export interface SpotGetValuationParams {
-  /** Account type. See Account type data dictionary. */
-  accountType?: string;
-  /** Valuation currency. Default BTC. Must be capitalized. */
-  valuationCurrency?: string;
-}
-
-/** Params for /v2/account/asset-valuation */
-export interface SpotGetAssetValuationParams {
+ */ export interface SpotGetAssetValuationParams {
   /** Account type: spot, margin, otc, super-margin. Default spot. */
   accountType?: string;
   /** Valuation currency: BTC, CNY, USD, JPY, etc. Case sensitive. Default BTC. */
@@ -178,14 +97,6 @@ export interface SpotAccountTransferParams {
   amount: string;
 }
 
-/** Params for POST /v1/account/fee/switch */
-export interface SpotV1AccountFeeSwitchParams {
-  /** 0: point card deduction, 1: currency deduction, 2: close deduction */
-  switchType: 0 | 1 | 2;
-  /** Required when switchType=1. Deduction currency (e.g. HTX, TRX) */
-  deductionCurrency?: string;
-}
-
 /** Params for GET /v1/account/history */
 export interface SpotGetAccountHistoryParams {
   /** Account ID from GET /v1/account/accounts */
@@ -206,13 +117,6 @@ export interface SpotGetAccountHistoryParams {
   'from-id'?: number;
 }
 
-/** Params for GET /v2/point/account */
-export interface SpotGetPointAccountParams {
-  /** Sub user UID (parent querying sub user's point balance) */
-  subUid?: string;
-}
-
-/** Params for POST /v2/point/transfer */
 export interface SpotV2PointTransferParams {
   /** Transferer UID */
   fromUid: string;
@@ -298,26 +202,6 @@ export interface SpotV1OrderAutoPlaceParams {
   operator?: string;
 }
 
-/** Params for POST /v1/order/orders/{order-id}/submitcancel. order-id in path. */
-export interface SpotV1OrderCancelParams {
-  /** Order ID to cancel (path param) */
-  orderId: string;
-  /** Symbol (e.g. btcusdt). Sent in request body. */
-  symbol?: string;
-}
-
-/** Params for POST /v1/order/orders/submitCancelClientOrder */
-export interface SpotV1OrderCancelByClientOrderIdParams {
-  /** Client order ID to cancel */
-  'client-order-id': string;
-}
-
-/** Params for GET /v1/order/cancelAllOrders */
-export interface SpotV1OrderCancelAllParams {
-  /** Comma-separated symbols. Omit or empty = cancel all spot orders. */
-  symbol?: string;
-}
-
 /** Params for POST /v1/order/orders/batchCancelOpenOrders */
 export interface SpotV1OrderBatchCancelOpenOrdersParams {
   /** Account ID from GET /v1/account/accounts */
@@ -331,27 +215,6 @@ export interface SpotV1OrderBatchCancelOpenOrdersParams {
   /** Orders to cancel [1-100]. Default 100 */
   size?: number;
 }
-
-/** Params for POST /v1/order/orders/batchcancel. Use order-ids or client-order-ids (max 50 each). */
-export interface SpotV1OrderBatchCancelParams {
-  /** Order IDs to cancel. Prefer over client-order-ids. Max 50 */
-  'order-ids'?: string[];
-  /** Client order IDs to cancel. Max 50 */
-  'client-order-ids'?: string[];
-}
-
-/** Params for GET /v1/order/orders/{order-id} */
-export interface SpotGetOrderDetailParams {
-  /** Order ID (path param) */
-  orderId: string;
-}
-
-/** Params for GET /v1/order/orders/getClientOrder */
-export interface SpotGetOrderByClientOrderIdParams {
-  /** Client order ID */
-  clientOrderId: string;
-}
-
 /** Params for GET /v1/order/orders (search past orders) */
 export interface SpotGetOrderHistoryParams {
   /** Trading symbol (required) */
@@ -422,12 +285,6 @@ export interface SpotGetOpenOrdersParams {
   size?: number;
 }
 
-/** Params for POST /v2/algo-orders/cancel-all-after (Dead man's switch). 0=off, >=5=on with timeout seconds */
-export interface SpotV2AlgoOrdersCancelAllAfterParams {
-  /** Timeout in seconds. 0=turn off, >=5=turn on. Must ping twice within timeout or all spot orders (max 500) are canceled. */
-  timeout: number;
-}
-
 /**
  * Conditional Order
  */
@@ -458,13 +315,6 @@ export interface SpotV2AlgoOrdersPlaceReq {
   trailingRate?: string;
 }
 
-/** Params for POST /v2/algo-orders/cancellation (Cancel conditional orders before triggering). Max 50 orders. */
-export interface SpotV2AlgoOrdersCancellationReq {
-  /** Client order IDs to cancel (max 50) */
-  clientOrderIds: string[];
-}
-
-/** Params for GET /v2/algo-orders/opening (Query open conditional orders before triggering). orderStatus=created only. */
 export interface SpotV2AlgoOrdersOpeningReq {
   /** Account ID */
   accountId?: number;
@@ -504,12 +354,6 @@ export interface SpotV2AlgoOrdersHistoryReq {
   limit?: number;
   /** First record ID for next-page pagination */
   fromId?: number;
-}
-
-/** Params for GET /v2/algo-orders/specific (Query a specific conditional order by clientOrderId) */
-export interface SpotV2AlgoOrdersSpecificReq {
-  /** Client order ID */
-  clientOrderId: string;
 }
 
 /**
@@ -584,14 +428,6 @@ export interface SpotMarginLoanOrderReq {
   amount?: string;
 }
 
-/** Params for POST /v1/margin/orders/{order-id}/repay (Repay Margin Loan, Isolated). order-id in path. */
-export interface SpotMarginRepayIsolatedReq {
-  /** Loan order ID (path param) */
-  orderId: string;
-  /** Amount of currency to repay */
-  amount: string;
-}
-
 /** Params for GET /v1/margin/loan-orders (Search Past Margin Orders, Isolated) */
 export interface SpotMarginLoanOrdersReq {
   /** Trading symbol (e.g. btcusdt) */
@@ -609,52 +445,6 @@ export interface SpotMarginLoanOrdersReq {
   /** Orders to return [1-100]. Default 100 */
   size?: number;
   /** Sub user ID (required when parent queries sub user's orders) */
-  'sub-uid'?: number;
-}
-
-/** Params for GET /v1/margin/accounts/balance (Get Margin Loan Account Balance, Isolated) */
-export interface SpotMarginAccountsBalanceReq {
-  /** Trading symbol (e.g. btcusdt). If empty, transfer-out-available and loan-available won't be returned */
-  symbol?: string;
-  /** Sub user ID (required when parent queries sub user's account) */
-  'sub-uid'?: number;
-}
-
-/** Params for POST /v1/cross-margin/transfer-in (Transfer Spot -> Cross Margin) */
-export interface SpotCrossMarginTransferInReq {
-  /** Currency to transfer */
-  currency?: string;
-  /** Transfer amount */
-  amount?: string;
-}
-
-/** Params for POST /v1/cross-margin/transfer-out (Transfer Cross Margin -> Spot) */
-export interface SpotCrossMarginTransferOutReq {
-  /** Currency to transfer */
-  currency?: string;
-  /** Transfer amount */
-  amount?: string;
-}
-
-/** Params for POST /v1/cross-margin/orders (Request a Margin Loan, Cross) */
-export interface SpotCrossMarginLoanOrderReq {
-  /** Currency to borrow */
-  currency?: string;
-  /** Amount to borrow (max 3 decimal places) */
-  amount?: string;
-}
-
-/** Params for POST /v1/cross-margin/orders/{order-id}/repay (Repay Margin Loan, Cross). order-id in path. */
-export interface SpotCrossMarginRepayReq {
-  /** Loan order ID (path param) */
-  orderId: string;
-  /** Amount of currency to repay */
-  amount: string;
-}
-
-/** Params for GET /v1/cross-margin/accounts/balance (Get Margin Loan Account Balance, Cross) */
-export interface SpotCrossMarginAccountsBalanceReq {
-  /** Sub user UID */
   'sub-uid'?: number;
 }
 
@@ -676,12 +466,6 @@ export interface SpotCrossMarginLoanOrdersReq {
   size?: number;
   /** Sub user UID */
   'sub-uid'?: number;
-}
-
-/** Params for GET /v2/margin/limit (Obtain leverage position limit, Cross) */
-export interface SpotMarginLimitReq {
-  /** Currency filter. If empty, all currencies. */
-  currency?: string;
 }
 
 /** Params for GET /v2/account/ledger */

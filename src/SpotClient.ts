@@ -2,66 +2,32 @@ import { BaseRestClient } from './lib/BaseRestClient.js';
 import { REST_CLIENT_TYPE_ENUM, RestClientType } from './lib/requestUtils.js';
 import type {
   SpotAccountTransferParams,
-  SpotCrossMarginAccountsBalanceReq,
-  SpotCrossMarginLoanOrderReq,
   SpotCrossMarginLoanOrdersReq,
-  SpotCrossMarginRepayReq,
-  SpotCrossMarginTransferInReq,
-  SpotCrossMarginTransferOutReq,
-  SpotGetAccountBalanceParams,
   SpotGetAccountHistoryParams,
   SpotGetAccountLedgerParams,
   SpotGetAssetValuationParams,
   SpotGetChainsParams,
-  SpotGetCurrenciesParams,
-  SpotGetCurrencysSettingsParams,
   SpotGetDepthParams,
-  SpotGetDetailParams,
-  SpotGetFullOrderbookParams,
-  SpotGetHistoryTradeParams,
   SpotGetKlineParams,
-  SpotGetMarketSymbolsParams,
   SpotGetMatchResultsParams,
-  SpotGetMergedTickerParams,
   SpotGetOpenOrdersParams,
-  SpotGetOrderByClientOrderIdParams,
-  SpotGetOrderDetailParams,
   SpotGetOrderHistory48hParams,
   SpotGetOrderHistoryParams,
-  SpotGetPointAccountParams,
-  SpotGetReferenceCurrenciesParams,
-  SpotGetSymbolsSettingsParams,
-  SpotGetTradeParams,
-  SpotGetTradingSymbolsParams,
-  SpotGetTransactFeeRateParams,
-  SpotGetValuationParams,
-  SpotMarginAccountsBalanceReq,
-  SpotMarginLimitReq,
-  SpotMarginLoanInfoReq,
   SpotMarginLoanOrderReq,
   SpotMarginLoanOrdersReq,
-  SpotMarginRepayIsolatedReq,
   SpotMarginRepaymentReq,
   SpotMarginTransferInIsolatedReq,
   SpotMarginTransferOutIsolatedReq,
   SpotRepaymentRecordReq,
-  SpotV1AccountFeeSwitchParams,
   SpotV1FuturesTransferParams,
   SpotV1OrderAutoPlaceParams,
   SpotV1OrderBatchCancelOpenOrdersParams,
-  SpotV1OrderBatchCancelParams,
   SpotV1OrderBatchPlaceParams,
-  SpotV1OrderCancelAllParams,
-  SpotV1OrderCancelByClientOrderIdParams,
-  SpotV1OrderCancelParams,
   SpotV1OrderPlaceParams,
   SpotV2AccountTransferParams,
-  SpotV2AlgoOrdersCancelAllAfterParams,
-  SpotV2AlgoOrdersCancellationReq,
   SpotV2AlgoOrdersHistoryReq,
   SpotV2AlgoOrdersOpeningReq,
   SpotV2AlgoOrdersPlaceReq,
-  SpotV2AlgoOrdersSpecificReq,
   SpotV2PointTransferParams,
 } from './types/request/spot.types.js';
 import { SpotAPISuccessResponse } from './types/response/shared.types.js';
@@ -187,9 +153,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns all supported trading symbols. Pass ts for incremental updates.
    */
-  getTradingSymbols(
-    params?: SpotGetTradingSymbolsParams,
-  ): Promise<SpotAPISuccessResponse<SpotTradingSymbol[]>> {
+  getTradingSymbols(params?: {
+    ts?: number;
+  }): Promise<SpotAPISuccessResponse<SpotTradingSymbol[]>> {
     return this.get('/v2/settings/common/symbols', params);
   }
 
@@ -198,9 +164,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns all supported currencies. Pass ts for incremental updates.
    */
-  getCurrencies(
-    params?: SpotGetCurrenciesParams,
-  ): Promise<SpotAPISuccessResponse<SpotCurrency[]>> {
+  getCurrencies(params?: {
+    ts?: number;
+  }): Promise<SpotAPISuccessResponse<SpotCurrency[]>> {
     return this.get('/v2/settings/common/currencies', params);
   }
 
@@ -209,9 +175,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns currency settings. No signature required. Pass ts for incremental updates.
    */
-  getCurrencysSettings(
-    params?: SpotGetCurrencysSettingsParams,
-  ): Promise<SpotAPISuccessResponse<SpotV1CurrencySettings[]>> {
+  getCurrencysSettings(params?: {
+    ts?: number;
+  }): Promise<SpotAPISuccessResponse<SpotV1CurrencySettings[]>> {
     return this.get('/v1/settings/common/currencys', params);
   }
 
@@ -220,9 +186,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns symbol settings. No signature required. Pass ts for incremental updates.
    */
-  getSymbolsSettings(
-    params?: SpotGetSymbolsSettingsParams,
-  ): Promise<SpotAPISuccessResponse<SpotV1SymbolSettings[]>> {
+  getSymbolsSettings(params?: {
+    ts?: number;
+  }): Promise<SpotAPISuccessResponse<SpotV1SymbolSettings[]>> {
     return this.get('/v1/settings/common/symbols', params);
   }
 
@@ -231,9 +197,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns market symbol settings. No signature required. Pass symbols (NA=all) and/or ts for incremental updates.
    */
-  getMarketSymbolsSettings(
-    params?: SpotGetMarketSymbolsParams,
-  ): Promise<SpotAPISuccessResponse<SpotV1MarketSymbolSettings[]>> {
+  getMarketSymbolsSettings(params?: {
+    symbols?: string;
+    ts?: number;
+  }): Promise<SpotAPISuccessResponse<SpotV1MarketSymbolSettings[]>> {
     return this.get('/v1/settings/common/market-symbols', params);
   }
 
@@ -242,7 +209,7 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns chain info per currency. No signature required. Pass show-desc, currency, and/or ts for incremental updates.
    */
-  getChains(
+  getChainsInfo(
     params?: SpotGetChainsParams,
   ): Promise<SpotAPISuccessResponse<SpotV1ChainInfo[]>> {
     return this.get('/v1/settings/common/chains', params);
@@ -253,9 +220,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns static reference info for each currency and its chains. No signature required.
    */
-  getReferenceCurrencies(
-    params?: SpotGetReferenceCurrenciesParams,
-  ): Promise<SpotAPISuccessResponse<SpotV2CurrencyReference[]>> {
+  getReferenceCurrencies(params?: {
+    currency?: string;
+    authorizedUser?: boolean;
+  }): Promise<SpotAPISuccessResponse<SpotV2CurrencyReference[]>> {
     return this.get('/v2/reference/currencies', params);
   }
 
@@ -281,9 +249,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns latest ticker with 24h aggregated market data. No signature required.
    */
-  getMergedTicker(
-    params: SpotGetMergedTickerParams,
-  ): Promise<SpotAPISuccessResponse<SpotMergedTicker, 'tick'>> {
+  getTicker(params: {
+    symbol: string;
+  }): Promise<SpotAPISuccessResponse<SpotMergedTicker, 'tick'>> {
     return this.get('/market/detail/merged', params);
   }
 
@@ -312,9 +280,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns latest trade with price, volume, direction. No signature required.
    */
-  getTrade(
-    params: SpotGetTradeParams,
-  ): Promise<SpotAPISuccessResponse<SpotTradeTick, 'tick'>> {
+  getLastTrade(params: {
+    symbol: string;
+  }): Promise<SpotAPISuccessResponse<SpotTradeTick, 'tick'>> {
     return this.get('/market/trade', params);
   }
 
@@ -323,9 +291,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns recent trades grouped by timestamp. No signature required.
    */
-  getHistoryTrade(
-    params: SpotGetHistoryTradeParams,
-  ): Promise<SpotAPISuccessResponse<SpotTradeTimestampGroup[]>> {
+  getHistoryTrades(params: {
+    symbol: string;
+    size?: number;
+  }): Promise<SpotAPISuccessResponse<SpotTradeTimestampGroup[]>> {
     return this.get('/market/history/trade', params);
   }
 
@@ -334,9 +303,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns 24h trading summary for a symbol. No signature required.
    */
-  getMarketDetail(
-    params: SpotGetDetailParams,
-  ): Promise<SpotAPISuccessResponse<SpotDetailTick, 'tick'>> {
+  get24hMarketSummary(params: {
+    symbol: string;
+  }): Promise<SpotAPISuccessResponse<SpotDetailTick, 'tick'>> {
     return this.get('/market/detail', params);
   }
 
@@ -345,9 +314,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns complete market depth, up to 5000 levels. Updated once per second. No signature required.
    */
-  getFullOrderBook(
-    params: SpotGetFullOrderbookParams,
-  ): Promise<SpotAPISuccessResponse<SpotDepthTick, 'tick'>> {
+  getFullOrderBook(params: {
+    symbol: string;
+  }): Promise<SpotAPISuccessResponse<SpotDepthTick, 'tick'>> {
     return this.get('/market/fullMbp', params);
   }
 
@@ -371,9 +340,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns balance for account specified by account id. Signature required. OTC not supported.
    */
-  getAccountBalance(
-    params: SpotGetAccountBalanceParams,
-  ): Promise<SpotAPISuccessResponse<SpotAccountBalance>> {
+  getAccountBalance(params: {
+    accountId: string;
+  }): Promise<SpotAPISuccessResponse<SpotAccountBalance>> {
     return this.getPrivate(`/v1/account/accounts/${params.accountId}/balance`);
   }
 
@@ -382,9 +351,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns total asset valuation in BTC or fiat. Signature required.
    */
-  getAccountValuation(
-    params?: SpotGetValuationParams,
-  ): Promise<SpotAPISuccessResponse<SpotV2AccountValuation>> {
+  getAccountValuation(params?: {
+    accountType?: string;
+    valuationCurrency?: string;
+  }): Promise<SpotAPISuccessResponse<SpotV2AccountValuation>> {
     return this.getPrivate('/v2/account/valuation', params);
   }
 
@@ -463,9 +433,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Query termless and terminable point balance. Parent can query sub user via subUid. Signature required. Read permission. Rate: 2/s.
    */
-  getPointAccount(
-    params?: SpotGetPointAccountParams,
-  ): Promise<SpotAPISuccessResponse<SpotV2PointAccount>> {
+  getPointBalance(params?: {
+    subUid?: string;
+  }): Promise<SpotAPISuccessResponse<SpotV2PointAccount>> {
     return this.getPrivate('/v2/point/account', params);
   }
 
@@ -507,9 +477,10 @@ export class SpotClient extends BaseRestClient {
    *
    * switchType: 0=point card, 1=currency (pass deductionCurrency), 2=close. Signature required. Read permission. Rate: 2/s.
    */
-  submitAccountFeeSwitch(
-    params: SpotV1AccountFeeSwitchParams,
-  ): Promise<SpotAPISuccessResponse<{}>> {
+  updateFeeDeductionMethod(params: {
+    switchType: 0 | 1 | 2;
+    deductionCurrency?: string;
+  }): Promise<SpotAPISuccessResponse<{}>> {
     return this.postPrivate('/v1/account/fee/switch', { body: params });
   }
 
@@ -557,9 +528,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Submits cancel request. Verify via order status or match result. Signature required. Trade permission. Rate: 100/2s.
    */
-  cancelOrderByOrderId(
-    params: SpotV1OrderCancelParams,
-  ): Promise<SpotAPISuccessResponse<SpotV1OrderCancelData>> {
+  cancelOrderById(params: {
+    orderId: string;
+    symbol?: string;
+  }): Promise<SpotAPISuccessResponse<SpotV1OrderCancelData>> {
     const { orderId, ...body } = params;
     return this.postPrivate(`/v1/order/orders/${orderId}/submitcancel`, {
       body: body,
@@ -571,9 +543,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Prefer cancelOrder (by order-id) when possible. Submits cancel request; verify via order status. Signature required. Trade permission. Rate: 100/2s.
    */
-  cancelOrderByClientOrderId(
-    params: SpotV1OrderCancelByClientOrderIdParams,
-  ): Promise<SpotAPISuccessResponse<SpotV1OrderCancelByClientOrderIdData>> {
+  cancelOrderByClientId(params: {
+    'client-order-id': string;
+  }): Promise<SpotAPISuccessResponse<SpotV1OrderCancelByClientOrderIdData>> {
     return this.postPrivate('/v1/order/orders/submitCancelClientOrder', {
       body: params,
     });
@@ -584,9 +556,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Cancel all open spot orders. Pass symbol for specific pair(s), comma-separated; omit for all. Signature required. Trade permission. Rate: 1/2s.
    */
-  cancelAllOrders(
-    params?: SpotV1OrderCancelAllParams,
-  ): Promise<SpotAPISuccessResponse<null>> {
+  cancelAllOrders(params?: {
+    symbol?: string;
+  }): Promise<SpotAPISuccessResponse<null>> {
     return this.getPrivate('/v1/order/cancelAllOrders', params);
   }
 
@@ -619,9 +591,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Cancel by order-ids or client-order-ids (max 50). Prefer order-ids. Signature required. Trade permission. Rate: 50/2s.
    */
-  batchCancelOrders(
-    params: SpotV1OrderBatchCancelParams,
-  ): Promise<SpotAPISuccessResponse<SpotV1OrderBatchCancelData>> {
+  batchCancelOrders(params: {
+    'order-ids'?: string[];
+    'client-order-ids'?: string[];
+  }): Promise<SpotAPISuccessResponse<SpotV1OrderBatchCancelData>> {
     return this.postPrivate('/v1/order/orders/batchcancel', { body: params });
   }
 
@@ -630,9 +603,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Turn on/off. timeout=0 to turn off. timeout>=5 to turn on: must call twice within timeout seconds or all spot orders (max 500) are canceled. Signature required. Trade permission.
    */
-  setCancelAllAfter(
-    params: SpotV2AlgoOrdersCancelAllAfterParams,
-  ): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancelAllAfterData>> {
+  setCancelAllAfter(params: {
+    timeout: number;
+  }): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancelAllAfterData>> {
     return this.postPrivate('/v2/algo-orders/cancel-all-after', {
       body: params,
     });
@@ -643,9 +616,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns order detail. API-created orders not queryable 2h after cancel. Signature required. Read permission. Rate: 50/2s.
    */
-  getOrder(
-    params: SpotGetOrderDetailParams,
-  ): Promise<SpotAPISuccessResponse<SpotV1OrderDetail>> {
+  getOrder(params: {
+    orderId: string;
+  }): Promise<SpotAPISuccessResponse<SpotV1OrderDetail>> {
     return this.getPrivate(`/v1/order/orders/${params.orderId}`);
   }
 
@@ -654,9 +627,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns latest status of order with given client order ID. Signature required. Read permission. Rate: 50/2s.
    */
-  getOrderByClientId(
-    params: SpotGetOrderByClientOrderIdParams,
-  ): Promise<SpotAPISuccessResponse<SpotV1OrderDetail>> {
+  getOrderByClientId(params: {
+    clientOrderId: string;
+  }): Promise<SpotAPISuccessResponse<SpotV1OrderDetail>> {
     return this.getPrivate('/v1/order/orders/getClientOrder', params);
   }
 
@@ -665,9 +638,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns match/trade results for a specific order. Signature required. Read permission. Rate: 50/2s.
    */
-  getOrderMatchResults(
-    params: SpotGetOrderDetailParams,
-  ): Promise<SpotAPISuccessResponse<SpotV1OrderMatchResult[]>> {
+  getOrderMatch(params: {
+    orderId: string;
+  }): Promise<SpotAPISuccessResponse<SpotV1OrderMatchResult[]>> {
     return this.getPrivate(`/v1/order/orders/${params.orderId}/matchresults`);
   }
 
@@ -709,9 +682,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Query fee rates for trading pairs. Max 10 symbols. Signature required. Read permission. Rate: 50/2s.
    */
-  getTransactFeeRate(
-    params: SpotGetTransactFeeRateParams,
-  ): Promise<SpotAPISuccessResponse<SpotV2TransactFeeRateItem[]>> {
+  getFeeRate(params: {
+    symbols: string;
+  }): Promise<SpotAPISuccessResponse<SpotV2TransactFeeRateItem[]>> {
     return this.getPrivate('/v2/reference/transact-fee-rate', params);
   }
 
@@ -737,9 +710,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Only cancels conditional orders that have not triggered yet. Max 50 orders. Signature required. Trade permission. Rate: 20/2s.
    */
-  cancelConditionalOrders(
-    params: SpotV2AlgoOrdersCancellationReq,
-  ): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancellationResp>> {
+  cancelConditionalOrders(params: {
+    clientOrderIds: string[];
+  }): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancellationResp>> {
     return this.postPrivate('/v2/algo-orders/cancellation', { body: params });
   }
 
@@ -770,9 +743,9 @@ export class SpotClient extends BaseRestClient {
    *
    * By clientOrderId. Covers created, triggered, canceled, rejected. Signature required. Read permission. Rate: 20/2s.
    */
-  getConditionalOrder(
-    params: SpotV2AlgoOrdersSpecificReq,
-  ): Promise<SpotAPISuccessResponse<SpotV2AlgoOrder>> {
+  getConditionalOrder(params: {
+    clientOrderId: string;
+  }): Promise<SpotAPISuccessResponse<SpotV2AlgoOrder>> {
     return this.getPrivate('/v2/algo-orders/specific', params);
   }
 
@@ -833,9 +806,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns loan interest rates and quota per symbol. Signature required. Read permission. Rate: 20/2s.
    */
-  getMarginLoanInfo(
-    params?: SpotMarginLoanInfoReq,
-  ): Promise<SpotAPISuccessResponse<SpotMarginLoanInfoItem[]>> {
+  getMarginLoanInfo(params?: {
+    symbols?: string;
+  }): Promise<SpotAPISuccessResponse<SpotMarginLoanInfoItem[]>> {
     return this.getPrivate('/v1/margin/loan-info', params);
   }
 
@@ -855,9 +828,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Repays with asset in margin account. Signature required. Trade permission. Rate: 2/2s.
    */
-  repayMarginLoanIsolated(
-    params: SpotMarginRepayIsolatedReq,
-  ): Promise<SpotAPISuccessResponse<number>> {
+  repayMarginLoanIsolated(params: {
+    orderId: string;
+    amount: string;
+  }): Promise<SpotAPISuccessResponse<number>> {
     const { orderId, amount } = params;
     return this.postPrivate(`/v1/margin/orders/${orderId}/repay`, {
       body: { amount },
@@ -880,9 +854,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Signature required. Read permission. Rate: 100/2s.
    */
-  getMarginAccountBalance(
-    params?: SpotMarginAccountsBalanceReq,
-  ): Promise<SpotAPISuccessResponse<SpotMarginAccountBalance[]>> {
+  getMarginAccountBalance(params?: {
+    symbol?: string;
+    'sub-uid'?: number;
+  }): Promise<SpotAPISuccessResponse<SpotMarginAccountBalance[]>> {
     return this.getPrivate('/v1/margin/accounts/balance', params);
   }
 
@@ -891,9 +866,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Signature required. Trade permission.
    */
-  transferSpotToCrossMargin(
-    params: SpotCrossMarginTransferInReq,
-  ): Promise<SpotAPISuccessResponse<number>> {
+  transferSpotToCrossMargin(params: {
+    currency?: string;
+    amount?: string;
+  }): Promise<SpotAPISuccessResponse<number>> {
     return this.postPrivate('/v1/cross-margin/transfer-in', { body: params });
   }
 
@@ -902,9 +878,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Signature required. Trade permission.
    */
-  transferCrossMarginToSpot(
-    params: SpotCrossMarginTransferOutReq,
-  ): Promise<SpotAPISuccessResponse<number>> {
+  transferCrossMarginToSpot(params: {
+    currency?: string;
+    amount?: string;
+  }): Promise<SpotAPISuccessResponse<number>> {
     return this.postPrivate('/v1/cross-margin/transfer-out', { body: params });
   }
 
@@ -924,9 +901,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Places order to borrow margin. Signature required. Trade permission. Rate: 2/2s.
    */
-  requestCrossMarginLoan(
-    params: SpotCrossMarginLoanOrderReq,
-  ): Promise<SpotAPISuccessResponse<number>> {
+  requestCrossMarginLoan(params: {
+    currency?: string;
+    amount?: string;
+  }): Promise<SpotAPISuccessResponse<number>> {
     return this.postPrivate('/v1/cross-margin/orders', { body: params });
   }
 
@@ -935,9 +913,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Repays with asset in cross margin account. Signature required. Trade permission. Rate: 2/2s.
    */
-  repayCrossMarginLoan(
-    params: SpotCrossMarginRepayReq,
-  ): Promise<SpotAPISuccessResponse<null>> {
+  repayCrossMarginLoan(params: {
+    orderId: string;
+    amount: string;
+  }): Promise<SpotAPISuccessResponse<null>> {
     const { orderId, amount } = params;
     return this.postPrivate(`/v1/cross-margin/orders/${orderId}/repay`, {
       body: { amount },
@@ -960,9 +939,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns single account object. Signature required. Read permission. Rate: 2/2s.
    */
-  getCrossMarginAccountBalance(
-    params?: SpotCrossMarginAccountsBalanceReq,
-  ): Promise<SpotAPISuccessResponse<SpotCrossMarginAccountBalance>> {
+  getCrossMarginBalance(params?: {
+    'sub-uid'?: number;
+  }): Promise<SpotAPISuccessResponse<SpotCrossMarginAccountBalance>> {
     return this.getPrivate('/v1/cross-margin/accounts/balance', params);
   }
 
@@ -971,9 +950,9 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns position limit at user level per currency. Signature required. Read permission. Rate: 2/2s.
    */
-  getMarginLimit(
-    params?: SpotMarginLimitReq,
-  ): Promise<SpotAPISuccessResponse<SpotMarginLimitItem[]>> {
+  getCrossMarginLimit(params?: {
+    currency?: string;
+  }): Promise<SpotAPISuccessResponse<SpotMarginLimitItem[]>> {
     return this.getPrivate('/v2/margin/limit', params);
   }
 }
