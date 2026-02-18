@@ -1,28 +1,66 @@
 import { BaseRestClient } from './lib/BaseRestClient.js';
 import { REST_CLIENT_TYPE_ENUM, RestClientType } from './lib/requestUtils.js';
 import type {
+  FuturesAvailableLevelRateReq,
   FuturesBasisReq,
   FuturesContractInfoReq,
+  FuturesCrossAvailableLevelRateReq,
   FuturesCrossLadderMarginReq,
+  FuturesCrossLeverPositionLimitReq,
+  FuturesCrossPositionInfoReq,
+  FuturesCrossPositionLimitReq,
+  FuturesCrossSubAccountInfoListReq,
+  FuturesCrossSubAccountInfoReq,
+  FuturesCrossSubAccountListReq,
+  FuturesCrossSubPositionInfoReq,
+  FuturesCrossTransferLimitReq,
+  FuturesFeeReq,
+  FuturesFinancialRecordExactReq,
+  FuturesFinancialRecordReq,
   FuturesHistoricalFundingRateReq,
   FuturesHistoricalOpenInterestReq,
   FuturesInsuranceFundHistoryReq,
+  FuturesIsolatedSubAccountInfoReq,
+  FuturesIsolatedSubAccountListReq,
+  FuturesIsolatedSubPositionInfoReq,
   FuturesKlineReq,
+  FuturesLeverPositionLimitReq,
   FuturesLiquidationOrdersReq,
   FuturesMarkPriceKlineReq,
+  FuturesMasterSubTransferRecordReq,
+  FuturesMasterSubTransferReq,
+  FuturesOrderLimitReq,
+  FuturesPositionLimitReq,
   FuturesSettlementRecordsReq,
+  FuturesSubAccountInfoListReq,
+  FuturesSubAuthListReq,
+  FuturesTransferInnerReq,
+  FuturesTransferLimitReq,
 } from './types/request/futures.types.js';
 import type {
   FuturesAccountTypeData,
   FuturesAdjustFactorItem,
   FuturesApiStateItem,
+  FuturesAvailableLevelRateItem,
+  FuturesBalanceValuationItem,
   FuturesBasisDataItem,
   FuturesBboTick,
   FuturesContractElementsItem,
   FuturesContractInfoItem,
+  FuturesCrossAccountInfoItem,
+  FuturesCrossAccountPositionData,
+  FuturesCrossAvailableLevelRateItem,
   FuturesCrossLadderMarginItem,
+  FuturesCrossLeverPositionLimitItem,
+  FuturesCrossPositionLimitItem,
+  FuturesCrossSubAccountInfoItem,
+  FuturesCrossSubAccountInfoListData,
+  FuturesCrossSubAccountListEntry,
+  FuturesCrossTransferLimitItem,
   FuturesEliteRatioData,
   FuturesEstimatedSettlementPriceItem,
+  FuturesFeeItem,
+  FuturesFinancialRecordItem,
   FuturesFundingRateData,
   FuturesHeartbeat,
   FuturesHistoricalFundingRatePage,
@@ -31,18 +69,32 @@ import type {
   FuturesIndexPriceItem,
   FuturesInsuranceFundHistoryItem,
   FuturesInsuranceFundInfoData,
+  FuturesIsolatedAccountInfoItem,
+  FuturesIsolatedAccountPositionItem,
+  FuturesIsolatedSubAccountInfoItem,
+  FuturesIsolatedSubAccountListEntry,
   FuturesKline,
   FuturesLastTradeTick,
+  FuturesLeverPositionLimitItem,
   FuturesLiquidationOrderItem,
   FuturesMarketDepthTick,
   FuturesMarketOverviewBatchTick,
   FuturesMarketOverviewTick,
   FuturesMarkPriceKlineItem,
+  FuturesMasterSubTransferData,
+  FuturesMasterSubTransferRecordData,
   FuturesOpenInterestItem,
+  FuturesOrderLimitData,
+  FuturesPositionInfoItem,
+  FuturesPositionLimitItem,
   FuturesPriceLimitItem,
   FuturesSettlementRecordsPage,
+  FuturesSubAccountInfoListData,
+  FuturesSubAuthData,
+  FuturesSubAuthListData,
   FuturesTimestamp,
   FuturesTradeHistoryGroup,
+  FuturesTransferLimitItem,
 } from './types/response/futures.types.js';
 import { FuturesAPISuccessResponse } from './types/response/shared.types.js';
 
@@ -571,5 +623,453 @@ export class FuturesClient extends BaseRestClient {
     params: FuturesBasisReq,
   ): Promise<FuturesAPISuccessResponse<FuturesBasisDataItem[]>> {
     return this.get('/index/market/history/linear_swap_basis', params);
+  }
+
+  /**
+   *
+   * Account
+   *
+   */
+
+  /**
+   * Query Asset Valuation
+   *
+   * Total asset valuation in fiat. Supports cross and isolated margin. Signature required.
+   * Rate limit: 144/3s per UID.
+   */
+  getBalanceValuation(params?: {
+    /** Valuation currency. Default BTC */
+    valuation_asset?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesBalanceValuationItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_balance_valuation', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Account Info (Isolated)
+   *
+   * User's isolated margin account info. Signature required. Rate limit: 144/3s per UID.
+   */
+  getIsolatedAccountInfo(params?: {
+    /** Contract code (e.g. BTC-USDT). Omit for all */
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesIsolatedAccountInfoItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_account_info', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Account Info (Cross)
+   *
+   * User's cross margin account info. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCrossAccountInfo(params?: {
+    /** Margin account (e.g. USDT). Omit for all */
+    margin_account?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCrossAccountInfoItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_account_info', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Position Info (Isolated)
+   *
+   * User's isolated margin positions. Signature required. Rate limit: 144/3s per UID.
+   */
+  getIsolatedPositionInfo(params?: {
+    /** Contract code (e.g. BTC-USDT). Omit for all */
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesPositionInfoItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_position_info', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Position Info (Cross)
+   *
+   * User's cross margin positions. contract_code preferred when all filled. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCrossPositionInfo(
+    params?: FuturesCrossPositionInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPositionInfoItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_position_info', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Assets And Positions (Isolated)
+   *
+   * Combined account + positions for isolated margin. Signature required. Rate limit: 144/3s per UID.
+   */
+  getIsolatedAccountPositionInfo(params: {
+    /** Contract code (e.g. BTC-USDT) */
+    contract_code: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesIsolatedAccountPositionItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_account_position_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Assets And Positions (Cross)
+   *
+   * Combined account + positions for cross margin. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCrossAccountPositionInfo(params: {
+    /** Margin account (e.g. USDT) */
+    margin_account: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCrossAccountPositionData>> {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_cross_account_position_info',
+      { body: params },
+    );
+  }
+
+  /**
+   * Set Sub-Account Trading Permissions
+   *
+   * Enable/disable trading for sub-accounts. Max 10 sub UIDs per request. Signature required. Trade permission.
+   */
+  setSubAuth(params: {
+    /** Sub-account UIDs, comma-separated. Max 10 */
+    sub_uid: string;
+    /** 1: enable, 0: disable */
+    sub_auth: 0 | 1;
+  }): Promise<FuturesAPISuccessResponse<FuturesSubAuthData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_sub_auth', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Sub-Account Trading Permissions
+   *
+   * List sub-accounts and their trading permission status. Signature required. Rate limit: 144/3s per UID.
+   */
+  getSubAuthList(
+    params?: FuturesSubAuthListReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubAuthListData>> {
+    return this.getPrivate('/linear-swap-api/v1/swap_sub_auth_list', params);
+  }
+
+  /**
+   * Query Assets of All Sub-Accounts (Isolated)
+   *
+   * Assets info of all sub-accounts under master. Isolated margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getIsolatedSubAccountList(
+    params?: FuturesIsolatedSubAccountListReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesIsolatedSubAccountListEntry[], 'data'>
+  > {
+    return this.postPrivate('/linear-swap-api/v1/swap_sub_account_list', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Assets of All Sub-Accounts (Cross)
+   *
+   * Assets info of all sub-accounts under master. Cross margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCrossSubAccountList(
+    params?: FuturesCrossSubAccountListReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesCrossSubAccountListEntry[], 'data'>
+  > {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_sub_account_list', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Batch of Sub-Account Assets (Isolated)
+   *
+   * Batch query sub-account assets with pagination. Isolated margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getSubAccountInfoList(
+    params?: FuturesSubAccountInfoListReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubAccountInfoListData, 'data'>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_sub_account_info_list', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Batch of Sub-Account Assets (Cross)
+   *
+   * Batch query sub-account assets with pagination. Cross margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCrossSubAccountInfoList(
+    params?: FuturesCrossSubAccountInfoListReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesCrossSubAccountInfoListData, 'data'>
+  > {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_cross_sub_account_info_list',
+      { body: params ?? {} },
+    );
+  }
+
+  /**
+   * Query Single Sub-Account Assets (Isolated)
+   *
+   * Assets info for one sub-account. Isolated margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getIsolatedSubAccountInfo(
+    params: FuturesIsolatedSubAccountInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesIsolatedSubAccountInfoItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_sub_account_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Single Sub-Account Assets (Cross)
+   *
+   * Assets info for one sub-account. Cross margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCrossSubAccountInfo(
+    params: FuturesCrossSubAccountInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossSubAccountInfoItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_sub_account_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Single Sub-Account Positions (Isolated)
+   *
+   * Position info for one sub-account. Isolated margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getIsolatedSubPositionInfo(
+    params: FuturesIsolatedSubPositionInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPositionInfoItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_sub_position_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Single Sub-Account Positions (Cross)
+   *
+   * Position info for one sub-account. Cross margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCrossSubPositionInfo(
+    params: FuturesCrossSubPositionInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPositionInfoItem[]>> {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_cross_sub_position_info',
+      { body: params },
+    );
+  }
+
+  /**
+   * Query Account Financial Records
+   *
+   * Financial records (transfers, fees, funding, etc.). Supports cross and isolated. Signature required. Rate limit: 144/3s per UID.
+   */
+  getFinancialRecords(
+    params: FuturesFinancialRecordReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesFinancialRecordItem[]>> {
+    return this.postPrivate('/linear-swap-api/v3/swap_financial_record', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Account Financial Records (Exact)
+   *
+   * Financial records via multiple fields. Same params as swap_financial_record; API default direct is prev. Signature required. Rate limit: 144/3s per UID.
+   */
+  getFinancialRecordsExact(
+    params: FuturesFinancialRecordExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesFinancialRecordItem[]>> {
+    return this.postPrivate('/linear-swap-api/v3/swap_financial_record_exact', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Available Leverage (Isolated)
+   *
+   * User's available leverage per contract. Isolated margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getAvailableLevelRate(
+    params?: FuturesAvailableLevelRateReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesAvailableLevelRateItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_available_level_rate', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Available Leverage (Cross)
+   *
+   * User's available leverage per contract. Cross margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCrossAvailableLevelRate(
+    params?: FuturesCrossAvailableLevelRateReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossAvailableLevelRateItem[]>> {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_cross_available_level_rate',
+      { body: params ?? {} },
+    );
+  }
+
+  /**
+   * Query Order Limit
+   *
+   * Max open/close order limits per contract for given order type. Supports cross and isolated. Signature required. Rate limit: 144/3s per UID.
+   */
+  getOrderLimit(
+    params: FuturesOrderLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderLimitData, 'data'>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_order_limit', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Trading Fee
+   *
+   * Maker/taker fee rates per contract. Supports cross and isolated. Signature required. Rate limit: 144/3s per UID.
+   */
+  getFee(
+    params?: FuturesFeeReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesFeeItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_fee', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Transfer Limit (Isolated)
+   *
+   * Transfer in/out limits per margin account. Isolated margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getTransferLimit(
+    params?: FuturesTransferLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTransferLimitItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_transfer_limit', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Transfer Limit (Cross)
+   *
+   * Transfer in/out limits per margin account. Cross margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCrossTransferLimit(
+    params?: FuturesCrossTransferLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossTransferLimitItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_transfer_limit', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Position Limit (Isolated)
+   *
+   * Max long/short position limits per contract. Isolated margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getPositionLimit(
+    params?: FuturesPositionLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPositionLimitItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_position_limit', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Position Limit (Cross)
+   *
+   * Max long/short position limits per contract. Cross margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCrossPositionLimit(
+    params?: FuturesCrossPositionLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossPositionLimitItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_position_limit', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Position Limit for All Leverages (Isolated)
+   *
+   * Position limits per leverage per contract. Isolated margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getLeverPositionLimit(
+    params?: FuturesLeverPositionLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesLeverPositionLimitItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_lever_position_limit', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Position Limit for All Leverages (Cross)
+   *
+   * Position limits per leverage per contract. Cross margin only. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCrossLeverPositionLimit(
+    params?: FuturesCrossLeverPositionLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossLeverPositionLimitItem[]>> {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_cross_lever_position_limit',
+      {
+        body: params ?? {},
+      },
+    );
+  }
+
+  /**
+   * Transfer Between Master and Sub Account
+   *
+   * Transfer asset between master and sub. Supports cross and isolated. Trade permission. Rate limit: 10/min per sub.
+   */
+  masterSubTransfer(
+    params: FuturesMasterSubTransferReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferData, 'data'>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_master_sub_transfer', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Master-Sub Transfer Records
+   *
+   * Transfer history between master and sub accounts. Supports cross and isolated. Signature required. Rate limit: 144/3s per UID.
+   */
+  getMasterSubTransferRecord(
+    params: FuturesMasterSubTransferRecordReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesMasterSubTransferRecordData, 'data'>
+  > {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_master_sub_transfer_record',
+      {
+        body: params,
+      },
+    );
+  }
+
+  /**
+   * Transfer Between Margin Accounts
+   *
+   * Transfer between margin accounts under same account. Supports cross and isolated. Trade permission. Rate limit: 10/min.
+   */
+  transferInner(
+    params: FuturesTransferInnerReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferData, 'data'>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_transfer_inner', {
+      body: params,
+    });
   }
 }
