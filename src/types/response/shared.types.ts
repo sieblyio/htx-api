@@ -46,3 +46,15 @@ export interface GenericAPIError<TBody = any> {
   requestOptions: RestClientOptions;
   requestParams: Record<string, any>;
 }
+
+/** HTX linear-swap (futures) API success response. TPayloadKey: data (default), tick, ticks. */
+export type FuturesAPISuccessResponse<
+  TData,
+  TPayloadKey extends string = 'data',
+> = {
+  code?: number;
+  msg?: string;
+  status?: string;
+  ch?: string;
+  ts?: number;
+} & Record<TPayloadKey, TData>;

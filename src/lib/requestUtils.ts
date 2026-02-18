@@ -6,6 +6,10 @@ export const REST_CLIENT_TYPE_ENUM = {
   spot: 'spot',
   /** Spot AWS */
   spotAWS: 'spotAWS',
+  /** Futures */
+  futures: 'futures',
+  /** Futures AWS */
+  futuresAWS: 'futuresAWS',
 } as const;
 
 export type RestClientType =
@@ -14,6 +18,8 @@ export type RestClientType =
 const krakenURLMap = {
   [REST_CLIENT_TYPE_ENUM.spot]: 'https://api.huobi.pro',
   [REST_CLIENT_TYPE_ENUM.spotAWS]: 'https://api-aws.huobi.pro',
+  [REST_CLIENT_TYPE_ENUM.futures]: 'https://api.hbdm.com',
+  [REST_CLIENT_TYPE_ENUM.futuresAWS]: 'https://api.hbdm.vn',
 } as const;
 
 export interface RestClientOptions {
