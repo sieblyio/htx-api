@@ -59,6 +59,8 @@ import type {
   FuturesFeeReq,
   FuturesFinancialRecordExactReq,
   FuturesFinancialRecordReq,
+  FuturesFixPositionMarginChangeRecordReq,
+  FuturesFixPositionMarginChangeReq,
   FuturesHistoricalFundingRateReq,
   FuturesHistoricalOpenInterestReq,
   FuturesHistoryOrdersExactReq,
@@ -70,6 +72,8 @@ import type {
   FuturesKlineReq,
   FuturesLeverPositionLimitReq,
   FuturesLightningClosePositionReq,
+  FuturesLinearSwapFeeSwitchReq,
+  FuturesLinearSwapOverviewAccountInfoReq,
   FuturesLiquidationOrdersReq,
   FuturesMarkPriceKlineReq,
   FuturesMasterSubTransferRecordReq,
@@ -100,6 +104,7 @@ import type {
   FuturesTransferLimitReq,
   FuturesTriggerHisOrdersReq,
   FuturesTriggerOpenOrdersReq,
+  FuturesUnifiedAccountInfoReq,
 } from './types/request/futures.types.js';
 import type {
   FuturesAccountTypeData,
@@ -131,6 +136,8 @@ import type {
   FuturesEstimatedSettlementPriceItem,
   FuturesFeeItem,
   FuturesFinancialRecordItem,
+  FuturesFixPositionMarginChangeData,
+  FuturesFixPositionMarginChangeRecordItem,
   FuturesFundingRateData,
   FuturesHeartbeat,
   FuturesHistoricalFundingRatePage,
@@ -147,6 +154,7 @@ import type {
   FuturesKline,
   FuturesLastTradeTick,
   FuturesLeverPositionLimitItem,
+  FuturesLinearSwapOverviewAccountInfoItem,
   FuturesLiquidationOrderItem,
   FuturesMarketDepthTick,
   FuturesMarketOverviewBatchTick,
@@ -182,6 +190,7 @@ import type {
   FuturesTransferLimitItem,
   FuturesTriggerHisOrdersData,
   FuturesTriggerOpenOrdersData,
+  FuturesUnifiedAccountInfoItem,
 } from './types/response/futures.types.js';
 import { FuturesAPISuccessResponse } from './types/response/shared.types.js';
 
@@ -2032,10 +2041,75 @@ export class FuturesClient extends BaseRestClient {
   }
 
   /**
-   *
-   * Unified
-   *
+   * Unified Account
    */
 
-  
+  /**
+   * Query unified account assets
+   *
+   * Total assets of USDT-M unified account. Non-unified accounts still use cross/isolated separately. Read permission.
+   */
+  getUnifiedAccountInfo(
+    params?: FuturesUnifiedAccountInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesUnifiedAccountInfoItem[]>> {
+    return this.getPrivate('/linear-swap-api/v3/unified_account_info', params);
+  }
+
+  /**
+   * Deductible asset inquiry (linear swap overview account info)
+   *
+   * Total account assets of U-margin contract unified account. Read permission.
+   */
+  getLinearSwapOverviewAccountInfo(
+    params?: FuturesLinearSwapOverviewAccountInfoReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesLinearSwapOverviewAccountInfoItem[]>
+  > {
+    return this.getPrivate(
+      '/linear-swap-api/v3/linear_swap_overview_account_info',
+      params,
+    );
+  }
+
+  /**
+   * Set the U-standard contract fee deduction method
+   *
+   * When set currency balance is insufficient, other currencies (e.g. USDT) offset. Only one currency in deduction_currency. Trade permission.
+   */
+  setLinearSwapFeeSwitch(
+    params: FuturesLinearSwapFeeSwitchReq,
+  ): Promise<FuturesAPISuccessResponse<Record<string, never>>> {
+    return this.postPrivate('/linear-swap-api/v3/linear_swap_fee_switch', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query the margin adjustment records of isolated positions
+   *
+   * Margin increase/decrease records. Read permission.
+   */
+  getFixPositionMarginChangeRecord(
+    params: FuturesFixPositionMarginChangeRecordReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesFixPositionMarginChangeRecordItem[]>
+  > {
+    return this.getPrivate(
+      '/linear-swap-api/v3/fix_position_margin_change_record',
+      params,
+    );
+  }
+
+  /**
+   * Adjust margin for isolated positions
+   *
+   * Increase or decrease isolated margin. Query margin_available (increase) and withdraw_available (reduce) via getUnifiedAccountInfo. Trade permission.
+   */
+  setFixPositionMarginChange(
+    params: FuturesFixPositionMarginChangeReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesFixPositionMarginChangeData>> {
+    return this.postPrivate('/linear-swap-api/v3/fix_position_margin_change', {
+      body: params,
+    });
+  }
 }

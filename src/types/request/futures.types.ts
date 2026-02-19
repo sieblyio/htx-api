@@ -1417,3 +1417,59 @@ export interface FuturesCrossTrackHisOrdersReq {
   /** create_date or update_time; descending */
   sort_by?: 'create_date' | 'update_time' | 'created_at';
 }
+
+/**
+ * Unified Account
+ */
+
+/** Req for GET /linear-swap-api/v3/unified_account_info. Query unified account assets. USDT-M unified account. Read. */
+export interface FuturesUnifiedAccountInfoReq {
+  /** Contract code. Swap: BTC-USDT; Future: BTC-USDT-210625. Omit for all */
+  contract_code?: string;
+}
+
+/** Req for GET /linear-swap-api/v3/linear_swap_overview_account_info. Deductible asset inquiry. USDT-M unified account. Read. */
+export interface FuturesLinearSwapOverviewAccountInfoReq {
+  /** Empty: USDT; ALL: all currencies; HTX: HTX */
+  trade_partition?: string;
+}
+
+/** Req for POST /linear-swap-api/v3/linear_swap_fee_switch. Set U-standard contract fee deduction method. Trade. Only one currency in deduction_currency. */
+export interface FuturesLinearSwapFeeSwitchReq {
+  /** 1: enable deduction; 0: disable */
+  fee_option: 0 | 1;
+  /** Deduction currency (e.g. HTX, TRX). Only one currency. */
+  deduction_currency: string;
+}
+
+/** Req for POST /linear-swap-api/v3/fix_position_margin_change. Adjust margin for isolated positions. Trade. */
+export interface FuturesFixPositionMarginChangeReq {
+  /** Adjustment amount */
+  amount: number | string;
+  /** Currency (e.g. USDT) */
+  asset: string;
+  /** Contract code (e.g. BTC-USDT, ETH-USDT) */
+  contract_code: string;
+  /** 1: increase isolated margin; 2: reduce isolated margin */
+  type: 1 | 2;
+  /** 1: buy; 2: sell */
+  direction: 1 | 2;
+  /** Client order ID */
+  clientOrderId?: number | string;
+}
+
+/** Req for GET /linear-swap-api/v3/fix_position_margin_change_record. Query margin adjustment records of isolated positions. Read. */
+export interface FuturesFixPositionMarginChangeRecordReq {
+  /** Currency (e.g. USDT) */
+  asset: string;
+  /** Contract code (e.g. BTC-USDT, ETH-USDT) */
+  contract_code: string;
+  /** Query start time (ms). Window max 48h, within 90 days. [(end_time - 48h), end_time] */
+  start_time?: number;
+  /** Query end time (ms). [(present-90d), present] */
+  end_time?: number;
+  /** prev: forward query; next: backward query */
+  direct?: 'prev' | 'next';
+  /** prev: min query_id from last result; next: max query_id from last result */
+  from_id?: number;
+}

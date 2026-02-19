@@ -1687,3 +1687,83 @@ export interface FuturesTrackHisOrdersData {
   current_page: number;
   orders: FuturesTrackHisOrderItem[];
 }
+
+/** Cross swap item within unified_account_info */
+export interface FuturesUnifiedAccountCrossSwapItem {
+  symbol: string;
+  contract_code: string;
+  margin_mode: string;
+  margin_available: number | string;
+  cross_max_available?: number | string;
+  lever_rate: number | string;
+  contract_type: string;
+  business_type: string;
+}
+
+/** Cross futures item within unified_account_info */
+export interface FuturesUnifiedAccountCrossFutureItem {
+  symbol: string;
+  contract_code: string;
+  margin_mode: string;
+  margin_available: number | string;
+  cross_max_available?: number | string;
+  lever_rate: number | string;
+  contract_type: string;
+  business_type: string;
+}
+
+/** Isolated swap item within unified_account_info */
+export interface FuturesUnifiedAccountIsolatedSwapItem {
+  symbol: string;
+  contract_code: string;
+  margin_mode: string;
+  margin_available: number | string;
+  withdraw_available?: number | string;
+  lever_rate: number | string;
+  position_mode?: string;
+}
+
+/** Unified account info item from unified_account_info */
+export interface FuturesUnifiedAccountInfoItem {
+  margin_balance: number | string;
+  margin_static: number | string;
+  cross_profit_unreal: number | string;
+  cross_margin_static: number | string;
+  margin_asset: string;
+  margin_frozen: number | string;
+  withdraw_available: number | string;
+  cross_risk_rate: number | string | null;
+  cross_swap: FuturesUnifiedAccountCrossSwapItem[];
+  cross_future: FuturesUnifiedAccountCrossFutureItem[];
+  isolated_swap: FuturesUnifiedAccountIsolatedSwapItem[];
+  userId?: string | null;
+}
+
+/** Linear swap overview account info item from linear_swap_overview_account_info */
+export interface FuturesLinearSwapOverviewAccountInfoItem {
+  margin_asset: string;
+  margin_balance: number | string;
+  margin_available: number | string;
+}
+
+/** Fix position margin change record item from fix_position_margin_change_record */
+export interface FuturesFixPositionMarginChangeRecordItem {
+  query_id: number;
+  order_id: string;
+  amount: number | string;
+  asset: string;
+  symbol: string;
+  type: number;
+  direction: number;
+}
+
+/** Fix position margin change response data from fix_position_margin_change */
+export interface FuturesFixPositionMarginChangeData {
+  amount: number | string;
+  asset: string;
+  contract_code: string;
+  type: number;
+  direction: number;
+  order_id: string;
+  client_order_id: number | string | null;
+}
