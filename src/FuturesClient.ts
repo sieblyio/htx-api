@@ -6,12 +6,24 @@ import type {
   FuturesBatchOrderReq,
   FuturesCancelAfterReq,
   FuturesCancelAllOrderReq,
+  FuturesCancelAllTpslOrderReq,
+  FuturesCancelAllTrackOrderReq,
+  FuturesCancelAllTriggerOrderReq,
   FuturesCancelOrderReq,
+  FuturesCancelTpslOrderReq,
+  FuturesCancelTrackOrderReq,
+  FuturesCancelTriggerOrderReq,
   FuturesContractInfoReq,
   FuturesCrossAvailableLevelRateReq,
   FuturesCrossBatchOrderReq,
   FuturesCrossCancelAllOrderReq,
+  FuturesCrossCancelAllTpslOrderReq,
+  FuturesCrossCancelAllTrackOrderReq,
+  FuturesCrossCancelAllTriggerOrderReq,
   FuturesCrossCancelOrderReq,
+  FuturesCrossCancelTpslOrderReq,
+  FuturesCrossCancelTrackOrderReq,
+  FuturesCrossCancelTriggerOrderReq,
   FuturesCrossHistoryOrdersExactReq,
   FuturesCrossHistoryOrdersReq,
   FuturesCrossLadderMarginReq,
@@ -23,16 +35,27 @@ import type {
   FuturesCrossOrderDetailReq,
   FuturesCrossOrderInfoReq,
   FuturesCrossPlaceOrderReq,
+  FuturesCrossPlaceTrackOrderReq,
+  FuturesCrossPlaceTriggerOrderReq,
   FuturesCrossPositionInfoReq,
   FuturesCrossPositionLimitReq,
   FuturesCrossPositionSideReq,
+  FuturesCrossRelationTpslOrderReq,
   FuturesCrossSubAccountInfoListReq,
   FuturesCrossSubAccountInfoReq,
   FuturesCrossSubAccountListReq,
   FuturesCrossSubPositionInfoReq,
   FuturesCrossSwitchLeverRateReq,
+  FuturesCrossTpslHisOrdersReq,
+  FuturesCrossTpslOpenOrdersReq,
+  FuturesCrossTpslOrderReq,
+  FuturesCrossTrackHisOrdersReq,
+  FuturesCrossTrackOpenOrdersReq,
   FuturesCrossTradeStateReq,
   FuturesCrossTransferLimitReq,
+  FuturesCrossTransferStateReq,
+  FuturesCrossTriggerHisOrdersReq,
+  FuturesCrossTriggerOpenOrdersReq,
   FuturesFeeReq,
   FuturesFinancialRecordExactReq,
   FuturesFinancialRecordReq,
@@ -58,15 +81,25 @@ import type {
   FuturesOrderInfoReq,
   FuturesOrderLimitReq,
   FuturesPlaceOrderReq,
+  FuturesPlaceTrackOrderReq,
+  FuturesPlaceTriggerOrderReq,
   FuturesPositionLimitReq,
   FuturesPositionSideReq,
+  FuturesRelationTpslOrderReq,
   FuturesSettlementRecordsReq,
   FuturesSubAccountInfoListReq,
   FuturesSubAuthListReq,
   FuturesSwitchLeverRateReq,
   FuturesSwitchPositionModeReq,
+  FuturesTpslHisOrdersReq,
+  FuturesTpslOpenOrdersReq,
+  FuturesTpslOrderReq,
+  FuturesTrackHisOrdersReq,
+  FuturesTrackOpenOrdersReq,
   FuturesTransferInnerReq,
   FuturesTransferLimitReq,
+  FuturesTriggerHisOrdersReq,
+  FuturesTriggerOpenOrdersReq,
 } from './types/request/futures.types.js';
 import type {
   FuturesAccountTypeData,
@@ -93,6 +126,7 @@ import type {
   FuturesCrossSwitchLeverRateData,
   FuturesCrossTradeStateItem,
   FuturesCrossTransferLimitItem,
+  FuturesCrossTransferStateItem,
   FuturesEliteRatioData,
   FuturesEstimatedSettlementPriceItem,
   FuturesFeeItem,
@@ -131,6 +165,7 @@ import type {
   FuturesPositionLimitItem,
   FuturesPositionSideItem,
   FuturesPriceLimitItem,
+  FuturesRelationTpslOrderData,
   FuturesSettlementRecordsPage,
   FuturesSubAccountInfoListData,
   FuturesSubAuthData,
@@ -138,8 +173,15 @@ import type {
   FuturesSwitchLeverRateData,
   FuturesSwitchPositionModeItem,
   FuturesTimestamp,
+  FuturesTpslHisOrdersData,
+  FuturesTpslOpenOrdersData,
+  FuturesTpslOrderData,
+  FuturesTrackHisOrdersData,
+  FuturesTrackOpenOrdersData,
   FuturesTradeHistoryGroup,
   FuturesTransferLimitItem,
+  FuturesTriggerHisOrdersData,
+  FuturesTriggerOpenOrdersData,
 } from './types/response/futures.types.js';
 import { FuturesAPISuccessResponse } from './types/response/shared.types.js';
 
@@ -1144,6 +1186,20 @@ export class FuturesClient extends BaseRestClient {
   }
 
   /**
+   * [Cross] Query Information On Transfer State
+   *
+   * Transfer in/out and master-sub transfer access per margin account. Cross margin only. No signature. Read permission.
+   */
+  getCrossTransferState(
+    params?: FuturesCrossTransferStateReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossTransferStateItem[]>> {
+    return this.getPrivate(
+      '/linear-swap-api/v1/swap_cross_transfer_state',
+      params,
+    );
+  }
+
+  /**
    * Switch Position Mode (Isolated)
    *
    * Set single_side or dual_side for isolated margin account. Trade permission. Rate limit: 144/3s per UID.
@@ -1550,4 +1606,436 @@ export class FuturesClient extends BaseRestClient {
    * Strategy Order
    *
    */
+
+  /**
+   * [Isolated] Place Trigger Order
+   *
+   * Isolated margin only. Trade permission. Rate limit: 5/s.
+   */
+  placeTriggerOrder(
+    params: FuturesPlaceTriggerOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPlaceOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_trigger_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Place Trigger Order
+   *
+   * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s.
+   */
+  placeCrossTriggerOrder(
+    params: FuturesCrossPlaceTriggerOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPlaceOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_trigger_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Isolated] Cancel Trigger Order
+   *
+   * Isolated margin only. Trade permission. Rate limit: 5/s.
+   */
+  cancelTriggerOrder(
+    params: FuturesCancelTriggerOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_trigger_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Cancel Trigger Order
+   *
+   * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s.
+   */
+  cancelCrossTriggerOrder(
+    params: FuturesCrossCancelTriggerOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_trigger_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Isolated] Cancel All Trigger Orders
+   *
+   * Isolated margin only. Trade permission. Rate limit: 5/s. Can fill only one of direction and offset to filter.
+   */
+  cancelAllTriggerOrders(
+    params: FuturesCancelAllTriggerOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_trigger_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Cancel All Trigger Orders
+   *
+   * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s. Can fill only one of direction and offset to filter.
+   */
+  cancelAllCrossTriggerOrders(
+    params: FuturesCrossCancelAllTriggerOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_cross_trigger_cancelall',
+      {
+        body: params,
+      },
+    );
+  }
+
+  /**
+   * [Isolated] Query Trigger Order Open Orders
+   *
+   * Isolated margin only. Read permission. Rate limit: 5/s.
+   */
+  getTriggerOpenOrders(
+    params: FuturesTriggerOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTriggerOpenOrdersData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_trigger_openorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Query Trigger Order Open Orders
+   *
+   * Cross margin only. When both pair and contract_code filled, contract_code preferred; when none, all open orders. Read permission.
+   */
+  getCrossTriggerOpenOrders(
+    params: FuturesCrossTriggerOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTriggerOpenOrdersData>> {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_cross_trigger_openorders',
+      { body: params },
+    );
+  }
+
+  /**
+   * [Isolated] Query Trigger Order History
+   *
+   * Isolated margin only. Read permission. Default query completed orders (status 4, 5, 6).
+   */
+  getTriggerHisOrders(
+    params: FuturesTriggerHisOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTriggerHisOrdersData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_trigger_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Query Trigger Order History
+   *
+   * Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read permission.
+   */
+  getCrossTriggerHisOrders(
+    params: FuturesCrossTriggerHisOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTriggerHisOrdersData>> {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_cross_trigger_hisorders',
+      { body: params },
+    );
+  }
+
+  /**
+   * [Isolated] Set Take-profit and Stop-loss Order for an Existing Position
+   *
+   * Isolated margin only. At least one of tp_trigger_price and sl_trigger_price required. Trade permission. Rate limit: 5/s.
+   */
+  placeTpslOrder(
+    params: FuturesTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_tpsl_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Set Take-profit and Stop-loss Order for an Existing Position
+   *
+   * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. At least one of tp_trigger_price and sl_trigger_price required. Trade permission. Rate limit: 5/s.
+   */
+  placeCrossTpslOrder(
+    params: FuturesCrossTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_tpsl_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Isolated] Cancel a Take-profit and Stop-loss Order
+   *
+   * Isolated margin only. Trade permission. Rate limit: 5/s.
+   */
+  cancelTpslOrder(
+    params: FuturesCancelTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_tpsl_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Cancel a Take-profit and Stop-loss Order
+   *
+   * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s.
+   */
+  cancelCrossTpslOrder(
+    params: FuturesCrossCancelTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_tpsl_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Isolated] Cancel all Take-profit and Stop-loss Orders
+   *
+   * Isolated margin only. Trade permission. Rate limit: 5/s.
+   */
+  cancelAllTpslOrders(
+    params: FuturesCancelAllTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_tpsl_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Cancel all Take-profit and Stop-loss Orders
+   *
+   * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s.
+   */
+  cancelAllCrossTpslOrders(
+    params: FuturesCrossCancelAllTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_tpsl_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Isolated] Query Open Take-profit and Stop-loss Orders
+   *
+   * Isolated margin only. Read permission.
+   */
+  getTpslOpenOrders(
+    params: FuturesTpslOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslOpenOrdersData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_tpsl_openorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Query Open Take-profit and Stop-loss Orders
+   *
+   * Cross margin only. When both filled, contract_code preferred; when none, all data. Read permission.
+   */
+  getCrossTpslOpenOrders(
+    params: FuturesCrossTpslOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslOpenOrdersData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_tpsl_openorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Isolated] Query Take-profit and Stop-loss History Orders
+   *
+   * Isolated margin only. Read permission.
+   */
+  getTpslHisOrders(
+    params: FuturesTpslHisOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslHisOrdersData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_tpsl_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Query Take-profit and Stop-loss History Orders
+   *
+   * Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read permission.
+   */
+  getCrossTpslHisOrders(
+    params: FuturesCrossTpslHisOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslHisOrdersData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_tpsl_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Isolated] Query Info Of Take-profit and Stop-loss Order That Related To Position Opening Order
+   *
+   * Isolated margin only. Read permission.
+   */
+  getRelationTpslOrder(
+    params: FuturesRelationTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesRelationTpslOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_relation_tpsl_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Query Info Of Take-profit and Stop-loss Order That Related To Position Opening Order
+   *
+   * Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read permission.
+   */
+  getCrossRelationTpslOrder(
+    params: FuturesCrossRelationTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesRelationTpslOrderData>> {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_cross_relation_tpsl_order',
+      {
+        body: params,
+      },
+    );
+  }
+
+  /**
+   * [Isolated] Place a Trailing Order
+   *
+   * Isolated margin only. Trade permission. Rate limit: 5/s.
+   */
+  placeTrackOrder(
+    params: FuturesPlaceTrackOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPlaceOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_track_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Place a Trailing Order
+   *
+   * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s.
+   */
+  placeCrossTrackOrder(
+    params: FuturesCrossPlaceTrackOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPlaceOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_track_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Isolated] Cancel a Trailing Order
+   *
+   * Isolated margin only. Trade permission. Rate limit: 5/s.
+   */
+  cancelTrackOrder(
+    params: FuturesCancelTrackOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_track_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Cancel a Trailing Order
+   *
+   * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s.
+   */
+  cancelCrossTrackOrder(
+    params: FuturesCrossCancelTrackOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_track_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Isolated] Cancel All Trailing Orders
+   *
+   * Isolated margin only. Can fill only one of direction and offset to filter. Trade permission. Rate limit: 5/s.
+   */
+  cancelAllTrackOrders(
+    params: FuturesCancelAllTrackOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_track_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Cancel All Trailing Orders
+   *
+   * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Can fill only one of direction and offset to filter. Trade permission. Rate limit: 5/s.
+   */
+  cancelAllCrossTrackOrders(
+    params: FuturesCrossCancelAllTrackOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_track_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Isolated] Current unfilled trailing order acquisition
+   *
+   * Isolated margin only. Read permission.
+   */
+  getTrackOpenOrders(
+    params: FuturesTrackOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTrackOpenOrdersData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_track_openorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Current unfilled trailing order acquisition
+   *
+   * Cross margin only. When both filled, contract_code preferred; when none, all open orders. Read permission.
+   */
+  getCrossTrackOpenOrders(
+    params: FuturesCrossTrackOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTrackOpenOrdersData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_track_openorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Isolated] Get History Trailing Orders
+   *
+   * Isolated margin only. Read permission.
+   */
+  getTrackHisOrders(
+    params: FuturesTrackHisOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTrackHisOrdersData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_track_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * [Cross] Get History Trailing Orders
+   *
+   * Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read permission.
+   */
+  getCrossTrackHisOrders(
+    params: FuturesCrossTrackHisOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTrackHisOrdersData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_track_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   *
+   * Unified
+   *
+   */
+
+  
 }

@@ -1348,6 +1348,26 @@ export interface FuturesPositionSideItem {
   position_mode: 'single_side' | 'dual_side';
 }
 
+/** Transfer state item from swap_cross_transfer_state */
+export interface FuturesCrossTransferStateItem {
+  margin_mode: string;
+  margin_account: string;
+  /** 1: available, 0: unavailable */
+  transfer_in: number;
+  /** 1: available, 0: unavailable */
+  transfer_out: number;
+  /** 1: available, 0: unavailable */
+  master_transfer_sub: number;
+  /** 1: available, 0: unavailable */
+  sub_transfer_master: number;
+  master_transfer_sub_inner_in: number;
+  master_transfer_sub_inner_out: number;
+  sub_transfer_master_inner_in: number;
+  sub_transfer_master_inner_out: number;
+  transfer_inner_in: number;
+  transfer_inner_out: number;
+}
+
 /** Trade state item from swap_cross_trade_state */
 export interface FuturesCrossTradeStateItem {
   symbol: string;
@@ -1363,4 +1383,307 @@ export interface FuturesCrossTradeStateItem {
   close: number;
   /** 1=available, 0=unavailable */
   cancel: number;
+}
+
+/** Trigger order open order item from swap_trigger_openorders and swap_cross_trigger_openorders */
+export interface FuturesTriggerOrderOpenOrderItem {
+  symbol: string;
+  contract_code: string;
+  trigger_type: string;
+  volume: number;
+  order_type: number;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  order_source: string;
+  trigger_price: number | string;
+  order_price: number | string;
+  created_at: number;
+  order_price_type: string;
+  status: number;
+  margin_mode: string;
+  margin_account: string;
+  reduce_only: number;
+  /** Cross margin only */
+  contract_type?: string;
+  pair?: string;
+  business_type?: string;
+}
+
+/** Trigger open orders response data from swap_trigger_openorders and swap_cross_trigger_openorders */
+export interface FuturesTriggerOpenOrdersData {
+  total_page: number;
+  current_page: number;
+  total_size: number;
+  orders: FuturesTriggerOrderOpenOrderItem[];
+}
+
+/** Trigger order history item from swap_trigger_hisorders and swap_cross_trigger_hisorders */
+export interface FuturesTriggerOrderHisOrderItem {
+  symbol: string;
+  contract_code: string;
+  trigger_type: string;
+  volume: number;
+  order_type: number;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  relation_order_id: string;
+  order_price_type: string;
+  status: number;
+  order_source: string;
+  trigger_price: number | string;
+  triggered_price: number | string | null;
+  order_price: number | string;
+  created_at: number;
+  triggered_at: number | null;
+  order_insert_at: number;
+  canceled_at: number | null;
+  update_time: number;
+  fail_code: number | null;
+  fail_reason: string | null;
+  margin_mode: string;
+  margin_account: string;
+  reduce_only?: number;
+  /** Cross margin only */
+  contract_type?: string;
+  pair?: string;
+  business_type?: string;
+}
+
+/** Trigger history orders response data from swap_trigger_hisorders and swap_cross_trigger_hisorders */
+export interface FuturesTriggerHisOrdersData {
+  total_page: number;
+  current_page: number;
+  total_size: number;
+  orders: FuturesTriggerOrderHisOrderItem[];
+}
+
+/** TP/SL order result; when only TP or only SL is set, the other is empty */
+export interface FuturesTpslOrderResult {
+  order_id: number | string;
+  order_id_str: string;
+}
+
+/** TPSL order response data from swap_tpsl_order and swap_cross_tpsl_order. tp_order or sl_order empty when only the other is set */
+export interface FuturesTpslOrderData {
+  tp_order?: FuturesTpslOrderResult;
+  sl_order?: FuturesTpslOrderResult;
+}
+
+/** TPSL open order item from swap_tpsl_openorders and swap_cross_tpsl_openorders */
+export interface FuturesTpslOpenOrderItem {
+  symbol: string;
+  contract_code: string;
+  margin_mode: string;
+  margin_account: string;
+  volume: number;
+  order_type: number;
+  tpsl_order_type: string;
+  direction: string;
+  order_id: number | string;
+  order_id_str: string;
+  order_source: string;
+  trigger_type: string;
+  trigger_price: number | string;
+  price_protect?: boolean;
+  created_at: number;
+  order_price_type: string;
+  order_price: number | string;
+  status: number;
+  source_order_id: string | null;
+  relation_tpsl_order_id: string;
+  /** Cross margin only */
+  contract_type?: string;
+  pair?: string;
+  business_type?: string;
+}
+
+/** TPSL open orders response data from swap_tpsl_openorders and swap_cross_tpsl_openorders */
+export interface FuturesTpslOpenOrdersData {
+  total_page: number;
+  total_size: number;
+  current_page: number;
+  orders: FuturesTpslOpenOrderItem[];
+}
+
+/** TPSL history order item from swap_tpsl_hisorders and swap_cross_tpsl_hisorders */
+export interface FuturesTpslHisOrderItem {
+  symbol: string;
+  contract_code: string;
+  margin_mode: string;
+  margin_account: string;
+  volume: number;
+  order_type: number;
+  tpsl_order_type: string;
+  direction: string;
+  order_id: number | string;
+  order_id_str: string;
+  order_source: string;
+  trigger_type: string;
+  trigger_price: number | string;
+  price_protect?: boolean;
+  created_at: number;
+  order_price_type: string;
+  order_price: number | string;
+  status: number;
+  source_order_id: string | null;
+  relation_tpsl_order_id: string;
+  canceled_at: number | null;
+  fail_code: number | null;
+  fail_reason: string | null;
+  triggered_price: number | string | null;
+  relation_order_id: string;
+  update_time: number;
+  /** Cross margin only */
+  contract_type?: string;
+  pair?: string;
+  business_type?: string;
+}
+
+/** TPSL history orders response data from swap_tpsl_hisorders and swap_cross_tpsl_hisorders */
+export interface FuturesTpslHisOrdersData {
+  total_page: number;
+  total_size: number;
+  current_page: number;
+  orders: FuturesTpslHisOrderItem[];
+}
+
+/** TPSL order info item within relation_tpsl_order response */
+export interface FuturesRelationTpslOrderTpslInfoItem {
+  volume: number;
+  tpsl_order_type: string;
+  direction: string;
+  order_id: number | string;
+  order_id_str: string;
+  trigger_type: string;
+  trigger_price: number | string;
+  price_protect?: boolean;
+  created_at: number;
+  order_price: number | string;
+  order_price_type?: string;
+  status: number;
+  relation_tpsl_order_id: string;
+  canceled_at: number | null;
+  fail_code: number | null;
+  fail_reason: string | null;
+  triggered_price: number | string | null;
+  relation_order_id: string;
+}
+
+/** Relation TPSL order data from swap_relation_tpsl_order and swap_cross_relation_tpsl_order */
+export interface FuturesRelationTpslOrderData {
+  symbol: string;
+  contract_code: string;
+  margin_mode: string;
+  margin_account: string;
+  volume: number;
+  price: number | string;
+  order_price_type: string;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  client_order_id: number | string | null;
+  created_at: number;
+  trade_volume: number;
+  trade_turnover: number | string;
+  fee: number | string;
+  trade_avg_price: number | string;
+  margin_frozen: number | string;
+  profit: number | string;
+  status: number;
+  order_type: number;
+  order_source: string;
+  fee_asset: string;
+  canceled_at: number;
+  tpsl_order_info: FuturesRelationTpslOrderTpslInfoItem[];
+  /** Cross margin only */
+  contract_type?: string;
+  pair?: string;
+  business_type?: string;
+}
+
+/** Trailing order open order item from swap_track_openorders and swap_cross_track_openorders */
+export interface FuturesTrackOpenOrderItem {
+  symbol: string;
+  contract_code: string;
+  volume: number;
+  order_type: number;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  order_source: string;
+  created_at: number;
+  order_price_type: string;
+  status: number;
+  callback_rate: number | string;
+  active_price: number | string;
+  is_active: number;
+  margin_mode: string;
+  margin_account: string;
+  reduce_only: number;
+  /** Cross margin only */
+  contract_type?: string;
+  pair?: string;
+  business_type?: string;
+}
+
+/** Trailing open orders response data from swap_track_openorders and swap_cross_track_openorders */
+export interface FuturesTrackOpenOrdersData {
+  total_page: number;
+  total_size: number;
+  current_page: number;
+  orders: FuturesTrackOpenOrderItem[];
+}
+
+/** Trailing order history item from swap_track_hisorders and swap_cross_track_hisorders */
+export interface FuturesTrackHisOrderItem {
+  symbol: string;
+  contract_code: string;
+  volume: number;
+  order_type: number;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  order_source: string;
+  created_at: number;
+  update_time: number;
+  order_price_type: string;
+  status: number;
+  canceled_at: number | null;
+  fail_code: number | null;
+  fail_reason: string | null;
+  callback_rate: number | string;
+  active_price: number | string;
+  is_active: number;
+  market_limit_price: number | string | null;
+  formula_price: number | string | null;
+  real_volume: number | string;
+  triggered_price: number | string | null;
+  relation_order_id: string;
+  margin_mode: string;
+  margin_account: string;
+  reduce_only: number;
+  /** Cross margin only */
+  contract_type?: string;
+  pair?: string;
+  business_type?: string;
+}
+
+/** Trailing history orders response data from swap_track_hisorders and swap_cross_track_hisorders */
+export interface FuturesTrackHisOrdersData {
+  total_page: number;
+  total_size: number;
+  current_page: number;
+  orders: FuturesTrackHisOrderItem[];
 }

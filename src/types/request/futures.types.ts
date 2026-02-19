@@ -342,6 +342,12 @@ export interface FuturesCrossTransferLimitReq {
   margin_account?: string;
 }
 
+/** Req for GET /linear-swap-api/v1/swap_cross_transfer_state. [Cross] Query transfer state. Cross margin only. No signature. Read. */
+export interface FuturesCrossTransferStateReq {
+  /** Margin account (e.g. USDT). Omit for all. Only USDT supported. */
+  margin_account?: string;
+}
+
 /** Req for POST /linear-swap-api/v1/swap_position_limit. Isolated margin only. */
 export interface FuturesPositionLimitReq {
   /** Contract code (e.g. BTC-USDT). Omit for all */
@@ -920,4 +926,494 @@ export interface FuturesCrossTradeStateReq {
   contract_type?: string;
   /** futures, swap, all. Required for futures. Default swap */
   business_type?: 'futures' | 'swap' | 'all';
+}
+
+/**
+ * Swap Strategy Order Interface
+ */
+
+/** Req for POST /linear-swap-api/v1/swap_trigger_order. [Isolated] Place Trigger Order. Isolated margin only. Trade. 5/s. */
+export interface FuturesPlaceTriggerOrderReq {
+  /** Contract type (e.g. BTC-USDT) */
+  contract_code: string;
+  /** ge: Equal to or Greater than; le: Less than or Equal to */
+  trigger_type: 'ge' | 'le';
+  /** Trigger price */
+  trigger_price: number | string;
+  /** Order price (required when order_price_type is limit) */
+  order_price?: number | string;
+  /** limit (default), optimal_5, optimal_10, optimal_20 */
+  order_price_type?: 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  /** Volume (number of contracts) */
+  volume: number;
+  /** buy or sell */
+  direction: 'buy' | 'sell';
+  /** open, close, both. In hedge mode required; in one-way mode optional, must be both when filled */
+  offset?: 'open' | 'close' | 'both';
+  /** Leverage. Must match current position leverage when holding. High leverage = high risk */
+  lever_rate?: number;
+  /** 0: no, 1: yes. In hedge mode invalid; one-way: 0 when not filled. reduce_only=1 for open in one-way triggers error 1492 */
+  reduce_only?: 0 | 1;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_trigger_order. [Cross] Place Trigger Order. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade. 5/s. */
+export interface FuturesCrossPlaceTriggerOrderReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625. Preferred when all filled */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT). Use with contract_type */
+  pair?: string;
+  /** swap, this_week, next_week, quarter, next_quarter */
+  contract_type?: string;
+  /** 0: no, 1: yes. In hedge mode invalid; one-way: 0 when not filled. reduce_only=1 for open in one-way triggers error 1492 */
+  reduce_only?: 0 | 1;
+  /** ge: Equal to or Greater than; le: Less than or Equal to */
+  trigger_type: 'ge' | 'le';
+  /** Trigger price */
+  trigger_price: number | string;
+  /** Order price (required when order_price_type is limit) */
+  order_price?: number | string;
+  /** limit (default), optimal_5, optimal_10, optimal_20 */
+  order_price_type?: 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  /** Volume (number of contracts) */
+  volume: number;
+  /** buy or sell */
+  direction: 'buy' | 'sell';
+  /** open, close, both. In hedge mode required; in one-way mode optional, must be both when filled */
+  offset?: 'open' | 'close' | 'both';
+  /** Leverage. Long = short leverage. High leverage = high risk */
+  lever_rate?: number;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_trigger_cancelall. [Isolated] Cancel All Trigger Orders. Isolated margin only. Trade. 5/s. Can fill only one of direction and offset to filter. */
+export interface FuturesCancelAllTriggerOrderReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** Transaction direction; omit for all */
+  direction?: 'buy' | 'sell';
+  /** open, close; omit for all */
+  offset?: 'open' | 'close';
+}
+
+/** Req for POST /linear-swap-api/v1/swap_trigger_cancel. [Isolated] Cancel Trigger Order. Isolated margin only. Trade. 5/s. */
+export interface FuturesCancelTriggerOrderReq {
+  /** Contract code (e.g. BTC-USDT). Case-insensitive */
+  contract_code: string;
+  /** Order ID(s). Comma-separated, max 20 */
+  order_id: string;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_trigger_cancelall. [Cross] Cancel All Trigger Orders. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade. 5/s. Can fill only one of direction and offset to filter. */
+export interface FuturesCrossCancelAllTriggerOrderReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625. Preferred when all filled */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT). Use with contract_type */
+  pair?: string;
+  /** swap, this_week, next_week, quarter, next_quarter */
+  contract_type?: string;
+  /** Transaction direction; omit for all */
+  direction?: 'buy' | 'sell';
+  /** open, close; omit for all */
+  offset?: 'open' | 'close';
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_trigger_cancel. [Cross] Cancel Trigger Order. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade. 5/s. */
+export interface FuturesCrossCancelTriggerOrderReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625. Preferred when all filled */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT). Use with contract_type */
+  pair?: string;
+  /** swap, this_week, next_week, quarter, next_quarter */
+  contract_type?: string;
+  /** Order ID(s). Comma-separated, max 10 */
+  order_id: string;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_trigger_openorders. [Isolated] Query Trigger Order Open Orders. Isolated margin only. Read. 5/s. */
+export interface FuturesTriggerOpenOrdersReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** Page index. Default 1 */
+  page_index?: number;
+  /** Page size. Default 20, max 50 */
+  page_size?: number;
+  /** 0: all, 1: buy long, 2: sell short, 3: buy short, 4: sell long, 17: buy(one-way), 18: sell(one-way) */
+  trade_type?: 0 | 1 | 2 | 3 | 4 | 17 | 18;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_trigger_openorders. [Cross] Query Trigger Order Open Orders. Cross margin only. When both pair and contract_code filled, contract_code preferred; when none, all open orders. Read. */
+export interface FuturesCrossTriggerOpenOrdersReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625 */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT) */
+  pair?: string;
+  /** Page index. Default 1 */
+  page_index?: number;
+  /** Page size. Default 20, max 50 */
+  page_size?: number;
+  /** 0: all, 1: buy long, 2: sell short, 3: buy short, 4: sell long, 17: buy(one-way), 18: sell(one-way) */
+  trade_type?: 0 | 1 | 2 | 3 | 4 | 17 | 18;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_trigger_hisorders. [Isolated] Query Trigger Order History. Isolated margin only. Read. Default query completed (status 4,5,6). */
+export interface FuturesTriggerHisOrdersReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** 0: all, 1: open long, 2: close short, 3: open short, 4: close long, 17: buy(one-way), 18: sell(one-way) */
+  trade_type: 0 | 1 | 2 | 3 | 4 | 17 | 18;
+  /** Order status: 0: all, 4: submitted, 5: failed, 6: cancelled. Comma-separated allowed */
+  status: string;
+  /** Days. Positive integer, max 90; beyond 90 returns last 90 days */
+  create_date: number;
+  /** Page index. Default 1 */
+  page_index?: number;
+  /** Page size. Default 20, max 50 */
+  page_size?: number;
+  /** created_at (default) or update_time; descending */
+  sort_by?: 'created_at' | 'update_time';
+}
+
+/** Req for POST /linear-swap-api/v1/swap_tpsl_order. [Isolated] Set Take-profit and Stop-loss for existing position. Isolated margin only. At least one of tp_trigger_price and sl_trigger_price required. Trade. 5/s. */
+export interface FuturesTpslOrderReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** buy or sell */
+  direction: 'buy' | 'sell';
+  /** Volume (number of contracts) */
+  volume: number | string;
+  /** Take-profit trigger price */
+  tp_trigger_price?: number | string;
+  /** Take-profit order price (not required for optimal_5/10/20) */
+  tp_order_price?: number | string;
+  /** market (default), limit, optimal_5, optimal_10, optimal_20 */
+  tp_order_price_type?: 'market' | 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  /** Stop-loss trigger price */
+  sl_trigger_price?: number | string;
+  /** Stop-loss order price (not required for optimal_5/10/20) */
+  sl_order_price?: number | string;
+  /** market (default), limit, optimal_5, optimal_10, optimal_20 */
+  sl_order_price_type?: 'market' | 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  /** Price protection. Default false. Only when setting tp/sl */
+  price_protect?: boolean;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_tpsl_order. [Cross] Set Take-profit and Stop-loss for existing position. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. At least one of tp_trigger_price and sl_trigger_price required. Trade. 5/s. */
+export interface FuturesCrossTpslOrderReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625. Preferred when all filled */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT). Use with contract_type */
+  pair?: string;
+  /** swap, this_week, next_week, quarter, next_quarter */
+  contract_type?: string;
+  /** buy or sell */
+  direction: 'buy' | 'sell';
+  /** Volume (number of contracts) */
+  volume: number | string;
+  /** Take-profit trigger price */
+  tp_trigger_price?: number | string;
+  /** Take-profit order price (not required for optimal_5/10/20) */
+  tp_order_price?: number | string;
+  /** market (default), limit, optimal_5, optimal_10, optimal_20 */
+  tp_order_price_type?: 'market' | 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  /** Stop-loss trigger price */
+  sl_trigger_price?: number | string;
+  /** Stop-loss order price (not required for optimal_5/10/20) */
+  sl_order_price?: number | string;
+  /** market (default), limit, optimal_5, optimal_10, optimal_20 */
+  sl_order_price_type?: 'market' | 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  /** Price protection. Default false. Only when setting tp/sl */
+  price_protect?: boolean;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_tpsl_cancel. [Isolated] Cancel a Take-profit and Stop-loss Order. Isolated margin only. Trade. 5/s. */
+export interface FuturesCancelTpslOrderReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** Order ID(s). Comma-separated, max 10 */
+  order_id: string;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_tpsl_cancel. [Cross] Cancel a Take-profit and Stop-loss Order. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade. 5/s. */
+export interface FuturesCrossCancelTpslOrderReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625. Preferred when all filled */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT). Use with contract_type */
+  pair?: string;
+  /** swap, this_week, next_week, quarter, next_quarter */
+  contract_type?: string;
+  /** Order ID(s). Comma-separated, max 10 */
+  order_id: string;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_tpsl_cancelall. [Isolated] Cancel all Take-profit and Stop-loss Orders. Isolated margin only. Trade. 5/s. */
+export interface FuturesCancelAllTpslOrderReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** buy or sell; omit for all */
+  direction?: 'buy' | 'sell';
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_tpsl_cancelall. [Cross] Cancel all Take-profit and Stop-loss Orders. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade. 5/s. */
+export interface FuturesCrossCancelAllTpslOrderReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625. Preferred when all filled */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT). Use with contract_type */
+  pair?: string;
+  /** swap, this_week, next_week, quarter, next_quarter */
+  contract_type?: string;
+  /** buy or sell; omit for all */
+  direction?: 'buy' | 'sell';
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_trigger_hisorders. [Cross] Query Trigger Order History. Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read. */
+export interface FuturesCrossTriggerHisOrdersReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625 */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT) */
+  pair?: string;
+  /** 0: all, 1: open long, 2: close short, 3: open short, 4: close long, 17: buy(one-way), 18: sell(one-way) */
+  trade_type: 0 | 1 | 2 | 3 | 4 | 17 | 18;
+  /** Order status: 0: all, 4: submitted, 5: failed, 6: cancelled. Comma-separated allowed */
+  status: string;
+  /** Days. Positive integer, max 90 */
+  create_date: number;
+  /** Page index. Default 1 */
+  page_index?: number;
+  /** Page size. Default 20, max 50 */
+  page_size?: number;
+  /** created_at (default) or update_time; descending */
+  sort_by?: 'created_at' | 'update_time';
+}
+
+/** Req for POST /linear-swap-api/v1/swap_tpsl_openorders. [Isolated] Query Open Take-profit and Stop-loss Orders. Isolated margin only. Read. */
+export interface FuturesTpslOpenOrdersReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** Page index. Default 1 */
+  page_index?: number;
+  /** Page size. Default 20, max 50 */
+  page_size?: number;
+  /** 0: all, 3: buy short, 4: sell long */
+  trade_type?: 0 | 3 | 4;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_tpsl_openorders. [Cross] Query Open Take-profit and Stop-loss Orders. Cross margin only. When both filled, contract_code preferred; when none, all data. Read. */
+export interface FuturesCrossTpslOpenOrdersReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625 */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT) */
+  pair?: string;
+  /** Page index. Default 1 */
+  page_index?: number;
+  /** Page size. Default 20, max 50 */
+  page_size?: number;
+  /** 0: all, 3: buy short, 4: sell long */
+  trade_type?: 0 | 3 | 4;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_tpsl_hisorders. [Isolated] Query Take-profit and Stop-loss History Orders. Isolated margin only. Read. */
+export interface FuturesTpslHisOrdersReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** Status: 0: all, 4: submitted, 5: failed, 6: cancelled, 11: expired. Comma-separated allowed */
+  status: string;
+  /** Days. Positive integer, max 90 */
+  create_date: number;
+  /** Page index. Default 1 */
+  page_index?: number;
+  /** Page size. Default 20, max 50 */
+  page_size?: number;
+  /** created_at (default) or update_time; descending */
+  sort_by?: 'created_at' | 'update_time';
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_tpsl_hisorders. [Cross] Query Take-profit and Stop-loss History Orders. Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read. */
+export interface FuturesCrossTpslHisOrdersReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625 */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT) */
+  pair?: string;
+  /** Status: 0: all, 4: submitted, 5: failed, 6: cancelled, 11: expired. Comma-separated allowed */
+  status: string;
+  /** Days. Positive integer, max 90 */
+  create_date: number;
+  /** Page index. Default 1 */
+  page_index?: number;
+  /** Page size. Default 20, max 50 */
+  page_size?: number;
+  /** created_at (default) or update_time; descending */
+  sort_by?: 'created_at' | 'update_time';
+}
+
+/** Req for POST /linear-swap-api/v1/swap_relation_tpsl_order. [Isolated] Query TPSL orders related to position opening order. Isolated margin only. Read. */
+export interface FuturesRelationTpslOrderReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** Position opening order ID */
+  order_id: number | string;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_relation_tpsl_order. [Cross] Query TPSL orders related to position opening order. Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read. */
+export interface FuturesCrossRelationTpslOrderReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625 */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT) */
+  pair?: string;
+  /** Position opening order ID */
+  order_id: number | string;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_track_order. [Isolated] Place a Trailing Order. Isolated margin only. Trade. 5/s. */
+export interface FuturesPlaceTrackOrderReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** 0: no, 1: yes. In hedge mode invalid; one-way: 0 when not filled. reduce_only=1 for open triggers error 1492 */
+  reduce_only?: 0 | 1;
+  /** buy or sell */
+  direction: 'buy' | 'sell';
+  /** open, close, both. Hedge mode required; one-way optional, must be both when filled */
+  offset?: 'open' | 'close' | 'both';
+  /** Leverage. Required when open, optional when close */
+  lever_rate?: number;
+  /** Volume (contracts) */
+  volume: number | string;
+  /** Callback rate (e.g. 0.01 = 1%). Min 0.001 (0.1%) */
+  callback_rate: number | string;
+  /** Active price */
+  active_price: number | string;
+  /** optimal_5, optimal_10, optimal_20, formula_price */
+  order_price_type: 'optimal_5' | 'optimal_10' | 'optimal_20' | 'formula_price';
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_track_order. [Cross] Place a Trailing Order. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade. 5/s. */
+export interface FuturesCrossPlaceTrackOrderReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625. Preferred when all filled */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT). Use with contract_type */
+  pair?: string;
+  /** swap, this_week, next_week, quarter, next_quarter */
+  contract_type?: string;
+  /** 0: no, 1: yes. In hedge mode invalid; one-way: 0 when not filled. reduce_only=1 for open triggers error 1492 */
+  reduce_only?: 0 | 1;
+  /** buy or sell */
+  direction: 'buy' | 'sell';
+  /** open, close, both. Hedge mode required; one-way optional, must be both when filled */
+  offset?: 'open' | 'close' | 'both';
+  /** Leverage. Required when open, optional when close */
+  lever_rate?: number;
+  /** Volume (contracts) */
+  volume: number | string;
+  /** Callback rate (e.g. 0.01 = 1%). Min 0.001 (0.1%) */
+  callback_rate: number | string;
+  /** Active price */
+  active_price: number | string;
+  /** optimal_5, optimal_10, optimal_20, formula_price */
+  order_price_type: 'optimal_5' | 'optimal_10' | 'optimal_20' | 'formula_price';
+}
+
+/** Req for POST /linear-swap-api/v1/swap_track_cancel. [Isolated] Cancel a Trailing Order. Isolated margin only. Trade. 5/s. */
+export interface FuturesCancelTrackOrderReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** Trailing order ID(s). Comma-separated, max 10 */
+  order_id: string;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_track_cancel. [Cross] Cancel a Trailing Order. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade. 5/s. */
+export interface FuturesCrossCancelTrackOrderReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625. Preferred when all filled */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT). Use with contract_type */
+  pair?: string;
+  /** swap, this_week, next_week, quarter, next_quarter */
+  contract_type?: string;
+  /** Trailing order ID(s). Comma-separated, max 10 */
+  order_id: string;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_track_cancelall. [Isolated] Cancel All Trailing Orders. Isolated margin only. Can fill only one of direction and offset to filter. Trade. 5/s. */
+export interface FuturesCancelAllTrackOrderReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** buy or sell; omit for all */
+  direction?: 'buy' | 'sell';
+  /** open or close; omit for all */
+  offset?: 'open' | 'close';
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_track_cancelall. [Cross] Cancel All Trailing Orders. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Can fill only one of direction and offset to filter. Trade. 5/s. */
+export interface FuturesCrossCancelAllTrackOrderReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625. Preferred when all filled */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT). Use with contract_type */
+  pair?: string;
+  /** swap, this_week, next_week, quarter, next_quarter */
+  contract_type?: string;
+  /** buy or sell; omit for all */
+  direction?: 'buy' | 'sell';
+  /** open or close; omit for all */
+  offset?: 'open' | 'close';
+}
+
+/** Req for POST /linear-swap-api/v1/swap_track_openorders. [Isolated] Current unfilled trailing orders. Isolated margin only. Read. */
+export interface FuturesTrackOpenOrdersReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** 0: all, 1: buy long, 2: sell short, 3: buy short, 4: sell long, 17: buy(one-way), 18: sell(one-way) */
+  trade_type?: 0 | 1 | 2 | 3 | 4 | 17 | 18;
+  /** Page index. Default 1 */
+  page_index?: number;
+  /** Page size. Default 20, max 50 */
+  page_size?: number;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_track_openorders. [Cross] Current unfilled trailing orders. Cross margin only. When both filled, contract_code preferred; when none, all open orders. Read. */
+export interface FuturesCrossTrackOpenOrdersReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625 */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT) */
+  pair?: string;
+  /** 0: all, 1: buy long, 2: sell short, 3: buy short, 4: sell long, 17: buy(one-way), 18: sell(one-way) */
+  trade_type?: 0 | 1 | 2 | 3 | 4 | 17 | 18;
+  /** Page index. Default 1 */
+  page_index?: number;
+  /** Page size. Default 20, max 50 */
+  page_size?: number;
+}
+
+/** Req for POST /linear-swap-api/v1/swap_track_hisorders. [Isolated] Get History Trailing Orders. Isolated margin only. Read. */
+export interface FuturesTrackHisOrdersReq {
+  /** Contract code (e.g. BTC-USDT) */
+  contract_code: string;
+  /** Status: 0: all, 4: submitted success, 5: failed, 6: cancelled. Comma-separated allowed */
+  status: string;
+  /** 0: all, 1: buy long, 2: sell short, 3: buy short, 4: sell long, 17: buy(one-way), 18: sell(one-way) */
+  trade_type: 0 | 1 | 2 | 3 | 4 | 17 | 18;
+  /** Days. Positive integer, max 90 */
+  create_date: number;
+  /** Page index. Default 1 */
+  page_index?: number;
+  /** Page size. Default 20, max 50 */
+  page_size?: number;
+  /** create_date or update_time; descending */
+  sort_by?: 'create_date' | 'update_time' | 'created_at';
+}
+
+/** Req for POST /linear-swap-api/v1/swap_cross_track_hisorders. [Cross] Get History Trailing Orders. Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read. */
+export interface FuturesCrossTrackHisOrdersReq {
+  /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625 */
+  contract_code?: string;
+  /** Pair (e.g. BTC-USDT) */
+  pair?: string;
+  /** Status: 0: all, 4: submitted success, 5: failed, 6: cancelled. Comma-separated allowed */
+  status: string;
+  /** 0: all, 1: buy long, 2: sell short, 3: buy short, 4: sell long, 17: buy(one-way), 18: sell(one-way) */
+  trade_type: 0 | 1 | 2 | 3 | 4 | 17 | 18;
+  /** Days. Positive integer, max 90 */
+  create_date: number;
+  /** Page index. Default 1 */
+  page_index?: number;
+  /** Page size. Default 20, max 50 */
+  page_size?: number;
+  /** create_date or update_time; descending */
+  sort_by?: 'create_date' | 'update_time' | 'created_at';
 }
