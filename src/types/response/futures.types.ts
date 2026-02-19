@@ -2,12 +2,6 @@
  * Reference Data
  */
 
-/** Account type data from swap_unified_account_type and swap_switch_account_type. 1: Non-unified; 2: Unified */
-export interface FuturesAccountTypeData {
-  /** 1: Non-unified account (cross-margin and isolated-margin account); 2: Unified account */
-  account_type: 1 | 2;
-}
-
 /** Funding rate from swap_funding_rate and swap_batch_funding_rate */
 export interface FuturesFundingRateData {
   funding_rate: string;
@@ -1046,8 +1040,8 @@ export interface FuturesCancelAfterData {
   trigger_time: number;
 }
 
-/** Place order response data from swap_order and swap_cross_order. order_id may exceed JS safe integer - use order_id_str. */
-export interface FuturesPlaceOrderData {
+/** Submit order response data from swap_order and swap_cross_order. order_id may exceed JS safe integer - use order_id_str. */
+export interface FuturesSubmitOrderData {
   order_id: number | string;
   order_id_str: string;
   client_order_id?: number;
