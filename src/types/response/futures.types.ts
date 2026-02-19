@@ -1039,3 +1039,328 @@ export interface FuturesMasterSubTransferRecordData {
   total_size: number;
   transfer_record: FuturesMasterSubTransferRecordItem[];
 }
+
+/** Cancel-after response data from linear-cancel-after */
+export interface FuturesCancelAfterData {
+  current_time: number;
+  trigger_time: number;
+}
+
+/** Place order response data from swap_order and swap_cross_order. order_id may exceed JS safe integer - use order_id_str. */
+export interface FuturesPlaceOrderData {
+  order_id: number | string;
+  order_id_str: string;
+  client_order_id?: number;
+}
+
+/** Batch order error item from swap_batchorder and swap_cross_batchorder */
+export interface FuturesBatchOrderErrorItem {
+  index: number;
+  err_code: number;
+  err_msg: string;
+}
+
+/** Batch order success item from swap_batchorder and swap_cross_batchorder */
+export interface FuturesBatchOrderSuccessItem {
+  index: number;
+  order_id: number | string;
+  order_id_str: string;
+  client_order_id?: number;
+}
+
+/** Cancel order error item from swap_cancel and swap_cross_cancel */
+export interface FuturesCancelOrderErrorItem {
+  order_id: string;
+  err_code: number;
+  err_msg: string;
+}
+
+/** Cancel order response data from swap_cancel, swap_cross_cancel, swap_cancelall, swap_cross_cancelall */
+export interface FuturesCancelOrderData {
+  errors: FuturesCancelOrderErrorItem[];
+  /** Comma-separated list of successfully cancelled order_id or client_order_id */
+  successes: string;
+}
+
+/** Switch leverage response data from swap_switch_lever_rate */
+export interface FuturesSwitchLeverRateData {
+  contract_code: string;
+  margin_mode: string;
+  lever_rate: number;
+}
+
+/** Switch leverage response data from swap_cross_switch_lever_rate */
+export interface FuturesCrossSwitchLeverRateData {
+  contract_code: string;
+  margin_mode: string;
+  lever_rate: number;
+  contract_type: string;
+  pair: string;
+  business_type: string;
+}
+
+/** Batch order response data from swap_batchorder and swap_cross_batchorder */
+export interface FuturesBatchOrderData {
+  errors: FuturesBatchOrderErrorItem[];
+  success: FuturesBatchOrderSuccessItem[];
+}
+
+/** Position mode item from swap_switch_position_mode and swap_cross_switch_position_mode */
+export interface FuturesSwitchPositionModeItem {
+  margin_account: string;
+  position_mode: string;
+}
+
+/** Order info item from swap_order_info and swap_cross_order_info */
+export interface FuturesOrderInfoItem {
+  symbol: string;
+  contract_code: string;
+  volume: number;
+  price: number;
+  order_price_type: string;
+  order_type: number;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  client_order_id: number | string;
+  created_at: number;
+  canceled_at: number;
+  trade_volume: number;
+  trade_turnover: number;
+  fee: number;
+  trade_avg_price: number;
+  margin_frozen: number;
+  margin_asset: string;
+  profit: number;
+  status: number;
+  order_source: string;
+  fee_asset: string;
+  liquidation_type: string;
+  margin_mode: string;
+  margin_account: string;
+  is_tpsl: number;
+  real_profit: number;
+  reduce_only: number;
+  fee_amount: number;
+  fee_quote_amount: number;
+  self_match_prevent_new: string;
+  canceled_source?: string;
+  self_match_prevent?: number;
+  /** Cross margin only */
+  contract_type?: string;
+  pair?: string;
+  business_type?: string;
+}
+
+/** Order detail trade item (trades array element) from swap_order_detail and swap_cross_order_detail */
+export interface FuturesOrderDetailTradeItem {
+  id: string;
+  fee_asse?: string;
+  price?: string;
+  trade_id: number | string;
+  trade_price: number;
+  trade_volume: number;
+  trade_turnover: number;
+  trade_fee: number;
+  role: string;
+  created_at: number;
+  profit: number;
+  real_profit: number;
+  fee_asset?: string;
+}
+
+/** Order detail data from swap_order_detail and swap_cross_order_detail */
+export interface FuturesOrderDetailData {
+  symbol: string;
+  contract_code: string;
+  lever_rate: number;
+  direction: string;
+  offset: string;
+  volume: number;
+  price: number;
+  created_at: number;
+  canceled_at: number;
+  order_source: string;
+  order_price_type: string;
+  margin_frozen: number;
+  margin_asset: string;
+  profit: number;
+  order_id: number | string;
+  order_id_str: string;
+  client_order_id: number | string;
+  order_type: string;
+  status: number;
+  trade_volume: number;
+  trade_turnover: number;
+  trade_avg_price: number;
+  total_page: number;
+  current_page: number;
+  total_size: number;
+  instrument_price: number;
+  final_interest: number;
+  adjust_value: number;
+  fee_asset: string;
+  fee: number;
+  liquidation_type: string;
+  margin_mode: string;
+  margin_account: string;
+  is_tpsl: number;
+  real_profit: number;
+  reduce_only: number;
+  self_match_prevent_new: string;
+  trades: FuturesOrderDetailTradeItem[];
+  canceled_source?: string;
+  self_match_prevent?: number;
+  /** Cross margin only */
+  contract_type?: string;
+  pair?: string;
+  business_type?: string;
+}
+
+/** Open order item from swap_openorders and swap_cross_openorders */
+export interface FuturesOpenOrderItem {
+  symbol: string;
+  contract_code: string;
+  volume: number;
+  price: number;
+  order_price_type: string;
+  order_type: number;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  client_order_id: number | string | null;
+  created_at: number;
+  trade_volume: number;
+  trade_turnover: number;
+  fee: number;
+  trade_avg_price: number | null;
+  margin_frozen: number;
+  margin_asset: string;
+  profit: number;
+  status: number;
+  order_source: string;
+  fee_asset: string;
+  liquidation_type: string | null;
+  canceled_at: number | null;
+  margin_mode: string;
+  margin_account: string;
+  is_tpsl: number;
+  real_profit: number;
+  update_time: number;
+  reduce_only: number;
+  /** Cross margin only */
+  contract_type?: string;
+  pair?: string;
+  business_type?: string;
+}
+
+/** Open orders response data from swap_openorders and swap_cross_openorders */
+export interface FuturesOpenOrdersData {
+  orders: FuturesOpenOrderItem[];
+  total_page: number;
+  current_page: number;
+  total_size: number;
+  self_match_prevent_new: string;
+  self_match_prevent?: number;
+  canceled_source?: string;
+}
+
+/** History order item from swap_hisorders and swap_cross_hisorders */
+export interface FuturesHistoryOrderItem {
+  query_id: number;
+  order_id: number | string;
+  order_id_str: string;
+  symbol: string;
+  contract_code: string;
+  margin_mode: string;
+  margin_account: string;
+  lever_rate: number;
+  direction: string;
+  offset: string;
+  volume: number;
+  price: number;
+  create_date: number;
+  update_time: number;
+  order_source: string;
+  order_price_type: string | number;
+  order_type: number;
+  margin_asset: string;
+  margin_frozen: number;
+  profit: number;
+  real_profit: number;
+  trade_volume: number;
+  trade_turnover: number;
+  fee: number;
+  trade_avg_price: number;
+  status: number;
+  fee_asset: string;
+  liquidation_type: string;
+  is_tpsl: number;
+  reduce_only: number;
+  self_match_prevent_new: string;
+  canceled_source?: string;
+  self_match_prevent?: number;
+  /** Cross margin only */
+  contract_type?: string;
+  pair?: string;
+  business_type?: string;
+}
+
+/** History match result item from swap_matchresults, swap_cross_matchresults, swap_matchresults_exact, swap_cross_matchresults_exact */
+export interface FuturesMatchResultItem {
+  id: string;
+  query_id: number;
+  match_id: number;
+  order_id: number;
+  order_id_str: string;
+  symbol: string;
+  contract_code: string;
+  margin_mode: string;
+  margin_account: string;
+  direction: string;
+  offset: string;
+  trade_volume: number;
+  trade_price: number;
+  trade_turnover: number;
+  create_date: number;
+  offset_profitloss: number;
+  real_profit: number;
+  trade_fee: number;
+  role: string;
+  fee_asset: string;
+  order_source: string;
+  reduce_only: number;
+  /** Cross / swap_matchresults; absent in swap_matchresults_exact isolated */
+  contract_type?: string;
+  pair?: string;
+  business_type?: string;
+  /** Exact endpoints only */
+  ht_price?: string;
+}
+
+/** Position mode item from swap_position_side and swap_cross_position_side */
+export interface FuturesPositionSideItem {
+  margin_account: string;
+  position_mode: 'single_side' | 'dual_side';
+}
+
+/** Trade state item from swap_cross_trade_state */
+export interface FuturesCrossTradeStateItem {
+  symbol: string;
+  contract_code: string;
+  margin_mode: string;
+  margin_account: string;
+  contract_type: string;
+  pair: string;
+  business_type: string;
+  /** 1=available, 0=unavailable */
+  open: number;
+  /** 1=available, 0=unavailable */
+  close: number;
+  /** 1=available, 0=unavailable */
+  cancel: number;
+}

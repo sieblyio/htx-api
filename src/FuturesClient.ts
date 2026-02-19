@@ -3,37 +3,68 @@ import { REST_CLIENT_TYPE_ENUM, RestClientType } from './lib/requestUtils.js';
 import type {
   FuturesAvailableLevelRateReq,
   FuturesBasisReq,
+  FuturesBatchOrderReq,
+  FuturesCancelAfterReq,
+  FuturesCancelAllOrderReq,
+  FuturesCancelOrderReq,
   FuturesContractInfoReq,
   FuturesCrossAvailableLevelRateReq,
+  FuturesCrossBatchOrderReq,
+  FuturesCrossCancelAllOrderReq,
+  FuturesCrossCancelOrderReq,
+  FuturesCrossHistoryOrdersExactReq,
+  FuturesCrossHistoryOrdersReq,
   FuturesCrossLadderMarginReq,
   FuturesCrossLeverPositionLimitReq,
+  FuturesCrossLightningClosePositionReq,
+  FuturesCrossMatchResultsExactReq,
+  FuturesCrossMatchResultsReq,
+  FuturesCrossOpenOrdersReq,
+  FuturesCrossOrderDetailReq,
+  FuturesCrossOrderInfoReq,
+  FuturesCrossPlaceOrderReq,
   FuturesCrossPositionInfoReq,
   FuturesCrossPositionLimitReq,
+  FuturesCrossPositionSideReq,
   FuturesCrossSubAccountInfoListReq,
   FuturesCrossSubAccountInfoReq,
   FuturesCrossSubAccountListReq,
   FuturesCrossSubPositionInfoReq,
+  FuturesCrossSwitchLeverRateReq,
+  FuturesCrossTradeStateReq,
   FuturesCrossTransferLimitReq,
   FuturesFeeReq,
   FuturesFinancialRecordExactReq,
   FuturesFinancialRecordReq,
   FuturesHistoricalFundingRateReq,
   FuturesHistoricalOpenInterestReq,
+  FuturesHistoryOrdersExactReq,
+  FuturesHistoryOrdersReq,
   FuturesInsuranceFundHistoryReq,
   FuturesIsolatedSubAccountInfoReq,
   FuturesIsolatedSubAccountListReq,
   FuturesIsolatedSubPositionInfoReq,
   FuturesKlineReq,
   FuturesLeverPositionLimitReq,
+  FuturesLightningClosePositionReq,
   FuturesLiquidationOrdersReq,
   FuturesMarkPriceKlineReq,
   FuturesMasterSubTransferRecordReq,
   FuturesMasterSubTransferReq,
+  FuturesMatchResultsExactReq,
+  FuturesMatchResultsReq,
+  FuturesOpenOrdersReq,
+  FuturesOrderDetailReq,
+  FuturesOrderInfoReq,
   FuturesOrderLimitReq,
+  FuturesPlaceOrderReq,
   FuturesPositionLimitReq,
+  FuturesPositionSideReq,
   FuturesSettlementRecordsReq,
   FuturesSubAccountInfoListReq,
   FuturesSubAuthListReq,
+  FuturesSwitchLeverRateReq,
+  FuturesSwitchPositionModeReq,
   FuturesTransferInnerReq,
   FuturesTransferLimitReq,
 } from './types/request/futures.types.js';
@@ -44,7 +75,10 @@ import type {
   FuturesAvailableLevelRateItem,
   FuturesBalanceValuationItem,
   FuturesBasisDataItem,
+  FuturesBatchOrderData,
   FuturesBboTick,
+  FuturesCancelAfterData,
+  FuturesCancelOrderData,
   FuturesContractElementsItem,
   FuturesContractInfoItem,
   FuturesCrossAccountInfoItem,
@@ -56,6 +90,8 @@ import type {
   FuturesCrossSubAccountInfoItem,
   FuturesCrossSubAccountInfoListData,
   FuturesCrossSubAccountListEntry,
+  FuturesCrossSwitchLeverRateData,
+  FuturesCrossTradeStateItem,
   FuturesCrossTransferLimitItem,
   FuturesEliteRatioData,
   FuturesEstimatedSettlementPriceItem,
@@ -65,6 +101,7 @@ import type {
   FuturesHeartbeat,
   FuturesHistoricalFundingRatePage,
   FuturesHistoricalOpenInterestData,
+  FuturesHistoryOrderItem,
   FuturesIndexConstituentsData,
   FuturesIndexPriceItem,
   FuturesInsuranceFundHistoryItem,
@@ -83,15 +120,23 @@ import type {
   FuturesMarkPriceKlineItem,
   FuturesMasterSubTransferData,
   FuturesMasterSubTransferRecordData,
+  FuturesMatchResultItem,
   FuturesOpenInterestItem,
+  FuturesOpenOrdersData,
+  FuturesOrderDetailData,
+  FuturesOrderInfoItem,
   FuturesOrderLimitData,
+  FuturesPlaceOrderData,
   FuturesPositionInfoItem,
   FuturesPositionLimitItem,
+  FuturesPositionSideItem,
   FuturesPriceLimitItem,
   FuturesSettlementRecordsPage,
   FuturesSubAccountInfoListData,
   FuturesSubAuthData,
   FuturesSubAuthListData,
+  FuturesSwitchLeverRateData,
+  FuturesSwitchPositionModeItem,
   FuturesTimestamp,
   FuturesTradeHistoryGroup,
   FuturesTransferLimitItem,
@@ -764,9 +809,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getIsolatedSubAccountList(
     params?: FuturesIsolatedSubAccountListReq,
-  ): Promise<
-    FuturesAPISuccessResponse<FuturesIsolatedSubAccountListEntry[], 'data'>
-  > {
+  ): Promise<FuturesAPISuccessResponse<FuturesIsolatedSubAccountListEntry[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_sub_account_list', {
       body: params ?? {},
     });
@@ -779,9 +822,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCrossSubAccountList(
     params?: FuturesCrossSubAccountListReq,
-  ): Promise<
-    FuturesAPISuccessResponse<FuturesCrossSubAccountListEntry[], 'data'>
-  > {
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossSubAccountListEntry[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_sub_account_list', {
       body: params ?? {},
     });
@@ -794,7 +835,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getSubAccountInfoList(
     params?: FuturesSubAccountInfoListReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesSubAccountInfoListData, 'data'>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesSubAccountInfoListData>> {
     return this.postPrivate('/linear-swap-api/v1/swap_sub_account_info_list', {
       body: params ?? {},
     });
@@ -807,9 +848,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCrossSubAccountInfoList(
     params?: FuturesCrossSubAccountInfoListReq,
-  ): Promise<
-    FuturesAPISuccessResponse<FuturesCrossSubAccountInfoListData, 'data'>
-  > {
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossSubAccountInfoListData>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_sub_account_info_list',
       { body: params ?? {} },
@@ -929,7 +968,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getOrderLimit(
     params: FuturesOrderLimitReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesOrderLimitData, 'data'>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderLimitData>> {
     return this.postPrivate('/linear-swap-api/v1/swap_order_limit', {
       body: params,
     });
@@ -1036,7 +1075,7 @@ export class FuturesClient extends BaseRestClient {
    */
   masterSubTransfer(
     params: FuturesMasterSubTransferReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferData, 'data'>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferData>> {
     return this.postPrivate('/linear-swap-api/v1/swap_master_sub_transfer', {
       body: params,
     });
@@ -1049,9 +1088,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getMasterSubTransferRecord(
     params: FuturesMasterSubTransferRecordReq,
-  ): Promise<
-    FuturesAPISuccessResponse<FuturesMasterSubTransferRecordData, 'data'>
-  > {
+  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferRecordData>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_master_sub_transfer_record',
       {
@@ -1067,9 +1104,450 @@ export class FuturesClient extends BaseRestClient {
    */
   transferInner(
     params: FuturesTransferInnerReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferData, 'data'>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferData>> {
     return this.postPrivate('/linear-swap-api/v1/swap_transfer_inner', {
       body: params,
     });
   }
+
+  /**
+   *
+   * Trade
+   *
+   */
+
+  /**
+   * Automatic Order Cancellation (Dead Man's Switch)
+   *
+   * Enable/disable auto-cancel of all pending orders after countdown. If not refreshed before timer ends, all pending orders are cancelled. Trade permission.
+   */
+  setCancelAfter(
+    params: FuturesCancelAfterReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelAfterData>> {
+    return this.postPrivate('/linear-swap-api/v1/linear-cancel-after', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Trade State (Cross)
+   *
+   * Open/close/cancel access per contract. Cross margin only. No signature. Rate limit: 144/3s per UID.
+   */
+  getCrossTradeState(
+    params?: FuturesCrossTradeStateReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossTradeStateItem[]>> {
+    return this.getPrivate(
+      '/linear-swap-api/v1/swap_cross_trade_state',
+      params,
+    );
+  }
+
+  /**
+   * Switch Position Mode (Isolated)
+   *
+   * Set single_side or dual_side for isolated margin account. Trade permission. Rate limit: 144/3s per UID.
+   */
+  switchPositionMode(
+    params: FuturesSwitchPositionModeReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSwitchPositionModeItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_switch_position_mode', {
+      body: params,
+    });
+  }
+
+  /**
+   * Switch Position Mode (Cross)
+   *
+   * Set single_side or dual_side for cross margin account. Trade permission. Rate limit: 144/3s per UID.
+   */
+  switchCrossPositionMode(
+    params: FuturesSwitchPositionModeReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSwitchPositionModeItem[]>> {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_cross_switch_position_mode',
+      {
+        body: params,
+      },
+    );
+  }
+
+  /**
+   * Place Order (Isolated)
+   *
+   * Place a single order. Isolated margin only. Trade permission. Rate limit: 144/3s per UID.
+   */
+  placeOrder(
+    params: FuturesPlaceOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPlaceOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * Place Order (Cross)
+   *
+   * Place a single order. Cross margin only. One of contract_code or (pair+contract_type) required. Trade permission. Rate limit: 144/3s per UID.
+   */
+  placeCrossOrder(
+    params: FuturesCrossPlaceOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPlaceOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * Place Batch Orders (Isolated)
+   *
+   * Place up to 10 orders. Isolated margin only. Trade permission. Rate limit: 144/3s per UID.
+   */
+  placeBatchOrder(
+    params: FuturesBatchOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesBatchOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_batchorder', {
+      body: params,
+    });
+  }
+
+  /**
+   * Place Batch Orders (Cross)
+   *
+   * Place up to 25 orders. Cross margin only. Trade permission. Rate limit: 144/3s per UID.
+   */
+  placeCrossBatchOrder(
+    params: FuturesCrossBatchOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesBatchOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_batchorder', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel Order (Isolated)
+   *
+   * Cancel order(s) by order_id or client_order_id. Max 25 per request. Isolated margin only. Trade permission. Rate limit: 144/3s per UID.
+   */
+  cancelOrder(
+    params: FuturesCancelOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel Order (Cross)
+   *
+   * Cancel order(s) by order_id or client_order_id. Max 25 per request. Cross margin only. Trade permission. Rate limit: 144/3s per UID.
+   */
+  cancelCrossOrder(
+    params: FuturesCrossCancelOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel All Orders (Isolated)
+   *
+   * Cancel all orders for contract. Optional direction/offset filter. Isolated margin only. Trade permission. Rate limit: 144/3s per UID.
+   */
+  cancelAllOrders(
+    params: FuturesCancelAllOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel All Orders (Cross)
+   *
+   * Cancel all orders for contract. Optional direction/offset filter. Cross margin only. Trade permission. Rate limit: 144/3s per UID.
+   */
+  cancelCrossAllOrders(
+    params: FuturesCrossCancelAllOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * Switch Leverage (Isolated)
+   *
+   * Set leverage for isolated margin contract. Requires no open orders. Trade permission. Rate limit: 1 per 3s.
+   */
+  switchLeverRate(
+    params: FuturesSwitchLeverRateReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSwitchLeverRateData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_switch_lever_rate', {
+      body: params,
+    });
+  }
+
+  /**
+   * Switch Leverage (Cross)
+   *
+   * Set leverage for cross margin contract. Requires no open orders. Trade permission. Rate limit: 1 per 3s.
+   */
+  switchCrossLeverRate(
+    params: FuturesCrossSwitchLeverRateReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossSwitchLeverRateData>> {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_cross_switch_lever_rate',
+      {
+        body: params,
+      },
+    );
+  }
+
+  /**
+   * Get Order Information (Isolated)
+   *
+   * Query order(s) by order_id or client_order_id. Max 50 per request. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
+   */
+  getOrderInfo(
+    params: FuturesOrderInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderInfoItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_order_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Order Information (Cross)
+   *
+   * Query order(s) by order_id or client_order_id. Max 50 per request. Cross margin only. One of contract_code or pair required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getCrossOrderInfo(
+    params: FuturesCrossOrderInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderInfoItem[]>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_order_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Order Detail (Isolated)
+   *
+   * Order details with trade breakdown. Paginated. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
+   */
+  getOrderDetail(
+    params: FuturesOrderDetailReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderDetailData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_order_detail', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Order Detail (Cross)
+   *
+   * Order details with trade breakdown. Paginated. Cross margin only. One of contract_code or pair required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getCrossOrderDetail(
+    params: FuturesCrossOrderDetailReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderDetailData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_order_detail', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Open Orders (Isolated)
+   *
+   * Current unfilled orders. Paginated. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
+   */
+  getOpenOrders(
+    params?: FuturesOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOpenOrdersData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_openorders', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Get Open Orders (Cross)
+   *
+   * Current unfilled orders. Paginated. Cross margin only. Omit all for all contracts. Read permission. Rate limit: 144/3s per UID.
+   */
+  getCrossOpenOrders(
+    params?: FuturesCrossOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOpenOrdersData>> {
+    return this.postPrivate('/linear-swap-api/v1/swap_cross_openorders', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Get History Orders (Isolated)
+   *
+   * Historical orders. Time-window query, 48h max. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
+   */
+  getHistoryOrders(
+    params: FuturesHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrderItem[]>> {
+    return this.postPrivate('/linear-swap-api/v3/swap_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get History Orders (Cross)
+   *
+   * Historical orders. Time-window query, 48h max. Cross margin only. One of contract or pair required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getCrossHistoryOrders(
+    params: FuturesCrossHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrderItem[]>> {
+    return this.postPrivate('/linear-swap-api/v3/swap_cross_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get History Orders via Multiple Fields (Isolated)
+   *
+   * History orders with price_type filter. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
+   */
+  getHistoryOrdersExact(
+    params: FuturesHistoryOrdersExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrderItem[]>> {
+    return this.postPrivate('/linear-swap-api/v3/swap_hisorders_exact', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get History Orders via Multiple Fields (Cross)
+   *
+   * History orders with price_type filter. Cross margin only. Read permission. Rate limit: 144/3s per UID.
+   */
+  getCrossHistoryOrdersExact(
+    params: FuturesCrossHistoryOrdersExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrderItem[]>> {
+    return this.postPrivate('/linear-swap-api/v3/swap_cross_hisorders_exact', {
+      body: params,
+    });
+  }
+
+  /**
+   * Acquire History Match Results (Isolated)
+   *
+   * Matched trades history. One of contract or pair required. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
+   */
+  getMatchResults(
+    params: FuturesMatchResultsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMatchResultItem[]>> {
+    return this.postPrivate('/linear-swap-api/v3/swap_matchresults', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get History Match Results (Cross)
+   *
+   * Matched trades history. One of contract or pair required. Cross margin only. Read permission. Rate limit: 144/3s per UID.
+   */
+  getCrossMatchResults(
+    params: FuturesCrossMatchResultsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMatchResultItem[]>> {
+    return this.postPrivate('/linear-swap-api/v3/swap_cross_matchresults', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get History Match Results via Multiple Fields (Isolated)
+   *
+   * Matched trades history. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
+   */
+  getMatchResultsExact(
+    params: FuturesMatchResultsExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMatchResultItem[]>> {
+    return this.postPrivate('/linear-swap-api/v3/swap_matchresults_exact', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get History Match Results via Multiple Fields (Cross)
+   *
+   * Matched trades history. Cross margin only. Read permission. Rate limit: 144/3s per UID.
+   */
+  getCrossMatchResultsExact(
+    params: FuturesCrossMatchResultsExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMatchResultItem[]>> {
+    return this.postPrivate(
+      '/linear-swap-api/v3/swap_cross_matchresults_exact',
+      {
+        body: params,
+      },
+    );
+  }
+
+  /**
+   * Place Lightning Close Order (Isolated)
+   *
+   * Closes position using optimal 30-grade rival price; unfilled converts to limit. Isolated only. Trade permission. Rate limit: 144/3s per UID.
+   */
+  placeLightningClosePosition(
+    params: FuturesLightningClosePositionReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPlaceOrderData>> {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_lightning_close_position',
+      {
+        body: params,
+      },
+    );
+  }
+
+  /**
+   * Place Lightning Close Position (Cross)
+   *
+   * Closes position using optimal 30-grade rival price. One of (pair+contract_type) or contract_code required. Cross only. Trade permission. Rate limit: 144/3s per UID.
+   */
+  placeCrossLightningClosePosition(
+    params: FuturesCrossLightningClosePositionReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPlaceOrderData>> {
+    return this.postPrivate(
+      '/linear-swap-api/v1/swap_cross_lightning_close_position',
+      { body: params },
+    );
+  }
+
+  /**
+   * Query Position Mode (Isolated)
+   *
+   * Returns position mode (single_side/dual_side) per margin account. Isolated. Read permission. Rate limit: 144/3s per UID.
+   */
+  getPositionSide(
+    params: FuturesPositionSideReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPositionSideItem[]>> {
+    return this.getPrivate('/linear-swap-api/v1/swap_position_side', params);
+  }
+
+  /**
+   * Query Position Mode (Cross)
+   *
+   * Returns position mode (single_side/dual_side) per margin account. Cross. Read permission. Rate limit: 144/3s per UID.
+   */
+  getCrossPositionSide(
+    params: FuturesCrossPositionSideReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPositionSideItem[]>> {
+    return this.getPrivate(
+      '/linear-swap-api/v1/swap_cross_position_side',
+      params,
+    );
+  }
+
+  /**
+   *
+   * Strategy Order
+   *
+   */
 }
