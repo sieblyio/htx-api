@@ -1,9 +1,9 @@
 /**
- * Reference Data
+ * Reference
  */
 
 /** Funding rate from swap_funding_rate and swap_batch_funding_rate */
-export interface FuturesFundingRateData {
+export interface FuturesFundingRate {
   funding_rate: string;
   contract_code: string;
   symbol: string;
@@ -16,7 +16,7 @@ export interface FuturesFundingRateData {
 }
 
 /** Historical funding rate item from swap_historical_funding_rate */
-export interface FuturesHistoricalFundingRateItem {
+export interface FuturesHistoricalFundingRate {
   avg_premium_index: string;
   funding_rate: string;
   funding_time: string;
@@ -32,11 +32,11 @@ export interface FuturesHistoricalFundingRatePage {
   total_page: number;
   current_page: number;
   total_size: number;
-  data: FuturesHistoricalFundingRateItem[];
+  data: FuturesHistoricalFundingRate[];
 }
 
 /** Liquidation order item from swap_liquidation_orders */
-export interface FuturesLiquidationOrderItem {
+export interface FuturesLiquidationOrder {
   query_id: number;
   symbol: string;
   contract_code: string;
@@ -52,7 +52,7 @@ export interface FuturesLiquidationOrderItem {
 }
 
 /** Settlement record item from swap_settlement_records */
-export interface FuturesSettlementRecordItem {
+export interface FuturesSettlementRecord {
   symbol: string;
   contract_code: string;
   settlement_time: number;
@@ -68,11 +68,11 @@ export interface FuturesSettlementRecordsPage {
   total_page: number;
   current_page: number;
   total_size: number;
-  settlement_record: FuturesSettlementRecordItem[];
+  settlement_record: FuturesSettlementRecord[];
 }
 
 /** Elite ratio list item (account and position) */
-export interface FuturesEliteRatioListItem {
+export interface FuturesEliteRatioList {
   buy_ratio: number;
   sell_ratio: number;
   /** Account ratio only */
@@ -81,16 +81,16 @@ export interface FuturesEliteRatioListItem {
 }
 
 /** Elite account/position ratio data from swap_elite_account_ratio and swap_elite_position_ratio */
-export interface FuturesEliteRatioData {
+export interface FuturesEliteRatio {
   symbol: string;
   contract_code: string;
   pair: string;
   business_type: string;
-  list: FuturesEliteRatioListItem[];
+  list: FuturesEliteRatioList[];
 }
 
 /** System status item from swap_api_state. 1=available, 0=unavailable */
-export interface FuturesApiStateItem {
+export interface FuturesApiState {
   symbol: string;
   contract_code: string;
   margin_mode: string;
@@ -119,25 +119,25 @@ export interface FuturesLadderMarginTier {
 }
 
 /** Cross ladder margin list item */
-export interface FuturesCrossLadderMarginListItem {
+export interface FuturesCrossLadderMarginList {
   lever_rate: number;
   ladders: FuturesLadderMarginTier[];
 }
 
 /** Cross tiered margin item from swap_cross_ladder_margin. Isolated (swap_ladder_margin) omits business_type, pair, contract_type. */
-export interface FuturesCrossLadderMarginItem {
+export interface FuturesCrossLadderMargin {
   margin_account: string;
   symbol: string;
   contract_code: string;
   margin_mode: string;
-  list: FuturesCrossLadderMarginListItem[];
+  list: FuturesCrossLadderMarginList[];
   business_type?: string;
   pair?: string;
   contract_type?: string;
 }
 
 /** Estimated settlement price item from swap_estimated_settlement_price. Empty around settlement/delivery. */
-export interface FuturesEstimatedSettlementPriceItem {
+export interface FuturesEstimatedSettlementPrice {
   contract_code: string;
   estimated_settlement_price: number | null;
   settlement_type: string;
@@ -155,37 +155,37 @@ export interface FuturesAdjustFactorLadder {
 }
 
 /** Adjust factor list item */
-export interface FuturesAdjustFactorListItem {
+export interface FuturesAdjustFactorList {
   lever_rate: number;
   ladders: FuturesAdjustFactorLadder[];
 }
 
 /** Tiered adjustment factor item from swap_adjustfactor and swap_cross_adjustfactor. Cross includes business_type, pair, contract_type. */
-export interface FuturesAdjustFactorItem {
+export interface FuturesAdjustFactor {
   symbol: string;
   contract_code: string;
   margin_mode: string;
-  list: FuturesAdjustFactorListItem[];
+  list: FuturesAdjustFactorList[];
   business_type?: string;
   pair?: string;
   contract_type?: string;
 }
 
 /** Risk reserve balance from /v1/insurance_fund_info */
-export interface FuturesInsuranceFundInfoData {
+export interface FuturesInsuranceFundInfo {
   insurance_fund: string;
   quote_currency?: string;
 }
 
 /** Historical risk reserve item from /v1/insurance_fund_history */
-export interface FuturesInsuranceFundHistoryItem {
+export interface FuturesInsuranceFundHistory {
   query_id: number;
   insurance_fund: string;
   date: string;
 }
 
 /** Price limit item from swap_price_limit */
-export interface FuturesPriceLimitItem {
+export interface FuturesPriceLimit {
   symbol: string;
   contract_code: string;
   high_limit: number;
@@ -196,7 +196,7 @@ export interface FuturesPriceLimitItem {
 }
 
 /** Open interest item from swap_open_interest */
-export interface FuturesOpenInterestItem {
+export interface FuturesOpenInterest {
   symbol: string;
   volume: number;
   amount: number;
@@ -211,7 +211,7 @@ export interface FuturesOpenInterestItem {
 }
 
 /** Contract info item from swap_contract_info */
-export interface FuturesContractInfoItem {
+export interface FuturesContractInfo {
   symbol: string;
   contract_code: string;
   contract_size: number;
@@ -233,7 +233,7 @@ export interface FuturesContractInfoItem {
 }
 
 /** Index price item from swap_index */
-export interface FuturesIndexPriceItem {
+export interface FuturesIndexPrice {
   contract_code: string;
   index_price: number;
   index_ts: number;
@@ -248,7 +248,7 @@ export interface FuturesIndexConstituentComponent {
 }
 
 /** Index constituents data from swap_contract_constituents. data is object, not array. */
-export interface FuturesIndexConstituentsData {
+export interface FuturesIndexConstituents {
   contract_code: string;
   index_price: string;
   ts: number;
@@ -256,13 +256,13 @@ export interface FuturesIndexConstituentsData {
 }
 
 /** Contract elements price tick / value item */
-export interface FuturesContractElementsPriceItem {
+export interface FuturesContractElementsPrice {
   business_type: number;
   price: string;
 }
 
 /** Contract elements order limit item */
-export interface FuturesContractElementsOrderLimitItem {
+export interface FuturesContractElementsOrderLimit {
   instrument_type: number;
   open: string;
   close: string;
@@ -271,7 +271,7 @@ export interface FuturesContractElementsOrderLimitItem {
 }
 
 /** Contract elements contract info item */
-export interface FuturesContractElementsContractInfoItem {
+export interface FuturesContractElementsContractInfo {
   contract_code: string;
   instrument_type: number;
   settlement_date: string;
@@ -299,7 +299,7 @@ export interface FuturesHeartbeat {
 }
 
 /** Contract elements item from swap_query_elements */
-export interface FuturesContractElementsItem {
+export interface FuturesContractElements {
   contract_code: string;
   mode_type: number;
   swap_delivery_type: number;
@@ -321,9 +321,9 @@ export interface FuturesContractElementsItem {
   short_position_limit?: string;
   price_tick?: string;
   instrument_value?: string;
-  price_ticks?: FuturesContractElementsPriceItem[];
-  instrument_values?: FuturesContractElementsPriceItem[];
-  order_limits?: FuturesContractElementsOrderLimitItem[];
+  price_ticks?: FuturesContractElementsPrice[];
+  instrument_values?: FuturesContractElementsPrice[];
+  order_limits?: FuturesContractElementsOrderLimit[];
   normal_limits?: Array<{
     instrument_type: number;
     open: string;
@@ -335,11 +335,11 @@ export interface FuturesContractElementsItem {
     open: string;
     close: string;
   }>;
-  contract_infos?: FuturesContractElementsContractInfoItem[];
+  contract_infos?: FuturesContractElementsContractInfo[];
 }
 
 /**
- * Market Data
+ * Market
  */
 
 /** Market depth tick from /linear-swap-ex/market/depth. Payload in "tick". */
@@ -377,7 +377,7 @@ export interface FuturesKline {
 }
 
 /** Basis data item from /index/market/history/linear_swap_basis */
-export interface FuturesBasisDataItem {
+export interface FuturesBasis {
   id: number;
   contract_price: string;
   index_price: string;
@@ -386,7 +386,7 @@ export interface FuturesBasisDataItem {
 }
 
 /** Mark price kline item. Also used for premium index and estimated rate kline. Price/vol fields as strings. */
-export interface FuturesMarkPriceKlineItem {
+export interface FuturesMarkPriceKline {
   id: number;
   vol: string;
   count: string;
@@ -415,7 +415,7 @@ export interface FuturesMarketOverviewTick {
 }
 
 /** Trade item from last trade and history trade */
-export interface FuturesTradeItem {
+export interface FuturesTrade {
   id: number;
   price: string | number;
   amount: string | number;
@@ -431,18 +431,18 @@ export interface FuturesTradeItem {
 export interface FuturesLastTradeTick {
   id: number;
   ts: number;
-  data: FuturesTradeItem[];
+  data: FuturesTrade[];
 }
 
 /** Trade history group from /linear-swap-ex/market/history/trade. Each group has trades by timestamp. */
 export interface FuturesTradeHistoryGroup {
   id: number;
   ts: number;
-  data: FuturesTradeItem[];
+  data: FuturesTrade[];
 }
 
 /** Open interest tick item from swap_his_open_interest */
-export interface FuturesOpenInterestTickItem {
+export interface FuturesOpenInterestTick {
   volume: number;
   amount_type: number;
   ts: number;
@@ -450,13 +450,13 @@ export interface FuturesOpenInterestTickItem {
 }
 
 /** Open interest data from swap_his_open_interest. data is object with tick array. */
-export interface FuturesHistoricalOpenInterestData {
+export interface FuturesHistoricalOpenInterest {
   symbol: string;
   contract_code: string;
   contract_type: string;
   pair: string;
   business_type: string;
-  tick: FuturesOpenInterestTickItem[];
+  tick: FuturesOpenInterestTick[];
 }
 
 /** Batch market overview tick from /v2/linear-swap-ex/market/detail/batch_merged */
@@ -482,13 +482,13 @@ export interface FuturesMarketOverviewBatchTick {
  */
 
 /** Asset valuation item from swap_balance_valuation */
-export interface FuturesBalanceValuationItem {
+export interface FuturesBalanceValuation {
   valuation_asset: string;
   balance: string;
 }
 
 /** Isolated account info item from swap_account_info */
-export interface FuturesIsolatedAccountInfoItem {
+export interface FuturesIsolatedAccountInfo {
   symbol: string;
   contract_code: string;
   margin_asset: string;
@@ -530,7 +530,7 @@ export interface FuturesCrossAccountContractDetail {
 }
 
 /** Cross account info item from swap_cross_account_info */
-export interface FuturesCrossAccountInfoItem {
+export interface FuturesCrossAccountInfo {
   margin_mode: string;
   margin_account: string;
   margin_asset: string;
@@ -550,7 +550,7 @@ export interface FuturesCrossAccountInfoItem {
 }
 
 /** Position info item from swap_position_info and swap_cross_position_info */
-export interface FuturesPositionInfoItem {
+export interface FuturesPositionInfo {
   symbol: string;
   contract_code: string;
   volume: number;
@@ -579,7 +579,7 @@ export interface FuturesPositionInfoItem {
 }
 
 /** Nested position in swap_account_position_info */
-export interface FuturesAccountPositionItem {
+export interface FuturesAccountPosition {
   symbol: string;
   contract_code: string;
   volume: number;
@@ -604,7 +604,7 @@ export interface FuturesAccountPositionItem {
 }
 
 /** Account + positions from swap_account_position_info (Isolated) */
-export interface FuturesIsolatedAccountPositionItem {
+export interface FuturesIsolatedAccountPosition {
   symbol: string;
   contract_code: string;
   margin_asset: string;
@@ -625,12 +625,12 @@ export interface FuturesIsolatedAccountPositionItem {
   margin_mode: string;
   margin_account: string;
   position_mode: string;
-  positions: FuturesAccountPositionItem[];
+  positions: FuturesAccountPosition[];
   adl_risk_percent?: string | number;
 }
 
 /** Cross position item (in positions array) from swap_cross_account_position_info */
-export interface FuturesCrossAccountPositionItem {
+export interface FuturesCrossAccountPosition {
   symbol: string;
   contract_code: string;
   volume: number;
@@ -657,7 +657,7 @@ export interface FuturesCrossAccountPositionItem {
 }
 
 /** Cross account + positions from swap_cross_account_position_info. data is object, not array. */
-export interface FuturesCrossAccountPositionData {
+export interface FuturesCrossAccountPosition {
   margin_mode: string;
   margin_account: string;
   margin_asset: string;
@@ -675,7 +675,7 @@ export interface FuturesCrossAccountPositionData {
   position_mode: string;
   contract_detail: FuturesCrossAccountContractDetail[];
   futures_contract_detail: FuturesCrossAccountContractDetail[];
-  positions: FuturesCrossAccountPositionItem[];
+  positions: FuturesCrossAccountPosition[];
   adl_risk_percent?: string | number;
 }
 
@@ -687,26 +687,26 @@ export interface FuturesSubAuthError {
 }
 
 /** Sub auth response data from swap_sub_auth */
-export interface FuturesSubAuthData {
+export interface FuturesSubAuth {
   errors: FuturesSubAuthError[];
   successes: string;
 }
 
 /** Sub auth success item from swap_sub_auth_list */
-export interface FuturesSubAuthSuccessItem {
+export interface FuturesSubAuthSuccess {
   query_id?: number;
   sub_uid: string;
   sub_auth: number | string;
 }
 
 /** Sub auth list response data */
-export interface FuturesSubAuthListData {
+export interface FuturesSubAuthList {
   errors: FuturesSubAuthError[];
-  successes: FuturesSubAuthSuccessItem[];
+  successes: FuturesSubAuthSuccess[];
 }
 
 /** Isolated sub-account list item from swap_sub_account_list */
-export interface FuturesIsolatedSubAccountListItem {
+export interface FuturesIsolatedSubAccountList {
   symbol: string;
   contract_code: string;
   margin_asset: string;
@@ -722,11 +722,11 @@ export interface FuturesIsolatedSubAccountListItem {
 /** Isolated sub-account entry from swap_sub_account_list (data array element) */
 export interface FuturesIsolatedSubAccountListEntry {
   sub_uid: number;
-  list: FuturesIsolatedSubAccountListItem[];
+  list: FuturesIsolatedSubAccountList[];
 }
 
 /** Cross sub-account list item from swap_cross_sub_account_list */
-export interface FuturesCrossSubAccountListItem {
+export interface FuturesCrossSubAccountList {
   margin_mode: string;
   margin_account: string;
   margin_asset: string;
@@ -753,12 +753,12 @@ export interface FuturesCrossSubAccountAssetMultiSub {
 export interface FuturesCrossSubAccountListEntry {
   query_id: number;
   sub_uid: number;
-  list: FuturesCrossSubAccountListItem[];
+  list: FuturesCrossSubAccountList[];
   asset_multi_sub: FuturesCrossSubAccountAssetMultiSub | null;
 }
 
 /** Account info item from swap_sub_account_info_list */
-export interface FuturesSubAccountInfoAccountItem {
+export interface FuturesSubAccountInfoAccount {
   symbol: string;
   contract_code: string;
   margin_account: string;
@@ -770,21 +770,21 @@ export interface FuturesSubAccountInfoAccountItem {
 }
 
 /** Sub-account item in swap_sub_account_info_list data.sub_list */
-export interface FuturesSubAccountInfoSubItem {
+export interface FuturesSubAccountInfoSub {
   sub_uid: number;
-  account_info_list: FuturesSubAccountInfoAccountItem[];
+  account_info_list: FuturesSubAccountInfoAccount[];
 }
 
-/** Data object from swap_sub_account_info_list */
-export interface FuturesSubAccountInfoListData {
+/**  object from swap_sub_account_info_list */
+export interface FuturesSubAccountInfoList {
   total_page: number;
   current_page: number;
   total_size: number;
-  sub_list: FuturesSubAccountInfoSubItem[];
+  sub_list: FuturesSubAccountInfoSub[];
 }
 
 /** Cross sub-account info list: account_info_list item (no symbol/contract_code) */
-export interface FuturesCrossSubAccountInfoListAccountItem {
+export interface FuturesCrossSubAccountInfoListAccount {
   margin_mode: string;
   margin_account: string;
   margin_asset: string;
@@ -794,28 +794,28 @@ export interface FuturesCrossSubAccountInfoListAccountItem {
 }
 
 /** Cross sub-account info list: sub_list item */
-export interface FuturesCrossSubAccountInfoListSubItem {
+export interface FuturesCrossSubAccountInfoListSub {
   sub_uid: number;
-  account_info_list: FuturesCrossSubAccountInfoListAccountItem[];
+  account_info_list: FuturesCrossSubAccountInfoListAccount[];
 }
 
 /** Cross sub-account info list: unite_sub_list item */
-export interface FuturesCrossSubAccountInfoListUniteItem {
+export interface FuturesCrossSubAccountInfoListUnite {
   sub_uid: number;
   asset_multi_sub: FuturesCrossSubAccountAssetMultiSub;
 }
 
-/** Data object from swap_cross_sub_account_info_list */
-export interface FuturesCrossSubAccountInfoListData {
+/**  object from swap_cross_sub_account_info_list */
+export interface FuturesCrossSubAccountInfoList {
   total_page: number;
   current_page: number;
   total_size: number;
-  sub_list: FuturesCrossSubAccountInfoListSubItem[];
-  unite_sub_list: FuturesCrossSubAccountInfoListUniteItem[];
+  sub_list: FuturesCrossSubAccountInfoListSub[];
+  unite_sub_list: FuturesCrossSubAccountInfoListUnite[];
 }
 
 /** Isolated sub-account info item from swap_sub_account_info (single sub, data array element) */
-export interface FuturesIsolatedSubAccountInfoItem {
+export interface FuturesIsolatedSubAccountInfo {
   symbol: string;
   contract_code: string;
   margin_asset: string;
@@ -839,7 +839,7 @@ export interface FuturesIsolatedSubAccountInfoItem {
 }
 
 /** Cross sub-account info item from swap_cross_sub_account_info (single sub, data array element) */
-export interface FuturesCrossSubAccountInfoItem {
+export interface FuturesCrossSubAccountInfo {
   margin_mode: string;
   margin_account: string;
   margin_asset: string;
@@ -860,7 +860,7 @@ export interface FuturesCrossSubAccountInfoItem {
 }
 
 /** Financial record item from swap_financial_record and swap_financial_record_exact */
-export interface FuturesFinancialRecordItem {
+export interface FuturesFinancialRecord {
   query_id: number;
   id: number;
   ts: number;
@@ -873,14 +873,14 @@ export interface FuturesFinancialRecordItem {
 }
 
 /** Available leverage item from swap_available_level_rate */
-export interface FuturesAvailableLevelRateItem {
+export interface FuturesAvailableLevelRate {
   contract_code: string;
   margin_mode: string;
   available_level_rate: string;
 }
 
 /** Available leverage item from swap_cross_available_level_rate */
-export interface FuturesCrossAvailableLevelRateItem {
+export interface FuturesCrossAvailableLevelRate {
   contract_code: string;
   margin_mode: string;
   available_level_rate: string;
@@ -890,7 +890,7 @@ export interface FuturesCrossAvailableLevelRateItem {
 }
 
 /** Order limit list item from swap_order_limit */
-export interface FuturesOrderLimitListItem {
+export interface FuturesOrderLimitList {
   symbol: string;
   contract_code: string;
   open_limit: number;
@@ -900,14 +900,14 @@ export interface FuturesOrderLimitListItem {
   business_type: string;
 }
 
-/** Data from swap_order_limit */
-export interface FuturesOrderLimitData {
+/**  from swap_order_limit */
+export interface FuturesOrderLimit {
   order_price_type: string;
-  list: FuturesOrderLimitListItem[];
+  list: FuturesOrderLimitList[];
 }
 
 /** Fee item from swap_fee */
-export interface FuturesFeeItem {
+export interface FuturesFee {
   symbol: string;
   contract_code: string;
   open_maker_fee: string;
@@ -922,7 +922,7 @@ export interface FuturesFeeItem {
 }
 
 /** Transfer limit item from swap_transfer_limit */
-export interface FuturesTransferLimitItem {
+export interface FuturesTransferLimit {
   symbol: string;
   contract_code: string;
   margin_mode: string;
@@ -938,7 +938,7 @@ export interface FuturesTransferLimitItem {
 }
 
 /** Transfer limit item from swap_cross_transfer_limit */
-export interface FuturesCrossTransferLimitItem {
+export interface FuturesCrossTransferLimit {
   margin_mode: string;
   margin_account: string;
   transfer_in_max_each: number;
@@ -952,7 +952,7 @@ export interface FuturesCrossTransferLimitItem {
 }
 
 /** Position limit item from swap_position_limit */
-export interface FuturesPositionLimitItem {
+export interface FuturesPositionLimit {
   symbol: string;
   contract_code: string;
   margin_mode: string;
@@ -965,7 +965,7 @@ export interface FuturesPositionLimitItem {
 }
 
 /** Position limit item from swap_cross_position_limit */
-export interface FuturesCrossPositionLimitItem {
+export interface FuturesCrossPositionLimit {
   symbol: string;
   contract_code: string;
   margin_mode: string;
@@ -981,39 +981,39 @@ export interface FuturesCrossPositionLimitItem {
 }
 
 /** Lever position limit list item (per leverage) from swap_lever_position_limit */
-export interface FuturesLeverPositionLimitListItem {
+export interface FuturesLeverPositionLimitList {
   lever_rate: number;
   buy_limit_value: number;
   sell_limit_value: number;
 }
 
 /** Lever position limit item from swap_lever_position_limit */
-export interface FuturesLeverPositionLimitItem {
+export interface FuturesLeverPositionLimit {
   symbol: string;
   contract_code: string;
   margin_mode: string;
-  list: FuturesLeverPositionLimitListItem[];
+  list: FuturesLeverPositionLimitList[];
 }
 
 /** Lever position limit item from swap_cross_lever_position_limit */
-export interface FuturesCrossLeverPositionLimitItem {
+export interface FuturesCrossLeverPositionLimit {
   symbol: string;
   contract_code: string;
   margin_mode: string;
   business_type: string;
   contract_type: string;
   pair: string;
-  list: FuturesLeverPositionLimitListItem[];
+  list: FuturesLeverPositionLimitList[];
 }
 
 /** Master-sub transfer response data from swap_master_sub_transfer */
-export interface FuturesMasterSubTransferData {
+export interface FuturesMasterSubTransfer {
   order_id: string;
   client_order_id?: number;
 }
 
 /** Transfer record item from swap_master_sub_transfer_record */
-export interface FuturesMasterSubTransferRecordItem {
+export interface FuturesMasterSubTransferRecord {
   id: number;
   ts: number;
   asset: string;
@@ -1026,36 +1026,36 @@ export interface FuturesMasterSubTransferRecordItem {
   amount: number | string;
 }
 
-/** Data from swap_master_sub_transfer_record */
-export interface FuturesMasterSubTransferRecordData {
+/**  from swap_master_sub_transfer_record */
+export interface FuturesMasterSubTransferRecord {
   total_page: number;
   current_page: number;
   total_size: number;
-  transfer_record: FuturesMasterSubTransferRecordItem[];
+  transfer_record: FuturesMasterSubTransferRecord[];
 }
 
 /** Cancel-after response data from linear-cancel-after */
-export interface FuturesCancelAfterData {
+export interface FuturesCancelAfter {
   current_time: number;
   trigger_time: number;
 }
 
 /** Submit order response data from swap_order and swap_cross_order. order_id may exceed JS safe integer - use order_id_str. */
-export interface FuturesSubmitOrderData {
+export interface FuturesSubmitOrder {
   order_id: number | string;
   order_id_str: string;
   client_order_id?: number;
 }
 
 /** Batch order error item from swap_batchorder and swap_cross_batchorder */
-export interface FuturesBatchOrderErrorItem {
+export interface FuturesBatchOrderError {
   index: number;
   err_code: number;
   err_msg: string;
 }
 
 /** Batch order success item from swap_batchorder and swap_cross_batchorder */
-export interface FuturesBatchOrderSuccessItem {
+export interface FuturesBatchOrderSuccess {
   index: number;
   order_id: number | string;
   order_id_str: string;
@@ -1063,28 +1063,28 @@ export interface FuturesBatchOrderSuccessItem {
 }
 
 /** Cancel order error item from swap_cancel and swap_cross_cancel */
-export interface FuturesCancelOrderErrorItem {
+export interface FuturesCancelOrderError {
   order_id: string;
   err_code: number;
   err_msg: string;
 }
 
 /** Cancel order response data from swap_cancel, swap_cross_cancel, swap_cancelall, swap_cross_cancelall */
-export interface FuturesCancelOrderData {
-  errors: FuturesCancelOrderErrorItem[];
+export interface FuturesCancelOrder {
+  errors: FuturesCancelOrderError[];
   /** Comma-separated list of successfully cancelled order_id or client_order_id */
   successes: string;
 }
 
 /** Switch leverage response data from swap_switch_lever_rate */
-export interface FuturesSwitchLeverRateData {
+export interface FuturesSwitchLeverRate {
   contract_code: string;
   margin_mode: string;
   lever_rate: number;
 }
 
 /** Switch leverage response data from swap_cross_switch_lever_rate */
-export interface FuturesCrossSwitchLeverRateData {
+export interface FuturesCrossSwitchLeverRate {
   contract_code: string;
   margin_mode: string;
   lever_rate: number;
@@ -1094,19 +1094,19 @@ export interface FuturesCrossSwitchLeverRateData {
 }
 
 /** Batch order response data from swap_batchorder and swap_cross_batchorder */
-export interface FuturesBatchOrderData {
-  errors: FuturesBatchOrderErrorItem[];
-  success: FuturesBatchOrderSuccessItem[];
+export interface FuturesBatchOrder {
+  errors: FuturesBatchOrderError[];
+  success: FuturesBatchOrderSuccess[];
 }
 
 /** Position mode item from swap_switch_position_mode and swap_cross_switch_position_mode */
-export interface FuturesSwitchPositionModeItem {
+export interface FuturesSwitchPositionMode {
   margin_account: string;
   position_mode: string;
 }
 
 /** Order info item from swap_order_info and swap_cross_order_info */
-export interface FuturesOrderInfoItem {
+export interface FuturesOrderInfo {
   symbol: string;
   contract_code: string;
   volume: number;
@@ -1149,7 +1149,7 @@ export interface FuturesOrderInfoItem {
 }
 
 /** Order detail trade item (trades array element) from swap_order_detail and swap_cross_order_detail */
-export interface FuturesOrderDetailTradeItem {
+export interface FuturesOrderDetailTrade {
   id: string;
   fee_asse?: string;
   price?: string;
@@ -1166,7 +1166,7 @@ export interface FuturesOrderDetailTradeItem {
 }
 
 /** Order detail data from swap_order_detail and swap_cross_order_detail */
-export interface FuturesOrderDetailData {
+export interface FuturesOrderDetail {
   symbol: string;
   contract_code: string;
   lever_rate: number;
@@ -1204,7 +1204,7 @@ export interface FuturesOrderDetailData {
   real_profit: number;
   reduce_only: number;
   self_match_prevent_new: string;
-  trades: FuturesOrderDetailTradeItem[];
+  trades: FuturesOrderDetailTrade[];
   canceled_source?: string;
   self_match_prevent?: number;
   /** Cross margin only */
@@ -1214,7 +1214,7 @@ export interface FuturesOrderDetailData {
 }
 
 /** Open order item from swap_openorders and swap_cross_openorders */
-export interface FuturesOpenOrderItem {
+export interface FuturesOpenOrder {
   symbol: string;
   contract_code: string;
   volume: number;
@@ -1253,8 +1253,8 @@ export interface FuturesOpenOrderItem {
 }
 
 /** Open orders response data from swap_openorders and swap_cross_openorders */
-export interface FuturesOpenOrdersData {
-  orders: FuturesOpenOrderItem[];
+export interface FuturesOpenOrders {
+  orders: FuturesOpenOrder[];
   total_page: number;
   current_page: number;
   total_size: number;
@@ -1264,7 +1264,7 @@ export interface FuturesOpenOrdersData {
 }
 
 /** History order item from swap_hisorders and swap_cross_hisorders */
-export interface FuturesHistoryOrderItem {
+export interface FuturesHistoryOrder {
   query_id: number;
   order_id: number | string;
   order_id_str: string;
@@ -1305,7 +1305,7 @@ export interface FuturesHistoryOrderItem {
 }
 
 /** History match result item from swap_matchresults, swap_cross_matchresults, swap_matchresults_exact, swap_cross_matchresults_exact */
-export interface FuturesMatchResultItem {
+export interface FuturesMatchResult {
   id: string;
   query_id: number;
   match_id: number;
@@ -1337,13 +1337,13 @@ export interface FuturesMatchResultItem {
 }
 
 /** Position mode item from swap_position_side and swap_cross_position_side */
-export interface FuturesPositionSideItem {
+export interface FuturesPositionSide {
   margin_account: string;
   position_mode: 'single_side' | 'dual_side';
 }
 
 /** Transfer state item from swap_cross_transfer_state */
-export interface FuturesCrossTransferStateItem {
+export interface FuturesCrossTransferState {
   margin_mode: string;
   margin_account: string;
   /** 1: available, 0: unavailable */
@@ -1363,7 +1363,7 @@ export interface FuturesCrossTransferStateItem {
 }
 
 /** Trade state item from swap_cross_trade_state */
-export interface FuturesCrossTradeStateItem {
+export interface FuturesCrossTradeState {
   symbol: string;
   contract_code: string;
   margin_mode: string;
@@ -1380,7 +1380,7 @@ export interface FuturesCrossTradeStateItem {
 }
 
 /** Trigger order open order item from swap_trigger_openorders and swap_cross_trigger_openorders */
-export interface FuturesTriggerOrderOpenOrderItem {
+export interface FuturesTriggerOrderOpenOrder {
   symbol: string;
   contract_code: string;
   trigger_type: string;
@@ -1407,15 +1407,15 @@ export interface FuturesTriggerOrderOpenOrderItem {
 }
 
 /** Trigger open orders response data from swap_trigger_openorders and swap_cross_trigger_openorders */
-export interface FuturesTriggerOpenOrdersData {
+export interface FuturesTriggerOpenOrders {
   total_page: number;
   current_page: number;
   total_size: number;
-  orders: FuturesTriggerOrderOpenOrderItem[];
+  orders: FuturesTriggerOrderOpenOrder[];
 }
 
 /** Trigger order history item from swap_trigger_hisorders and swap_cross_trigger_hisorders */
-export interface FuturesTriggerOrderHisOrderItem {
+export interface FuturesTriggerOrderHisOrder {
   symbol: string;
   contract_code: string;
   trigger_type: string;
@@ -1450,11 +1450,11 @@ export interface FuturesTriggerOrderHisOrderItem {
 }
 
 /** Trigger history orders response data from swap_trigger_hisorders and swap_cross_trigger_hisorders */
-export interface FuturesTriggerHisOrdersData {
+export interface FuturesTriggerHisOrders {
   total_page: number;
   current_page: number;
   total_size: number;
-  orders: FuturesTriggerOrderHisOrderItem[];
+  orders: FuturesTriggerOrderHisOrder[];
 }
 
 /** TP/SL order result; when only TP or only SL is set, the other is empty */
@@ -1464,13 +1464,13 @@ export interface FuturesTpslOrderResult {
 }
 
 /** TPSL order response data from swap_tpsl_order and swap_cross_tpsl_order. tp_order or sl_order empty when only the other is set */
-export interface FuturesTpslOrderData {
+export interface FuturesTpslOrder {
   tp_order?: FuturesTpslOrderResult;
   sl_order?: FuturesTpslOrderResult;
 }
 
 /** TPSL open order item from swap_tpsl_openorders and swap_cross_tpsl_openorders */
-export interface FuturesTpslOpenOrderItem {
+export interface FuturesTpslOpenOrder {
   symbol: string;
   contract_code: string;
   margin_mode: string;
@@ -1498,15 +1498,15 @@ export interface FuturesTpslOpenOrderItem {
 }
 
 /** TPSL open orders response data from swap_tpsl_openorders and swap_cross_tpsl_openorders */
-export interface FuturesTpslOpenOrdersData {
+export interface FuturesTpslOpenOrders {
   total_page: number;
   total_size: number;
   current_page: number;
-  orders: FuturesTpslOpenOrderItem[];
+  orders: FuturesTpslOpenOrder[];
 }
 
 /** TPSL history order item from swap_tpsl_hisorders and swap_cross_tpsl_hisorders */
-export interface FuturesTpslHisOrderItem {
+export interface FuturesTpslHisOrder {
   symbol: string;
   contract_code: string;
   margin_mode: string;
@@ -1540,15 +1540,15 @@ export interface FuturesTpslHisOrderItem {
 }
 
 /** TPSL history orders response data from swap_tpsl_hisorders and swap_cross_tpsl_hisorders */
-export interface FuturesTpslHisOrdersData {
+export interface FuturesTpslHisOrders {
   total_page: number;
   total_size: number;
   current_page: number;
-  orders: FuturesTpslHisOrderItem[];
+  orders: FuturesTpslHisOrder[];
 }
 
 /** TPSL order info item within relation_tpsl_order response */
-export interface FuturesRelationTpslOrderTpslInfoItem {
+export interface FuturesRelationTpslOrderTpslInfo {
   volume: number;
   tpsl_order_type: string;
   direction: string;
@@ -1570,7 +1570,7 @@ export interface FuturesRelationTpslOrderTpslInfoItem {
 }
 
 /** Relation TPSL order data from swap_relation_tpsl_order and swap_cross_relation_tpsl_order */
-export interface FuturesRelationTpslOrderData {
+export interface FuturesRelationTpslOrder {
   symbol: string;
   contract_code: string;
   margin_mode: string;
@@ -1596,7 +1596,7 @@ export interface FuturesRelationTpslOrderData {
   order_source: string;
   fee_asset: string;
   canceled_at: number;
-  tpsl_order_info: FuturesRelationTpslOrderTpslInfoItem[];
+  tpsl_order_info: FuturesRelationTpslOrderTpslInfo[];
   /** Cross margin only */
   contract_type?: string;
   pair?: string;
@@ -1604,7 +1604,7 @@ export interface FuturesRelationTpslOrderData {
 }
 
 /** Trailing order open order item from swap_track_openorders and swap_cross_track_openorders */
-export interface FuturesTrackOpenOrderItem {
+export interface FuturesTrackOpenOrder {
   symbol: string;
   contract_code: string;
   volume: number;
@@ -1631,15 +1631,15 @@ export interface FuturesTrackOpenOrderItem {
 }
 
 /** Trailing open orders response data from swap_track_openorders and swap_cross_track_openorders */
-export interface FuturesTrackOpenOrdersData {
+export interface FuturesTrackOpenOrders {
   total_page: number;
   total_size: number;
   current_page: number;
-  orders: FuturesTrackOpenOrderItem[];
+  orders: FuturesTrackOpenOrder[];
 }
 
 /** Trailing order history item from swap_track_hisorders and swap_cross_track_hisorders */
-export interface FuturesTrackHisOrderItem {
+export interface FuturesTrackHisOrder {
   symbol: string;
   contract_code: string;
   volume: number;
@@ -1675,15 +1675,15 @@ export interface FuturesTrackHisOrderItem {
 }
 
 /** Trailing history orders response data from swap_track_hisorders and swap_cross_track_hisorders */
-export interface FuturesTrackHisOrdersData {
+export interface FuturesTrackHisOrders {
   total_page: number;
   total_size: number;
   current_page: number;
-  orders: FuturesTrackHisOrderItem[];
+  orders: FuturesTrackHisOrder[];
 }
 
 /** Cross swap item within unified_account_info */
-export interface FuturesUnifiedAccountCrossSwapItem {
+export interface FuturesUnifiedAccountCrossSwap {
   symbol: string;
   contract_code: string;
   margin_mode: string;
@@ -1695,7 +1695,7 @@ export interface FuturesUnifiedAccountCrossSwapItem {
 }
 
 /** Cross futures item within unified_account_info */
-export interface FuturesUnifiedAccountCrossFutureItem {
+export interface FuturesUnifiedAccountCrossFuture {
   symbol: string;
   contract_code: string;
   margin_mode: string;
@@ -1707,7 +1707,7 @@ export interface FuturesUnifiedAccountCrossFutureItem {
 }
 
 /** Isolated swap item within unified_account_info */
-export interface FuturesUnifiedAccountIsolatedSwapItem {
+export interface FuturesUnifiedAccountIsolatedSwap {
   symbol: string;
   contract_code: string;
   margin_mode: string;
@@ -1718,7 +1718,7 @@ export interface FuturesUnifiedAccountIsolatedSwapItem {
 }
 
 /** Unified account info item from unified_account_info */
-export interface FuturesUnifiedAccountInfoItem {
+export interface FuturesUnifiedAccountInfo {
   margin_balance: number | string;
   margin_static: number | string;
   cross_profit_unreal: number | string;
@@ -1727,21 +1727,21 @@ export interface FuturesUnifiedAccountInfoItem {
   margin_frozen: number | string;
   withdraw_available: number | string;
   cross_risk_rate: number | string | null;
-  cross_swap: FuturesUnifiedAccountCrossSwapItem[];
-  cross_future: FuturesUnifiedAccountCrossFutureItem[];
-  isolated_swap: FuturesUnifiedAccountIsolatedSwapItem[];
+  cross_swap: FuturesUnifiedAccountCrossSwap[];
+  cross_future: FuturesUnifiedAccountCrossFuture[];
+  isolated_swap: FuturesUnifiedAccountIsolatedSwap[];
   userId?: string | null;
 }
 
 /** Linear swap overview account info item from linear_swap_overview_account_info */
-export interface FuturesLinearSwapOverviewAccountInfoItem {
+export interface FuturesLinearSwapOverviewAccountInfo {
   margin_asset: string;
   margin_balance: number | string;
   margin_available: number | string;
 }
 
 /** Fix position margin change record item from fix_position_margin_change_record */
-export interface FuturesFixPositionMarginChangeRecordItem {
+export interface FuturesFixPositionMarginChangeRecord {
   query_id: number;
   order_id: string;
   amount: number | string;
@@ -1752,7 +1752,7 @@ export interface FuturesFixPositionMarginChangeRecordItem {
 }
 
 /** Fix position margin change response data from fix_position_margin_change */
-export interface FuturesFixPositionMarginChangeData {
+export interface FuturesFixPositionMarginChange {
   amount: number | string;
   asset: string;
   contract_code: string;

@@ -1,177 +1,183 @@
 import { BaseRestClient } from './lib/BaseRestClient.js';
 import { REST_CLIENT_TYPE_ENUM, RestClientType } from './lib/requestUtils.js';
 import type {
-  FuturesBasisReq,
-  FuturesBatchOrderReq,
-  FuturesCancelAfterReq,
-  FuturesCancelAllOrderReq,
-  FuturesCancelAllTpslOrderReq,
-  FuturesCancelAllTrackOrderReq,
-  FuturesCancelAllTriggerOrderReq,
+  FuturesCancelAllCrossTpslOrdersReq,
+  FuturesCancelAllCrossTrailingOrdersReq,
+  FuturesCancelAllCrossTriggerOrdersReq,
+  FuturesCancelAllOrdersReq,
+  FuturesCancelAllTpslOrdersReq,
+  FuturesCancelAllTrailingOrdersReq,
+  FuturesCancelAllTriggerOrdersReq,
+  FuturesCancelCrossAllOrdersReq,
+  FuturesCancelCrossOrderReq,
+  FuturesCancelCrossTpslOrderReq,
+  FuturesCancelCrossTrailingOrderReq,
+  FuturesCancelCrossTriggerOrderReq,
   FuturesCancelOrderReq,
   FuturesCancelTpslOrderReq,
-  FuturesCancelTrackOrderReq,
-  FuturesContractInfoReq,
-  FuturesCrossAvailableLevelRateReq,
-  FuturesCrossBatchOrderReq,
-  FuturesCrossCancelAllOrderReq,
-  FuturesCrossCancelAllTpslOrderReq,
-  FuturesCrossCancelAllTrackOrderReq,
-  FuturesCrossCancelAllTriggerOrderReq,
-  FuturesCrossCancelOrderReq,
-  FuturesCrossCancelTpslOrderReq,
-  FuturesCrossCancelTrackOrderReq,
-  FuturesCrossCancelTriggerOrderReq,
-  FuturesCrossHistoryOrdersExactReq,
-  FuturesCrossHistoryOrdersReq,
-  FuturesCrossLadderMarginReq,
-  FuturesCrossLeverPositionLimitReq,
-  FuturesCrossLightningClosePositionReq,
-  FuturesCrossMatchResultsExactReq,
-  FuturesCrossMatchResultsReq,
-  FuturesCrossOpenOrdersReq,
-  FuturesCrossOrderDetailReq,
-  FuturesCrossOrderInfoReq,
-  FuturesCrossPositionInfoReq,
-  FuturesCrossPositionLimitReq,
-  FuturesCrossRelationTpslOrderReq,
-  FuturesCrossSubAccountInfoListReq,
-  FuturesCrossSubAccountListReq,
+  FuturesCancelTrailingOrderReq,
   FuturesCrossSubmitOrderReq,
-  FuturesCrossSubmitTrackOrderReq,
-  FuturesCrossSubmitTriggerOrderReq,
-  FuturesCrossSubPositionInfoReq,
-  FuturesCrossSwitchLeverRateReq,
-  FuturesCrossTpslHisOrdersReq,
-  FuturesCrossTpslOpenOrdersReq,
-  FuturesCrossTpslOrderReq,
-  FuturesCrossTrackHisOrdersReq,
-  FuturesCrossTrackOpenOrdersReq,
-  FuturesCrossTradeStateReq,
-  FuturesCrossTriggerHisOrdersReq,
-  FuturesCrossTriggerOpenOrdersReq,
-  FuturesFeeReq,
-  FuturesFinancialRecordExactReq,
-  FuturesFinancialRecordReq,
-  FuturesFixPositionMarginChangeRecordReq,
-  FuturesFixPositionMarginChangeReq,
-  FuturesHistoricalFundingRateReq,
-  FuturesHistoricalOpenInterestReq,
-  FuturesHistoryOrdersExactReq,
-  FuturesHistoryOrdersReq,
-  FuturesInsuranceFundHistoryReq,
-  FuturesIsolatedSubAccountListReq,
-  FuturesKlineReq,
-  FuturesLightningClosePositionReq,
-  FuturesLiquidationOrdersReq,
-  FuturesMarkPriceKlineReq,
-  FuturesMasterSubTransferRecordReq,
-  FuturesMasterSubTransferReq,
-  FuturesMatchResultsExactReq,
-  FuturesMatchResultsReq,
-  FuturesOpenOrdersReq,
-  FuturesOrderDetailReq,
-  FuturesOrderInfoReq,
-  FuturesOrderLimitReq,
-  FuturesSettlementRecordsReq,
-  FuturesSubAccountInfoListReq,
-  FuturesSubAuthListReq,
+  FuturesGetBasisDataReq,
+  FuturesGetContractInfoReq,
+  FuturesGetContractPriceLimitReq,
+  FuturesGetCrossAdjustFactorReq,
+  FuturesGetCrossAvailableLeverageReq,
+  FuturesGetCrossHistoryOrdersExactReq,
+  FuturesGetCrossHistoryOrdersReq,
+  FuturesGetCrossLeverageLimitsReq,
+  FuturesGetCrossMatchResultsExactReq,
+  FuturesGetCrossMatchResultsReq,
+  FuturesGetCrossOpenOrdersReq,
+  FuturesGetCrossOrderDetailReq,
+  FuturesGetCrossOrderInfoReq,
+  FuturesGetCrossPositionLimitReq,
+  FuturesGetCrossPositionsReq,
+  FuturesGetCrossSubAccountsAssetsReq,
+  FuturesGetCrossSubAccountsReq,
+  FuturesGetCrossSubPositionsReq,
+  FuturesGetCrossTieredMarginReq,
+  FuturesGetCrossTpslHistoryOrdersReq,
+  FuturesGetCrossTpslOpenOrdersReq,
+  FuturesGetCrossTpSlOrderInfoReq,
+  FuturesGetCrossTradeStateReq,
+  FuturesGetCrossTrailingHistoryOrdersReq,
+  FuturesGetCrossTrailingOpenOrdersReq,
+  FuturesGetCrossTriggerOpenOrdersReq,
+  FuturesGetCrossTriggerOrderHistoryReq,
+  FuturesGetEstimatedSettlementPriceReq,
+  FuturesGetFeeReq,
+  FuturesGetFinancialRecordsExactReq,
+  FuturesGetFinancialRecordsReq,
+  FuturesGetFundingRateKlinesReq,
+  FuturesGetHistoricalFundingRateReq,
+  FuturesGetHistoricalOpenInterestReq,
+  FuturesGetHistoryOrdersExactReq,
+  FuturesGetHistoryOrdersReq,
+  FuturesGetIsolatedSubAccountsReq,
+  FuturesGetKlinesReq,
+  FuturesGetLiquidationOrdersReq,
+  FuturesGetMarkKlinesReq,
+  FuturesGetMasterSubTransfersReq,
+  FuturesGetMatchResultsExactReq,
+  FuturesGetMatchResultsReq,
+  FuturesGetOpenInterestReq,
+  FuturesGetOpenOrdersReq,
+  FuturesGetOrderDetailReq,
+  FuturesGetOrderInfoReq,
+  FuturesGetOrderLimitReq,
+  FuturesGetPremiumIndexKlinesReq,
+  FuturesGetRiskReserveHistoryReq,
+  FuturesGetSettlementRecordsReq,
+  FuturesGetSubAccountsAssetsReq,
+  FuturesGetSubAuthListReq,
+  FuturesGetTpslHistoryOrdersReq,
+  FuturesGetTpslOpenOrdersReq,
+  FuturesGetTrailingHistoryOrdersReq,
+  FuturesGetTrailingOpenOrdersReq,
+  FuturesGetTriggerOpenOrdersReq,
+  FuturesGetTriggerOrderHistoryReq,
+  FuturesGetUnifiedMarginAdjustmentsReq,
+  FuturesSetCancelAfterReq,
+  FuturesSubmitBatchOrderReq,
+  FuturesSubmitCrossBatchOrderReq,
+  FuturesSubmitCrossLightningCloseOrderReq,
+  FuturesSubmitCrossTpslOrderReq,
+  FuturesSubmitCrossTrailingOrderReq,
+  FuturesSubmitCrossTriggerOrderReq,
+  FuturesSubmitLightningCloseOrderReq,
   FuturesSubmitOrderReq,
-  FuturesSubmitTrackOrderReq,
+  FuturesSubmitTpslOrderReq,
+  FuturesSubmitTrailingOrderReq,
   FuturesSubmitTriggerOrderReq,
-  FuturesTpslHisOrdersReq,
-  FuturesTpslOpenOrdersReq,
-  FuturesTpslOrderReq,
-  FuturesTrackHisOrdersReq,
-  FuturesTrackOpenOrdersReq,
   FuturesTransferInnerReq,
-  FuturesTriggerHisOrdersReq,
-  FuturesTriggerOpenOrdersReq,
+  FuturesTransferMasterSubReq,
+  FuturesUpdateCrossLeverageReq,
+  FuturesUpdateUnifiedMarginReq,
 } from './types/request/futures.types.js';
 import type {
-  FuturesAdjustFactorItem,
-  FuturesApiStateItem,
-  FuturesAvailableLevelRateItem,
-  FuturesBalanceValuationItem,
-  FuturesBasisDataItem,
-  FuturesBatchOrderData,
+  FuturesAdjustFactor,
+  FuturesApiState,
+  FuturesAvailableLevelRate,
+  FuturesBalanceValuation,
+  FuturesBasis,
+  FuturesBatchOrder,
   FuturesBboTick,
-  FuturesCancelAfterData,
-  FuturesCancelOrderData,
-  FuturesContractElementsItem,
-  FuturesContractInfoItem,
-  FuturesCrossAccountInfoItem,
-  FuturesCrossAccountPositionData,
-  FuturesCrossAvailableLevelRateItem,
-  FuturesCrossLadderMarginItem,
-  FuturesCrossLeverPositionLimitItem,
-  FuturesCrossPositionLimitItem,
-  FuturesCrossSubAccountInfoItem,
-  FuturesCrossSubAccountInfoListData,
+  FuturesCancelAfter,
+  FuturesCancelOrder,
+  FuturesContractElements,
+  FuturesContractInfo,
+  FuturesCrossAccountInfo,
+  FuturesCrossAccountPosition,
+  FuturesCrossAvailableLevelRate,
+  FuturesCrossLadderMargin,
+  FuturesCrossLeverPositionLimit,
+  FuturesCrossPositionLimit,
+  FuturesCrossSubAccountInfo,
+  FuturesCrossSubAccountInfoList,
   FuturesCrossSubAccountListEntry,
-  FuturesCrossSwitchLeverRateData,
-  FuturesCrossTradeStateItem,
-  FuturesCrossTransferLimitItem,
-  FuturesCrossTransferStateItem,
-  FuturesEliteRatioData,
-  FuturesEstimatedSettlementPriceItem,
-  FuturesFeeItem,
-  FuturesFinancialRecordItem,
-  FuturesFixPositionMarginChangeData,
-  FuturesFixPositionMarginChangeRecordItem,
-  FuturesFundingRateData,
+  FuturesCrossSwitchLeverRate,
+  FuturesCrossTradeState,
+  FuturesCrossTransferLimit,
+  FuturesCrossTransferState,
+  FuturesEliteRatio,
+  FuturesEstimatedSettlementPrice,
+  FuturesFee,
+  FuturesFinancialRecord,
+  FuturesFixPositionMarginChange,
+  FuturesFixPositionMarginChangeRecord,
+  FuturesFundingRate,
   FuturesHeartbeat,
   FuturesHistoricalFundingRatePage,
-  FuturesHistoricalOpenInterestData,
-  FuturesHistoryOrderItem,
-  FuturesIndexConstituentsData,
-  FuturesIndexPriceItem,
-  FuturesInsuranceFundHistoryItem,
-  FuturesInsuranceFundInfoData,
-  FuturesIsolatedAccountInfoItem,
-  FuturesIsolatedAccountPositionItem,
-  FuturesIsolatedSubAccountInfoItem,
+  FuturesHistoricalOpenInterest,
+  FuturesHistoryOrder,
+  FuturesIndexConstituents,
+  FuturesIndexPrice,
+  FuturesInsuranceFundHistory,
+  FuturesInsuranceFundInfo,
+  FuturesIsolatedAccountInfo,
+  FuturesIsolatedAccountPosition,
+  FuturesIsolatedSubAccountInfo,
   FuturesIsolatedSubAccountListEntry,
   FuturesKline,
   FuturesLastTradeTick,
-  FuturesLeverPositionLimitItem,
-  FuturesLinearSwapOverviewAccountInfoItem,
-  FuturesLiquidationOrderItem,
+  FuturesLeverPositionLimit,
+  FuturesLinearSwapOverviewAccountInfo,
+  FuturesLiquidationOrder,
   FuturesMarketDepthTick,
   FuturesMarketOverviewBatchTick,
   FuturesMarketOverviewTick,
-  FuturesMarkPriceKlineItem,
-  FuturesMasterSubTransferData,
-  FuturesMasterSubTransferRecordData,
-  FuturesMatchResultItem,
-  FuturesOpenInterestItem,
-  FuturesOpenOrdersData,
-  FuturesOrderDetailData,
-  FuturesOrderInfoItem,
-  FuturesOrderLimitData,
-  FuturesPositionInfoItem,
-  FuturesPositionLimitItem,
-  FuturesPositionSideItem,
-  FuturesPriceLimitItem,
-  FuturesRelationTpslOrderData,
+  FuturesMarkPriceKline,
+  FuturesMasterSubTransfer,
+  FuturesMasterSubTransferRecord,
+  FuturesMatchResult,
+  FuturesOpenInterest,
+  FuturesOpenOrders,
+  FuturesOrderDetail,
+  FuturesOrderInfo,
+  FuturesOrderLimit,
+  FuturesPositionInfo,
+  FuturesPositionLimit,
+  FuturesPositionSide,
+  FuturesPriceLimit,
+  FuturesRelationTpslOrder,
   FuturesSettlementRecordsPage,
-  FuturesSubAccountInfoListData,
-  FuturesSubAuthData,
-  FuturesSubAuthListData,
-  FuturesSubmitOrderData,
-  FuturesSwitchLeverRateData,
-  FuturesSwitchPositionModeItem,
+  FuturesSubAccountInfoList,
+  FuturesSubAuth,
+  FuturesSubAuthList,
+  FuturesSubmitOrder,
+  FuturesSwitchLeverRate,
+  FuturesSwitchPositionMode,
   FuturesTimestamp,
-  FuturesTpslHisOrdersData,
-  FuturesTpslOpenOrdersData,
-  FuturesTpslOrderData,
-  FuturesTrackHisOrdersData,
-  FuturesTrackOpenOrdersData,
+  FuturesTpslHisOrders,
+  FuturesTpslOpenOrders,
+  FuturesTpslOrder,
+  FuturesTrackHisOrders,
+  FuturesTrackOpenOrders,
   FuturesTradeHistoryGroup,
-  FuturesTransferLimitItem,
-  FuturesTriggerHisOrdersData,
-  FuturesTriggerOpenOrdersData,
-  FuturesUnifiedAccountInfoItem,
+  FuturesTransferLimit,
+  FuturesTriggerHisOrders,
+  FuturesTriggerOpenOrders,
+  FuturesUnifiedAccountInfo,
 } from './types/response/futures.types.js';
 import { FuturesAPISuccessResponse } from './types/response/shared.types.js';
 
@@ -224,7 +230,7 @@ export class FuturesClient extends BaseRestClient {
 
   /**
    *
-   * Reference Data
+   * Reference
    *
    */
 
@@ -268,7 +274,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getFundingRate(params: {
     contract_code: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesFundingRateData>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesFundingRate>> {
     return this.get('/linear-swap-api/v1/swap_funding_rate', params);
   }
 
@@ -280,7 +286,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getFundingRates(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesFundingRateData[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesFundingRate[]>> {
     return this.get('/linear-swap-api/v1/swap_batch_funding_rate', params);
   }
 
@@ -291,7 +297,7 @@ export class FuturesClient extends BaseRestClient {
    * Rate limit: 240/3s per IP (shared with other public index/price endpoints).
    */
   getHistoricalFundingRate(
-    params: FuturesHistoricalFundingRateReq,
+    params: FuturesGetHistoricalFundingRateReq,
   ): Promise<FuturesAPISuccessResponse<FuturesHistoricalFundingRatePage>> {
     return this.get('/linear-swap-api/v1/swap_historical_funding_rate', params);
   }
@@ -303,8 +309,8 @@ export class FuturesClient extends BaseRestClient {
    * Rate limit: 240/3s per IP (shared with other public index/price endpoints).
    */
   getLiquidationOrders(
-    params: FuturesLiquidationOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesLiquidationOrderItem[]>> {
+    params: FuturesGetLiquidationOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesLiquidationOrder[]>> {
     return this.get('/linear-swap-api/v3/swap_liquidation_orders', params);
   }
 
@@ -315,7 +321,7 @@ export class FuturesClient extends BaseRestClient {
    * Rate limit: 240/3s per IP (shared with other public index/price endpoints).
    */
   getSettlementRecords(
-    params: FuturesSettlementRecordsReq,
+    params: FuturesGetSettlementRecordsReq,
   ): Promise<FuturesAPISuccessResponse<FuturesSettlementRecordsPage>> {
     return this.get('/linear-swap-api/v1/swap_settlement_records', params);
   }
@@ -329,7 +335,7 @@ export class FuturesClient extends BaseRestClient {
   getNetAccountRatio(params: {
     contract_code: string;
     period: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesEliteRatioData>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesEliteRatio>> {
     return this.get('/linear-swap-api/v1/swap_elite_account_ratio', params);
   }
 
@@ -342,7 +348,7 @@ export class FuturesClient extends BaseRestClient {
   getNetPositionRatio(params: {
     contract_code: string;
     period: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesEliteRatioData>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesEliteRatio>> {
     return this.get('/linear-swap-api/v1/swap_elite_position_ratio', params);
   }
 
@@ -354,7 +360,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getSystemStatus(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesApiStateItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesApiState[]>> {
     return this.get('/linear-swap-api/v1/swap_api_state', params);
   }
 
@@ -366,8 +372,8 @@ export class FuturesClient extends BaseRestClient {
    * Rate limit: 240/3s per IP (shared with other public index/price endpoints).
    */
   getCrossTieredMargin(
-    params?: FuturesCrossLadderMarginReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCrossLadderMarginItem[]>> {
+    params?: FuturesGetCrossTieredMarginReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossLadderMargin[]>> {
     return this.get('/linear-swap-api/v1/swap_cross_ladder_margin', params);
   }
 
@@ -379,7 +385,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getTieredMargin(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCrossLadderMarginItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesCrossLadderMargin[]>> {
     return this.get('/linear-swap-api/v1/swap_ladder_margin', params);
   }
 
@@ -391,8 +397,8 @@ export class FuturesClient extends BaseRestClient {
    * Rate limit: 240/3s per IP (shared with other public index/price endpoints).
    */
   getEstimatedSettlementPrice(
-    params?: FuturesCrossLadderMarginReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesEstimatedSettlementPriceItem[]>> {
+    params?: FuturesGetEstimatedSettlementPriceReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesEstimatedSettlementPrice[]>> {
     return this.get(
       '/linear-swap-api/v1/swap_estimated_settlement_price',
       params,
@@ -407,7 +413,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getAdjustFactor(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesAdjustFactorItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesAdjustFactor[]>> {
     return this.get('/linear-swap-api/v1/swap_adjustfactor', params);
   }
 
@@ -419,8 +425,8 @@ export class FuturesClient extends BaseRestClient {
    * Rate limit: 240/3s per IP (shared with other public index/price endpoints).
    */
   getCrossAdjustFactor(
-    params?: FuturesCrossLadderMarginReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesAdjustFactorItem[]>> {
+    params?: FuturesGetCrossAdjustFactorReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesAdjustFactor[]>> {
     return this.get('/linear-swap-api/v1/swap_cross_adjustfactor', params);
   }
 
@@ -431,7 +437,7 @@ export class FuturesClient extends BaseRestClient {
    * Rate limit: 144/3s per UID (shared with other read interfaces).
    */
   getRiskReserveBalance(): Promise<
-    FuturesAPISuccessResponse<FuturesInsuranceFundInfoData>
+    FuturesAPISuccessResponse<FuturesInsuranceFundInfo>
   > {
     return this.get('/v1/insurance_fund_info');
   }
@@ -443,8 +449,8 @@ export class FuturesClient extends BaseRestClient {
    * Rate limit: 144/3s per UID (shared with other read interfaces).
    */
   getRiskReserveHistory(
-    params?: FuturesInsuranceFundHistoryReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesInsuranceFundHistoryItem[]>> {
+    params?: FuturesGetRiskReserveHistoryReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesInsuranceFundHistory[]>> {
     return this.get('/v1/insurance_fund_history', params);
   }
 
@@ -455,8 +461,8 @@ export class FuturesClient extends BaseRestClient {
    * business_type required for futures. Rate limit: 240/3s per IP.
    */
   getContractPriceLimit(
-    params?: FuturesCrossLadderMarginReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesPriceLimitItem[]>> {
+    params?: FuturesGetContractPriceLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPriceLimit[]>> {
     return this.get('/linear-swap-api/v1/swap_price_limit', params);
   }
 
@@ -467,8 +473,8 @@ export class FuturesClient extends BaseRestClient {
    * business_type required for futures. Rate limit: 240/3s per IP.
    */
   getOpenInterest(
-    params?: FuturesCrossLadderMarginReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesOpenInterestItem[]>> {
+    params?: FuturesGetOpenInterestReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOpenInterest[]>> {
     return this.get('/linear-swap-api/v1/swap_open_interest', params);
   }
 
@@ -479,8 +485,8 @@ export class FuturesClient extends BaseRestClient {
    * When isolated, contract_type/business_type cannot be futures. Rate limit: 240/3s per IP.
    */
   getContractInfo(
-    params?: FuturesContractInfoReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesContractInfoItem[]>> {
+    params?: FuturesGetContractInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesContractInfo[]>> {
     return this.get('/linear-swap-api/v1/swap_contract_info', params);
   }
 
@@ -492,7 +498,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getIndexPrice(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesIndexPriceItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesIndexPrice[]>> {
     return this.get('/linear-swap-api/v1/swap_index', params);
   }
 
@@ -504,7 +510,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getIndexConstituents(params: {
     contract_code: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesIndexConstituentsData>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesIndexConstituents>> {
     return this.get(
       '/linear-swap-api/market/swap_contract_constituents',
       params,
@@ -519,7 +525,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getContractElements(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesContractElementsItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesContractElements[]>> {
     return this.get('/linear-swap-api/v1/swap_query_elements', params);
   }
 
@@ -562,7 +568,7 @@ export class FuturesClient extends BaseRestClient {
    * Rate limit: 800/s per IP.
    */
   getKlines(
-    params: FuturesKlineReq,
+    params: FuturesGetKlinesReq,
   ): Promise<FuturesAPISuccessResponse<FuturesKline[]>> {
     return this.get('/linear-swap-ex/market/history/kline', params);
   }
@@ -573,8 +579,8 @@ export class FuturesClient extends BaseRestClient {
    * Mark price candlestick data. No signature. Rate limit: 800/s per IP.
    */
   getMarkKlines(
-    params: FuturesMarkPriceKlineReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesMarkPriceKlineItem[]>> {
+    params: FuturesGetMarkKlinesReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMarkPriceKline[]>> {
     return this.get(
       '/index/market/history/linear_swap_mark_price_kline',
       params,
@@ -639,8 +645,8 @@ export class FuturesClient extends BaseRestClient {
    * Rate limit: 800/s per IP.
    */
   getHistoricalOpenInterest(
-    params: FuturesHistoricalOpenInterestReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesHistoricalOpenInterestData>> {
+    params: FuturesGetHistoricalOpenInterestReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesHistoricalOpenInterest>> {
     return this.get('/linear-swap-api/v1/swap_his_open_interest', params);
   }
 
@@ -650,8 +656,8 @@ export class FuturesClient extends BaseRestClient {
    * Premium index candlestick data. No signature. Rate limit: 800/s per IP.
    */
   getPremiumIndexKlines(
-    params: FuturesMarkPriceKlineReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesMarkPriceKlineItem[]>> {
+    params: FuturesGetPremiumIndexKlinesReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMarkPriceKline[]>> {
     return this.get(
       '/index/market/history/linear_swap_premium_index_kline',
       params,
@@ -664,8 +670,8 @@ export class FuturesClient extends BaseRestClient {
    * Estimated funding rate candlestick data. No signature. Rate limit: 800/s per IP.
    */
   getFundingRateKlines(
-    params: FuturesMarkPriceKlineReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesMarkPriceKlineItem[]>> {
+    params: FuturesGetFundingRateKlinesReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMarkPriceKline[]>> {
     return this.get(
       '/index/market/history/linear_swap_estimated_rate_kline',
       params,
@@ -678,8 +684,8 @@ export class FuturesClient extends BaseRestClient {
    * Basis (contract - index) kline. basis_price_type defaults to open. No signature. Rate limit: 800/s per IP.
    */
   getBasisData(
-    params: FuturesBasisReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesBasisDataItem[]>> {
+    params: FuturesGetBasisDataReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesBasis[]>> {
     return this.get('/index/market/history/linear_swap_basis', params);
   }
 
@@ -697,7 +703,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getAssetValuation(params?: {
     valuation_asset?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesBalanceValuationItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesBalanceValuation[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_balance_valuation', {
       body: params ?? {},
     });
@@ -710,7 +716,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getIsolatedAccountInfo(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesIsolatedAccountInfoItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesIsolatedAccountInfo[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_account_info', {
       body: params ?? {},
     });
@@ -723,7 +729,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCrossAccountInfo(params?: {
     margin_account?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCrossAccountInfoItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesCrossAccountInfo[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_account_info', {
       body: params ?? {},
     });
@@ -736,7 +742,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getIsolatedPositions(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesPositionInfoItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesPositionInfo[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_position_info', {
       body: params ?? {},
     });
@@ -748,8 +754,8 @@ export class FuturesClient extends BaseRestClient {
    * User's cross margin positions. contract_code preferred when all filled. Signature required. Rate limit: 144/3s per UID.
    */
   getCrossPositions(
-    params?: FuturesCrossPositionInfoReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesPositionInfoItem[]>> {
+    params?: FuturesGetCrossPositionsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPositionInfo[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_position_info', {
       body: params ?? {},
     });
@@ -762,7 +768,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getIsolatedAccountFull(params: {
     contract_code: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesIsolatedAccountPositionItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesIsolatedAccountPosition[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_account_position_info', {
       body: params,
     });
@@ -775,7 +781,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCrossAccountFull(params: {
     margin_account: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCrossAccountPositionData>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesCrossAccountPosition>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_account_position_info',
       { body: params },
@@ -790,7 +796,7 @@ export class FuturesClient extends BaseRestClient {
   updateSubAuth(params: {
     sub_uid: string;
     sub_auth: 0 | 1;
-  }): Promise<FuturesAPISuccessResponse<FuturesSubAuthData>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesSubAuth>> {
     return this.postPrivate('/linear-swap-api/v1/swap_sub_auth', {
       body: params,
     });
@@ -802,8 +808,8 @@ export class FuturesClient extends BaseRestClient {
    * List sub-accounts and their trading permission status. Signature required. Rate limit: 144/3s per UID.
    */
   getSubAuthList(
-    params?: FuturesSubAuthListReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesSubAuthListData>> {
+    params?: FuturesGetSubAuthListReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubAuthList>> {
     return this.getPrivate('/linear-swap-api/v1/swap_sub_auth_list', params);
   }
 
@@ -813,7 +819,7 @@ export class FuturesClient extends BaseRestClient {
    * Assets info of all sub-accounts under master. Isolated margin only. Signature required. Rate limit: 144/3s per UID.
    */
   getIsolatedSubAccounts(
-    params?: FuturesIsolatedSubAccountListReq,
+    params?: FuturesGetIsolatedSubAccountsReq,
   ): Promise<FuturesAPISuccessResponse<FuturesIsolatedSubAccountListEntry[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_sub_account_list', {
       body: params ?? {},
@@ -826,7 +832,7 @@ export class FuturesClient extends BaseRestClient {
    * Assets info of all sub-accounts under master. Cross margin only. Signature required. Rate limit: 144/3s per UID.
    */
   getCrossSubAccounts(
-    params?: FuturesCrossSubAccountListReq,
+    params?: FuturesGetCrossSubAccountsReq,
   ): Promise<FuturesAPISuccessResponse<FuturesCrossSubAccountListEntry[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_sub_account_list', {
       body: params ?? {},
@@ -839,8 +845,8 @@ export class FuturesClient extends BaseRestClient {
    * Batch query sub-account assets with pagination. Isolated margin only. Signature required. Rate limit: 144/3s per UID.
    */
   getSubAccountsAssets(
-    params?: FuturesSubAccountInfoListReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesSubAccountInfoListData>> {
+    params?: FuturesGetSubAccountsAssetsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubAccountInfoList>> {
     return this.postPrivate('/linear-swap-api/v1/swap_sub_account_info_list', {
       body: params ?? {},
     });
@@ -852,8 +858,8 @@ export class FuturesClient extends BaseRestClient {
    * Batch query sub-account assets with pagination. Cross margin only. Signature required. Rate limit: 144/3s per UID.
    */
   getCrossSubAccountsAssets(
-    params?: FuturesCrossSubAccountInfoListReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCrossSubAccountInfoListData>> {
+    params?: FuturesGetCrossSubAccountsAssetsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossSubAccountInfoList>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_sub_account_info_list',
       { body: params ?? {} },
@@ -868,7 +874,7 @@ export class FuturesClient extends BaseRestClient {
   getIsolatedSubAccountAssets(params: {
     contract_code?: string;
     sub_uid: number;
-  }): Promise<FuturesAPISuccessResponse<FuturesIsolatedSubAccountInfoItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesIsolatedSubAccountInfo[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_sub_account_info', {
       body: params,
     });
@@ -882,7 +888,7 @@ export class FuturesClient extends BaseRestClient {
   getCrossSubAccountAssets(params: {
     sub_uid: number;
     margin_account?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCrossSubAccountInfoItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesCrossSubAccountInfo[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_sub_account_info', {
       body: params,
     });
@@ -896,7 +902,7 @@ export class FuturesClient extends BaseRestClient {
   getIsolatedSubPositions(params: {
     contract_code?: string;
     sub_uid: number;
-  }): Promise<FuturesAPISuccessResponse<FuturesPositionInfoItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesPositionInfo[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_sub_position_info', {
       body: params,
     });
@@ -908,8 +914,8 @@ export class FuturesClient extends BaseRestClient {
    * Position info for one sub-account. Cross margin only. Signature required. Rate limit: 144/3s per UID.
    */
   getCrossSubPositions(
-    params: FuturesCrossSubPositionInfoReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesPositionInfoItem[]>> {
+    params: FuturesGetCrossSubPositionsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesPositionInfo[]>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_sub_position_info',
       { body: params },
@@ -922,8 +928,8 @@ export class FuturesClient extends BaseRestClient {
    * Financial records (transfers, fees, funding, etc.). Supports cross and isolated. Signature required. Rate limit: 144/3s per UID.
    */
   getFinancialRecords(
-    params: FuturesFinancialRecordReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesFinancialRecordItem[]>> {
+    params: FuturesGetFinancialRecordsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesFinancialRecord[]>> {
     return this.postPrivate('/linear-swap-api/v3/swap_financial_record', {
       body: params,
     });
@@ -935,8 +941,8 @@ export class FuturesClient extends BaseRestClient {
    * Financial records via multiple fields. Same params as swap_financial_record; API default direct is prev. Signature required. Rate limit: 144/3s per UID.
    */
   getFinancialRecordsExact(
-    params: FuturesFinancialRecordExactReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesFinancialRecordItem[]>> {
+    params: FuturesGetFinancialRecordsExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesFinancialRecord[]>> {
     return this.postPrivate('/linear-swap-api/v3/swap_financial_record_exact', {
       body: params,
     });
@@ -949,7 +955,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getAvailableLeverage(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesAvailableLevelRateItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesAvailableLevelRate[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_available_level_rate', {
       body: params ?? {},
     });
@@ -961,8 +967,8 @@ export class FuturesClient extends BaseRestClient {
    * User's available leverage per contract. Cross margin only. Signature required. Rate limit: 144/3s per UID.
    */
   getCrossAvailableLeverage(
-    params?: FuturesCrossAvailableLevelRateReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCrossAvailableLevelRateItem[]>> {
+    params?: FuturesGetCrossAvailableLeverageReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossAvailableLevelRate[]>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_available_level_rate',
       { body: params ?? {} },
@@ -975,8 +981,8 @@ export class FuturesClient extends BaseRestClient {
    * Max open/close order limits per contract for given order type. Supports cross and isolated. Signature required. Rate limit: 144/3s per UID.
    */
   getOrderLimit(
-    params: FuturesOrderLimitReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesOrderLimitData>> {
+    params: FuturesGetOrderLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderLimit>> {
     return this.postPrivate('/linear-swap-api/v1/swap_order_limit', {
       body: params,
     });
@@ -988,8 +994,8 @@ export class FuturesClient extends BaseRestClient {
    * Maker/taker fee rates per contract. Supports cross and isolated. Signature required. Rate limit: 144/3s per UID.
    */
   getFee(
-    params?: FuturesFeeReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesFeeItem[]>> {
+    params?: FuturesGetFeeReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesFee[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_fee', {
       body: params ?? {},
     });
@@ -1002,7 +1008,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getTransferLimit(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesTransferLimitItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesTransferLimit[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_transfer_limit', {
       body: params ?? {},
     });
@@ -1015,7 +1021,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCrossTransferLimit(params?: {
     margin_account?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCrossTransferLimitItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesCrossTransferLimit[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_transfer_limit', {
       body: params ?? {},
     });
@@ -1028,7 +1034,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getPositionLimit(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesPositionLimitItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesPositionLimit[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_position_limit', {
       body: params ?? {},
     });
@@ -1040,8 +1046,8 @@ export class FuturesClient extends BaseRestClient {
    * Max long/short position limits per contract. Cross margin only. Signature required. Rate limit: 144/3s per UID.
    */
   getCrossPositionLimit(
-    params?: FuturesCrossPositionLimitReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCrossPositionLimitItem[]>> {
+    params?: FuturesGetCrossPositionLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossPositionLimit[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_position_limit', {
       body: params ?? {},
     });
@@ -1055,7 +1061,7 @@ export class FuturesClient extends BaseRestClient {
   getLeverageLimits(params?: {
     contract_code?: string;
     lever_rate?: number;
-  }): Promise<FuturesAPISuccessResponse<FuturesLeverPositionLimitItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesLeverPositionLimit[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_lever_position_limit', {
       body: params ?? {},
     });
@@ -1067,8 +1073,8 @@ export class FuturesClient extends BaseRestClient {
    * Position limits per leverage per contract. Cross margin only. Signature required. Rate limit: 144/3s per UID.
    */
   getCrossLeverageLimits(
-    params?: FuturesCrossLeverPositionLimitReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCrossLeverPositionLimitItem[]>> {
+    params?: FuturesGetCrossLeverageLimitsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossLeverPositionLimit[]>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_lever_position_limit',
       {
@@ -1083,8 +1089,8 @@ export class FuturesClient extends BaseRestClient {
    * Transfer asset between master and sub. Supports cross and isolated. Trade permission. Rate limit: 10/min per sub.
    */
   transferMasterSub(
-    params: FuturesMasterSubTransferReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferData>> {
+    params: FuturesTransferMasterSubReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransfer>> {
     return this.postPrivate('/linear-swap-api/v1/swap_master_sub_transfer', {
       body: params,
     });
@@ -1096,8 +1102,8 @@ export class FuturesClient extends BaseRestClient {
    * Transfer history between master and sub accounts. Supports cross and isolated. Signature required. Rate limit: 144/3s per UID.
    */
   getMasterSubTransfers(
-    params: FuturesMasterSubTransferRecordReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferRecordData>> {
+    params: FuturesGetMasterSubTransfersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferRecord>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_master_sub_transfer_record',
       {
@@ -1113,7 +1119,7 @@ export class FuturesClient extends BaseRestClient {
    */
   transferInner(
     params: FuturesTransferInnerReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferData>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransfer>> {
     return this.postPrivate('/linear-swap-api/v1/swap_transfer_inner', {
       body: params,
     });
@@ -1131,8 +1137,8 @@ export class FuturesClient extends BaseRestClient {
    * Enable/disable auto-cancel of all pending orders after countdown. If not refreshed before timer ends, all pending orders are cancelled. Trade permission.
    */
   setCancelAfter(
-    params: FuturesCancelAfterReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelAfterData>> {
+    params: FuturesSetCancelAfterReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelAfter>> {
     return this.postPrivate('/linear-swap-api/v1/linear-cancel-after', {
       body: params,
     });
@@ -1144,8 +1150,8 @@ export class FuturesClient extends BaseRestClient {
    * Open/close/cancel access per contract. Cross margin only. No signature. Rate limit: 144/3s per UID.
    */
   getCrossTradeState(
-    params?: FuturesCrossTradeStateReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCrossTradeStateItem[]>> {
+    params?: FuturesGetCrossTradeStateReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossTradeState[]>> {
     return this.getPrivate(
       '/linear-swap-api/v1/swap_cross_trade_state',
       params,
@@ -1159,7 +1165,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCrossTransferState(params?: {
     margin_account?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCrossTransferStateItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesCrossTransferState[]>> {
     return this.getPrivate(
       '/linear-swap-api/v1/swap_cross_transfer_state',
       params,
@@ -1174,7 +1180,7 @@ export class FuturesClient extends BaseRestClient {
   updatePositionMode(params: {
     margin_account: string;
     position_mode: 'single_side' | 'dual_side';
-  }): Promise<FuturesAPISuccessResponse<FuturesSwitchPositionModeItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesSwitchPositionMode[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_switch_position_mode', {
       body: params,
     });
@@ -1188,7 +1194,7 @@ export class FuturesClient extends BaseRestClient {
   updateCrossPositionMode(params: {
     margin_account: string;
     position_mode: 'single_side' | 'dual_side';
-  }): Promise<FuturesAPISuccessResponse<FuturesSwitchPositionModeItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesSwitchPositionMode[]>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_switch_position_mode',
       {
@@ -1204,7 +1210,7 @@ export class FuturesClient extends BaseRestClient {
    */
   submitOrder(
     params: FuturesSubmitOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrderData>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_order', {
       body: params,
     });
@@ -1217,7 +1223,7 @@ export class FuturesClient extends BaseRestClient {
    */
   submitCrossOrder(
     params: FuturesCrossSubmitOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrderData>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_order', {
       body: params,
     });
@@ -1229,8 +1235,8 @@ export class FuturesClient extends BaseRestClient {
    * Place up to 10 orders. Isolated margin only. Trade permission. Rate limit: 144/3s per UID.
    */
   submitBatchOrder(
-    params: FuturesBatchOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesBatchOrderData>> {
+    params: FuturesSubmitBatchOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesBatchOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_batchorder', {
       body: params,
     });
@@ -1242,8 +1248,8 @@ export class FuturesClient extends BaseRestClient {
    * Place up to 25 orders. Cross margin only. Trade permission. Rate limit: 144/3s per UID.
    */
   submitCrossBatchOrder(
-    params: FuturesCrossBatchOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesBatchOrderData>> {
+    params: FuturesSubmitCrossBatchOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesBatchOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_batchorder', {
       body: params,
     });
@@ -1256,7 +1262,7 @@ export class FuturesClient extends BaseRestClient {
    */
   cancelOrder(
     params: FuturesCancelOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cancel', {
       body: params,
     });
@@ -1268,8 +1274,8 @@ export class FuturesClient extends BaseRestClient {
    * Cancel order(s) by order_id or client_order_id. Max 25 per request. Cross margin only. Trade permission. Rate limit: 144/3s per UID.
    */
   cancelCrossOrder(
-    params: FuturesCrossCancelOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    params: FuturesCancelCrossOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_cancel', {
       body: params,
     });
@@ -1281,8 +1287,8 @@ export class FuturesClient extends BaseRestClient {
    * Cancel all orders for contract. Optional direction/offset filter. Isolated margin only. Trade permission. Rate limit: 144/3s per UID.
    */
   cancelAllOrders(
-    params: FuturesCancelAllOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    params: FuturesCancelAllOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cancelall', {
       body: params,
     });
@@ -1294,8 +1300,8 @@ export class FuturesClient extends BaseRestClient {
    * Cancel all orders for contract. Optional direction/offset filter. Cross margin only. Trade permission. Rate limit: 144/3s per UID.
    */
   cancelCrossAllOrders(
-    params: FuturesCrossCancelAllOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    params: FuturesCancelCrossAllOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_cancelall', {
       body: params,
     });
@@ -1309,7 +1315,7 @@ export class FuturesClient extends BaseRestClient {
   updateLeverage(params: {
     contract_code: string;
     lever_rate: number;
-  }): Promise<FuturesAPISuccessResponse<FuturesSwitchLeverRateData>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesSwitchLeverRate>> {
     return this.postPrivate('/linear-swap-api/v1/swap_switch_lever_rate', {
       body: params,
     });
@@ -1321,8 +1327,8 @@ export class FuturesClient extends BaseRestClient {
    * Set leverage for cross margin contract. Requires no open orders. Trade permission. Rate limit: 1 per 3s.
    */
   updateCrossLeverage(
-    params: FuturesCrossSwitchLeverRateReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCrossSwitchLeverRateData>> {
+    params: FuturesUpdateCrossLeverageReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCrossSwitchLeverRate>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_switch_lever_rate',
       {
@@ -1337,8 +1343,8 @@ export class FuturesClient extends BaseRestClient {
    * Query order(s) by order_id or client_order_id. Max 50 per request. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
    */
   getOrderInfo(
-    params: FuturesOrderInfoReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesOrderInfoItem[]>> {
+    params: FuturesGetOrderInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderInfo[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_order_info', {
       body: params,
     });
@@ -1350,8 +1356,8 @@ export class FuturesClient extends BaseRestClient {
    * Query order(s) by order_id or client_order_id. Max 50 per request. Cross margin only. One of contract_code or pair required. Read permission. Rate limit: 144/3s per UID.
    */
   getCrossOrderInfo(
-    params: FuturesCrossOrderInfoReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesOrderInfoItem[]>> {
+    params: FuturesGetCrossOrderInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderInfo[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_order_info', {
       body: params,
     });
@@ -1363,8 +1369,8 @@ export class FuturesClient extends BaseRestClient {
    * Order details with trade breakdown. Paginated. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
    */
   getOrderDetail(
-    params: FuturesOrderDetailReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesOrderDetailData>> {
+    params: FuturesGetOrderDetailReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderDetail>> {
     return this.postPrivate('/linear-swap-api/v1/swap_order_detail', {
       body: params,
     });
@@ -1376,8 +1382,8 @@ export class FuturesClient extends BaseRestClient {
    * Order details with trade breakdown. Paginated. Cross margin only. One of contract_code or pair required. Read permission. Rate limit: 144/3s per UID.
    */
   getCrossOrderDetail(
-    params: FuturesCrossOrderDetailReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesOrderDetailData>> {
+    params: FuturesGetCrossOrderDetailReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderDetail>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_order_detail', {
       body: params,
     });
@@ -1389,8 +1395,8 @@ export class FuturesClient extends BaseRestClient {
    * Current unfilled orders. Paginated. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
    */
   getOpenOrders(
-    params?: FuturesOpenOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesOpenOrdersData>> {
+    params?: FuturesGetOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOpenOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_openorders', {
       body: params ?? {},
     });
@@ -1402,8 +1408,8 @@ export class FuturesClient extends BaseRestClient {
    * Current unfilled orders. Paginated. Cross margin only. Omit all for all contracts. Read permission. Rate limit: 144/3s per UID.
    */
   getCrossOpenOrders(
-    params?: FuturesCrossOpenOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesOpenOrdersData>> {
+    params?: FuturesGetCrossOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesOpenOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_openorders', {
       body: params ?? {},
     });
@@ -1415,8 +1421,8 @@ export class FuturesClient extends BaseRestClient {
    * Historical orders. Time-window query, 48h max. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
    */
   getHistoryOrders(
-    params: FuturesHistoryOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrderItem[]>> {
+    params: FuturesGetHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrder[]>> {
     return this.postPrivate('/linear-swap-api/v3/swap_hisorders', {
       body: params,
     });
@@ -1428,8 +1434,8 @@ export class FuturesClient extends BaseRestClient {
    * Historical orders. Time-window query, 48h max. Cross margin only. One of contract or pair required. Read permission. Rate limit: 144/3s per UID.
    */
   getCrossHistoryOrders(
-    params: FuturesCrossHistoryOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrderItem[]>> {
+    params: FuturesGetCrossHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrder[]>> {
     return this.postPrivate('/linear-swap-api/v3/swap_cross_hisorders', {
       body: params,
     });
@@ -1441,8 +1447,8 @@ export class FuturesClient extends BaseRestClient {
    * History orders with price_type filter. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
    */
   getHistoryOrdersExact(
-    params: FuturesHistoryOrdersExactReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrderItem[]>> {
+    params: FuturesGetHistoryOrdersExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrder[]>> {
     return this.postPrivate('/linear-swap-api/v3/swap_hisorders_exact', {
       body: params,
     });
@@ -1454,8 +1460,8 @@ export class FuturesClient extends BaseRestClient {
    * History orders with price_type filter. Cross margin only. Read permission. Rate limit: 144/3s per UID.
    */
   getCrossHistoryOrdersExact(
-    params: FuturesCrossHistoryOrdersExactReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrderItem[]>> {
+    params: FuturesGetCrossHistoryOrdersExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrder[]>> {
     return this.postPrivate('/linear-swap-api/v3/swap_cross_hisorders_exact', {
       body: params,
     });
@@ -1467,8 +1473,8 @@ export class FuturesClient extends BaseRestClient {
    * Matched trades history. One of contract or pair required. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
    */
   getMatchResults(
-    params: FuturesMatchResultsReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesMatchResultItem[]>> {
+    params: FuturesGetMatchResultsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMatchResult[]>> {
     return this.postPrivate('/linear-swap-api/v3/swap_matchresults', {
       body: params,
     });
@@ -1480,8 +1486,8 @@ export class FuturesClient extends BaseRestClient {
    * Matched trades history. One of contract or pair required. Cross margin only. Read permission. Rate limit: 144/3s per UID.
    */
   getCrossMatchResults(
-    params: FuturesCrossMatchResultsReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesMatchResultItem[]>> {
+    params: FuturesGetCrossMatchResultsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMatchResult[]>> {
     return this.postPrivate('/linear-swap-api/v3/swap_cross_matchresults', {
       body: params,
     });
@@ -1493,8 +1499,8 @@ export class FuturesClient extends BaseRestClient {
    * Matched trades history. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
    */
   getMatchResultsExact(
-    params: FuturesMatchResultsExactReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesMatchResultItem[]>> {
+    params: FuturesGetMatchResultsExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMatchResult[]>> {
     return this.postPrivate('/linear-swap-api/v3/swap_matchresults_exact', {
       body: params,
     });
@@ -1506,8 +1512,8 @@ export class FuturesClient extends BaseRestClient {
    * Matched trades history. Cross margin only. Read permission. Rate limit: 144/3s per UID.
    */
   getCrossMatchResultsExact(
-    params: FuturesCrossMatchResultsExactReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesMatchResultItem[]>> {
+    params: FuturesGetCrossMatchResultsExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesMatchResult[]>> {
     return this.postPrivate(
       '/linear-swap-api/v3/swap_cross_matchresults_exact',
       {
@@ -1522,8 +1528,8 @@ export class FuturesClient extends BaseRestClient {
    * Closes position using optimal 30-grade rival price; unfilled converts to limit. Isolated only. Trade permission. Rate limit: 144/3s per UID.
    */
   submitLightningCloseOrder(
-    params: FuturesLightningClosePositionReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrderData>> {
+    params: FuturesSubmitLightningCloseOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_lightning_close_position',
       {
@@ -1538,8 +1544,8 @@ export class FuturesClient extends BaseRestClient {
    * Closes position using optimal 30-grade rival price. One of (pair+contract_type) or contract_code required. Cross only. Trade permission. Rate limit: 144/3s per UID.
    */
   submitCrossLightningCloseOrder(
-    params: FuturesCrossLightningClosePositionReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrderData>> {
+    params: FuturesSubmitCrossLightningCloseOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_lightning_close_position',
       { body: params },
@@ -1553,7 +1559,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getPositionMode(params: {
     margin_account: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesPositionSideItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesPositionSide[]>> {
     return this.getPrivate('/linear-swap-api/v1/swap_position_side', params);
   }
 
@@ -1564,7 +1570,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCrossPositionMode(params: {
     margin_account: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesPositionSideItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesPositionSide[]>> {
     return this.getPrivate(
       '/linear-swap-api/v1/swap_cross_position_side',
       params,
@@ -1584,7 +1590,7 @@ export class FuturesClient extends BaseRestClient {
    */
   submitTriggerOrder(
     params: FuturesSubmitTriggerOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrderData>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_trigger_order', {
       body: params,
     });
@@ -1596,8 +1602,8 @@ export class FuturesClient extends BaseRestClient {
    * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s.
    */
   submitCrossTriggerOrder(
-    params: FuturesCrossSubmitTriggerOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrderData>> {
+    params: FuturesSubmitCrossTriggerOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_trigger_order', {
       body: params,
     });
@@ -1611,7 +1617,7 @@ export class FuturesClient extends BaseRestClient {
   cancelTriggerOrder(params: {
     contract_code: string;
     order_id: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_trigger_cancel', {
       body: params,
     });
@@ -1623,8 +1629,8 @@ export class FuturesClient extends BaseRestClient {
    * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s.
    */
   cancelCrossTriggerOrder(
-    params: FuturesCrossCancelTriggerOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    params: FuturesCancelCrossTriggerOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_trigger_cancel', {
       body: params,
     });
@@ -1636,8 +1642,8 @@ export class FuturesClient extends BaseRestClient {
    * Isolated margin only. Trade permission. Rate limit: 5/s. Can fill only one of direction and offset to filter.
    */
   cancelAllTriggerOrders(
-    params: FuturesCancelAllTriggerOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    params: FuturesCancelAllTriggerOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_trigger_cancelall', {
       body: params,
     });
@@ -1649,8 +1655,8 @@ export class FuturesClient extends BaseRestClient {
    * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s. Can fill only one of direction and offset to filter.
    */
   cancelAllCrossTriggerOrders(
-    params: FuturesCrossCancelAllTriggerOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    params: FuturesCancelAllCrossTriggerOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_trigger_cancelall',
       {
@@ -1665,8 +1671,8 @@ export class FuturesClient extends BaseRestClient {
    * Isolated margin only. Read permission. Rate limit: 5/s.
    */
   getTriggerOpenOrders(
-    params: FuturesTriggerOpenOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTriggerOpenOrdersData>> {
+    params: FuturesGetTriggerOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTriggerOpenOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_trigger_openorders', {
       body: params,
     });
@@ -1678,8 +1684,8 @@ export class FuturesClient extends BaseRestClient {
    * Cross margin only. When both pair and contract_code filled, contract_code preferred; when none, all open orders. Read permission.
    */
   getCrossTriggerOpenOrders(
-    params: FuturesCrossTriggerOpenOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTriggerOpenOrdersData>> {
+    params: FuturesGetCrossTriggerOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTriggerOpenOrders>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_trigger_openorders',
       { body: params },
@@ -1692,8 +1698,8 @@ export class FuturesClient extends BaseRestClient {
    * Isolated margin only. Read permission. Default query completed orders (status 4, 5, 6).
    */
   getTriggerOrderHistory(
-    params: FuturesTriggerHisOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTriggerHisOrdersData>> {
+    params: FuturesGetTriggerOrderHistoryReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTriggerHisOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_trigger_hisorders', {
       body: params,
     });
@@ -1705,8 +1711,8 @@ export class FuturesClient extends BaseRestClient {
    * Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read permission.
    */
   getCrossTriggerOrderHistory(
-    params: FuturesCrossTriggerHisOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTriggerHisOrdersData>> {
+    params: FuturesGetCrossTriggerOrderHistoryReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTriggerHisOrders>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_trigger_hisorders',
       { body: params },
@@ -1719,8 +1725,8 @@ export class FuturesClient extends BaseRestClient {
    * Isolated margin only. At least one of tp_trigger_price and sl_trigger_price required. Trade permission. Rate limit: 5/s.
    */
   submitTpslOrder(
-    params: FuturesTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTpslOrderData>> {
+    params: FuturesSubmitTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_tpsl_order', {
       body: params,
     });
@@ -1732,8 +1738,8 @@ export class FuturesClient extends BaseRestClient {
    * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. At least one of tp_trigger_price and sl_trigger_price required. Trade permission. Rate limit: 5/s.
    */
   submitCrossTpslOrder(
-    params: FuturesCrossTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTpslOrderData>> {
+    params: FuturesSubmitCrossTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_tpsl_order', {
       body: params,
     });
@@ -1746,7 +1752,7 @@ export class FuturesClient extends BaseRestClient {
    */
   cancelTpslOrder(
     params: FuturesCancelTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_tpsl_cancel', {
       body: params,
     });
@@ -1758,8 +1764,8 @@ export class FuturesClient extends BaseRestClient {
    * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s.
    */
   cancelCrossTpslOrder(
-    params: FuturesCrossCancelTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    params: FuturesCancelCrossTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_tpsl_cancel', {
       body: params,
     });
@@ -1771,8 +1777,8 @@ export class FuturesClient extends BaseRestClient {
    * Isolated margin only. Trade permission. Rate limit: 5/s.
    */
   cancelAllTpslOrders(
-    params: FuturesCancelAllTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    params: FuturesCancelAllTpslOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_tpsl_cancelall', {
       body: params,
     });
@@ -1784,8 +1790,8 @@ export class FuturesClient extends BaseRestClient {
    * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s.
    */
   cancelAllCrossTpslOrders(
-    params: FuturesCrossCancelAllTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+    params: FuturesCancelAllCrossTpslOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_tpsl_cancelall', {
       body: params,
     });
@@ -1797,8 +1803,8 @@ export class FuturesClient extends BaseRestClient {
    * Isolated margin only. Read permission.
    */
   getTpslOpenOrders(
-    params: FuturesTpslOpenOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTpslOpenOrdersData>> {
+    params: FuturesGetTpslOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslOpenOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_tpsl_openorders', {
       body: params,
     });
@@ -1810,8 +1816,8 @@ export class FuturesClient extends BaseRestClient {
    * Cross margin only. When both filled, contract_code preferred; when none, all data. Read permission.
    */
   getCrossTpslOpenOrders(
-    params: FuturesCrossTpslOpenOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTpslOpenOrdersData>> {
+    params: FuturesGetCrossTpslOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslOpenOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_tpsl_openorders', {
       body: params,
     });
@@ -1822,9 +1828,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Isolated margin only. Read permission.
    */
-  getTpslHisOrders(
-    params: FuturesTpslHisOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTpslHisOrdersData>> {
+  getTpslHistoryOrders(
+    params: FuturesGetTpslHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslHisOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_tpsl_hisorders', {
       body: params,
     });
@@ -1835,9 +1841,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read permission.
    */
-  getCrossTpslHisOrders(
-    params: FuturesCrossTpslHisOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTpslHisOrdersData>> {
+  getCrossTpslHistoryOrders(
+    params: FuturesGetCrossTpslHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslHisOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_tpsl_hisorders', {
       body: params,
     });
@@ -1848,10 +1854,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Isolated margin only. Read permission.
    */
-  getRelationTpslOrder(params: {
+  getTpSlOrderInfo(params: {
     contract_code: string;
     order_id: number | string;
-  }): Promise<FuturesAPISuccessResponse<FuturesRelationTpslOrderData>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesRelationTpslOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_relation_tpsl_order', {
       body: params,
     });
@@ -1862,9 +1868,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read permission.
    */
-  getCrossRelationTpslOrder(
-    params: FuturesCrossRelationTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesRelationTpslOrderData>> {
+  getCrossTpSlOrderInfo(
+    params: FuturesGetCrossTpSlOrderInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesRelationTpslOrder>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_relation_tpsl_order',
       {
@@ -1878,9 +1884,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Isolated margin only. Trade permission. Rate limit: 5/s.
    */
-  submitTrackOrder(
-    params: FuturesSubmitTrackOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrderData>> {
+  submitTrailingOrder(
+    params: FuturesSubmitTrailingOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_track_order', {
       body: params,
     });
@@ -1891,9 +1897,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s.
    */
-  submitCrossTrackOrder(
-    params: FuturesCrossSubmitTrackOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrderData>> {
+  submitCrossTrailingOrder(
+    params: FuturesSubmitCrossTrailingOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_track_order', {
       body: params,
     });
@@ -1904,9 +1910,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Isolated margin only. Trade permission. Rate limit: 5/s.
    */
-  cancelTrackOrder(
-    params: FuturesCancelTrackOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+  cancelTrailingOrder(
+    params: FuturesCancelTrailingOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_track_cancel', {
       body: params,
     });
@@ -1917,9 +1923,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade permission. Rate limit: 5/s.
    */
-  cancelCrossTrackOrder(
-    params: FuturesCrossCancelTrackOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+  cancelCrossTrailingOrder(
+    params: FuturesCancelCrossTrailingOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_track_cancel', {
       body: params,
     });
@@ -1930,9 +1936,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Isolated margin only. Can fill only one of direction and offset to filter. Trade permission. Rate limit: 5/s.
    */
-  cancelAllTrackOrders(
-    params: FuturesCancelAllTrackOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+  cancelAllTrailingOrders(
+    params: FuturesCancelAllTrailingOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_track_cancelall', {
       body: params,
     });
@@ -1943,9 +1949,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Can fill only one of direction and offset to filter. Trade permission. Rate limit: 5/s.
    */
-  cancelAllCrossTrackOrders(
-    params: FuturesCrossCancelAllTrackOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrderData>> {
+  cancelAllCrossTrailingOrders(
+    params: FuturesCancelAllCrossTrailingOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_track_cancelall', {
       body: params,
     });
@@ -1956,9 +1962,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Isolated margin only. Read permission.
    */
-  getTrackOpenOrders(
-    params: FuturesTrackOpenOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTrackOpenOrdersData>> {
+  getTrailingOpenOrders(
+    params: FuturesGetTrailingOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTrackOpenOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_track_openorders', {
       body: params,
     });
@@ -1969,9 +1975,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Cross margin only. When both filled, contract_code preferred; when none, all open orders. Read permission.
    */
-  getCrossTrackOpenOrders(
-    params: FuturesCrossTrackOpenOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTrackOpenOrdersData>> {
+  getCrossTrailingOpenOrders(
+    params: FuturesGetCrossTrailingOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTrackOpenOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_track_openorders', {
       body: params,
     });
@@ -1982,9 +1988,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Isolated margin only. Read permission.
    */
-  getTrackHisOrders(
-    params: FuturesTrackHisOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTrackHisOrdersData>> {
+  getTrailingHistoryOrders(
+    params: FuturesGetTrailingHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTrackHisOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_track_hisorders', {
       body: params,
     });
@@ -1995,9 +2001,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read permission.
    */
-  getCrossTrackHisOrders(
-    params: FuturesCrossTrackHisOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTrackHisOrdersData>> {
+  getCrossTrailingHistoryOrders(
+    params: FuturesGetCrossTrailingHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTrackHisOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_track_hisorders', {
       body: params,
     });
@@ -2014,7 +2020,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getUnifiedAccountInfo(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesUnifiedAccountInfoItem[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesUnifiedAccountInfo[]>> {
     return this.getPrivate('/linear-swap-api/v3/unified_account_info', params);
   }
 
@@ -2023,10 +2029,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Total account assets of U-margin contract unified account. Read permission.
    */
-  getLinearSwapOverviewAccountInfo(params?: {
+  getUnifiedLinearAssets(params?: {
     trade_partition?: string;
   }): Promise<
-    FuturesAPISuccessResponse<FuturesLinearSwapOverviewAccountInfoItem[]>
+    FuturesAPISuccessResponse<FuturesLinearSwapOverviewAccountInfo[]>
   > {
     return this.getPrivate(
       '/linear-swap-api/v3/linear_swap_overview_account_info',
@@ -2039,7 +2045,7 @@ export class FuturesClient extends BaseRestClient {
    *
    * When set currency balance is insufficient, other currencies (e.g. USDT) offset. Only one currency in deduction_currency. Trade permission.
    */
-  setLinearSwapFeeSwitch(params: {
+  updateUnifiedFeeMethod(params: {
     fee_option: 0 | 1;
     deduction_currency: string;
   }): Promise<FuturesAPISuccessResponse<Record<string, never>>> {
@@ -2053,10 +2059,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Margin increase/decrease records. Read permission.
    */
-  getFixPositionMarginChangeRecord(
-    params: FuturesFixPositionMarginChangeRecordReq,
+  getUnifiedMarginAdjustments(
+    params: FuturesGetUnifiedMarginAdjustmentsReq,
   ): Promise<
-    FuturesAPISuccessResponse<FuturesFixPositionMarginChangeRecordItem[]>
+    FuturesAPISuccessResponse<FuturesFixPositionMarginChangeRecord[]>
   > {
     return this.getPrivate(
       '/linear-swap-api/v3/fix_position_margin_change_record',
@@ -2069,9 +2075,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Increase or decrease isolated margin. Query margin_available (increase) and withdraw_available (reduce) via getUnifiedAccountInfo. Trade permission.
    */
-  setFixPositionMarginChange(
-    params: FuturesFixPositionMarginChangeReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesFixPositionMarginChangeData>> {
+  updateUnifiedMargin(
+    params: FuturesUpdateUnifiedMarginReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesFixPositionMarginChange>> {
     return this.postPrivate('/linear-swap-api/v3/fix_position_margin_change', {
       body: params,
     });
