@@ -20,13 +20,22 @@ import type {
   FuturesCmDeliveryContractInfoReq,
   FuturesCmDeliveryContractLimitReq,
   FuturesCmDeliveryContractOpenInterestReq,
+  FuturesCmDeliveryFinancialRecordExactReq,
+  FuturesCmDeliveryFinancialRecordReq,
   FuturesCmDeliveryIndexKlinesReq,
   FuturesCmDeliveryKlinesReq,
   FuturesCmDeliveryLiquidationOrdersReq,
   FuturesCmDeliveryMarkPriceKlinesReq,
+  FuturesCmDeliveryMasterSubTransferRecordReq,
+  FuturesCmDeliveryMasterSubTransferReq,
   FuturesCmDeliveryOpenInterestReq,
+  FuturesCmDeliveryOrderLimitReq,
   FuturesCmDeliveryRiskReserveHistoryReq,
   FuturesCmDeliverySettlementRecordsReq,
+  FuturesCmDeliverySubAccountInfoListReq,
+  FuturesCmDeliverySubAccountListReq,
+  FuturesCmDeliverySubAuthListReq,
+  FuturesCmDeliveryUserSettlementRecordsReq,
   FuturesCrossSubmitOrderReq,
   FuturesGetBasisDataReq,
   FuturesGetContractInfoReq,
@@ -134,8 +143,14 @@ import type {
   FuturesBboTick,
   FuturesCancelAfter,
   FuturesCancelOrder,
+  FuturesCmDeliveryAccountInfo,
   FuturesCmDeliveryAdjustFactor,
+  FuturesCmDeliveryAllSubAccount,
   FuturesCmDeliveryApiState,
+  FuturesCmDeliveryApiTradingStatus,
+  FuturesCmDeliveryAssetPositionInfo,
+  FuturesCmDeliveryAssetValuation,
+  FuturesCmDeliveryBasisData,
   FuturesCmDeliveryConstituents,
   FuturesCmDeliveryContractInfo,
   FuturesCmDeliveryContractOpenInterest,
@@ -143,6 +158,8 @@ import type {
   FuturesCmDeliveryEliteAccountRatio,
   FuturesCmDeliveryElitePositionRatio,
   FuturesCmDeliveryEstimatedSettlementPrice,
+  FuturesCmDeliveryFee,
+  FuturesCmDeliveryFinancialRecord,
   FuturesCmDeliveryIndex,
   FuturesCmDeliveryIndexKline,
   FuturesCmDeliveryInsuranceFund,
@@ -150,15 +167,29 @@ import type {
   FuturesCmDeliveryKline,
   FuturesCmDeliveryLadderMargin,
   FuturesCmDeliveryLastTrade,
+  FuturesCmDeliveryLeverageRate,
   FuturesCmDeliveryLiquidationOrder,
   FuturesCmDeliveryMarketBbo,
-  FuturesCmDeliveryMarketOverview,
+  FuturesCmDeliveryMarketDepth,
   FuturesCmDeliveryMarkPriceKline,
+  FuturesCmDeliveryMasterSubTransfer,
+  FuturesCmDeliveryMasterSubTransfers,
   FuturesCmDeliveryOpenInterest,
+  FuturesCmDeliveryOrderLimit,
+  FuturesCmDeliveryPositionInfo,
+  FuturesCmDeliveryPositionLimit,
   FuturesCmDeliveryPriceLimit,
   FuturesCmDeliveryQueryElements,
   FuturesCmDeliverySettlementRecords,
-  FuturesCmDeliveryTradeHistoryGroup,
+  FuturesCmDeliverySubAccountAssets,
+  FuturesCmDeliverySubAccountsAssets,
+  FuturesCmDeliverySubAuth,
+  FuturesCmDeliverySubPermissions,
+  FuturesCmDeliverySubPositionInfo,
+  FuturesCmDeliveryTicker,
+  FuturesCmDeliveryTradeHistory,
+  FuturesCmDeliveryTransferLimit,
+  FuturesCmDeliveryUserSettlementRecords,
   FuturesContractElements,
   FuturesContractInfo,
   FuturesCrossAccountInfo,
@@ -2760,7 +2791,7 @@ export class FuturesClient extends BaseRestClient {
   getCmMarketDepth(params: {
     symbol: string;
     type: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesMarketDepthTick, 'tick'>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryMarketDepth, 'tick'>> {
     return this.get('/market/depth', params);
   }
 
@@ -2806,9 +2837,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmTicker(params: {
     symbol: string;
-  }): Promise<
-    FuturesAPISuccessResponse<FuturesCmDeliveryMarketOverview, 'tick'>
-  > {
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTicker, 'tick'>> {
     return this.get('/market/detail/merged', params);
   }
 
@@ -2819,9 +2848,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmTickers(params?: {
     symbol?: string;
-  }): Promise<
-    FuturesAPISuccessResponse<FuturesCmDeliveryMarketOverview[], 'ticks'>
-  > {
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTicker[], 'ticks'>> {
     return this.get('/v2/market/detail/batch_merged', params);
   }
 
@@ -2844,7 +2871,7 @@ export class FuturesClient extends BaseRestClient {
   getCmTradeHistory(params: {
     symbol: string;
     size: number;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTradeHistoryGroup[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTradeHistory[]>> {
     return this.get('/market/history/trade', params);
   }
 
@@ -2866,7 +2893,287 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmBasisData(
     params: FuturesCmDeliveryBasisDataReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesBasis[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryBasisData[]>> {
     return this.get('/index/market/history/basis', params);
+  }
+
+  /**
+   *
+   * Coin-M Delivery - Account
+   *
+   */
+
+  /**
+   * Query Asset Valuation (CM)
+   *
+   * Total asset valuation in fiat. valuation_asset optional, defaults to BTC. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmAssetValuation(params?: {
+    valuation_asset?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryAssetValuation[]>> {
+    return this.postPrivate('/api/v1/contract_balance_valuation', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Account Info (CM)
+   *
+   * User's account info per symbol. Omit symbol for all. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmAccountInfo(params?: {
+    symbol?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryAccountInfo[]>> {
+    return this.postPrivate('/api/v1/contract_account_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Position Info (CM)
+   *
+   * User's positions. Omit symbol for all. Signature required. Rate limit: 72/3s per UID. Query with symbol to avoid 1080 when contracts in settlement.
+   */
+  getCmPositionInfo(params?: {
+    symbol?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryPositionInfo[]>> {
+    return this.postPrivate('/api/v1/contract_position_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Set Sub-Account Trading Permissions (CM)
+   *
+   * Enable/disable trading for sub-accounts. sub_uid comma-separated, max 10. Signature required. Trade permission. Rate limit: 72/3s per UID.
+   */
+  updateCmSubPermissions(params: {
+    sub_uid: string;
+    sub_auth: 0 | 1;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliverySubAuth>> {
+    return this.postPrivate('/api/v1/contract_sub_auth', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Sub-Account Trading Permissions (CM)
+   *
+   * List sub-accounts and their trading permission status. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCmSubPermissions(
+    params?: FuturesCmDeliverySubAuthListReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliverySubPermissions>> {
+    return this.getPrivate('/api/v1/contract_sub_auth_list', params);
+  }
+
+  /**
+   * Query Assets of All Sub-Accounts (CM)
+   *
+   * Assets info of all sub-accounts under master. Only returns activated contract sub-accounts. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmAllSubAccounts(
+    params?: FuturesCmDeliverySubAccountListReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryAllSubAccount[]>> {
+    return this.postPrivate('/api/v1/contract_sub_account_list', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Batch of Sub-Account Assets (CM)
+   *
+   * Paginated batch of sub-account assets. Only activated sub-accounts. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmSubAccountsAssets(
+    params?: FuturesCmDeliverySubAccountInfoListReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliverySubAccountsAssets>> {
+    return this.postPrivate('/api/v1/contract_sub_account_info_list', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Single Sub-Account Assets (CM)
+   *
+   * Assets info for one sub-account. sub_uid required. Only activated sub-accounts. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmSubAccountAssets(params: {
+    sub_uid: number;
+    symbol?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliverySubAccountAssets[]>> {
+    return this.postPrivate('/api/v1/contract_sub_account_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Single Sub-Account Positions (CM)
+   *
+   * Position info for one sub-account. sub_uid required. Only activated sub-accounts. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmSubPositionInfo(params: {
+    sub_uid: number;
+    symbol?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliverySubPositionInfo[]>> {
+    return this.postPrivate('/api/v1/contract_sub_position_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Account Financial Records (CM)
+   *
+   * Financial records (transfers, fees, funding, etc.). symbol required, type optional (comma-separated). Window max 48h, within 90 days. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmFinancialRecords(
+    params: FuturesCmDeliveryFinancialRecordReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryFinancialRecord[]>> {
+    return this.postPrivate('/api/v3/contract_financial_record', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Account Financial Records Exact (CM)
+   *
+   * Financial records via multiple fields. from_id for pagination. Same params as contract_financial_record. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmFinancialRecordsExact(
+    params: FuturesCmDeliveryFinancialRecordExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryFinancialRecord[]>> {
+    return this.postPrivate('/api/v3/contract_financial_record_exact', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query User Settlement Records (CM)
+   *
+   * User's settlement records. symbol required. Within 90 days. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmUserSettlementRecords(
+    params: FuturesCmDeliveryUserSettlementRecordsReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesCmDeliveryUserSettlementRecords>
+  > {
+    return this.postPrivate('/api/v1/contract_user_settlement_records', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Order Limit (CM)
+   *
+   * Max open/close order limits per contract for given order type. order_price_type required. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmOrderLimit(
+    params: FuturesCmDeliveryOrderLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryOrderLimit>> {
+    return this.postPrivate('/api/v1/contract_order_limit', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Trading Fee (CM)
+   *
+   * Maker/taker fee rates per contract. Omit symbol for all. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmFee(params?: {
+    symbol?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryFee[]>> {
+    return this.postPrivate('/api/v1/contract_fee', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Transfer Limit (CM)
+   *
+   * Transfer in/out limits per symbol. Omit symbol for all. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmTransferLimit(params?: {
+    symbol?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTransferLimit[]>> {
+    return this.postPrivate('/api/v1/contract_transfer_limit', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Position Limit (CM)
+   *
+   * Max long/short position limits per contract type. Omit symbol for all. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmPositionLimit(params?: {
+    symbol?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryPositionLimit[]>> {
+    return this.postPrivate('/api/v1/contract_position_limit', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Assets And Positions (CM)
+   *
+   * Combined account + positions for symbol. symbol required. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmAssetPositionInfo(params: {
+    symbol: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryAssetPositionInfo[]>> {
+    return this.postPrivate('/api/v1/contract_account_position_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Transfer Between Master And Sub Account (CM)
+   *
+   * Master-sub or sub-master transfer. type: master_to_sub or sub_to_master. Rate limit 10/min per sub. Signature required. Trade permission. Rate limit: 72/3s per UID.
+   */
+  transferCmMasterSub(
+    params: FuturesCmDeliveryMasterSubTransferReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryMasterSubTransfer>> {
+    return this.postPrivate('/api/v1/contract_master_sub_transfer', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Master-Sub Transfer Records (CM)
+   *
+   * Transfer history between master and sub accounts. symbol and create_date required. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmMasterSubTransfers(
+    params: FuturesCmDeliveryMasterSubTransferRecordReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryMasterSubTransfers>> {
+    return this.postPrivate('/api/v1/contract_master_sub_transfer_record', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query API Trading Status (CM)
+   *
+   * User's API indicator disable information (COR, TDN). No params. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmApiTradingStatus(): Promise<
+    FuturesAPISuccessResponse<FuturesCmDeliveryApiTradingStatus[]>
+  > {
+    return this.getPrivate('/api/v1/contract_api_trading_status');
+  }
+
+  /**
+   * Query Available Leverage Rate (CM)
+   *
+   * Available leverage rates per symbol. Omit symbol for all. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmLeverageRate(params?: {
+    symbol?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryLeverageRate[]>> {
+    return this.postPrivate('/api/v1/contract_available_level_rate', {
+      body: params ?? {},
+    });
   }
 }

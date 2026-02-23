@@ -1696,6 +1696,97 @@ export interface FuturesCmDeliveryIndexKlinesReq {
   size: number;
 }
 
+/** Req for GET /api/v1/contract_sub_auth_list. Sub-account trading permissions. */
+export interface FuturesCmDeliverySubAuthListReq {
+  sub_uid?: string;
+  start_time?: number;
+  end_time?: number;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+}
+
+/** Req for POST /api/v3/contract_financial_record. Account financial records. */
+export interface FuturesCmDeliveryFinancialRecordReq {
+  symbol: string;
+  type?: string;
+  start_time?: number;
+  end_time?: number;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+}
+
+/** Req for POST /api/v3/contract_financial_record_exact. Same as contract_financial_record; from_id for pagination. */
+export type FuturesCmDeliveryFinancialRecordExactReq =
+  FuturesCmDeliveryFinancialRecordReq;
+
+/** Req for POST /api/v1/contract_user_settlement_records. User settlement records. */
+export interface FuturesCmDeliveryUserSettlementRecordsReq {
+  symbol: string;
+  start_time?: number;
+  end_time?: number;
+  page_index?: number;
+  page_size?: number;
+}
+
+/** Order price type for contract_order_limit */
+export type FuturesCmDeliveryOrderLimitPriceType =
+  | 'limit'
+  | 'opponent'
+  | 'lightning'
+  | 'optimal_5'
+  | 'optimal_10'
+  | 'optimal_20'
+  | 'fok'
+  | 'ioc'
+  | 'opponent_ioc'
+  | 'lightning_ioc'
+  | 'optimal_5_ioc'
+  | 'optimal_10_ioc'
+  | 'optimal_20_ioc'
+  | 'opponent_fok'
+  | 'lightning_fok'
+  | 'optimal_5_fok'
+  | 'optimal_10_fok'
+  | 'optimal_20_fok';
+
+/** Req for POST /api/v1/contract_order_limit */
+export interface FuturesCmDeliveryOrderLimitReq {
+  order_price_type: FuturesCmDeliveryOrderLimitPriceType;
+  symbol?: string;
+}
+
+/** Req for POST /api/v1/contract_master_sub_transfer_record */
+export interface FuturesCmDeliveryMasterSubTransferRecordReq {
+  symbol: string;
+  transfer_type?: string;
+  create_date: number;
+  page_index?: number;
+  page_size?: number;
+}
+
+/** Req for POST /api/v1/contract_master_sub_transfer */
+export interface FuturesCmDeliveryMasterSubTransferReq {
+  sub_uid: number;
+  symbol: string;
+  amount: number | string;
+  type: 'master_to_sub' | 'sub_to_master';
+  client_order_id?: number;
+}
+
+/** Req for POST /api/v1/contract_sub_account_info_list. Batch of sub-account assets with pagination. */
+export interface FuturesCmDeliverySubAccountInfoListReq {
+  symbol?: string;
+  page_index?: number;
+  page_size?: number;
+}
+
+/** Req for POST /api/v1/contract_sub_account_list. Sub-account assets. */
+export interface FuturesCmDeliverySubAccountListReq {
+  symbol?: string;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+}
+
 /** Req for GET /index/market/history/basis. Basis (contract - index) data. */
 export interface FuturesCmDeliveryBasisDataReq {
   symbol: string;

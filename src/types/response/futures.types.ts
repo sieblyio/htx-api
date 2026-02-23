@@ -376,7 +376,7 @@ export interface FuturesKline {
   trade_turnover: number;
 }
 
-/** Basis data item from /index/market/history/linear_swap_basis */
+/** Basis data item from /index/market/history/linear_swap_basis and /index/market/history/basis */
 export interface FuturesBasis {
   id: number;
   contract_price: string;
@@ -2149,8 +2149,8 @@ export interface FuturesCmDeliveryMarkPriceKline {
   amount: string;
 }
 
-/** Market overview tick from GET /market/detail/merged. 24h summary + best bid/ask. Payload in "tick". */
-export interface FuturesCmDeliveryMarketOverview {
+/** Ticker from GET /market/detail/merged. 24h summary + best bid/ask. Payload in "tick". Alias: getCmTicker/getCmTickers. */
+export interface FuturesCmDeliveryTicker {
   id: number;
   ts: number;
   vol: string;
@@ -2191,14 +2191,14 @@ export interface FuturesCmDeliveryTradeHistoryItem {
   quantity?: string | number;
 }
 
-/** Trade history group from GET /market/history/trade. Each group has trades by timestamp. Payload in "data". */
-export interface FuturesCmDeliveryTradeHistoryGroup {
+/** Trade history from GET /market/history/trade. Each group has trades by timestamp. Payload in "data". Alias: getCmTradeHistory. */
+export interface FuturesCmDeliveryTradeHistory {
   id: number;
   ts: number;
   data: FuturesCmDeliveryTradeHistoryItem[];
 }
 
-/** Index kline item from GET /index/market/history/index. vol/count/amount typically 0. */
+/** Index kline item from GET /index/market/history/index. vol/count/amount typically 0. Alias: getCmIndexKlines. */
 export interface FuturesCmDeliveryIndexKline {
   id: number;
   vol: number;
@@ -2209,6 +2209,142 @@ export interface FuturesCmDeliveryIndexKline {
   high: number;
   amount: number;
 }
+
+/** Market depth from GET /market/depth. Same structure as FuturesMarketDepthTick. Alias: getCmMarketDepth. */
+export type FuturesCmDeliveryMarketDepth = FuturesMarketDepthTick;
+
+/** Asset valuation from POST /api/v1/contract_balance_valuation. Same structure as FuturesBalanceValuation. Alias: getCmAssetValuation. */
+export type FuturesCmDeliveryAssetValuation = FuturesBalanceValuation;
+
+/** Account info from POST /api/v1/contract_account_info. Per-symbol margin account. */
+export interface FuturesCmDeliveryAccountInfo {
+  symbol: string;
+  margin_balance: number;
+  margin_position: number;
+  margin_frozen: number;
+  margin_available: number;
+  profit_real: number;
+  profit_unreal: number;
+  risk_rate: number | null;
+  new_risk_rate: string;
+  trade_partition: string;
+  liquidation_price: number | null;
+  withdraw_available: number;
+  lever_rate: number;
+  adjust_factor: number;
+  margin_static: number;
+}
+
+/** Sub auth from POST /api/v1/contract_sub_auth. Same structure as FuturesSubAuth. Alias: updateCmSubPermissions. */
+export type FuturesCmDeliverySubAuth = FuturesSubAuth;
+
+/** Sub permissions from GET /api/v1/contract_sub_auth_list. Same structure as FuturesSubAuthList. Alias: getCmSubPermissions. */
+export type FuturesCmDeliverySubPermissions = FuturesSubAuthList;
+
+/** Sub-account list item from POST /api/v1/contract_sub_account_list. Per-symbol margin info. */
+export interface FuturesCmDeliverySubAccountListItem {
+  symbol: string;
+  margin_balance: number;
+  liquidation_price: number | null;
+  risk_rate: number | string | null;
+  query_id: number;
+}
+
+/** All sub-account from POST /api/v1/contract_sub_account_list. Alias: getCmAllSubAccounts. */
+export interface FuturesCmDeliveryAllSubAccount {
+  sub_uid: number;
+  list: FuturesCmDeliverySubAccountListItem[];
+}
+
+/** Account info item from POST /api/v1/contract_sub_account_info_list sub_list[].account_info_list */
+export interface FuturesCmDeliverySubAccountInfoListItem {
+  symbol: string;
+  margin_balance: number;
+  liquidation_price: number | null;
+  risk_rate: number | string | null;
+}
+
+/** Sub-list item from POST /api/v1/contract_sub_account_info_list */
+export interface FuturesCmDeliverySubAccountInfoListSub {
+  sub_uid: number;
+  account_info_list: FuturesCmDeliverySubAccountInfoListItem[];
+}
+
+/** Sub-accounts assets from POST /api/v1/contract_sub_account_info_list. Alias: getCmSubAccountsAssets. */
+export interface FuturesCmDeliverySubAccountsAssets {
+  total_page: number;
+  current_page: number;
+  total_size: number;
+  sub_list: FuturesCmDeliverySubAccountInfoListSub[];
+}
+
+/** Sub-account assets from POST /api/v1/contract_sub_account_info. Alias: getCmSubAccountAssets. */
+export interface FuturesCmDeliverySubAccountAssets {
+  symbol: string;
+  margin_balance: number;
+  margin_position: number;
+  margin_frozen: number;
+  margin_available: number;
+  profit_real: number;
+  profit_unreal: number;
+  risk_rate: number | string | null;
+  liquidation_price: number | null;
+  withdraw_available: number;
+  lever_rate: number;
+  adjust_factor: number;
+  margin_static: number;
+  new_risk_rate: string;
+  trade_partition: string;
+}
+
+/** Position info from POST /api/v1/contract_sub_position_info. Single sub-account positions, data array element. */
+export interface FuturesCmDeliverySubPositionInfo {
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  volume: number;
+  available: number;
+  frozen: number;
+  cost_open: number;
+  cost_hold: number;
+  profit_unreal: number;
+  profit_rate: number;
+  profit: number;
+  position_margin: number;
+  lever_rate: number;
+  direction: string;
+  last_price: number;
+  adl_risk_percent?: string | number;
+  liq_px: string;
+  new_risk_rate: string;
+  trade_partition: string;
+}
+
+/** Position info from POST /api/v1/contract_position_info. */
+export interface FuturesCmDeliveryPositionInfo {
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  volume: number;
+  available: number;
+  frozen: number;
+  cost_open: number;
+  cost_hold: number;
+  profit_unreal: number;
+  profit_rate: number;
+  profit: number;
+  position_margin: number;
+  lever_rate: number;
+  direction: string;
+  last_price: number;
+  adl_risk_percent?: string | number;
+  liq_px: string;
+  new_risk_rate: string;
+  trade_partition: string;
+}
+
+/** Basis data from GET /index/market/history/basis. Same structure as FuturesBasis. Alias: getCmBasisData. */
+export type FuturesCmDeliveryBasisData = FuturesBasis;
 
 /** Liquidation order from GET /api/v3/contract_liquidation_orders */
 export interface FuturesCmDeliveryLiquidationOrder {
@@ -2244,6 +2380,208 @@ export interface FuturesCmDeliverySettlementRecords {
   current_page: number;
   total_size: number;
   settlement_record: FuturesCmDeliverySettlementRecord[];
+}
+
+/** Financial record from POST /api/v3/contract_financial_record and contract_financial_record_exact */
+export interface FuturesCmDeliveryFinancialRecord {
+  query_id?: number;
+  id: number;
+  ts: number;
+  symbol: string;
+  contract_code: string;
+  type: number;
+  amount: number | string;
+}
+
+/** Position in user settlement record from POST /api/v1/contract_user_settlement_records */
+export interface FuturesCmDeliveryUserSettlementRecordPosition {
+  symbol: string;
+  contract_code: string;
+  direction: string;
+  volume: number;
+  cost_open: number;
+  cost_hold_pre: number;
+  cost_hold: number;
+  settlement_profit_unreal: number;
+  settlement_price: number;
+  settlement_type: string;
+}
+
+/** User settlement record from POST /api/v1/contract_user_settlement_records */
+export interface FuturesCmDeliveryUserSettlementRecord {
+  symbol: string;
+  margin_balance_init: number;
+  margin_balance: number;
+  settlement_profit_real: number;
+  settlement_time: number;
+  clawback: number;
+  delivery_fee: number;
+  offset_profitloss: number;
+  fee: number;
+  fee_asset: string;
+  positions: FuturesCmDeliveryUserSettlementRecordPosition[];
+}
+
+/** Response from POST /api/v1/contract_user_settlement_records */
+export interface FuturesCmDeliveryUserSettlementRecords {
+  total_page: number;
+  current_page: number;
+  total_size: number;
+  settlement_records: FuturesCmDeliveryUserSettlementRecord[];
+}
+
+/** Order limit type from POST /api/v1/contract_order_limit list[].types */
+export interface FuturesCmDeliveryOrderLimitType {
+  contract_type: string;
+  open_limit: number;
+  close_limit: number;
+}
+
+/** Order limit list item from POST /api/v1/contract_order_limit */
+export interface FuturesCmDeliveryOrderLimitListItem {
+  symbol: string;
+  types: FuturesCmDeliveryOrderLimitType[];
+}
+
+/** Response from POST /api/v1/contract_order_limit */
+export interface FuturesCmDeliveryOrderLimit {
+  order_price_type: string;
+  list: FuturesCmDeliveryOrderLimitListItem[];
+}
+
+/** Fee from POST /api/v1/contract_fee */
+export interface FuturesCmDeliveryFee {
+  symbol: string;
+  open_maker_fee: string;
+  open_taker_fee: string;
+  close_maker_fee: string;
+  close_taker_fee: string;
+  delivery_fee: string;
+  fee_asset: string;
+}
+
+/** Transfer limit from POST /api/v1/contract_transfer_limit */
+export interface FuturesCmDeliveryTransferLimit {
+  symbol: string;
+  transfer_in_max_each: number;
+  transfer_in_min_each: number;
+  transfer_out_max_each: number;
+  transfer_out_min_each: number;
+  transfer_in_max_daily: number;
+  transfer_out_max_daily: number;
+  net_transfer_in_max_daily: number;
+  net_transfer_out_max_daily: number;
+}
+
+/** Position limit list item from POST /api/v1/contract_position_limit data[].list */
+export interface FuturesCmDeliveryPositionLimitListItem {
+  contract_type: string;
+  buy_limit: number;
+  sell_limit: number;
+}
+
+/** Position limit from POST /api/v1/contract_position_limit */
+export interface FuturesCmDeliveryPositionLimit {
+  symbol: string;
+  list: FuturesCmDeliveryPositionLimitListItem[];
+}
+
+/** Position in asset_position_info from POST /api/v1/contract_account_position_info */
+export interface FuturesCmDeliveryAssetPositionInfoPosition {
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  volume: number;
+  available: number;
+  frozen: number;
+  cost_open: number;
+  cost_hold: number;
+  profit_unreal: number;
+  profit_rate: number;
+  profit: number;
+  position_margin: number;
+  lever_rate: number;
+  direction: string;
+  last_price: number;
+  adl_risk_percent?: string | number;
+}
+
+/** Asset + positions from POST /api/v1/contract_account_position_info. Alias: getCmAssetPositionInfo. */
+export interface FuturesCmDeliveryAssetPositionInfo {
+  symbol: string;
+  margin_balance: number;
+  margin_position: number;
+  margin_frozen: number;
+  margin_available: number;
+  profit_real: number;
+  profit_unreal: number;
+  risk_rate: number | string | null;
+  withdraw_available: number;
+  liquidation_price: number | null;
+  lever_rate: number;
+  adjust_factor: number;
+  margin_static: number;
+  new_risk_rate: string;
+  trade_partition: string;
+  positions: FuturesCmDeliveryAssetPositionInfoPosition[];
+}
+
+/** Master-sub transfer from POST /api/v1/contract_master_sub_transfer. Same structure as FuturesMasterSubTransfer. */
+export type FuturesCmDeliveryMasterSubTransfer = FuturesMasterSubTransfer;
+
+/** Transfer record item from POST /api/v1/contract_master_sub_transfer_record */
+export interface FuturesCmDeliveryMasterSubTransferRecordItem {
+  id: number;
+  ts: number;
+  symbol: string;
+  sub_uid: string;
+  sub_account_name: string;
+  transfer_type: number;
+  amount: number | string;
+}
+
+/** Master-sub transfers from POST /api/v1/contract_master_sub_transfer_record. Alias: getCmMasterSubTransfers. */
+export interface FuturesCmDeliveryMasterSubTransfers {
+  total_page: number;
+  current_page: number;
+  total_size: number;
+  transfer_record: FuturesCmDeliveryMasterSubTransferRecordItem[];
+}
+
+/** API trading status item from GET /api/v1/contract_api_trading_status */
+export interface FuturesCmDeliveryApiTradingStatusCor {
+  orders_threshold: number;
+  orders: number;
+  invalid_cancel_orders: number;
+  cancel_ratio_threshold: number;
+  cancel_ratio: number;
+  is_trigger: number;
+  is_active: number;
+}
+
+/** API trading status TDN from GET /api/v1/contract_api_trading_status */
+export interface FuturesCmDeliveryApiTradingStatusTdn {
+  disables_threshold: number;
+  disables: number;
+  is_trigger: number;
+  is_active: number;
+}
+
+/** API trading status from GET /api/v1/contract_api_trading_status */
+export interface FuturesCmDeliveryApiTradingStatus {
+  is_disable: number;
+  order_price_types: string;
+  disable_reason: string;
+  disable_interval: number;
+  recovery_time: number;
+  COR: FuturesCmDeliveryApiTradingStatusCor;
+  TDN: FuturesCmDeliveryApiTradingStatusTdn;
+}
+
+/** Leverage rate from POST /api/v1/contract_available_level_rate. Alias: getCmLeverageRate. */
+export interface FuturesCmDeliveryLeverageRate {
+  symbol: string;
+  available_level_rate: string;
 }
 
 /** GET /v1/insurance_fund_info */
