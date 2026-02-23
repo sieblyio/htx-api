@@ -1761,3 +1761,272 @@ export interface FuturesFixPositionMarginChange {
   order_id: string;
   client_order_id: number | string | null;
 }
+
+/**
+ * USDT Margined Futures Multi Asset - Account (v5 API)
+ */
+
+/** Currency detail from /v5/account/balance */
+export interface FuturesV5AccountBalanceDetail {
+  currency: string;
+  equity: string;
+  isolated_equity: string;
+  available: string;
+  withdraw_available: string;
+  profit_unreal: string;
+  isolated_profit_unreal: string;
+  initial_margin: string;
+  maintenance_margin: string;
+  maintenance_margin_rate: string;
+  initial_margin_rate: string;
+  voucher: string;
+  voucher_value: string;
+  created_time: number;
+  updated_time: number;
+}
+
+/** Account balance data from /v5/account/balance */
+export interface FuturesV5AccountBalance {
+  /** "normal" | "liquidating" | "adl" | "open_limit" */
+  state: string;
+  equity: string;
+  initial_margin: string;
+  maintenance_margin: string;
+  maintenance_margin_rate: string;
+  profit_unreal: string;
+  available_margin: string;
+  voucher_value: string;
+  created_time: number;
+  updated_time: number;
+  details: FuturesV5AccountBalanceDetail[];
+}
+
+/** Set asset mode response data from POST /v5/account/asset_mode */
+export interface FuturesV5AssetMode {
+  /** 0: Single-asset collateral; 1: Multi-assets collateral */
+  assets_mode: 0 | 1;
+}
+
+/** Get asset mode response data from GET /v5/account/asset_mode */
+export interface FuturesV5AssetModeGet {
+  /** 0: Single-asset collateral; 1: Multi-assets collateral */
+  asset_mode: 0 | 1;
+}
+
+/** Fee deduction crypto from /v5/account/fee_deduction_currency */
+export interface FuturesV5FeeDeductionCurrency {
+  /** 1: Yes; 0: No */
+  fee_option: 0 | 1;
+  /** Deduction currency (e.g. htx, trx). Not returned when fee_option = 0 */
+  deduction_currency?: string;
+}
+
+/** Financial record item from /v5/account/bills */
+export interface FuturesV5Bill {
+  id: string;
+  contract_code: string;
+  margin_mode: string;
+  type: string;
+  currency: string;
+  amount: string;
+  created_time: string;
+}
+
+/**
+ * USDT Margined Futures Multi Asset - Orders (v5 API)
+ */
+
+/** Place order response from POST /v5/trade/order */
+export interface FuturesV5PlaceOrderResp {
+  order_id: string;
+  client_order_id?: string;
+}
+
+/** Batch place order item from POST /v5/trade/batch_orders */
+export interface FuturesV5PlaceBatchOrderRespItem {
+  order_id: string;
+  client_order_id?: string;
+  code: number;
+  message: string;
+}
+
+/** Close position response from POST /v5/trade/position */
+export interface FuturesV5ClosePositionResp {
+  order_id: string | number;
+  client_order_id?: string;
+}
+
+/** Open order / order info / order history item from v5 trade endpoints */
+export interface FuturesV5Order {
+  id: string;
+  contract_code: string;
+  contract_type?: string;
+  side: string;
+  position_side: string;
+  type: string;
+  price_match?: string | null;
+  order_id: string;
+  client_order_id: string;
+  margin_mode: string;
+  price?: string;
+  volume: string;
+  lever_rate?: number;
+  state: string | number;
+  order_source: string;
+  reduce_only?: boolean | string;
+  time_in_force: string;
+  tp_trigger_price?: string;
+  tp_order_price?: string;
+  tp_type?: string | null;
+  tp_trigger_price_type?: string | null;
+  sl_trigger_price?: string;
+  sl_order_price?: string;
+  sl_type?: string | null;
+  sl_trigger_price_type?: string | null;
+  trade_avg_price?: string;
+  trade_volume?: string;
+  trade_turnover?: string;
+  fee_currency?: string;
+  fee?: string;
+  profit?: string | null;
+  price_protect?: boolean | string;
+  cancel_reason?: string | null;
+  created_time?: string;
+  updated_time?: string;
+  self_match_prevent?: string;
+}
+
+/** Execution/trade detail from GET /v5/trade/order/details */
+export interface FuturesV5OrderExecutionDetail {
+  id?: string;
+  contract_code?: string;
+  order_id?: string;
+  trade_id?: string;
+  side?: string;
+  position_side?: string;
+  order_type?: string;
+  margin_mode?: string;
+  type?: string;
+  client_order_id?: string;
+  role?: string;
+  trade_price?: string;
+  trade_volume?: string;
+  trade_turnover?: string;
+  created_time?: string;
+  updated_time?: string;
+  order_source?: string;
+  fee_currency?: string;
+  trade_fee?: string;
+  deduction_price?: string;
+  profit?: string;
+  contract_type?: string;
+}
+
+/** Cancel-after response from POST /v5/trade/cancel-after */
+export interface FuturesV5CancelAfterResp {
+  current_time: string;
+  trigger_time?: string;
+}
+
+/**
+ * USDT Margined Futures Multi Asset - Positions (v5 API)
+ */
+
+/** Position from GET /v5/trade/position/opens */
+export interface FuturesV5Position {
+  contract_code: string;
+  position_side: string;
+  direction: string;
+  margin_mode: string;
+  open_avg_price: string;
+  volume: string;
+  available: string;
+  lever_rate: string | number;
+  adl_risk_percent?: number | null;
+  liquidation_price: string;
+  initial_margin: string;
+  maintenance_margin: string;
+  profit_unreal: string;
+  profit_rate: string;
+  margin_rate: string;
+  margin_currency: string;
+  last_price?: string;
+  mark_price?: string;
+  contract_type: string;
+  created_time: string;
+  updated_time: string;
+}
+
+/** Leverage list entry from GET /v5/position/lever */
+export interface FuturesV5LeverListEntry {
+  contract_code: string;
+  contract_type: string;
+  margin_mode: string;
+  position_side: string;
+  lever_rate: number;
+  available_lever: string | string[];
+}
+
+/** Set leverage response from POST /v5/position/lever */
+export interface FuturesV5SetLeverageResp {
+  contract_code: string;
+  margin_mode: string;
+  position_side?: string;
+  lever_rate: number;
+}
+
+/** Position mode from GET/POST /v5/position/mode */
+export interface FuturesV5PositionModeResp {
+  position_mode: 'single_side' | 'dual_side';
+}
+
+/** Risk limit entry from GET /v5/position/risk/limit */
+export interface FuturesV5RiskLimitEntry {
+  contract_code: string;
+  contract_type?: string;
+  margin_mode: string;
+  position_side: string;
+  max_lever: string;
+  maintenance_margin_rate: string;
+  max_volume: string;
+  min_volume: string;
+  volume_unit: string;
+}
+
+/** Risk limit tier entry from GET /v5/position/risk/limit_tier */
+export interface FuturesV5RiskLimitTierEntry {
+  contract_code: string;
+  margin_mode: string;
+  tier: number;
+  max_lever: string;
+  maintenance_margin_rate: string;
+  max_volume: string;
+  min_volume: string;
+  volume_unit: string;
+}
+
+/**
+ * USDT Margined Futures Multi Asset - Basic Information (v5 API)
+ */
+
+/** Risk limit entry from GET /v5/market/risk/limit */
+export interface FuturesV5MarketRiskLimitEntry {
+  contract_code: string;
+  margin_mode: string;
+  tier: number;
+  max_lever: string;
+  maintenance_margin_rate: string;
+  max_volume: string;
+  min_volume: string;
+  volume_unit?: string;
+}
+
+/** Assets deduction currency from GET /v5/market/assets_deduction_currency */
+export interface FuturesV5AssetsDeductionCurrencyResp {
+  currency: string[];
+}
+
+/** Multi-assets margin from GET /v5/market/multi_assets_margin */
+export interface FuturesV5MultiAssetsMarginResp {
+  multi_assets: string[];
+}

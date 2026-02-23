@@ -93,6 +93,25 @@ import type {
   FuturesTransferMasterSubReq,
   FuturesUpdateCrossLeverageReq,
   FuturesUpdateUnifiedMarginReq,
+  FuturesV5AdjustMarginReq,
+  FuturesV5BillsReq,
+  FuturesV5CancelAfterReq,
+  FuturesV5CancelAllOrdersReq,
+  FuturesV5CancelBatchOrdersReq,
+  FuturesV5CancelOrderReq,
+  FuturesV5ClosePositionReq,
+  FuturesV5LeverListReq,
+  FuturesV5MarketRiskLimitReq,
+  FuturesV5OpenOrdersReq,
+  FuturesV5OpenPositionsReq,
+  FuturesV5OrderDetailsReq,
+  FuturesV5OrderHistoryReq,
+  FuturesV5OrderInfoReq,
+  FuturesV5RiskLimitReq,
+  FuturesV5RiskLimitTierReq,
+  FuturesV5SetLeverageReq,
+  FuturesV5SetPositionModeReq,
+  FuturesV5SubmitOrderReq,
 } from './types/request/futures.types.js';
 import type {
   FuturesAdjustFactor,
@@ -178,6 +197,26 @@ import type {
   FuturesTriggerHisOrders,
   FuturesTriggerOpenOrders,
   FuturesUnifiedAccountInfo,
+  FuturesV5AccountBalance,
+  FuturesV5AssetMode,
+  FuturesV5AssetModeGet,
+  FuturesV5AssetsDeductionCurrencyResp,
+  FuturesV5Bill,
+  FuturesV5CancelAfterResp,
+  FuturesV5ClosePositionResp,
+  FuturesV5FeeDeductionCurrency,
+  FuturesV5LeverListEntry,
+  FuturesV5MarketRiskLimitEntry,
+  FuturesV5MultiAssetsMarginResp,
+  FuturesV5Order,
+  FuturesV5OrderExecutionDetail,
+  FuturesV5PlaceBatchOrderRespItem,
+  FuturesV5PlaceOrderResp,
+  FuturesV5Position,
+  FuturesV5PositionModeResp,
+  FuturesV5RiskLimitEntry,
+  FuturesV5RiskLimitTierEntry,
+  FuturesV5SetLeverageResp,
 } from './types/response/futures.types.js';
 import { FuturesAPISuccessResponse } from './types/response/shared.types.js';
 
@@ -2081,5 +2120,381 @@ export class FuturesClient extends BaseRestClient {
     return this.postPrivate('/linear-swap-api/v3/fix_position_margin_change', {
       body: params,
     });
+  }
+
+  /**
+   *
+   * USDT Margined Futures Multi Asset - Account (v5 API)
+   *
+   */
+
+  /**
+   * Get Account Balance
+   *
+   * Get information about your Futures account. Applicable to multi-assets collateral mode.
+   * Signature required. Read permission. Rate limit: 144/3s per UID (shared by all altcoins contracts).
+   */
+  getMultiAssetAccountBalance(): Promise<
+    FuturesAPISuccessResponse<FuturesV5AccountBalance>
+  > {
+    return this.getPrivate('/v5/account/balance');
+  }
+
+  /**
+   * Get Asset Mode
+   *
+   * Query the current asset mode (single vs multi-assets collateral).
+   * Signature required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getMultiAssetMode(): Promise<
+    FuturesAPISuccessResponse<FuturesV5AssetModeGet>
+  > {
+    return this.getPrivate('/v5/account/asset_mode');
+  }
+
+  /**
+   * Set Asset Mode
+   *
+   * Set the current asset mode (single vs multi-assets collateral).
+   * Signature required. Trade permission. Rate limit: 1 req/10s per UID.
+   */
+  updateMultiAssetMode(params: {
+    assets_mode: 0 | 1;
+  }): Promise<FuturesAPISuccessResponse<FuturesV5AssetMode>> {
+    return this.postPrivate('/v5/account/asset_mode', { body: params });
+  }
+
+  /**
+   * Set Fee Deduction Crypto
+   *
+   * Set the cryptocurrency for deducting trading fees (e.g. HTX, TRX).
+   * Signature required. Trade permission. Rate limit: 144/3s per UID.
+   */
+  updateMultiAssetFeeCurrency(params: {
+    fee_option: 0 | 1;
+    deduction_currency: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesV5FeeDeductionCurrency>> {
+    return this.postPrivate('/v5/account/fee_deduction_currency', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Fee Deduction Crypto
+   *
+   * Query whether fee deduction is enabled and the deduction currency.
+   * Signature required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getMultiAssetFeeCurrency(): Promise<
+    FuturesAPISuccessResponse<FuturesV5FeeDeductionCurrency>
+  > {
+    return this.getPrivate('/v5/account/fee_deduction_currency');
+  }
+
+  /**
+   * Query Financial Records
+   *
+   * Query financial records (bills) with optional filters.
+   * Signature required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getMultiAssetBills(
+    params?: FuturesV5BillsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5Bill[]>> {
+    return this.getPrivate('/v5/account/bills', params);
+  }
+
+  /**
+   *
+   * USDT Margined Futures Multi Asset - Orders (v5 API)
+   *
+   */
+
+  /**
+   * Place Order
+   *
+   * Place an order in futures trading.
+   * Signature required. Trade permission. Rate limit: 144/3s per UID.
+   */
+  submitMultiAssetOrder(
+    params: FuturesV5SubmitOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5PlaceOrderResp>> {
+    return this.postPrivate('/v5/trade/order', { body: params });
+  }
+
+  /**
+   * Place Multiple Orders
+   *
+   * Place bulk orders in futures trading.
+   * Signature required. Trade permission. Rate limit: 144/3s per UID.
+   */
+  submitMultiAssetBatchOrders(
+    orders: FuturesV5SubmitOrderReq[],
+  ): Promise<FuturesAPISuccessResponse<FuturesV5PlaceBatchOrderRespItem[]>> {
+    return this.postPrivate('/v5/trade/batch_orders', { body: orders });
+  }
+
+  /**
+   * Cancel Order
+   *
+   * Cancel an order in futures trading.
+   * Signature required. Trade permission. Rate limit: 144/3s per UID.
+   */
+  cancelMultiAssetOrder(
+    params: FuturesV5CancelOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5PlaceOrderResp>> {
+    return this.postPrivate('/v5/trade/cancel_order', { body: params });
+  }
+
+  /**
+   * Cancel Multiple Orders
+   *
+   * Cancel orders in a batch. Max 10 orders per request.
+   * Signature required. Trade permission. Rate limit: 144/3s per UID.
+   */
+  cancelMultiAssetBatchOrders(
+    params: FuturesV5CancelBatchOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5PlaceBatchOrderRespItem[]>> {
+    return this.postPrivate('/v5/trade/cancel_batch_orders', { body: params });
+  }
+
+  /**
+   * Cancel All Orders
+   *
+   * Cancel all open orders. Optional filters by contract, side, position_side.
+   * Signature required. Trade permission. Rate limit: 144/3s per UID.
+   */
+  cancelMultiAssetAllOrders(
+    params?: FuturesV5CancelAllOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5PlaceBatchOrderRespItem[]>> {
+    return this.postPrivate('/v5/trade/cancel_all_orders', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Close All of a Symbol at Market Price
+   *
+   * Sell designated positions at market price.
+   * Signature required. Trade permission. Rate limit: 144/3s per UID.
+   */
+  closeMultiAssetPosition(
+    params: FuturesV5ClosePositionReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5ClosePositionResp>> {
+    return this.postPrivate('/v5/trade/position', { body: params });
+  }
+
+  /**
+   * Close All at Market Price
+   *
+   * Sell all positions at market price.
+   * Signature required. Trade permission. Rate limit: 144/3s per UID.
+   */
+  closeMultiAssetAllPositions(): Promise<
+    FuturesAPISuccessResponse<FuturesV5PlaceBatchOrderRespItem[]>
+  > {
+    return this.postPrivate('/v5/trade/position_all', { body: {} });
+  }
+
+  /**
+   * Get Current Orders
+   *
+   * Get unfilled futures orders. Omit params for all open orders.
+   * Signature required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getMultiAssetOpenOrders(
+    params?: FuturesV5OpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5Order[]>> {
+    return this.getPrivate('/v5/trade/order/opens', params);
+  }
+
+  /**
+   * Get Execution Details (last 3 days)
+   *
+   * Get detailed info about executed orders in the last 3 days.
+   * Either order_id or client_order_id recommended. Signature required. Read permission.
+   */
+  getMultiAssetFills(
+    params?: FuturesV5OrderDetailsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5OrderExecutionDetail[]>> {
+    return this.getPrivate('/v5/trade/order/details', params);
+  }
+
+  /**
+   * Get Order History
+   *
+   * Get previous futures orders. contract_code and margin_mode required.
+   * Signature required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getMultiAssetOrderHistory(
+    params: FuturesV5OrderHistoryReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5Order[]>> {
+    return this.getPrivate('/v5/trade/order/history', params);
+  }
+
+  /**
+   * Get Order Info
+   *
+   * Get information about a specific order. contract_code required; one of order_id or client_order_id required.
+   * Signature required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getMultiAssetOrderInfo(
+    params: FuturesV5OrderInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5Order>> {
+    return this.getPrivate('/v5/trade/order', params);
+  }
+
+  /**
+   * Automatic Order Cancellation (Dead Man's Switch)
+   *
+   * Enable/disable auto-cancel of all pending orders when heartbeat stops.
+   * time_out >= 5000 ms; default 5000. Signature required. Trade permission.
+   */
+  setMultiAssetCancelAfter(
+    params: FuturesV5CancelAfterReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5CancelAfterResp>> {
+    return this.postPrivate('/v5/trade/cancel-after', { body: params });
+  }
+
+  /**
+   *
+   * USDT Margined Futures Multi Asset - Positions (v5 API)
+   *
+   */
+
+  /**
+   * Get Current Position
+   *
+   * Get information about your current positions.
+   * Signature required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getMultiAssetPositions(
+    params?: FuturesV5OpenPositionsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5Position[]>> {
+    return this.getPrivate('/v5/trade/position/opens', params);
+  }
+
+  /**
+   * Get Leverage List
+   *
+   * Get the list of available leverage for a contract.
+   * Signature required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getMultiAssetLeverage(
+    params?: FuturesV5LeverListReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5LeverListEntry[]>> {
+    return this.getPrivate('/v5/position/lever', params);
+  }
+
+  /**
+   * Set Leverage
+   *
+   * Set leverage for a contract. position_side required when isolated in two-way mode.
+   * Signature required. Trade permission. Rate limit: 144/3s per UID.
+   */
+  updateMultiAssetLeverage(
+    params: FuturesV5SetLeverageReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5SetLeverageResp>> {
+    return this.postPrivate('/v5/position/lever', { body: params });
+  }
+
+  /**
+   * Get Position Mode
+   *
+   * Get the current position mode (one-way vs hedge).
+   * Signature required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getMultiAssetPositionMode(): Promise<
+    FuturesAPISuccessResponse<FuturesV5PositionModeResp>
+  > {
+    return this.getPrivate('/v5/position/mode');
+  }
+
+  /**
+   * Set Position Mode
+   *
+   * Switch between one-way (single_side) and hedge (dual_side) mode.
+   * Signature required. Trade permission. Rate limit: 144/3s per UID.
+   */
+  updateMultiAssetPositionMode(
+    params: FuturesV5SetPositionModeReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5PositionModeResp>> {
+    return this.postPrivate('/v5/position/mode', { body: params });
+  }
+
+  /**
+   * Get Futures Risk Limit
+   *
+   * Get risk limit info of your current futures position.
+   * Signature required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getMultiAssetRiskLimit(
+    params?: FuturesV5RiskLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5RiskLimitEntry[]>> {
+    return this.getPrivate('/v5/position/risk/limit', params);
+  }
+
+  /**
+   * Query Position Risk Limit Tiers
+   *
+   * Get all risk limit tiers for a contract.
+   * Signature required. Read permission. Rate limit: 144/3s per UID.
+   */
+  getMultiAssetRiskLimitTiers(
+    params: FuturesV5RiskLimitTierReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5RiskLimitTierEntry[]>> {
+    return this.getPrivate('/v5/position/risk/limit_tier', params);
+  }
+
+  /**
+   * Adjust Margin for Isolated Positions
+   *
+   * Increase or decrease margin of isolated positions. Query margin_available (add) and withdraw_available (reduce) via unified account info.
+   * Signature required. Trade permission. Rate limit: 144/3s per UID.
+   */
+  adjustMultiAssetMargin(
+    params: FuturesV5AdjustMarginReq,
+  ): Promise<FuturesAPISuccessResponse<Record<string, never>>> {
+    return this.postPrivate('/v5/position/margin', { body: params });
+  }
+
+  /**
+   *
+   * USDT Margined Futures Multi Asset - Basic Information (v5 API)
+   *
+   */
+
+  /**
+   * Get Futures Risk Limit (Market)
+   *
+   * Get futures risk limit table info. Signature required. Read permission. Rate limit: 240/3s per IP.
+   */
+  getMultiAssetMarketRiskLimit(
+    params?: FuturesV5MarketRiskLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5MarketRiskLimitEntry[]>> {
+    return this.getPrivate('/v5/market/risk/limit', params);
+  }
+
+  /**
+   * Assets Available for Trading Fee Deduction
+   *
+   * Get list of assets that can be used to deduct trading fees.
+   * Signature required. Read permission. Rate limit: 240/3s per IP.
+   */
+  getMultiAssetFeeCurrencies(): Promise<
+    FuturesAPISuccessResponse<FuturesV5AssetsDeductionCurrencyResp>
+  > {
+    return this.getPrivate('/v5/market/assets_deduction_currency');
+  }
+
+  /**
+   * Assets Available for Multi-Assets Collateral Mode
+   *
+   * Get assets available for multi-assets collateral mode.
+   * Signature required. Read permission. Rate limit: 240/3s per IP.
+   */
+  getMultiAssetCollateralAssets(): Promise<
+    FuturesAPISuccessResponse<FuturesV5MultiAssetsMarginResp>
+  > {
+    return this.getPrivate('/v5/market/multi_assets_margin');
   }
 }

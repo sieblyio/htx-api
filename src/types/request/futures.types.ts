@@ -1376,3 +1376,194 @@ export interface FuturesGetUnifiedMarginAdjustmentsReq {
   /** prev: min query_id from last result; next: max query_id from last result */
   from_id?: number;
 }
+
+/** Req for GET /v5/account/bills. Query financial records. */
+export interface FuturesV5BillsReq {
+  /** Contract code (e.g. BTC-USDT, ETH-USDT) */
+  contract_code?: string;
+  /** cross: Cross margin; isolated: Isolated margin */
+  margin_mode?: 'cross' | 'isolated';
+  /** Financial type; comma-separated for multiple. e.g. 3,4,5,6 */
+  type?: string;
+  /** Start time (ms). Default: now - 48h */
+  start_time?: string | number;
+  /** End time (ms). Default: now */
+  end_time?: string | number;
+  /** Query offset, default 0 */
+  from?: number;
+  /** Page size, default 10, max 100 */
+  limit?: number;
+  /** prev | next */
+  direct?: 'prev' | 'next';
+}
+
+/** Req for POST /v5/trade/cancel_order. Cancel a single order. */
+export interface FuturesV5CancelOrderReq {
+  contract_code: string;
+  /** Order ID. One of order_id or client_order_id required */
+  order_id?: string;
+  /** Client order ID. One of order_id or client_order_id required */
+  client_order_id?: string;
+}
+
+/** Req for POST /v5/trade/cancel_batch_orders. Max 10 orders per request. */
+export interface FuturesV5CancelBatchOrdersReq {
+  contract_code: string;
+  /** Order IDs. One of order_id or client_order_id required */
+  order_id?: string[];
+  /** Client order IDs. One of order_id or client_order_id required */
+  client_order_id?: string[];
+}
+
+/** Req for POST /v5/trade/cancel_all_orders. Cancel all open orders. */
+export interface FuturesV5CancelAllOrdersReq {
+  contract_code?: string;
+  side?: 'buy' | 'sell';
+  position_side?: 'long' | 'short' | 'both';
+}
+
+/** Req for POST /v5/trade/position. Close all of a symbol at market price. */
+export interface FuturesV5ClosePositionReq {
+  contract_code: string;
+  margin_mode: 'cross' | 'isolated';
+  position_side: 'long' | 'short' | 'both';
+  client_order_id?: string;
+}
+
+/** Req for GET /v5/trade/order/opens. Get unfilled orders. */
+export interface FuturesV5OpenOrdersReq {
+  contract_code?: string;
+  margin_mode?: 'cross' | 'isolated';
+  order_id?: string;
+  client_order_id?: string;
+  from?: number;
+  limit?: number;
+  direct?: 'prev' | 'next';
+}
+
+/** Req for GET /v5/trade/order/details. Execution details (last 3 days). */
+export interface FuturesV5OrderDetailsReq {
+  contract_code?: string;
+  order_id?: string;
+  start_time?: string | number;
+  end_time?: string | number;
+  from?: number;
+  limit?: number;
+  direct?: 'prev' | 'next';
+}
+
+/** Req for GET /v5/trade/order/history. Get order history. */
+export interface FuturesV5OrderHistoryReq {
+  contract_code: string;
+  margin_mode: 'cross' | 'isolated';
+  state?: string;
+  type?: 'market' | 'limit' | 'post_only';
+  price_match?: string;
+  start_time?: string | number;
+  end_time?: string | number;
+  from?: number;
+  limit?: number;
+  direct?: 'prev' | 'next';
+}
+
+/** Req for GET /v5/trade/order. Get single order info. */
+export interface FuturesV5OrderInfoReq {
+  contract_code: string;
+  margin_mode?: 'cross' | 'isolated';
+  order_id?: string;
+  client_order_id?: string;
+}
+
+/** Req for POST /v5/trade/cancel-after. Automatic order cancellation (Dead Man's Switch). */
+export interface FuturesV5CancelAfterReq {
+  on_off: '0' | '1';
+  time_out?: number | string;
+}
+
+/** Req for POST /v5/trade/order. Place a single order. */
+export interface FuturesV5SubmitOrderReq {
+  contract_code: string;
+  margin_mode: 'cross' | 'isolated';
+  side: 'buy' | 'sell';
+  type: 'market' | 'limit' | 'post_only';
+  volume: string;
+  position_side?: 'long' | 'short' | 'both';
+  price_match?: 'opponent' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  client_order_id?: string;
+  price?: string | number;
+  reduce_only?: 0 | 1;
+  time_in_force?: 'fok' | 'ioc' | 'gtc';
+  tp_trigger_price?: string;
+  tp_order_price?: string;
+  tp_type?: 'market' | 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  tp_trigger_price_type?: 'last' | 'market';
+  sl_trigger_price?: string;
+  sl_order_price?: string;
+  sl_type?: 'market' | 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  sl_trigger_price_type?: 'last' | 'market';
+  price_protect?: boolean;
+  self_match_prevent?: 'cancel_taker' | 'cancel_maker' | 'cancel_both';
+}
+
+/**
+ * USDT Margined Futures Multi Asset - Positions (v5 API)
+ */
+
+/** Req for GET /v5/trade/position/opens. Get current positions. */
+export interface FuturesV5OpenPositionsReq {
+  contract_code?: string;
+}
+
+/** Req for GET /v5/position/lever. Get leverage list. */
+export interface FuturesV5LeverListReq {
+  contract_code?: string;
+  margin_mode?: 'cross' | 'isolated';
+  position_side?: 'long' | 'short' | 'both';
+}
+
+/** Req for POST /v5/position/lever. Set leverage. */
+export interface FuturesV5SetLeverageReq {
+  contract_code: string;
+  margin_mode: 'cross' | 'isolated';
+  lever_rate: string | number;
+  /** Required when isolated margin in two-way position mode */
+  position_side?: 'long' | 'short' | 'both';
+}
+
+/** Req for POST /v5/position/mode. Set position mode. */
+export interface FuturesV5SetPositionModeReq {
+  position_mode: 'single_side' | 'dual_side';
+}
+
+/** Req for GET /v5/position/risk/limit. Get current position risk limit. */
+export interface FuturesV5RiskLimitReq {
+  contract_code?: string;
+  margin_mode?: 'cross' | 'isolated';
+  position_side?: 'long' | 'short' | 'both';
+}
+
+/** Req for GET /v5/position/risk/limit_tier. Query risk limit tiers. */
+export interface FuturesV5RiskLimitTierReq {
+  contract_code: string;
+  margin_mode?: 'cross' | 'isolated';
+}
+
+/** Req for POST /v5/position/margin. Adjust margin for isolated positions. */
+export interface FuturesV5AdjustMarginReq {
+  contract_code: string;
+  position_side: 'long' | 'short' | 'both';
+  type: 'add' | 'reduce';
+  amount: string;
+  currency?: string;
+}
+
+/**
+ * USDT Margined Futures Multi Asset - Basic Information (v5 API)
+ */
+
+/** Req for GET /v5/market/risk/limit. Get futures risk limit table. */
+export interface FuturesV5MarketRiskLimitReq {
+  contract_code?: string;
+  margin_mode?: 'cross' | 'isolated';
+  tier?: string | number;
+}
