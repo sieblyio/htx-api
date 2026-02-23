@@ -2164,6 +2164,24 @@ export interface FuturesCmDeliveryMarketOverview {
   bid: [number, number];
 }
 
+/** Batch market overview tick from GET /v2/market/detail/batch_merged */
+export interface FuturesCmDeliveryMarketOverviewBatch {
+  symbol: string;
+  id: number;
+  ts: number;
+  amount: string;
+  count: number;
+  vol: string;
+  number_of: string;
+  open: string;
+  close: string;
+  low: string;
+  high: string;
+  ask: [number, number];
+  bid: [number, number];
+}
+
+/** Trade item from GET /market/trade data array */
 export interface FuturesCmDeliveryTrade {
   id: number;
   price: string;
@@ -2179,35 +2197,6 @@ export interface FuturesCmDeliveryLastTrade {
   id: number;
   ts: number;
   data: FuturesCmDeliveryTrade[];
-}
-
-/** Trade item from GET /market/history/trade data array. No symbol in response. */
-export interface FuturesCmDeliveryTradeHistoryItem {
-  id: number;
-  price: string | number;
-  amount: string | number;
-  direction: string;
-  ts: number;
-  quantity?: string | number;
-}
-
-/** Trade history group from GET /market/history/trade. Each group has trades by timestamp. Payload in "data". */
-export interface FuturesCmDeliveryTradeHistoryGroup {
-  id: number;
-  ts: number;
-  data: FuturesCmDeliveryTradeHistoryItem[];
-}
-
-/** Index kline item from GET /index/market/history/index. vol/count/amount typically 0. */
-export interface FuturesCmDeliveryIndexKline {
-  id: number;
-  vol: number;
-  count: number;
-  open: number;
-  close: number;
-  low: number;
-  high: number;
-  amount: number;
 }
 
 /** Liquidation order from GET /api/v3/contract_liquidation_orders */

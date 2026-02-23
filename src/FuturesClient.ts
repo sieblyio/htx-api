@@ -16,6 +16,17 @@ import type {
   FuturesCancelOrderReq,
   FuturesCancelTpslOrderReq,
   FuturesCancelTrailingOrderReq,
+  FuturesCmDeliveryBasisDataReq,
+  FuturesCmDeliveryContractInfoReq,
+  FuturesCmDeliveryContractLimitReq,
+  FuturesCmDeliveryContractOpenInterestReq,
+  FuturesCmDeliveryIndexKlinesReq,
+  FuturesCmDeliveryKlinesReq,
+  FuturesCmDeliveryLiquidationOrdersReq,
+  FuturesCmDeliveryMarkPriceKlinesReq,
+  FuturesCmDeliveryOpenInterestReq,
+  FuturesCmDeliveryRiskReserveHistoryReq,
+  FuturesCmDeliverySettlementRecordsReq,
   FuturesCrossSubmitOrderReq,
   FuturesGetBasisDataReq,
   FuturesGetContractInfoReq,
@@ -123,6 +134,31 @@ import type {
   FuturesBboTick,
   FuturesCancelAfter,
   FuturesCancelOrder,
+  FuturesCmDeliveryAdjustFactor,
+  FuturesCmDeliveryApiState,
+  FuturesCmDeliveryConstituents,
+  FuturesCmDeliveryContractInfo,
+  FuturesCmDeliveryContractOpenInterest,
+  FuturesCmDeliveryDeliveryPrice,
+  FuturesCmDeliveryEliteAccountRatio,
+  FuturesCmDeliveryElitePositionRatio,
+  FuturesCmDeliveryEstimatedSettlementPrice,
+  FuturesCmDeliveryIndex,
+  FuturesCmDeliveryIndexKline,
+  FuturesCmDeliveryInsuranceFund,
+  FuturesCmDeliveryInsuranceFundHistory,
+  FuturesCmDeliveryKline,
+  FuturesCmDeliveryLadderMargin,
+  FuturesCmDeliveryLastTrade,
+  FuturesCmDeliveryLiquidationOrder,
+  FuturesCmDeliveryMarketBbo,
+  FuturesCmDeliveryMarketOverview,
+  FuturesCmDeliveryMarkPriceKline,
+  FuturesCmDeliveryOpenInterest,
+  FuturesCmDeliveryPriceLimit,
+  FuturesCmDeliveryQueryElements,
+  FuturesCmDeliverySettlementRecords,
+  FuturesCmDeliveryTradeHistoryGroup,
   FuturesContractElements,
   FuturesContractInfo,
   FuturesCrossAccountInfo,
@@ -2496,5 +2532,341 @@ export class FuturesClient extends BaseRestClient {
     FuturesAPISuccessResponse<FuturesV5MultiAssetsMarginResp>
   > {
     return this.getPrivate('/v5/market/multi_assets_margin');
+  }
+
+  /**
+   *
+   * Coin-M Delivery - Reference Data
+   *
+   */
+
+  /**
+   * Query Tiered Adjustment Factor (CM)
+   *
+   * Get adjustment factor by leverage tier. No signature. Rate limit: 120/3s per IP.
+   */
+  getCmAdjustFactor(params?: {
+    symbol?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryAdjustFactor[]>> {
+    return this.get('/api/v1/contract_adjustfactor', params);
+  }
+
+  /**
+   * Query Open Interest (CM)
+   *
+   * Get historical open interest. No signature. Rate limit: 120/3s per IP.
+   */
+  getCmOpenInterest(
+    params: FuturesCmDeliveryOpenInterestReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryOpenInterest>> {
+    return this.get('/api/v1/contract_his_open_interest', params);
+  }
+
+  /**
+   * Query Tiered Margin (CM)
+   *
+   * Get tiered margin by leverage. No signature. Rate limit: 120/3s per IP.
+   */
+  getCmLadderMargin(params?: {
+    symbol?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryLadderMargin[]>> {
+    return this.get('/api/v1/contract_ladder_margin', params);
+  }
+
+  /**
+   * Query Top Trader Sentiment - Account (CM)
+   *
+   * Net long/short accounts ratio. No signature. Rate limit: 120/3s per IP.
+   */
+  getCmAccountSentiment(params: {
+    symbol: string;
+    period: '5min' | '15min' | '30min' | '60min' | '4hour' | '1day';
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryEliteAccountRatio>> {
+    return this.get('/api/v1/contract_elite_account_ratio', params);
+  }
+
+  /**
+   * Query Top Trader Sentiment - Position (CM)
+   *
+   * Net long/short position ratio. No signature. Rate limit: 120/3s per IP.
+   */
+  getCmPositionSentiment(params: {
+    symbol: string;
+    period: '5min' | '15min' | '30min' | '60min' | '4hour' | '1day';
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryElitePositionRatio>> {
+    return this.get('/api/v1/contract_elite_position_ratio', params);
+  }
+
+  /**
+   * Query Liquidation Orders (CM)
+   *
+   * Get liquidation order info. trade_type: 0=fully filled, 5=liquidated close, 6=liquidated open. No signature. Rate limit: 120/3s per IP.
+   */
+  getCmLiquidationOrders(
+    params: FuturesCmDeliveryLiquidationOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryLiquidationOrder[]>> {
+    return this.get('/api/v3/contract_liquidation_orders', params);
+  }
+
+  /**
+   * Query Settlement Records (CM)
+   *
+   * Historical settlement records. No signature. Rate limit: 120/3s per IP.
+   */
+  getCmSettlementRecords(
+    params: FuturesCmDeliverySettlementRecordsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliverySettlementRecords>> {
+    return this.get('/api/v1/contract_settlement_records', params);
+  }
+
+  /**
+   * Query Risk Reserve Balance (CM)
+   *
+   * Total risk funds for all business lines, priced in USDT. No signature.
+   */
+  getCmRiskReserveBalance(): Promise<
+    FuturesAPISuccessResponse<FuturesCmDeliveryInsuranceFund>
+  > {
+    return this.get('/v1/insurance_fund_info');
+  }
+
+  /**
+   * Query Historical Risk Reserves (CM)
+   *
+   * Historical risk fund data by day. No signature.
+   */
+  getCmRiskReserveHistory(
+    params?: FuturesCmDeliveryRiskReserveHistoryReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesCmDeliveryInsuranceFundHistory[]>
+  > {
+    return this.get('/v1/insurance_fund_history', params);
+  }
+
+  /**
+   * Get Contract Price Limit (CM)
+   *
+   * Highest/lowest price limits. No signature. Rate limit: 120/3s per IP.
+   */
+  getCmContractLimit(
+    params?: FuturesCmDeliveryContractLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryPriceLimit[]>> {
+    return this.get('/api/v1/contract_price_limit', params);
+  }
+
+  /**
+   * Get Contract Open Interest (CM)
+   *
+   * Current open interest and 24h trading volume. No signature. Rate limit: 120/3s per IP.
+   */
+  getCmContractOpenInterest(
+    params?: FuturesCmDeliveryContractOpenInterestReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesCmDeliveryContractOpenInterest[]>
+  > {
+    return this.get('/api/v1/contract_open_interest', params);
+  }
+
+  /**
+   * Get Estimated Delivery Price (CM)
+   *
+   * Estimated delivery price for a symbol. No signature. Rate limit: 120/3s per IP.
+   */
+  getCmDeliveryPrice(params: {
+    symbol: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryDeliveryPrice>> {
+    return this.get('/api/v1/contract_delivery_price', params);
+  }
+
+  /**
+   * Get Estimated Settlement Price (CM)
+   *
+   * Current-period estimated settlement/delivery price. Updated every 6s within 1h of settlement. No signature. Rate limit: 120/3s per IP.
+   */
+  getCmEstimatedSettlementPrice(params?: {
+    symbol?: string;
+  }): Promise<
+    FuturesAPISuccessResponse<FuturesCmDeliveryEstimatedSettlementPrice[]>
+  > {
+    return this.get('/api/v1/contract_estimated_settlement_price', params);
+  }
+
+  /**
+   * Query System Status (CM)
+   *
+   * Open/close/cancel/transfer access per symbol. No signature. Rate limit: 120/3s per IP.
+   */
+  getCmSystemStatus(params?: {
+    symbol?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryApiState[]>> {
+    return this.get('/api/v1/contract_api_state', params);
+  }
+
+  /**
+   * Get Contract Info (CM)
+   *
+   * Contract metadata (size, tick, dates, status). No signature. Rate limit: 120/3s per IP.
+   */
+  getCmContractInfo(
+    params?: FuturesCmDeliveryContractInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryContractInfo[]>> {
+    return this.get('/api/v1/contract_contract_info', params);
+  }
+
+  /**
+   * Get Contract Index Price (CM)
+   *
+   * Index price for symbol(s). No signature. Rate limit: 120/3s per IP.
+   */
+  getCmIndex(params?: {
+    symbol?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryIndex[]>> {
+    return this.get('/api/v1/contract_index', params);
+  }
+
+  /**
+   * Get Index Components (CM)
+   *
+   * Index constituent/exchange data. No signature.
+   */
+  getCmIndexConstituents(params: {
+    symbol: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryConstituents>> {
+    return this.get('/api/market/contract_constituents', params);
+  }
+
+  /**
+   * Get Contract Elements (CM)
+   *
+   * Contract elements (limits, face value, etc). No signature.
+   */
+  getCmContractElements(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryQueryElements[]>> {
+    return this.get('/api/v1/contract_query_elements', params);
+  }
+
+  /**
+   *
+   * Coin-M Delivery - Market Data
+   *
+   */
+
+  /**
+   * Get Market Depth (CM)
+   *
+   * Order book (asks/bids). type: step0=raw 150 levels; step1–5,14–15=merged 150; step6=raw 30; step7–13=merged 30. No signature. Rate limit: 800/s per IP.
+   */
+  getCmMarketDepth(params: {
+    symbol: string;
+    type: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesMarketDepthTick, 'tick'>> {
+    return this.get('/market/depth', params);
+  }
+
+  /**
+   * Get Market BBO (CM)
+   *
+   * Best bid/offer. Omit symbol for all. No signature. Rate limit: 800/s per IP.
+   */
+  getCmMarketBbo(params?: {
+    symbol?: string;
+  }): Promise<
+    FuturesAPISuccessResponse<FuturesCmDeliveryMarketBbo[], 'ticks'>
+  > {
+    return this.get('/market/bbo', params);
+  }
+
+  /**
+   * Get Kline Data (CM)
+   *
+   * Candlestick data. Either size or (from+to) required. No signature. Rate limit: 800/s per IP.
+   */
+  getCmKlines(
+    params: FuturesCmDeliveryKlinesReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryKline[]>> {
+    return this.get('/market/history/kline', params);
+  }
+
+  /**
+   * Get Mark Price Kline (CM)
+   *
+   * Mark price candlestick data. No signature. Rate limit: 800/s per IP.
+   */
+  getCmMarkPriceKlines(
+    params: FuturesCmDeliveryMarkPriceKlinesReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryMarkPriceKline[]>> {
+    return this.get('/index/market/history/mark_price_kline', params);
+  }
+
+  /**
+   * Get Market Data Overview (CM)
+   *
+   * 24h ticker + best bid/ask for one contract. symbol required. No signature. Rate limit: 800/s per IP.
+   */
+  getCmTicker(params: {
+    symbol: string;
+  }): Promise<
+    FuturesAPISuccessResponse<FuturesCmDeliveryMarketOverview, 'tick'>
+  > {
+    return this.get('/market/detail/merged', params);
+  }
+
+  /**
+   * Get Batch Market Data Overview (CM V2)
+   *
+   * 24h tickers + best bid/ask for one or all contracts. Omit symbol for all. No signature. Rate limit: 800/s per IP. Data updated every 50ms.
+   */
+  getCmTickers(params?: {
+    symbol?: string;
+  }): Promise<
+    FuturesAPISuccessResponse<FuturesCmDeliveryMarketOverview[], 'ticks'>
+  > {
+    return this.get('/v2/market/detail/batch_merged', params);
+  }
+
+  /**
+   * Get Last Trade (CM)
+   *
+   * Latest trade for a contract. Omit symbol for all. No signature. Rate limit: 800/s per IP.
+   */
+  getCmLastrade(params?: {
+    symbol?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryLastTrade, 'tick'>> {
+    return this.get('/market/trade', params);
+  }
+
+  /**
+   * Get Trade History (CM)
+   *
+   * Batch of recent trades for a contract. symbol and size required. No signature. Rate limit: 800/s per IP.
+   */
+  getCmTradeHistory(params: {
+    symbol: string;
+    size: number;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTradeHistoryGroup[]>> {
+    return this.get('/market/history/trade', params);
+  }
+
+  /**
+   * Get Index Kline Data (CM)
+   *
+   * Index price candlestick data. vol/count/amount typically 0. No signature. Rate limit: 800/s per IP.
+   */
+  getCmIndexKlines(
+    params: FuturesCmDeliveryIndexKlinesReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryIndexKline[]>> {
+    return this.get('/index/market/history/index', params);
+  }
+
+  /**
+   * Get Basis Data (CM)
+   *
+   * Basis (contract - index) kline. basis_price_type defaults to open. No signature. Rate limit: 800/s per IP. Max 2000 per request.
+   */
+  getCmBasisData(
+    params: FuturesCmDeliveryBasisDataReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesBasis[]>> {
+    return this.get('/index/market/history/basis', params);
   }
 }

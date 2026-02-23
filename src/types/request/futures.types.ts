@@ -1567,3 +1567,147 @@ export interface FuturesV5MarketRiskLimitReq {
   margin_mode?: 'cross' | 'isolated';
   tier?: string | number;
 }
+
+/**
+ * Coin-M Delivery - Reference Data (FuturesCmDelivery)
+ */
+
+/** Req for GET /api/v1/contract_adjustfactor. Tiered adjustment factor. Inlined in getCmAdjustFactor - params?: { symbol?: string } */
+/** Req for GET /api/v1/contract_ladder_margin. Tiered margin. Inlined in getCmLadderMargin - params?: { symbol?: string } */
+
+/** Req for GET /api/v1/contract_his_open_interest. Historical open interest. */
+export interface FuturesCmDeliveryOpenInterestReq {
+  symbol: string;
+  contract_type: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  period: '60min' | '4hour' | '12hour' | '1day';
+  amount_type: 1 | 2;
+  size?: number;
+}
+
+/** Req for GET /api/v1/contract_elite_account_ratio. Top trader sentiment - account. Inlined in getCmAccountSentiment - params: { symbol, period } */
+/** Req for GET /api/v1/contract_elite_position_ratio. Top trader sentiment - position. Inlined in getCmPositionSentiment - params: { symbol, period } */
+
+/** Req for GET /api/v3/contract_liquidation_orders. Liquidation orders. */
+export interface FuturesCmDeliveryLiquidationOrdersReq {
+  symbol: string;
+  trade_type: 0 | 5 | 6;
+  start_time?: number;
+  end_time?: number;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+}
+
+/** Req for GET /api/v1/contract_settlement_records. Historical settlement records. */
+export interface FuturesCmDeliverySettlementRecordsReq {
+  symbol: string;
+  start_time?: number;
+  end_time?: number;
+  page_index?: number;
+  page_size?: number;
+}
+
+/** Req for GET /v1/insurance_fund_history. Historical risk reserves. Aligned with getCmRiskReserveHistory. */
+export interface FuturesCmDeliveryRiskReserveHistoryReq {
+  start_time?: number;
+  end_time?: number;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+  limit?: number;
+}
+
+/** Req for GET /api/v1/contract_price_limit. Contract price limits. Aligned with getCmContractLimit. */
+export interface FuturesCmDeliveryContractLimitReq {
+  symbol?: string;
+  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  contract_code?: string;
+}
+
+/** Req for GET /api/v1/contract_open_interest. Current open interest. */
+export interface FuturesCmDeliveryContractOpenInterestReq {
+  symbol?: string;
+  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  contract_code?: string;
+}
+
+/** Req for GET /api/v1/contract_delivery_price. Estimated delivery price. Inlined in getCmDeliveryPrice - params: { symbol: string } */
+/** Req for GET /api/v1/contract_estimated_settlement_price. Estimated settlement price. Inlined in getCmEstimatedSettlementPrice - params?: { symbol?: string } */
+/** Req for GET /api/v1/contract_api_state. System status. Inlined in getCmSystemStatus - params?: { symbol?: string } */
+
+/** Req for GET /api/v1/contract_contract_info. Contract info. */
+export interface FuturesCmDeliveryContractInfoReq {
+  symbol?: string;
+  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  contract_code?: string;
+}
+
+/** Req for GET /market/depth. Inlined in getCmMarketDepth - params: { symbol, type } (type: step0–15) */
+/** Req for GET /market/bbo. Inlined in getCmMarketBbo - params?: { symbol?: string } */
+
+/** Req for GET /market/history/kline. Either size or (from+to) required. Aligned with getCmKlines. */
+export interface FuturesCmDeliveryKlinesReq {
+  symbol: string;
+  period:
+    | '1min'
+    | '5min'
+    | '15min'
+    | '30min'
+    | '60min'
+    | '1hour'
+    | '4hour'
+    | '1day'
+    | '1mon';
+  size?: number;
+  from?: number;
+  to?: number;
+}
+
+/** Req for GET /index/market/history/mark_price_kline. Aligned with getCmMarkPriceKlines. */
+export interface FuturesCmDeliveryMarkPriceKlinesReq {
+  symbol: string;
+  period:
+    | '1min'
+    | '5min'
+    | '15min'
+    | '30min'
+    | '60min'
+    | '4hour'
+    | '1day'
+    | '1week'
+    | '1mon';
+  size: number;
+}
+
+/** Req for GET /api/v1/contract_index. Index price. Inlined in getCmIndex - params?: { symbol?: string } */
+/** Req for GET /api/market/contract_constituents. Index components. Inlined in getCmIndexConstituents - params: { symbol: string } */
+/** Req for GET /api/v1/contract_query_elements. Contract elements. Inlined in getCmContractElements - params?: { contract_code?: string } */
+
+/** Req for GET /index/market/history/index. Index kline data. */
+export interface FuturesCmDeliveryIndexKlinesReq {
+  symbol: string;
+  period:
+    | '1min'
+    | '5min'
+    | '15min'
+    | '30min'
+    | '60min'
+    | '4hour'
+    | '1day'
+    | '1mon';
+  size: number;
+}
+
+/** Req for GET /index/market/history/basis. Basis (contract - index) data. */
+export interface FuturesCmDeliveryBasisDataReq {
+  symbol: string;
+  period:
+    | '1min'
+    | '5min'
+    | '15min'
+    | '30min'
+    | '60min'
+    | '4hour'
+    | '1day'
+    | '1mon';
+  size: number;
+  basis_price_type?: 'open' | 'close' | 'high' | 'low' | 'average';
+}
