@@ -3,6 +3,7 @@ const tsEslintPlugin = require('@typescript-eslint/eslint-plugin');
 const simpleImportSortPlugin = require('eslint-plugin-simple-import-sort');
 const prettierPlugin = require('eslint-plugin-prettier');
 const prettierConfig = require('eslint-config-prettier');
+const requireExtensions = require('eslint-plugin-require-extensions')
 
 module.exports = [
   {
@@ -23,6 +24,7 @@ module.exports = [
     },
     plugins: {
       'simple-import-sort': simpleImportSortPlugin,
+      'require-extensions': requireExtensions,
       prettier: prettierPlugin,
     },
     rules: {
