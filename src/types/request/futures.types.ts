@@ -2171,3 +2171,57 @@ export interface FuturesCmDeliveryBasisDataReq {
   size: number;
   basis_price_type?: 'open' | 'close' | 'high' | 'low' | 'average';
 }
+
+/** Req for GET /v1/insurance_fund_history (CMPerp). Historical risk reserves. */
+export interface FuturesCmPerpRiskReserveHistoryReq {
+  start_time?: number;
+  end_time?: number;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+  limit?: number;
+}
+
+/** Req for GET /swap-api/v1/swap_historical_funding_rate */
+export interface FuturesCmPerpHistoricalFundingRateReq {
+  contract_code: string;
+  page_index?: number;
+  page_size?: number;
+}
+
+/** Req for GET /swap-api/v1/swap_his_open_interest */
+export interface FuturesCmPerpGetOpenInterestReq {
+  contract_code: string;
+  /** 60min, 4hour, 12hour, 1day */
+  period: '60min' | '4hour' | '12hour' | '1day';
+  /** 1: cont, 2: cryptocurrency */
+  amount_type: 1 | 2;
+  /** Default 48, [1, 200] */
+  size?: number;
+}
+
+/** Req for GET /swap-api/v3/swap_liquidation_orders. 0=fully filled, 5=liquidated close, 6=liquidated open. */
+export interface FuturesCmPerpLiquidationOrdersReq {
+  /** Contract code. Case-insensitive */
+  contract: string;
+  /** 0: fully filled liquidated; 5: liquidated close; 6: liquidated open */
+  trade_type: 0 | 5 | 6;
+  /** Start time (ms). Window max 2h, within 90 days */
+  start_time?: number;
+  /** End time (ms). Default now. Within 90 days */
+  end_time?: number;
+  /** next=chronological, prev=reverse. Default prev */
+  direct?: 'next' | 'prev';
+  /** Pagination: min/max query_id from last result depending on direct */
+  from_id?: number;
+}
+
+/** Req for GET /swap-api/v1/swap_settlement_records */
+export interface FuturesCmPerpSettlementRecordsReq {
+  contract_code: string;
+  /** Start time (ms). Default: now - 90 days */
+  start_time?: number;
+  /** End time (ms). Default: now */
+  end_time?: number;
+  page_index?: number;
+  page_size?: number;
+}

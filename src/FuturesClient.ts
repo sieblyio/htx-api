@@ -65,6 +65,11 @@ import type {
   FuturesCmDeliverySubmitTriggerOrderReq,
   FuturesCmDeliveryUpdateLeverageReq,
   FuturesCmDeliveryUserSettlementRecordsReq,
+  FuturesCmPerpGetOpenInterestReq,
+  FuturesCmPerpHistoricalFundingRateReq,
+  FuturesCmPerpLiquidationOrdersReq,
+  FuturesCmPerpRiskReserveHistoryReq,
+  FuturesCmPerpSettlementRecordsReq,
   FuturesCrossSubmitOrderReq,
   FuturesGetBasisDataReq,
   FuturesGetContractInfoReq,
@@ -206,7 +211,6 @@ import type {
   FuturesCmDeliveryMasterSubTransfers,
   FuturesCmDeliveryMatchResult,
   FuturesCmDeliveryOpenInterest,
-  FuturesCmDeliveryOpenOrder,
   FuturesCmDeliveryOpenOrders,
   FuturesCmDeliveryOrderDetail,
   FuturesCmDeliveryOrderInfo,
@@ -224,22 +228,37 @@ import type {
   FuturesCmDeliverySubPositionInfo,
   FuturesCmDeliverySwitchLeverRate,
   FuturesCmDeliveryTicker,
-  FuturesCmDeliveryTpslHistoryOrder,
   FuturesCmDeliveryTpslHistoryOrders,
-  FuturesCmDeliveryTpslOpenOrder,
   FuturesCmDeliveryTpslOpenOrders,
   FuturesCmDeliveryTpslOrder,
   FuturesCmDeliveryTradeHistory,
-  FuturesCmDeliveryTrailingHistoryOrder,
   FuturesCmDeliveryTrailingHistoryOrders,
-  FuturesCmDeliveryTrailingOpenOrder,
   FuturesCmDeliveryTrailingOpenOrders,
   FuturesCmDeliveryTransferLimit,
-  FuturesCmDeliveryTriggerHistoryOrder,
   FuturesCmDeliveryTriggerHistoryOrders,
-  FuturesCmDeliveryTriggerOpenOrder,
   FuturesCmDeliveryTriggerOpenOrders,
   FuturesCmDeliveryUserSettlementRecords,
+  FuturesCmPerpAccountRatio,
+  FuturesCmPerpAdjustFactor,
+  FuturesCmPerpContractElements,
+  FuturesCmPerpContractElementsContractInfo,
+  FuturesCmPerpContractInfo,
+  FuturesCmPerpEstimatedSettlementPrice,
+  FuturesCmPerpFundingRate,
+  FuturesCmPerpHistoricalFundingRatePage,
+  FuturesCmPerpIndexConstituents,
+  FuturesCmPerpIndexPrice,
+  FuturesCmPerpLiquidationOrder,
+  FuturesCmPerpOpenInterest,
+  FuturesCmPerpOpenInterestCurrent,
+  FuturesCmPerpPositionRatio,
+  FuturesCmPerpPriceLimit,
+  FuturesCmPerpRiskReserveBalance,
+  FuturesCmPerpRiskReserveHistory,
+  FuturesCmPerpSettlementRecord,
+  FuturesCmPerpSettlementRecordsPage,
+  FuturesCmPerpSystemStatus,
+  FuturesCmPerpTieredMargin,
   FuturesContractElements,
   FuturesContractInfo,
   FuturesCrossAccountInfo,
@@ -3630,4 +3649,245 @@ export class FuturesClient extends BaseRestClient {
       body: params,
     });
   }
+
+  /**
+   *
+   * Coin-M Perpetual - Reference Data
+   *
+   */
+
+  /**
+   * Query Tiered Adjustment Factor (CMPerp)
+   *
+   * Adjustment factor by leverage tier. No signature. Omit contract_code for all.
+   */
+  getCmPerpAdjustFactor(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpAdjustFactor[]>> {
+    return this.get('/swap-api/v1/swap_adjustfactor', params ?? {});
+  }
+
+  /**
+   * Query Historical Open Interest (CMPerp)
+   *
+   * Open interest by period. No signature.
+   */
+  getCmPerpOpenInterest(
+    params: FuturesCmPerpGetOpenInterestReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpOpenInterest>> {
+    return this.get('/swap-api/v1/swap_his_open_interest', params);
+  }
+
+  /**
+   * Query Tiered Margin (CMPerp)
+   *
+   * Tiered margin by leverage. No signature. Omit contract_code for all.
+   */
+  getCmPerpTieredMargin(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpTieredMargin[]>> {
+    return this.get('/swap-api/v1/swap_ladder_margin', params ?? {});
+  }
+
+  /**
+   * Query Top Trader Sentiment - Account (CMPerp)
+   *
+   * Net long/short accounts ratio. No signature.
+   */
+  getCmPerpAccountRatio(params: {
+    contract_code: string;
+    period: '5min' | '15min' | '30min' | '60min' | '4hour' | '1day';
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpAccountRatio>> {
+    return this.get('/swap-api/v1/swap_elite_account_ratio', params);
+  }
+
+  /**
+   * Query Top Trader Sentiment - Position (CMPerp)
+   *
+   * Net long/short position ratio. No signature.
+   */
+  getCmPerpPositionRatio(params: {
+    contract_code: string;
+    period: '5min' | '15min' | '30min' | '60min' | '4hour' | '1day';
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpPositionRatio>> {
+    return this.get('/swap-api/v1/swap_elite_position_ratio', params);
+  }
+
+  /**
+   * Get Estimated Settlement Price (CMPerp)
+   *
+   * Current-period estimated settlement/delivery price. No signature. Omit contract_code for all.
+   */
+  getCmPerpEstimatedSettlementPrice(params?: {
+    contract_code?: string;
+  }): Promise<
+    FuturesAPISuccessResponse<FuturesCmPerpEstimatedSettlementPrice[]>
+  > {
+    return this.get(
+      '/swap-api/v1/swap_estimated_settlement_price',
+      params ?? {},
+    );
+  }
+
+  /**
+   * Query System Status (CMPerp)
+   *
+   * Open/close/cancel/transfer access per contract. No signature. Omit contract_code for all.
+   */
+  getCmPerpSystemStatus(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpSystemStatus[]>> {
+    return this.get('/swap-api/v1/swap_api_state', params ?? {});
+  }
+
+  /**
+   * Query Funding Rate (CMPerp)
+   *
+   * Current funding rate for contract. No signature.
+   */
+  getCmPerpFundingRate(params: {
+    contract_code: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpFundingRate>> {
+    return this.get('/swap-api/v1/swap_funding_rate', params);
+  }
+
+  /**
+   * Query Batch Funding Rate (CMPerp)
+   *
+   * Funding rates for multiple contracts. No signature. Omit contract_code for all.
+   */
+  getCmPerpFundingRates(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpFundingRate[]>> {
+    return this.get('/swap-api/v1/swap_batch_funding_rate', params ?? {});
+  }
+
+  /**
+   * Query Historical Funding Rate (CMPerp)
+   *
+   * Paginated historical funding rates. No signature.
+   */
+  getCmPerpHistoricalFundingRate(
+    params: FuturesCmPerpHistoricalFundingRateReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesCmPerpHistoricalFundingRatePage>
+  > {
+    return this.get('/swap-api/v1/swap_historical_funding_rate', params);
+  }
+
+  /**
+   * Query Liquidation Orders (CMPerp)
+   *
+   * GET /swap-api/v3/swap_liquidation_orders. trade_type: 0=fully filled, 5=liquidated close, 6=liquidated open. No signature.
+   */
+  getCmPerpLiquidationOrders(
+    params: FuturesCmPerpLiquidationOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpLiquidationOrder[]>> {
+    return this.get('/swap-api/v3/swap_liquidation_orders', params);
+  }
+
+  /**
+   * Query Settlement Records (CMPerp)
+   *
+   * Historical settlement records for platform. No signature.
+   */
+  getCmPerpSettlementRecords(
+    params: FuturesCmPerpSettlementRecordsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpSettlementRecordsPage>> {
+    return this.get('/swap-api/v1/swap_settlement_records', params);
+  }
+
+  /**
+   * Query Swap Info (CMPerp)
+   *
+   * Contract metadata (size, tick, dates, status). No signature. Omit contract_code for all.
+   */
+  getCmPerpContractInfo(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpContractInfo[]>> {
+    return this.get('/swap-api/v1/swap_contract_info', params ?? {});
+  }
+
+  /**
+   * Query Swap Index Price (CMPerp)
+   *
+   * Index price and timestamp per contract. No signature. Omit contract_code for all.
+   */
+  getCmPerpIndexPrice(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpIndexPrice[]>> {
+    return this.get('/swap-api/v1/swap_index', params ?? {});
+  }
+
+  /**
+   * Query Contract Elements (CMPerp)
+   *
+   * Contract elements (limits, ticks, contract_infos). No signature. Rate limit: 144/3s per UID.
+   */
+  getCmPerpContractElements(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpContractElements[]>> {
+    return this.get('/swap-api/v1/swap_query_elements', params ?? {});
+  }
+
+  /**
+   * Get Index Constituents (CMPerp)
+   *
+   * Index component info (exchange, symbol, weights, prices). No signature. Rate limit: 144/3s per UID.
+   */
+  getCmPerpIndexConstituents(params: {
+    contract_code: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpIndexConstituents>> {
+    return this.get('/swap-api/market/swap_constituents', params);
+  }
+
+  /**
+   * Query Risk Reserve Balance (CMPerp)
+   *
+   * Total risk funds for all business lines, priced in USDT. No signature. Rate limit: 144/3s per UID.
+   */
+  getCmPerpRiskReserveBalance(): Promise<
+    FuturesAPISuccessResponse<FuturesCmPerpRiskReserveBalance>
+  > {
+    return this.get('/v1/insurance_fund_info');
+  }
+
+  /**
+   * Query Historical Risk Reserves (CMPerp)
+   *
+   * Historical risk fund data by day. No signature. Rate limit: 144/3s per UID.
+   */
+  getCmPerpHistoryRiskReserves(
+    params?: FuturesCmPerpRiskReserveHistoryReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpRiskReserveHistory[]>> {
+    return this.get('/v1/insurance_fund_history', params);
+  }
+
+  /**
+   * Query Price Limitation (CMPerp)
+   *
+   * Highest buying and lowest selling price per contract. No signature. Omit contract_code for all.
+   */
+  getCmPerpPriceLimit(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpPriceLimit[]>> {
+    return this.get('/swap-api/v1/swap_price_limit', params ?? {});
+  }
+
+  /**
+   * Get Open Interest (CMPerp)
+   *
+   * Current position quantity and 24h trading volume per contract. No signature. Omit contract_code for all.
+   */
+  getCmPerpCurrentOpenInterest(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpOpenInterestCurrent[]>> {
+    return this.get('/swap-api/v1/swap_open_interest', params ?? {});
+  }
+
+  /**
+   *
+   * Coin-M Perpetual - Market Data
+   *
+   */
 }

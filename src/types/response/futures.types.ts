@@ -2089,6 +2089,270 @@ export interface FuturesCmDeliveryLadderMargin {
   list: FuturesCmDeliveryLadderMarginLeverItem[];
 }
 
+/** Ladder from GET /swap-api/v1/swap_adjustfactor */
+export interface FuturesCmPerpAdjustFactorLadder {
+  ladder: number;
+  min_size: number;
+  max_size: number | null;
+  adjust_factor: number;
+}
+
+/** Lever item from swap_adjustfactor list */
+export interface FuturesCmPerpAdjustFactorLeverItem {
+  lever_rate: number;
+  ladders: FuturesCmPerpAdjustFactorLadder[];
+}
+
+/** GET /swap-api/v1/swap_adjustfactor */
+export interface FuturesCmPerpAdjustFactor {
+  symbol: string;
+  contract_code: string;
+  list: FuturesCmPerpAdjustFactorLeverItem[];
+}
+
+/** Tick from GET /swap-api/v1/swap_his_open_interest */
+export interface FuturesCmPerpOpenInterestTick {
+  volume: number;
+  amount_type: number;
+  ts: number;
+}
+
+/** GET /swap-api/v1/swap_his_open_interest */
+export interface FuturesCmPerpOpenInterest {
+  symbol: string;
+  contract_code: string;
+  tick: FuturesCmPerpOpenInterestTick[];
+}
+
+/** Ladder from GET /swap-api/v1/swap_ladder_margin */
+export interface FuturesCmPerpTieredMarginLadder {
+  min_margin_balance: number;
+  max_margin_balance: number | null;
+  min_margin_available: number;
+  max_margin_available: number | null;
+}
+
+/** Lever item from swap_ladder_margin list */
+export interface FuturesCmPerpTieredMarginLeverItem {
+  lever_rate: number;
+  ladders: FuturesCmPerpTieredMarginLadder[];
+}
+
+/** GET /swap-api/v1/swap_ladder_margin */
+export interface FuturesCmPerpTieredMargin {
+  symbol: string;
+  contract_code: string;
+  list: FuturesCmPerpTieredMarginLeverItem[];
+}
+
+/** List item from GET /swap-api/v1/swap_elite_account_ratio */
+export interface FuturesCmPerpAccountRatioItem {
+  buy_ratio: number;
+  sell_ratio: number;
+  locked_ratio: number;
+  ts: number;
+}
+
+/** GET /swap-api/v1/swap_elite_account_ratio */
+export interface FuturesCmPerpAccountRatio {
+  symbol: string;
+  contract_code: string;
+  list: FuturesCmPerpAccountRatioItem[];
+}
+
+/** List item from GET /swap-api/v1/swap_elite_position_ratio */
+export interface FuturesCmPerpPositionRatioItem {
+  buy_ratio: number;
+  sell_ratio: number;
+  ts: number;
+}
+
+/** GET /swap-api/v1/swap_elite_position_ratio */
+export interface FuturesCmPerpPositionRatio {
+  symbol: string;
+  contract_code: string;
+  list: FuturesCmPerpPositionRatioItem[];
+}
+
+/** Item from GET /swap-api/v1/swap_estimated_settlement_price data[] */
+export interface FuturesCmPerpEstimatedSettlementPrice {
+  contract_code: string;
+  estimated_settlement_price: number | null;
+  settlement_type: 'delivery' | 'settlement';
+}
+
+/** GET /swap-api/v1/swap_api_state */
+export interface FuturesCmPerpSystemStatus {
+  symbol: string;
+  contract_code: string;
+  open: number;
+  close: number;
+  cancel: number;
+  transfer_in: number;
+  transfer_out: number;
+  master_transfer_sub: number;
+  sub_transfer_master: number;
+}
+
+/** GET /swap-api/v1/swap_funding_rate */
+export interface FuturesCmPerpFundingRate {
+  symbol: string;
+  contract_code: string;
+  fee_asset: string;
+  funding_time: string;
+  funding_rate: string;
+  estimated_rate: string | null;
+  next_funding_time: string | null;
+}
+
+/** Item from GET /swap-api/v1/swap_historical_funding_rate data[] */
+export interface FuturesCmPerpHistoricalFundingRate {
+  symbol: string;
+  contract_code: string;
+  fee_asset: string;
+  funding_time: string;
+  funding_rate: string;
+  /** Deprecated, default null */
+  realized_rate?: string | null;
+  avg_premium_index: string;
+}
+
+/** Paginated wrapper for GET /swap-api/v1/swap_historical_funding_rate */
+export interface FuturesCmPerpHistoricalFundingRatePage {
+  total_page: number;
+  current_page: number;
+  total_size: number;
+  data: FuturesCmPerpHistoricalFundingRate[];
+}
+
+/** Item from GET /swap-api/v3/swap_liquidation_orders data[] */
+export interface FuturesCmPerpLiquidationOrder {
+  query_id?: number;
+  contract_code: string;
+  symbol: string;
+  direction: string;
+  offset: string;
+  volume: number;
+  price: number;
+  created_at: number;
+  amount: number;
+}
+
+/** Item from GET /swap-api/v1/swap_settlement_records settlement_record[] */
+export interface FuturesCmPerpSettlementRecord {
+  symbol: string;
+  contract_code: string;
+  settlement_time: number;
+  clawback_ratio: number;
+  settlement_price: number;
+  settlement_type: string;
+}
+
+/** Paginated wrapper for GET /swap-api/v1/swap_settlement_records */
+export interface FuturesCmPerpSettlementRecordsPage {
+  total_page: number;
+  current_page: number;
+  total_size: number;
+  settlement_record: FuturesCmPerpSettlementRecord[];
+}
+
+/** Index constituents from GET /swap-api/market/swap_constituents. data is object. */
+export interface FuturesCmPerpIndexConstituents {
+  contract_code: string;
+  ts: number;
+  index_price: string;
+  components: FuturesIndexConstituentComponent[];
+}
+
+/** Item from GET /swap-api/v1/swap_contract_info data[] */
+export interface FuturesCmPerpContractInfo {
+  symbol: string;
+  contract_code: string;
+  contract_size: number;
+  price_tick: number;
+  settlement_date: string;
+  settlement_period: string;
+  create_date: string;
+  delivery_time: string;
+  contract_status: number;
+}
+
+/** Item from GET /swap-api/v1/swap_index data[] */
+export interface FuturesCmPerpIndexPrice {
+  contract_code: string;
+  index_price: number;
+  index_ts: number;
+}
+
+/** Item from GET /swap-api/v1/swap_price_limit data[] */
+export interface FuturesCmPerpPriceLimit {
+  symbol: string;
+  contract_code: string;
+  high_limit: number;
+  low_limit: number;
+}
+
+/** Item from GET /swap-api/v1/swap_open_interest data[] */
+export interface FuturesCmPerpOpenInterestCurrent {
+  symbol: string;
+  contract_code: string;
+  volume: number;
+  amount: number;
+  trade_amount: number;
+  trade_volume: number;
+  trade_turnover: number;
+}
+
+/** contract_infos[] item from GET /swap-api/v1/swap_query_elements */
+export interface FuturesCmPerpContractElementsContractInfo {
+  contract_code: string;
+  settlement_date: string;
+  /** Empty string when no delivery */
+  delivery_time: string;
+  create_date: string;
+  contract_status: number;
+  instrument_type?: number;
+}
+
+/** Risk reserve balance from GET /v1/insurance_fund_info (CMPerp) */
+export interface FuturesCmPerpRiskReserveBalance {
+  insurance_fund: string;
+}
+
+/** Historical risk reserve item from GET /v1/insurance_fund_history (CMPerp) */
+export interface FuturesCmPerpRiskReserveHistory {
+  query_id: number;
+  insurance_fund: string;
+  date: string;
+}
+
+/** Item from GET /swap-api/v1/swap_query_elements data[] */
+export interface FuturesCmPerpContractElements {
+  contract_code: string;
+  instrument_index_code: string;
+  real_time_settlement: number;
+  transfer_profit_ratio: number;
+  min_level: string;
+  max_level: string;
+  open_order_limit: string;
+  offset_order_limit: string;
+  long_position_limit: string;
+  short_position_limit: string;
+  price_tick: string;
+  instrument_value: string;
+  settle_period: number;
+  funding_rate_cap: string;
+  funding_rate_floor: string;
+  trigger_protect?: number;
+  hig_normal_limit: string;
+  min_normal_limit: string;
+  hig_open_limit: string;
+  min_open_limit: string;
+  hig_trade_limit: string;
+  min_trade_limit: string;
+  contract_infos: FuturesCmPerpContractElementsContractInfo[];
+}
+
 /** List item from contract_elite_account_ratio */
 export interface FuturesCmDeliveryEliteAccountRatioItem {
   buy_ratio: number;
