@@ -2449,6 +2449,198 @@ export interface FuturesCmDeliveryOrderLimit {
   list: FuturesCmDeliveryOrderLimitListItem[];
 }
 
+/** Response from POST /api/v1/contract_switch_lever_rate */
+export interface FuturesCmDeliverySwitchLeverRate {
+  symbol: string;
+  lever_rate: number;
+}
+
+/** Order info item from POST /api/v1/contract_order_info data[] */
+export interface FuturesCmDeliveryOrderInfo {
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  volume: number;
+  price: number;
+  order_price_type: string;
+  order_type: number;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  client_order_id: number | string | null;
+  created_at: number;
+  trade_volume: number;
+  trade_turnover: number;
+  fee: number;
+  trade_avg_price: number;
+  margin_frozen: number;
+  profit: number;
+  status: number;
+  order_source: string;
+  fee_asset: string;
+  canceled_at: number;
+  liquidation_type: string;
+  is_tpsl: number;
+  real_profit: number;
+  canceled_source?: string;
+  self_match_prevent?: number;
+}
+
+/** Order detail trade item from POST /api/v1/contract_order_detail data.trades[] */
+export interface FuturesCmDeliveryOrderDetailTrade {
+  id: string;
+  trade_id: number | string;
+  trade_price: number;
+  trade_volume: number;
+  trade_turnover: number;
+  trade_fee: number;
+  role: string;
+  created_at: number;
+  profit: number;
+  real_profit: number;
+}
+
+/** Order detail from POST /api/v1/contract_order_detail */
+export interface FuturesCmDeliveryOrderDetail {
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  lever_rate: number;
+  direction: string;
+  offset: string;
+  volume: number;
+  price: number;
+  created_at: number;
+  canceled_at: number;
+  order_source: string;
+  order_price_type: string;
+  margin_frozen: number;
+  profit: number;
+  order_id: number | string;
+  order_id_str: string;
+  client_order_id: number | string | null;
+  order_type: number | string;
+  status: number;
+  trade_volume: number;
+  trade_turnover: number;
+  trade_avg_price: number;
+  total_page: number;
+  current_page: number;
+  total_size: number;
+  instrument_price: number;
+  final_interest: number;
+  adjust_value: number;
+  fee_asset: string;
+  fee: number;
+  liquidation_type: string;
+  is_tpsl: number;
+  real_profit: number;
+  trades: FuturesCmDeliveryOrderDetailTrade[];
+  canceled_source?: string;
+  self_match_prevent?: number;
+}
+
+/** Open order item from POST /api/v1/contract_openorders data.orders[] */
+export interface FuturesCmDeliveryOpenOrder {
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  volume: number;
+  price: number;
+  order_price_type: string;
+  order_type: number;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  client_order_id: number | string | null;
+  created_at: number;
+  trade_volume: number;
+  trade_turnover: number;
+  fee: number;
+  trade_avg_price: number | null;
+  margin_frozen: number;
+  profit: number;
+  status: number;
+  order_source: string;
+  fee_asset: string;
+  is_tpsl: number;
+  update_time: number;
+  real_profit: number;
+  liquidation_type?: string | null;
+  canceled_at?: number | null;
+}
+
+/** Response from POST /api/v1/contract_openorders */
+export interface FuturesCmDeliveryOpenOrders {
+  orders: FuturesCmDeliveryOpenOrder[];
+  total_page: number;
+  current_page: number;
+  total_size: number;
+  self_match_prevent?: number;
+  canceled_source?: string;
+}
+
+/** Match result item from POST /api/v3/contract_matchresults and contract_matchresults_exact data[] */
+export interface FuturesCmDeliveryMatchResult {
+  query_id: number;
+  id: string;
+  match_id: number;
+  order_id: number | string;
+  order_id_str: string;
+  symbol: string;
+  contract_type: string;
+  contract_code: string;
+  direction: string;
+  offset: string;
+  trade_volume: number;
+  trade_price: number;
+  trade_turnover: number;
+  create_date: number;
+  offset_profitloss: number;
+  trade_fee: number;
+  role: string;
+  real_profit: number;
+  fee_asset: string;
+  order_source: string;
+}
+
+/** History order item from POST /api/v3/contract_hisorders and contract_hisorders_exact data[] */
+export interface FuturesCmDeliveryHistoryOrder {
+  query_id: number;
+  order_id: number | string;
+  order_id_str: string;
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  lever_rate: number;
+  direction: string;
+  offset: string;
+  volume: number;
+  price: number;
+  create_date: number;
+  update_time: number;
+  order_source: string;
+  order_price_type: number | string;
+  order_type: number;
+  margin_frozen: number;
+  profit: number;
+  trade_volume: number;
+  trade_turnover: number;
+  fee: number;
+  trade_avg_price: number;
+  status: number;
+  fee_asset: string;
+  liquidation_type: string;
+  is_tpsl: number | string;
+  real_profit: number;
+  canceled_source?: string;
+  self_match_prevent?: number;
+}
+
 /** Fee from POST /api/v1/contract_fee */
 export interface FuturesCmDeliveryFee {
   symbol: string;

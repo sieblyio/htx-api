@@ -17,11 +17,20 @@ import type {
   FuturesCancelTpslOrderReq,
   FuturesCancelTrailingOrderReq,
   FuturesCmDeliveryBasisDataReq,
+  FuturesCmDeliveryCancelAllOrdersReq,
+  FuturesCmDeliveryCancelOrderReq,
   FuturesCmDeliveryContractInfoReq,
   FuturesCmDeliveryContractLimitReq,
   FuturesCmDeliveryContractOpenInterestReq,
   FuturesCmDeliveryFinancialRecordExactReq,
   FuturesCmDeliveryFinancialRecordReq,
+  FuturesCmDeliveryGetFillsExactReq,
+  FuturesCmDeliveryGetFillsReq,
+  FuturesCmDeliveryGetHistoryOrdersExactReq,
+  FuturesCmDeliveryGetHistoryOrdersReq,
+  FuturesCmDeliveryGetOpenOrdersReq,
+  FuturesCmDeliveryGetOrderDetailReq,
+  FuturesCmDeliveryGetOrderInfoReq,
   FuturesCmDeliveryIndexKlinesReq,
   FuturesCmDeliveryKlinesReq,
   FuturesCmDeliveryLiquidationOrdersReq,
@@ -35,6 +44,10 @@ import type {
   FuturesCmDeliverySubAccountInfoListReq,
   FuturesCmDeliverySubAccountListReq,
   FuturesCmDeliverySubAuthListReq,
+  FuturesCmDeliverySubmitBatchOrderReq,
+  FuturesCmDeliverySubmitFlashCloseOrderReq,
+  FuturesCmDeliverySubmitOrderReq,
+  FuturesCmDeliveryUpdateLeverageReq,
   FuturesCmDeliveryUserSettlementRecordsReq,
   FuturesCrossSubmitOrderReq,
   FuturesGetBasisDataReq,
@@ -160,6 +173,7 @@ import type {
   FuturesCmDeliveryEstimatedSettlementPrice,
   FuturesCmDeliveryFee,
   FuturesCmDeliveryFinancialRecord,
+  FuturesCmDeliveryHistoryOrder,
   FuturesCmDeliveryIndex,
   FuturesCmDeliveryIndexKline,
   FuturesCmDeliveryInsuranceFund,
@@ -174,7 +188,12 @@ import type {
   FuturesCmDeliveryMarkPriceKline,
   FuturesCmDeliveryMasterSubTransfer,
   FuturesCmDeliveryMasterSubTransfers,
+  FuturesCmDeliveryMatchResult,
   FuturesCmDeliveryOpenInterest,
+  FuturesCmDeliveryOpenOrder,
+  FuturesCmDeliveryOpenOrders,
+  FuturesCmDeliveryOrderDetail,
+  FuturesCmDeliveryOrderInfo,
   FuturesCmDeliveryOrderLimit,
   FuturesCmDeliveryPositionInfo,
   FuturesCmDeliveryPositionLimit,
@@ -186,6 +205,7 @@ import type {
   FuturesCmDeliverySubAuth,
   FuturesCmDeliverySubPermissions,
   FuturesCmDeliverySubPositionInfo,
+  FuturesCmDeliverySwitchLeverRate,
   FuturesCmDeliveryTicker,
   FuturesCmDeliveryTradeHistory,
   FuturesCmDeliveryTransferLimit,
@@ -3176,4 +3196,198 @@ export class FuturesClient extends BaseRestClient {
       body: params ?? {},
     });
   }
+
+  /**
+   *
+   * Coin-M Delivery - Future Trade Interface
+   *
+   */
+
+  /**
+   * Automatic Order Cancellation (Future Trade)
+   *
+   * Dead Man's Switch for delivery futures. Enable/disable auto-cancel of all pending orders after countdown. If not refreshed before timer ends, all pending orders cancelled. Trade permission.
+   */
+  setCmCancelAfter(
+    params: FuturesSetCancelAfterReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelAfter>> {
+    return this.postPrivate('/api/v1/contract-cancel-after', {
+      body: params,
+    });
+  }
+
+  /**
+   * Place an Order (Future Trade)
+   *
+   * Place order for delivery futures (weekly/quarterly). One of contract_code or (symbol+contract_type). Trade permission. Rate limit: 36/3s per UID.
+   */
+  submitCmOrder(
+    params: FuturesCmDeliverySubmitOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
+    return this.postPrivate('/api/v1/contract_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * Place a Batch of Orders (Future Trade)
+   *
+   * Place up to 25 orders for delivery futures. Trade permission. Rate limit: 36/3s per UID.
+   */
+  submitCmBatchOrder(
+    params: FuturesCmDeliverySubmitBatchOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesBatchOrder>> {
+    return this.postPrivate('/api/v1/contract_batchorder', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel an Order (Future Trade)
+   *
+   * Cancel by order_id or client_order_id. Max 10 per request. Symbol required. Trade permission. Rate limit: 36/3s per UID.
+   */
+  cancelCmOrder(
+    params: FuturesCmDeliveryCancelOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+    return this.postPrivate('/api/v1/contract_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel All Orders (Future Trade)
+   *
+   * Cancel all orders. One of: symbol, contract_code, or (symbol+contract_type). Optional direction/offset filter. Trade permission. Rate limit: 36/3s per UID.
+   */
+  cancelCmAllOrders(
+    params: FuturesCmDeliveryCancelAllOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+    return this.postPrivate('/api/v1/contract_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * Switch Leverage (Future Trade)
+   *
+   * Set leverage for symbol. Trade permission. Rate limit: 36/3s per UID.
+   */
+  updateCmLeverage(
+    params: FuturesCmDeliveryUpdateLeverageReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliverySwitchLeverRate>> {
+    return this.postPrivate('/api/v1/contract_switch_lever_rate', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Information of an Order (Future Trade)
+   *
+   * Query order(s) by order_id or client_order_id. Max 50 per request. Symbol required. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmOrderInfo(
+    params: FuturesCmDeliveryGetOrderInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryOrderInfo[]>> {
+    return this.postPrivate('/api/v1/contract_order_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Order Details Acquisition (Future Trade)
+   *
+   * Get order detail with trades. symbol, order_id, created_at, order_type required. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmOrderDetail(
+    params: FuturesCmDeliveryGetOrderDetailReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryOrderDetail>> {
+    return this.postPrivate('/api/v1/contract_order_detail', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Open Orders (Future Trade)
+   *
+   * Get open orders. Omit symbol for all. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmOpenOrders(
+    params?: FuturesCmDeliveryGetOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryOpenOrders>> {
+    return this.postPrivate('/api/v1/contract_openorders', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Get History Orders (Future Trade, v3)
+   *
+   * History orders. symbol, trade_type, type, status required. Window max 48h, within 90 days. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmHistoryOrders(
+    params: FuturesCmDeliveryGetHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryHistoryOrder[]>> {
+    return this.postPrivate('/api/v3/contract_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query History Orders via Multiple Fields (Future Trade, v3)
+   *
+   * History orders with type filter. symbol, trade_type, type, status required. Window max 48h, within 90 days. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmHistoryOrdersExact(
+    params: FuturesCmDeliveryGetHistoryOrdersExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryHistoryOrder[]>> {
+    return this.postPrivate('/api/v3/contract_hisorders_exact', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get History Match Results (Future Trade, v3)
+   *
+   * Match/fill history. symbol, contract, trade_type required. Window max 48h, within 90 days. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmFills(
+    params: FuturesCmDeliveryGetFillsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryMatchResult[]>> {
+    return this.postPrivate('/api/v3/contract_matchresults', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query History Match Results via Multiple Fields (Future Trade, v3)
+   *
+   * Match/fill history with flexible filters. symbol, trade_type required. Within 90 days. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmFillsExact(
+    params: FuturesCmDeliveryGetFillsExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryMatchResult[]>> {
+    return this.postPrivate('/api/v3/contract_matchresults_exact', {
+      body: params,
+    });
+  }
+
+  /**
+   * Place Flash Close Order (Future Trade)
+   *
+   * Lightning close position. One of contract_code or (symbol+contract_type). volume, direction required. Trade permission. Rate limit: 36/3s per UID.
+   */
+  submitCmFlashCloseOrder(
+    params: FuturesCmDeliverySubmitFlashCloseOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
+    return this.postPrivate('/api/v1/lightning_close_position', {
+      body: params,
+    });
+  }
+
+  /**
+   *
+   * Coin-M Delivery - Strategy Order (Trigger order)
+   *
+   */
 }

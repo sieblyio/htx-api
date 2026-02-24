@@ -1755,6 +1755,202 @@ export interface FuturesCmDeliveryOrderLimitReq {
   symbol?: string;
 }
 
+/** Order price type for POST /api/v1/contract_order. Delivery futures (weekly/quarterly). */
+export type FuturesCmDeliverySubmitOrderPriceType =
+  | 'limit'
+  | 'opponent'
+  | 'post_only'
+  | 'optimal_5'
+  | 'optimal_10'
+  | 'optimal_20'
+  | 'ioc'
+  | 'fok'
+  | 'opponent_ioc'
+  | 'optimal_5_ioc'
+  | 'optimal_10_ioc'
+  | 'optimal_20_ioc'
+  | 'opponent_fok'
+  | 'optimal_5_fok'
+  | 'optimal_10_fok'
+  | 'optimal_20_fok';
+
+/** Req for POST /api/v1/contract_order. Place order. Delivery futures. One of contract_code or (symbol+contract_type). */
+export interface FuturesCmDeliverySubmitOrderReq {
+  /** Contract code (e.g. bch210326). Use if known. */
+  contract_code?: string;
+  /** Symbol (e.g. BTC, ETH). Case-insensitive. Use with contract_type. */
+  symbol?: string;
+  /** this_week, next_week, quarter, next_quarter. Use with symbol. */
+  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  /** Client order ID [1, 9223372036854775807] */
+  client_order_id?: number;
+  /** Price. Required for limit, post_only, ioc, fok */
+  price?: number | string;
+  /** Order quantity. Required */
+  volume: number;
+  /** buy or sell. Required */
+  direction: 'buy' | 'sell';
+  /** open or close. Required */
+  offset: 'open' | 'close';
+  /** Leverage rate. Required */
+  lever_rate: number;
+  /** Order price type. Required */
+  order_price_type: FuturesCmDeliverySubmitOrderPriceType;
+  /** Take-profit trigger price */
+  tp_trigger_price?: number | string;
+  /** Take-profit order price */
+  tp_order_price?: number | string;
+  /** Take-profit order type: limit, optimal_5, optimal_10, optimal_20 */
+  tp_order_price_type?: string;
+  /** Stop-loss trigger price */
+  sl_trigger_price?: number | string;
+  /** Stop-loss order price */
+  sl_order_price?: number | string;
+  /** Stop-loss order type: limit, optimal_5, optimal_10, optimal_20 */
+  sl_order_price_type?: string;
+  /** Price protection when setting tp/sl. Default false. */
+  price_protect?: boolean;
+  /** 0: allow self-trade, 1: prevent. Default 1 */
+  self_match_prevent?: 0 | 1;
+}
+
+/** Req for POST /api/v1/contract_batchorder. Max 25 orders. */
+export interface FuturesCmDeliverySubmitBatchOrderReq {
+  orders_data: FuturesCmDeliverySubmitOrderReq[];
+}
+
+/** Req for POST /api/v1/contract_cancel. One of order_id or client_order_id. Max 10 IDs. Symbol required. */
+export interface FuturesCmDeliveryCancelOrderReq {
+  symbol: string;
+  /** Order IDs, comma-separated. Max 10 */
+  order_id?: string;
+  /** Client order IDs, comma-separated. Max 10 */
+  client_order_id?: string;
+}
+
+/** Req for POST /api/v1/contract_switch_lever_rate */
+export interface FuturesCmDeliveryUpdateLeverageReq {
+  symbol: string;
+  lever_rate: number;
+}
+
+/** Req for POST /api/v1/contract_order_info. One of order_id or client_order_id. Max 50 IDs. Symbol required. */
+export interface FuturesCmDeliveryGetOrderInfoReq {
+  symbol: string;
+  /** Order IDs, comma-separated. Max 50 */
+  order_id?: string;
+  /** Client order IDs, comma-separated. Max 50 */
+  client_order_id?: string;
+}
+
+/** Req for POST /api/v1/contract_order_detail. created_at cannot be 0. */
+export interface FuturesCmDeliveryGetOrderDetailReq {
+  symbol: string;
+  order_id: number | string;
+  created_at: number;
+  order_type: number;
+  page_index?: number;
+  page_size?: number;
+}
+
+/** Req for POST /api/v1/contract_openorders. Omit symbol to query all. */
+export interface FuturesCmDeliveryGetOpenOrdersReq {
+  symbol?: string;
+  page_index?: number;
+  page_size?: number;
+  sort_by?: 'created_at' | 'update_time';
+  /** 0: all, 1: buy long, 2: sell short, 3: buy short, 4: sell long */
+  trade_type?: 0 | 1 | 2 | 3 | 4;
+}
+
+/** Req for POST /api/v3/contract_hisorders. Window max 48h, within 90 days. */
+export interface FuturesCmDeliveryGetHistoryOrdersReq {
+  symbol: string;
+  /** 0:all, 1: buy long, 2: sell short, 3: buy short, 4: sell long, 5: sell liq, 6: buy liq, 7: delivery long, 8: delivery short, 11: reduce close long, 12: reduce close short */
+  trade_type: number;
+  /** 1: All Orders, 2: Order in Finished Status */
+  type: 1 | 2;
+  /** 0: all, or comma-separated: 3,4,5,6,7 */
+  status: string;
+  contract_code?: string;
+  order_type?: string;
+  start_time?: number;
+  end_time?: number;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+  limit?: number;
+}
+
+/** Req for POST /api/v3/contract_hisorders_exact. type filters by trade type. Window max 48h, within 90 days. */
+export interface FuturesCmDeliveryGetHistoryOrdersExactReq {
+  symbol: string;
+  /** Same as trade_type */
+  trade_type: number;
+  /** Same values as trade_type (0-12) */
+  type: number;
+  /** 0: all, or comma-separated: 3,4,5,6,7 */
+  status: string;
+  contract_code?: string;
+  order_type?: string;
+  start_time?: number;
+  end_time?: number;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+}
+
+/** Req for POST /api/v3/contract_matchresults. Window max 48h, within 90 days. */
+export interface FuturesCmDeliveryGetFillsReq {
+  symbol: string;
+  /** Contract code (e.g. BTC-USD) */
+  contract: string;
+  /** 0: all, 1: open long, 2: open short, 3: close short, 4: close long, 5: liq long, 6: liq short */
+  trade_type: number;
+  start_time?: number;
+  end_time?: number;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+}
+
+/** Req for POST /api/v3/contract_matchresults_exact. Within 90 days. */
+export interface FuturesCmDeliveryGetFillsExactReq {
+  symbol: string;
+  /** 0: all, 1: open long, 2: open short, 3: close short, 4: close long, 5: liq long, 6: liq short */
+  trade_type: number;
+  contract_code?: string;
+  start_time?: number;
+  end_time?: number;
+  from_id?: number;
+  /** Default 20, max 50 */
+  size?: number;
+  direct?: 'next' | 'prev';
+}
+
+/** Req for POST /api/v1/lightning_close_position. One of contract_code or (symbol+contract_type). */
+export interface FuturesCmDeliverySubmitFlashCloseOrderReq {
+  volume: number;
+  direction: 'buy' | 'sell';
+  contract_code?: string;
+  symbol?: string;
+  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  client_order_id?: number;
+  /** lightning (default), lightning_fok, lightning_ioc */
+  order_price_type?: 'lightning' | 'lightning_fok' | 'lightning_ioc';
+}
+
+/** Req for POST /api/v1/contract_cancelall. One of: symbol, contract_code, or (symbol+contract_type). */
+export interface FuturesCmDeliveryCancelAllOrdersReq {
+  /** Symbol (e.g. BTC). Cancel all contracts of this symbol. */
+  symbol?: string;
+  /** Contract code (e.g. btc200925). Cancel orders for this contract. */
+  contract_code?: string;
+  /** this_week, next_week, quarter, next_quarter. Use with symbol. */
+  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  /** buy or sell. Omit for all */
+  direction?: 'buy' | 'sell';
+  /** open or close. Omit for all */
+  offset?: 'open' | 'close';
+}
+
 /** Req for POST /api/v1/contract_master_sub_transfer_record */
 export interface FuturesCmDeliveryMasterSubTransferRecordReq {
   symbol: string;
