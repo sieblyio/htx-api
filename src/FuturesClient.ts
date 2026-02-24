@@ -18,7 +18,13 @@ import type {
   FuturesCancelTrailingOrderReq,
   FuturesCmDeliveryBasisDataReq,
   FuturesCmDeliveryCancelAllOrdersReq,
+  FuturesCmDeliveryCancelAllTpslOrdersReq,
+  FuturesCmDeliveryCancelAllTrailingOrdersReq,
+  FuturesCmDeliveryCancelAllTriggerOrdersReq,
   FuturesCmDeliveryCancelOrderReq,
+  FuturesCmDeliveryCancelTpslOrderReq,
+  FuturesCmDeliveryCancelTrailingOrderReq,
+  FuturesCmDeliveryCancelTriggerOrderReq,
   FuturesCmDeliveryContractInfoReq,
   FuturesCmDeliveryContractLimitReq,
   FuturesCmDeliveryContractOpenInterestReq,
@@ -31,6 +37,13 @@ import type {
   FuturesCmDeliveryGetOpenOrdersReq,
   FuturesCmDeliveryGetOrderDetailReq,
   FuturesCmDeliveryGetOrderInfoReq,
+  FuturesCmDeliveryGetRelationTpslOrderReq,
+  FuturesCmDeliveryGetTpslHistoryOrdersReq,
+  FuturesCmDeliveryGetTpslOpenOrdersReq,
+  FuturesCmDeliveryGetTrailingHistoryOrdersReq,
+  FuturesCmDeliveryGetTrailingOpenOrdersReq,
+  FuturesCmDeliveryGetTriggerHistoryOrdersReq,
+  FuturesCmDeliveryGetTriggerOpenOrdersReq,
   FuturesCmDeliveryIndexKlinesReq,
   FuturesCmDeliveryKlinesReq,
   FuturesCmDeliveryLiquidationOrdersReq,
@@ -47,6 +60,9 @@ import type {
   FuturesCmDeliverySubmitBatchOrderReq,
   FuturesCmDeliverySubmitFlashCloseOrderReq,
   FuturesCmDeliverySubmitOrderReq,
+  FuturesCmDeliverySubmitTpslOrderReq,
+  FuturesCmDeliverySubmitTrailingOrderReq,
+  FuturesCmDeliverySubmitTriggerOrderReq,
   FuturesCmDeliveryUpdateLeverageReq,
   FuturesCmDeliveryUserSettlementRecordsReq,
   FuturesCrossSubmitOrderReq,
@@ -199,6 +215,7 @@ import type {
   FuturesCmDeliveryPositionLimit,
   FuturesCmDeliveryPriceLimit,
   FuturesCmDeliveryQueryElements,
+  FuturesCmDeliveryRelationTpslOrder,
   FuturesCmDeliverySettlementRecords,
   FuturesCmDeliverySubAccountAssets,
   FuturesCmDeliverySubAccountsAssets,
@@ -207,8 +224,21 @@ import type {
   FuturesCmDeliverySubPositionInfo,
   FuturesCmDeliverySwitchLeverRate,
   FuturesCmDeliveryTicker,
+  FuturesCmDeliveryTpslHistoryOrder,
+  FuturesCmDeliveryTpslHistoryOrders,
+  FuturesCmDeliveryTpslOpenOrder,
+  FuturesCmDeliveryTpslOpenOrders,
+  FuturesCmDeliveryTpslOrder,
   FuturesCmDeliveryTradeHistory,
+  FuturesCmDeliveryTrailingHistoryOrder,
+  FuturesCmDeliveryTrailingHistoryOrders,
+  FuturesCmDeliveryTrailingOpenOrder,
+  FuturesCmDeliveryTrailingOpenOrders,
   FuturesCmDeliveryTransferLimit,
+  FuturesCmDeliveryTriggerHistoryOrder,
+  FuturesCmDeliveryTriggerHistoryOrders,
+  FuturesCmDeliveryTriggerOpenOrder,
+  FuturesCmDeliveryTriggerOpenOrders,
   FuturesCmDeliveryUserSettlementRecords,
   FuturesContractElements,
   FuturesContractInfo,
@@ -3390,4 +3420,214 @@ export class FuturesClient extends BaseRestClient {
    * Coin-M Delivery - Strategy Order (Trigger order)
    *
    */
+
+  /**
+   * Place Trigger Order (Future Trade)
+   *
+   * Submit trigger order. One of contract_code or (symbol+contract_type). Trade permission. Rate limit: 5/s.
+   */
+  submitCmTriggerOrder(
+    params: FuturesCmDeliverySubmitTriggerOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
+    return this.postPrivate('/api/v1/contract_trigger_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel Trigger Order (Future Trade)
+   *
+   * Cancel by order_id. Max 10 per request. Symbol required. Trade permission. Rate limit: 5/s.
+   */
+  cancelCmTriggerOrder(
+    params: FuturesCmDeliveryCancelTriggerOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+    return this.postPrivate('/api/v1/contract_trigger_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel All Trigger Orders (Future Trade)
+   *
+   * Cancel all trigger orders. symbol required. Optional contract_code, contract_type, direction, offset. Trade permission. Rate limit: 5/s.
+   */
+  cancelCmAllTriggerOrders(
+    params: FuturesCmDeliveryCancelAllTriggerOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+    return this.postPrivate('/api/v1/contract_trigger_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Trigger Order Open Orders (Future Trade)
+   *
+   * Get open trigger orders. Symbol required. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmTriggerOpenOrders(
+    params: FuturesCmDeliveryGetTriggerOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTriggerOpenOrders>> {
+    return this.postPrivate('/api/v1/contract_trigger_openorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Trigger Order History (Future Trade)
+   *
+   * Get trigger order history. symbol, trade_type, status, create_date required. Within 90 days. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmTriggerHistoryOrders(
+    params: FuturesCmDeliveryGetTriggerHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTriggerHistoryOrders>> {
+    return this.postPrivate('/api/v1/contract_trigger_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Set Take-profit and Stop-loss Order (Future Trade)
+   *
+   * TPSL for existing position. One of contract_code or (symbol+contract_type). At least one of tp or sl. Rate limit: 5/s.
+   */
+  submitCmTpslOrder(
+    params: FuturesCmDeliverySubmitTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTpslOrder>> {
+    return this.postPrivate('/api/v1/contract_tpsl_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel Take-profit and Stop-loss Order (Future Trade)
+   *
+   * Cancel TPSL by order_id. Max 10 per request. Symbol required. Trade permission. Rate limit: 5/s.
+   */
+  cancelCmTpslOrder(
+    params: FuturesCmDeliveryCancelTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+    return this.postPrivate('/api/v1/contract_tpsl_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel All Take-profit and Stop-loss Orders (Future Trade)
+   *
+   * Cancel all TPSL. One of: symbol, contract_code, or (symbol+contract_type). Optional direction. Trade permission. Rate limit: 5/s.
+   */
+  cancelCmAllTpslOrders(
+    params: FuturesCmDeliveryCancelAllTpslOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+    return this.postPrivate('/api/v1/contract_tpsl_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Open Take-profit and Stop-loss Orders (Future Trade)
+   *
+   * Get open TPSL orders. Symbol required. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmTpslOpenOrders(
+    params: FuturesCmDeliveryGetTpslOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTpslOpenOrders>> {
+    return this.postPrivate('/api/v1/contract_tpsl_openorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Take-profit and Stop-loss History Orders (Future Trade)
+   *
+   * TPSL order history. symbol, contract_code, status, create_date required. Within 90 days. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmTpslHistoryOrders(
+    params: FuturesCmDeliveryGetTpslHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTpslHistoryOrders>> {
+    return this.postPrivate('/api/v1/contract_tpsl_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query TPSL Orders Related to Position-opening Order (Future Trade)
+   *
+   * Get TPSL orders linked to a limit order. symbol, order_id required. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmRelationTpslOrder(
+    params: FuturesCmDeliveryGetRelationTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryRelationTpslOrder>> {
+    return this.postPrivate('/api/v1/contract_relation_tpsl_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * Place Trailing Order (Future Trade)
+   *
+   * Submit trailing order. One of contract_code or (symbol+contract_type). lever_rate required when open. Trade permission. Rate limit: 5/s.
+   */
+  submitCmTrailingOrder(
+    params: FuturesCmDeliverySubmitTrailingOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
+    return this.postPrivate('/api/v1/contract_track_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel Trailing Order (Future Trade)
+   *
+   * Cancel by order_id. Max 10 per request. Symbol required. Trade permission. Rate limit: 5/s.
+   */
+  cancelCmTrailingOrder(
+    params: FuturesCmDeliveryCancelTrailingOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+    return this.postPrivate('/api/v1/contract_track_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel All Trailing Orders (Future Trade)
+   *
+   * Cancel all trailing orders. symbol required. Optional contract_code, contract_type, direction, offset. Trade permission. Rate limit: 5/s.
+   */
+  cancelCmAllTrailingOrders(
+    params: FuturesCmDeliveryCancelAllTrailingOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+    return this.postPrivate('/api/v1/contract_track_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Open Trailing Orders (Future Trade)
+   *
+   * Get unfilled trailing orders. Symbol required. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmTrailingOpenOrders(
+    params: FuturesCmDeliveryGetTrailingOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTrailingOpenOrders>> {
+    return this.postPrivate('/api/v1/contract_track_openorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get History Trailing Orders (Future Trade)
+   *
+   * Trailing order history. symbol, status, trade_type, create_date required. Within 90 days. Read permission. Rate limit: 72/3s per UID.
+   */
+  getCmTrailingHistoryOrders(
+    params: FuturesCmDeliveryGetTrailingHistoryOrdersReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesCmDeliveryTrailingHistoryOrders>
+  > {
+    return this.postPrivate('/api/v1/contract_track_hisorders', {
+      body: params,
+    });
+  }
 }

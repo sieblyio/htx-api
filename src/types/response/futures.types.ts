@@ -2584,6 +2584,270 @@ export interface FuturesCmDeliveryOpenOrders {
   canceled_source?: string;
 }
 
+/** Trigger open order item from POST /api/v1/contract_trigger_openorders data.orders[] */
+export interface FuturesCmDeliveryTriggerOpenOrder {
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  trigger_type: string;
+  volume: number;
+  order_type: number;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  order_source: string;
+  trigger_price: number;
+  order_price: number;
+  created_at: number;
+  order_price_type: string;
+  status: number;
+}
+
+/** Response from POST /api/v1/contract_trigger_openorders */
+export interface FuturesCmDeliveryTriggerOpenOrders {
+  orders: FuturesCmDeliveryTriggerOpenOrder[];
+  total_page: number;
+  current_page: number;
+  total_size: number;
+}
+
+/** Trigger history order item from POST /api/v1/contract_trigger_hisorders data.orders[] */
+export interface FuturesCmDeliveryTriggerHistoryOrder {
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  trigger_type: string;
+  volume: number;
+  order_type: number;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  relation_order_id: string;
+  order_price_type: string;
+  status: number;
+  order_source: string;
+  trigger_price: number;
+  triggered_price: number;
+  order_price: number;
+  created_at: number;
+  triggered_at: number;
+  order_insert_at: number;
+  canceled_at: number;
+  fail_code: number | null;
+  fail_reason: string | null;
+  update_time?: number;
+}
+
+/** Response from POST /api/v1/contract_trigger_hisorders */
+export interface FuturesCmDeliveryTriggerHistoryOrders {
+  orders: FuturesCmDeliveryTriggerHistoryOrder[];
+  total_page: number;
+  current_page: number;
+  total_size: number;
+}
+
+/** TPSL order ids from POST /api/v1/contract_tpsl_order */
+export interface FuturesCmDeliveryTpslOrderIds {
+  order_id: number | string;
+  order_id_str: string;
+}
+
+/** Response from POST /api/v1/contract_tpsl_order */
+export interface FuturesCmDeliveryTpslOrder {
+  tp_order?: FuturesCmDeliveryTpslOrderIds;
+  sl_order?: FuturesCmDeliveryTpslOrderIds;
+}
+
+/** TPSL open order item from POST /api/v1/contract_tpsl_openorders data.orders[] */
+export interface FuturesCmDeliveryTpslOpenOrder {
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  volume: number;
+  order_type: number;
+  tpsl_order_type: 'tp' | 'sl';
+  direction: string;
+  order_id: number | string;
+  order_id_str: string;
+  order_source: string;
+  trigger_type: string;
+  trigger_price: number;
+  order_price: number;
+  created_at: number;
+  order_price_type: string;
+  status: number;
+  source_order_id: string | null;
+  relation_tpsl_order_id: string;
+  price_protect?: boolean;
+}
+
+/** Response from POST /api/v1/contract_tpsl_openorders */
+export interface FuturesCmDeliveryTpslOpenOrders {
+  orders: FuturesCmDeliveryTpslOpenOrder[];
+  total_page: number;
+  current_page: number;
+  total_size: number;
+}
+
+/** TPSL history order item from POST /api/v1/contract_tpsl_hisorders data.orders[] */
+export interface FuturesCmDeliveryTpslHistoryOrder {
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  volume: number;
+  order_type: number;
+  tpsl_order_type: 'tp' | 'sl';
+  direction: string;
+  order_id: number | string;
+  order_id_str: string;
+  order_source: string;
+  trigger_type: string;
+  trigger_price: number;
+  order_price: number;
+  created_at: number;
+  order_price_type: string;
+  status: number;
+  source_order_id: string | null;
+  relation_tpsl_order_id: string;
+  canceled_at: number;
+  fail_code: number | null;
+  fail_reason: string | null;
+  triggered_price: number | null;
+  relation_order_id: string;
+  update_time: number;
+  price_protect?: boolean;
+}
+
+/** Response from POST /api/v1/contract_tpsl_hisorders */
+export interface FuturesCmDeliveryTpslHistoryOrders {
+  orders: FuturesCmDeliveryTpslHistoryOrder[];
+  total_page: number;
+  current_page: number;
+  total_size: number;
+}
+
+/** TPSL order info item from contract_relation_tpsl_order data.tpsl_order_info[] */
+export interface FuturesCmDeliveryRelationTpslOrderInfo {
+  volume: number;
+  tpsl_order_type: 'tp' | 'sl';
+  direction: string;
+  order_id: number | string;
+  order_id_str: string;
+  trigger_type: string;
+  trigger_price: number;
+  order_price: number;
+  created_at: number;
+  order_price_type: string;
+  status: number;
+  relation_tpsl_order_id: string;
+  canceled_at: number;
+  fail_code: number | null;
+  fail_reason: string | null;
+  triggered_price: number | null;
+  relation_order_id: string;
+  price_protect?: boolean;
+}
+
+/** Trailing open order item from POST /api/v1/contract_track_openorders data.orders[] */
+export interface FuturesCmDeliveryTrailingOpenOrder {
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  volume: number;
+  order_type: number;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  order_source: string;
+  created_at: number;
+  order_price_type: string;
+  status: number;
+  callback_rate: number;
+  active_price: number;
+  is_active: number;
+}
+
+/** Response from POST /api/v1/contract_track_openorders */
+export interface FuturesCmDeliveryTrailingOpenOrders {
+  orders: FuturesCmDeliveryTrailingOpenOrder[];
+  total_page: number;
+  current_page: number;
+  total_size: number;
+}
+
+/** Trailing history order item from POST /api/v1/contract_track_hisorders data.orders[] */
+export interface FuturesCmDeliveryTrailingHistoryOrder {
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  volume: number;
+  order_type: number;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  order_source: string;
+  created_at: number;
+  update_time: number;
+  order_price_type: string;
+  status: number;
+  canceled_at: number;
+  fail_code: number | null;
+  fail_reason: string | null;
+  callback_rate: number;
+  active_price: number;
+  is_active: number;
+  market_limit_price: number | null;
+  formula_price: number | null;
+  real_volume: number;
+  triggered_price: number | null;
+  relation_order_id: string;
+}
+
+/** Response from POST /api/v1/contract_track_hisorders */
+export interface FuturesCmDeliveryTrailingHistoryOrders {
+  orders: FuturesCmDeliveryTrailingHistoryOrder[];
+  total_page: number;
+  current_page: number;
+  total_size: number;
+}
+
+/** Response from POST /api/v1/contract_relation_tpsl_order */
+export interface FuturesCmDeliveryRelationTpslOrder {
+  symbol: string;
+  contract_code: string;
+  contract_type: string;
+  volume: number;
+  price: number;
+  order_price_type: string;
+  direction: string;
+  offset: string;
+  lever_rate: number;
+  order_id: number | string;
+  order_id_str: string;
+  client_order_id: number | string | null;
+  created_at: number;
+  trade_volume: number;
+  trade_turnover: number;
+  fee: number;
+  trade_avg_price: number | null;
+  margin_frozen: number;
+  profit: number;
+  status: number;
+  order_type: number;
+  order_source: string;
+  fee_asset: string;
+  canceled_at: number;
+  tpsl_order_info: FuturesCmDeliveryRelationTpslOrderInfo[];
+}
+
 /** Match result item from POST /api/v3/contract_matchresults and contract_matchresults_exact data[] */
 export interface FuturesCmDeliveryMatchResult {
   query_id: number;
