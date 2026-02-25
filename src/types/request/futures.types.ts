@@ -163,8 +163,8 @@ export interface FuturesGetCrossPositionsReq {
   contract_type?: string;
 }
 
-/** Req for GET /linear-swap-api/v1/swap_sub_auth_list */
-export interface FuturesGetSubAuthListReq {
+/** Req for GET /linear-swap-api/v1/swap_sub_auth_list. getSubPermissions. */
+export interface FuturesGetSubPermissionsReq {
   /** Sub-account UIDs, comma-separated. Max 10 */
   sub_uid?: string;
   /** Start time of sub-account creation (ms) */
@@ -1696,8 +1696,8 @@ export interface FuturesCmDeliveryIndexKlinesReq {
   size: number;
 }
 
-/** Req for GET /api/v1/contract_sub_auth_list. Sub-account trading permissions. */
-export interface FuturesCmDeliverySubAuthListReq {
+/** Req for GET /api/v1/contract_sub_auth_list. getCmSubPermissions. */
+export interface FuturesCmDeliverySubPermissionsReq {
   sub_uid?: string;
   start_time?: number;
   end_time?: number;

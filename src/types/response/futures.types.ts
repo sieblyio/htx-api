@@ -17,6 +17,16 @@ export type FuturesPaginatedSettlement<T> = FuturesPaginatedBase & {
   settlement_record: T[];
 };
 
+/** Paginated response with `sub_list` array (sub-account info list). */
+export type FuturesPaginatedSubList<T> = FuturesPaginatedBase & {
+  sub_list: T[];
+};
+
+/** Paginated response with `transfer_record` array (master-sub transfers). */
+export type FuturesPaginatedTransferRecord<T> = FuturesPaginatedBase & {
+  transfer_record: T[];
+};
+
 /** Funding rate from swap_funding_rate and swap_batch_funding_rate */
 export interface FuturesFundingRate {
   funding_rate: string;
@@ -428,12 +438,6 @@ export interface FuturesTicker {
   number_of?: string;
 }
 
-/** @deprecated Use FuturesTicker */
-export interface FuturesMarketOverviewTick extends FuturesTicker {}
-
-/** @deprecated Use FuturesTicker */
-export interface FuturesMarketOverviewBatchTick extends FuturesTicker {}
-
 /** Trade item from last trade and history trade. symbol, contract_code, business_type, trade_turnover optional per product. */
 export interface FuturesTrade {
   id: number;
@@ -455,18 +459,12 @@ export interface FuturesLastTrade {
   data: FuturesTrade[];
 }
 
-/** @deprecated Use FuturesLastTrade */
-export interface FuturesLastTradeTick extends FuturesLastTrade {}
-
 /** Trade history group from market/history/trade. Each group has trades by timestamp. */
 export interface FuturesTradeHistory {
   id: number;
   ts: number;
   data: FuturesTrade[];
 }
-
-/** @deprecated Use FuturesTradeHistory */
-export interface FuturesTradeHistoryGroup extends FuturesTradeHistory {}
 
 /** Open interest tick item from swap_his_open_interest */
 export interface FuturesOpenInterestTick {
@@ -485,7 +483,6 @@ export interface FuturesHistoricalOpenInterest {
   business_type: string;
   tick: FuturesOpenInterestTick[];
 }
-
 
 /**
  * Account
@@ -709,8 +706,8 @@ export interface FuturesSubAuthSuccess {
   sub_auth: number | string;
 }
 
-/** Sub auth list response data */
-export interface FuturesSubAuthList {
+/** Sub permissions response from getSubPermissions */
+export interface FuturesSubPermissions {
   errors: FuturesSubAuthError[];
   successes: FuturesSubAuthSuccess[];
 }
@@ -786,12 +783,8 @@ export interface FuturesSubAccountInfoSub {
 }
 
 /**  object from swap_sub_account_info_list */
-export interface FuturesSubAccountInfoList {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  sub_list: FuturesSubAccountInfoSub[];
-}
+export type FuturesSubAccountInfoList =
+  FuturesPaginatedSubList<FuturesSubAccountInfoSub>;
 
 /** Cross sub-account info list: account_info_list item (no symbol/contract_code) */
 export interface FuturesCrossSubAccountInfoListAccount {
@@ -816,13 +809,10 @@ export interface FuturesCrossSubAccountInfoListUnite {
 }
 
 /**  object from swap_cross_sub_account_info_list */
-export interface FuturesCrossSubAccountInfoList {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  sub_list: FuturesCrossSubAccountInfoListSub[];
-  unite_sub_list: FuturesCrossSubAccountInfoListUnite[];
-}
+export type FuturesCrossSubAccountInfoList =
+  FuturesPaginatedSubList<FuturesCrossSubAccountInfoListSub> & {
+    unite_sub_list: FuturesCrossSubAccountInfoListUnite[];
+  };
 
 /** Isolated sub-account info item from swap_sub_account_info (single sub, data array element) */
 export interface FuturesIsolatedSubAccountInfo {
@@ -1016,33 +1006,31 @@ export interface FuturesCrossLeverPositionLimit {
   list: FuturesLeverPositionLimitList[];
 }
 
-/** Master-sub transfer response data from swap_master_sub_transfer */
+/** Master-sub transfer response from transfer*MasterSub */
 export interface FuturesMasterSubTransfer {
   order_id: string;
   client_order_id?: number;
 }
 
-/** Transfer record item from swap_master_sub_transfer_record */
-export interface FuturesMasterSubTransferRecord {
+/** Transfer record item from master_sub_transfer_record. asset, margin_account, symbol, contract_code optional per product. */
+export interface FuturesMasterSubTransferRecordItem {
   id: number;
   ts: number;
-  asset: string;
-  margin_account: string;
-  from_margin_account: string;
-  to_margin_account: string;
   sub_uid: string;
   sub_account_name: string;
   transfer_type: number;
   amount: number | string;
+  asset?: string;
+  margin_account?: string;
+  from_margin_account?: string;
+  to_margin_account?: string;
+  symbol?: string;
+  contract_code?: string;
 }
 
-/**  from swap_master_sub_transfer_record */
-export interface FuturesMasterSubTransferRecord {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  transfer_record: FuturesMasterSubTransferRecord[];
-}
+/** Master-sub transfer records from swap_master_sub_transfer_record */
+export type FuturesMasterSubTransferRecords =
+  FuturesPaginatedTransferRecord<FuturesMasterSubTransferRecordItem>;
 
 /** Cancel-after response data from linear-cancel-after */
 export interface FuturesCancelAfter {
@@ -2279,7 +2267,6 @@ export interface FuturesCmPerpContractInfo {
   contract_status: number;
 }
 
-
 /** Item from GET /swap-api/v1/swap_open_interest data[] */
 export interface FuturesCmPerpOpenInterestCurrent {
   symbol: string;
@@ -2437,12 +2424,6 @@ export interface FuturesCmPerpBasisData {
   basis_rate: string;
 }
 
-/** Asset valuation from POST /swap-api/v1/swap_balance_valuation */
-export interface FuturesCmPerpAssetValuation {
-  valuation_asset: string;
-  balance: string;
-}
-
 /** Account info from POST /swap-api/v1/swap_account_info */
 export interface FuturesCmPerpAccountInfo {
   symbol: string;
@@ -2485,8 +2466,8 @@ export interface FuturesCmPerpPositionInfo {
   trade_partition?: string;
 }
 
-/** Position item in getCmPerpAccAndPosInfo positions[] */
-export interface FuturesCmPerpAccAndPosInfoPosition {
+/** Position item in getCmPerpAccountFull positions[] */
+export interface FuturesCmPerpAccountFullPosition {
   symbol: string;
   contract_code: string;
   volume: number;
@@ -2504,8 +2485,9 @@ export interface FuturesCmPerpAccAndPosInfoPosition {
   adl_risk_percent?: string | number;
 }
 
-/** Account + positions from getCmPerpAccAndPosInfo */
-export interface FuturesCmPerpAccAndPosInfo {
+/** Account + positions from getCmPerpAccountFull */
+/** Account + positions from getCmPerpAccountFull */
+export interface FuturesCmPerpAccountFull {
   symbol: string;
   contract_code: string;
   margin_balance: number;
@@ -2522,7 +2504,7 @@ export interface FuturesCmPerpAccAndPosInfo {
   adjust_factor: number;
   new_risk_rate?: string | null;
   trade_partition?: string;
-  positions: FuturesCmPerpAccAndPosInfoPosition[];
+  positions: FuturesCmPerpAccountFullPosition[];
 }
 
 /** Sub-auth error from swap_sub_auth and swap_sub_auth_list */
@@ -2582,13 +2564,9 @@ export interface FuturesCmPerpSubAccountsAssetsSub {
   account_info_list: FuturesCmPerpSubAccountsAssetsAccount[];
 }
 
-/** Response from getCmPerpSubAccountsAssets */
-export interface FuturesCmPerpSubAccountsAssets {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  sub_list: FuturesCmPerpSubAccountsAssetsSub[];
-}
+/** Response from getCmPerpSubAccounts */
+export type FuturesCmPerpSubAccountsAssets =
+  FuturesPaginatedSubList<FuturesCmPerpSubAccountsAssetsSub>;
 
 /** Sub-account account info from getCmPerpSubAccountAssets (data array element) */
 export interface FuturesCmPerpSubAccountAssets {
@@ -2695,32 +2673,6 @@ export interface FuturesCmPerpPositionLimit {
   contract_code: string;
   buy_limit: number;
   sell_limit: number;
-}
-
-/** Master-sub transfer from POST /swap-api/v1/swap_master_sub_transfer */
-export interface FuturesCmPerpMasterSubTransfer {
-  order_id: string;
-  client_order_id?: number;
-}
-
-/** Transfer record item from getCmPerpMasterSubTransfers */
-export interface FuturesCmPerpMasterSubTransfersItem {
-  id: number;
-  ts: number;
-  symbol: string;
-  contract_code: string;
-  sub_uid: string;
-  sub_account_name: string;
-  transfer_type: number;
-  amount: number | string;
-}
-
-/** Master-sub transfers from getCmPerpMasterSubTransfers */
-export interface FuturesCmPerpMasterSubTransfers {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  transfer_record: FuturesCmPerpMasterSubTransfersItem[];
 }
 
 /** API trading status COR from getCmPerpApiStatus */
@@ -3264,7 +3216,6 @@ export interface FuturesCmPerpFill {
   order_source: string;
 }
 
-
 /** Item from GET /swap-api/v1/swap_query_elements data[] */
 export interface FuturesCmPerpContractElements {
   contract_code: string;
@@ -3413,10 +3364,6 @@ export interface FuturesCmDeliveryIndexKline {
   amount: number;
 }
 
-
-/** Asset valuation from POST /api/v1/contract_balance_valuation. Same structure as FuturesBalanceValuation. Alias: getCmAssetValuation. */
-export type FuturesCmDeliveryAssetValuation = FuturesBalanceValuation;
-
 /** Account info from POST /api/v1/contract_account_info. Per-symbol margin account. */
 export interface FuturesCmDeliveryAccountInfo {
   symbol: string;
@@ -3435,12 +3382,6 @@ export interface FuturesCmDeliveryAccountInfo {
   adjust_factor: number;
   margin_static: number;
 }
-
-/** Sub auth from POST /api/v1/contract_sub_auth. Same structure as FuturesSubAuth. Alias: updateCmSubPermissions. */
-export type FuturesCmDeliverySubAuth = FuturesSubAuth;
-
-/** Sub permissions from GET /api/v1/contract_sub_auth_list. Same structure as FuturesSubAuthList. Alias: getCmSubPermissions. */
-export type FuturesCmDeliverySubPermissions = FuturesSubAuthList;
 
 /** Sub-account list item from POST /api/v1/contract_sub_account_list. Per-symbol margin info. */
 export interface FuturesCmDeliverySubAccountListItem {
@@ -3471,13 +3412,9 @@ export interface FuturesCmDeliverySubAccountInfoListSub {
   account_info_list: FuturesCmDeliverySubAccountInfoListItem[];
 }
 
-/** Sub-accounts assets from POST /api/v1/contract_sub_account_info_list. Alias: getCmSubAccountsAssets. */
-export interface FuturesCmDeliverySubAccountsAssets {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  sub_list: FuturesCmDeliverySubAccountInfoListSub[];
-}
+/** Sub-accounts assets from POST /api/v1/contract_sub_account_info_list. Alias: getCmSubAccounts. */
+export type FuturesCmDeliverySubAccountsAssets =
+  FuturesPaginatedSubList<FuturesCmDeliverySubAccountInfoListSub>;
 
 /** Sub-account assets from POST /api/v1/contract_sub_account_info. Alias: getCmSubAccountAssets. */
 export interface FuturesCmDeliverySubAccountAssets {
@@ -3543,7 +3480,6 @@ export interface FuturesCmDeliveryPositionInfo {
   new_risk_rate: string;
   trade_partition: string;
 }
-
 
 /** Liquidation order from GET /api/v3/contract_liquidation_orders */
 export interface FuturesCmDeliveryLiquidationOrder {
@@ -4181,28 +4117,6 @@ export interface FuturesCmDeliveryAssetPositionInfo {
   positions: FuturesCmDeliveryAssetPositionInfoPosition[];
 }
 
-/** Master-sub transfer from POST /api/v1/contract_master_sub_transfer. Same structure as FuturesMasterSubTransfer. */
-export type FuturesCmDeliveryMasterSubTransfer = FuturesMasterSubTransfer;
-
-/** Transfer record item from POST /api/v1/contract_master_sub_transfer_record */
-export interface FuturesCmDeliveryMasterSubTransferRecordItem {
-  id: number;
-  ts: number;
-  symbol: string;
-  sub_uid: string;
-  sub_account_name: string;
-  transfer_type: number;
-  amount: number | string;
-}
-
-/** Master-sub transfers from POST /api/v1/contract_master_sub_transfer_record. Alias: getCmMasterSubTransfers. */
-export interface FuturesCmDeliveryMasterSubTransfers {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  transfer_record: FuturesCmDeliveryMasterSubTransferRecordItem[];
-}
-
 /** API trading status item from GET /api/v1/contract_api_trading_status */
 export interface FuturesCmDeliveryApiTradingStatusCor {
   orders_threshold: number;
@@ -4238,8 +4152,6 @@ export interface FuturesCmDeliveryLeverageRate {
   symbol: string;
   available_level_rate: string;
 }
-
-
 
 /** GET /api/v1/contract_open_interest */
 export interface FuturesCmDeliveryContractOpenInterest {
@@ -4297,7 +4209,6 @@ export interface FuturesCmDeliveryContractInfo {
   delivery_time: string;
   contract_status: number;
 }
-
 
 /** GET /api/market/contract_constituents */
 export interface FuturesCmDeliveryConstituents {

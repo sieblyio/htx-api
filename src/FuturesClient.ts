@@ -56,13 +56,13 @@ import type {
   FuturesCmDeliverySettlementRecordsReq,
   FuturesCmDeliverySubAccountInfoListReq,
   FuturesCmDeliverySubAccountListReq,
-  FuturesCmDeliverySubAuthListReq,
   FuturesCmDeliverySubmitBatchOrderReq,
   FuturesCmDeliverySubmitFlashCloseOrderReq,
   FuturesCmDeliverySubmitOrderReq,
   FuturesCmDeliverySubmitTpslOrderReq,
   FuturesCmDeliverySubmitTrailingOrderReq,
   FuturesCmDeliverySubmitTriggerOrderReq,
+  FuturesCmDeliverySubPermissionsReq,
   FuturesCmDeliveryUpdateLeverageReq,
   FuturesCmDeliveryUserSettlementRecordsReq,
   FuturesCmPerpBasisDataReq,
@@ -166,7 +166,7 @@ import type {
   FuturesGetRiskReserveHistoryReq,
   FuturesGetSettlementRecordsReq,
   FuturesGetSubAccountsAssetsReq,
-  FuturesGetSubAuthListReq,
+  FuturesGetSubPermissionsReq,
   FuturesGetTpslHistoryOrdersReq,
   FuturesGetTpslOpenOrdersReq,
   FuturesGetTrailingHistoryOrdersReq,
@@ -226,7 +226,6 @@ import type {
   FuturesCmDeliveryApiState,
   FuturesCmDeliveryApiTradingStatus,
   FuturesCmDeliveryAssetPositionInfo,
-  FuturesCmDeliveryAssetValuation,
   FuturesCmDeliveryContractInfo,
   FuturesCmDeliveryContractOpenInterest,
   FuturesCmDeliveryDeliveryPrice,
@@ -239,8 +238,6 @@ import type {
   FuturesCmDeliveryLadderMargin,
   FuturesCmDeliveryLeverageRate,
   FuturesCmDeliveryLiquidationOrder,
-  FuturesCmDeliveryMasterSubTransfer,
-  FuturesCmDeliveryMasterSubTransfers,
   FuturesCmDeliveryMatchResult,
   FuturesCmDeliveryOpenInterest,
   FuturesCmDeliveryOpenOrders,
@@ -254,8 +251,6 @@ import type {
   FuturesCmDeliverySettlementRecords,
   FuturesCmDeliverySubAccountAssets,
   FuturesCmDeliverySubAccountsAssets,
-  FuturesCmDeliverySubAuth,
-  FuturesCmDeliverySubPermissions,
   FuturesCmDeliverySubPositionInfo,
   FuturesCmDeliverySwitchLeverRate,
   FuturesCmDeliveryTpslHistoryOrders,
@@ -267,12 +262,11 @@ import type {
   FuturesCmDeliveryTriggerHistoryOrders,
   FuturesCmDeliveryTriggerOpenOrders,
   FuturesCmDeliveryUserSettlementRecords,
-  FuturesCmPerpAccAndPosInfo,
+  FuturesCmPerpAccountFull,
   FuturesCmPerpAccountInfo,
   FuturesCmPerpAccountRatio,
   FuturesCmPerpAdjustFactor,
   FuturesCmPerpApiStatus,
-  FuturesCmPerpAssetValuation,
   FuturesCmPerpAvailableLeverage,
   FuturesCmPerpBatchOrder,
   FuturesCmPerpCancelAfter,
@@ -288,8 +282,6 @@ import type {
   FuturesCmPerpHistoryOrder,
   FuturesCmPerpLightningClose,
   FuturesCmPerpLiquidationOrder,
-  FuturesCmPerpMasterSubTransfer,
-  FuturesCmPerpMasterSubTransfers,
   FuturesCmPerpOpenInterest,
   FuturesCmPerpOpenInterestCurrent,
   FuturesCmPerpOpenOrders,
@@ -305,7 +297,6 @@ import type {
   FuturesCmPerpSubAccounts,
   FuturesCmPerpSubAccountsAssets,
   FuturesCmPerpSubmitOrder,
-  FuturesCmPerpSubPermissions,
   FuturesCmPerpSubPositions,
   FuturesCmPerpSystemStatus,
   FuturesCmPerpTieredMargin,
@@ -363,7 +354,7 @@ import type {
   FuturesMarketDepthTick,
   FuturesMarkPriceKline,
   FuturesMasterSubTransfer,
-  FuturesMasterSubTransferRecord,
+  FuturesMasterSubTransferRecords,
   FuturesMatchResult,
   FuturesOpenInterest,
   FuturesOpenOrders,
@@ -378,8 +369,8 @@ import type {
   FuturesSettlementRecordsPage,
   FuturesSubAccountInfoList,
   FuturesSubAuth,
-  FuturesSubAuthList,
   FuturesSubmitOrder,
+  FuturesSubPermissions,
   FuturesSwitchLeverRate,
   FuturesSwitchPositionMode,
   FuturesTicker,
@@ -1027,7 +1018,7 @@ export class FuturesClient extends BaseRestClient {
    *
    * Enable/disable trading for sub-accounts. Max 10 sub UIDs per request. Signature required. Trade permission.
    */
-  updateSubAuth(params: {
+  updateSubPermissions(params: {
     sub_uid: string;
     sub_auth: 0 | 1;
   }): Promise<FuturesAPISuccessResponse<FuturesSubAuth>> {
@@ -1041,9 +1032,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * List sub-accounts and their trading permission status. Signature required. Rate limit: 144/3s per UID.
    */
-  getSubAuthList(
-    params?: FuturesGetSubAuthListReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesSubAuthList>> {
+  getSubPermissions(
+    params?: FuturesGetSubPermissionsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubPermissions>> {
     return this.getPrivate('/linear-swap-api/v1/swap_sub_auth_list', params);
   }
 
@@ -1337,7 +1328,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getMasterSubTransfers(
     params: FuturesGetMasterSubTransfersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferRecord>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferRecords>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_master_sub_transfer_record',
       {
@@ -3034,7 +3025,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmAssetValuation(params?: {
     valuation_asset?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryAssetValuation[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesBalanceValuation[]>> {
     return this.postPrivate('/api/v1/contract_balance_valuation', {
       body: params,
     });
@@ -3074,7 +3065,7 @@ export class FuturesClient extends BaseRestClient {
   updateCmSubPermissions(params: {
     sub_uid: string;
     sub_auth: 0 | 1;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliverySubAuth>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesSubAuth>> {
     return this.postPrivate('/api/v1/contract_sub_auth', {
       body: params,
     });
@@ -3086,8 +3077,8 @@ export class FuturesClient extends BaseRestClient {
    * List sub-accounts and their trading permission status. Signature required. Rate limit: 144/3s per UID.
    */
   getCmSubPermissions(
-    params?: FuturesCmDeliverySubAuthListReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliverySubPermissions>> {
+    params?: FuturesCmDeliverySubPermissionsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesSubPermissions>> {
     return this.getPrivate('/api/v1/contract_sub_auth_list', params);
   }
 
@@ -3096,7 +3087,7 @@ export class FuturesClient extends BaseRestClient {
    *
    * Assets info of all sub-accounts under master. Only returns activated contract sub-accounts. Signature required. Rate limit: 72/3s per UID.
    */
-  getCmAllSubAccounts(
+  getCmSubAccounts(
     params?: FuturesCmDeliverySubAccountListReq,
   ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryAllSubAccount[]>> {
     return this.postPrivate('/api/v1/contract_sub_account_list', {
@@ -3243,7 +3234,7 @@ export class FuturesClient extends BaseRestClient {
    *
    * Combined account + positions for symbol. symbol required. Signature required. Rate limit: 72/3s per UID.
    */
-  getCmAssetPositionInfo(params: {
+  getCmAccountFull(params: {
     symbol: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryAssetPositionInfo[]>> {
     return this.postPrivate('/api/v1/contract_account_position_info', {
@@ -3258,7 +3249,7 @@ export class FuturesClient extends BaseRestClient {
    */
   transferCmMasterSub(
     params: FuturesCmDeliveryMasterSubTransferReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryMasterSubTransfer>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransfer>> {
     return this.postPrivate('/api/v1/contract_master_sub_transfer', {
       body: params,
     });
@@ -3271,7 +3262,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmMasterSubTransfers(
     params: FuturesCmDeliveryMasterSubTransferRecordReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryMasterSubTransfers>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferRecords>> {
     return this.postPrivate('/api/v1/contract_master_sub_transfer_record', {
       body: params,
     });
@@ -3282,7 +3273,7 @@ export class FuturesClient extends BaseRestClient {
    *
    * User's API indicator disable information (COR, TDN). No params. Signature required. Rate limit: 72/3s per UID.
    */
-  getCmApiTradingStatus(): Promise<
+  getCmApiStatus(): Promise<
     FuturesAPISuccessResponse<FuturesCmDeliveryApiTradingStatus[]>
   > {
     return this.getPrivate('/api/v1/contract_api_trading_status');
@@ -3293,7 +3284,7 @@ export class FuturesClient extends BaseRestClient {
    *
    * Available leverage rates per symbol. Omit symbol for all. Signature required. Rate limit: 72/3s per UID.
    */
-  getCmLeverageRate(params?: {
+  getCmAvailableLeverage(params?: {
     symbol?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryLeverageRate[]>> {
     return this.postPrivate('/api/v1/contract_available_level_rate', {
@@ -4079,7 +4070,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpAssetValuation(params?: {
     valuation_asset?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpAssetValuation[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesBalanceValuation[]>> {
     return this.postPrivate('/swap-api/v1/swap_balance_valuation', {
       body: params,
     });
@@ -4116,9 +4107,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Combined account + positions for contract. Signature required. Rate limit: 144/3s per UID.
    */
-  getCmPerpAccAndPosInfo(params: {
+  getCmPerpAccountFull(params: {
     contract_code: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpAccAndPosInfo[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpAccountFull[]>> {
     return this.postPrivate('/swap-api/v1/swap_account_position_info', {
       body: params,
     });
@@ -4131,7 +4122,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpSubPermissions(
     params?: FuturesCmPerpSubPermissionsReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpSubPermissions>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesSubPermissions>> {
     return this.getPrivate('/swap-api/v1/swap_sub_auth_list', params);
   }
 
@@ -4301,7 +4292,7 @@ export class FuturesClient extends BaseRestClient {
    */
   transferCmPerpMasterSub(
     params: FuturesCmPerpMasterSubTransferReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpMasterSubTransfer>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransfer>> {
     return this.postPrivate('/swap-api/v1/swap_master_sub_transfer', {
       body: params,
     });
@@ -4314,7 +4305,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpMasterSubTransfers(
     params: FuturesCmPerpMasterSubTransfersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpMasterSubTransfers>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMasterSubTransferRecords>> {
     return this.postPrivate('/swap-api/v1/swap_master_sub_transfer_record', {
       body: params,
     });
