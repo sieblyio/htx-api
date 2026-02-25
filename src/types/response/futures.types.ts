@@ -2314,6 +2314,457 @@ export interface FuturesCmPerpContractElementsContractInfo {
   instrument_type?: number;
 }
 
+/** Market depth tick from GET /swap-ex/market/depth. Payload in "tick". */
+export interface FuturesCmPerpMarketDepth {
+  mrid: number;
+  id: number;
+  asks: [number, number][];
+  bids: [number, number][];
+  ts: number;
+  version: number;
+  ch: string;
+}
+
+/** BBO tick from GET /swap-ex/market/bbo. ask/bid: [price, qty]. Payload in "ticks". */
+export interface FuturesCmPerpMarketBbo {
+  contract_code: string;
+  mrid: number;
+  ask: [number, number];
+  bid: [number, number];
+  ts: number;
+}
+
+/** Kline item from GET /swap-ex/market/history/kline */
+export interface FuturesCmPerpKline {
+  id: number;
+  vol: number;
+  count: number;
+  open: number;
+  close: number;
+  low: number;
+  high: number;
+  amount: number;
+}
+
+/** Mark price kline item from GET /index/market/history/swap_mark_price_kline */
+export interface FuturesCmPerpMarkPriceKline {
+  id: number;
+  vol: string;
+  count: string;
+  open: string;
+  close: string;
+  low: string;
+  high: string;
+  amount: string;
+  trade_turnover: string;
+}
+
+/** 24h ticker from GET /swap-ex/market/detail/merged. Payload in "tick". */
+export interface FuturesCmPerp24hTicker {
+  id: number;
+  ts: number;
+  vol: string;
+  count: number;
+  open: string;
+  close: string;
+  low: string;
+  high: string;
+  amount: string;
+  ask: [number, number];
+  bid: [number, number];
+}
+
+/** 24h ticker item from GET /v2/swap-ex/market/detail/batch_merged */
+export interface FuturesCmPerp24hTickers {
+  contract_code: string;
+  id: number;
+  ts: number;
+  amount: string;
+  count: number;
+  vol: string;
+  number_of: string;
+  open: string;
+  close: string;
+  low: string;
+  high: string;
+  ask: [number, number];
+  bid: [number, number];
+}
+
+/** Trade item from GET /swap-ex/market/trade and history/trade */
+export interface FuturesCmPerpTrade {
+  id: number;
+  price: string;
+  amount: string;
+  direction: string;
+  ts: number;
+  quantity: string;
+  contract_code?: string;
+}
+
+/** Last trade tick from GET /swap-ex/market/trade. Payload in "tick". */
+export interface FuturesCmPerpLastTrade {
+  id: number;
+  ts: number;
+  data: FuturesCmPerpTrade[];
+}
+
+/** Trade history group from GET /swap-ex/market/history/trade. Each group has trades by timestamp. */
+export interface FuturesCmPerpTradeHistory {
+  id: number;
+  ts: number;
+  data: FuturesCmPerpTrade[];
+}
+
+/** Estimated funding rate kline item from GET /index/market/history/swap_estimated_rate_kline */
+export interface FuturesCmPerpFundingRateKline {
+  id: number;
+  vol: string;
+  count: string;
+  open: string;
+  close: string;
+  low: string;
+  high: string;
+  amount: string;
+}
+
+/** Premium index kline item from GET /index/market/history/swap_premium_index_kline */
+export interface FuturesCmPerpPremiumIndexKline {
+  id: number;
+  vol: string;
+  count: string;
+  open: string;
+  close: string;
+  low: string;
+  high: string;
+  amount: string;
+}
+
+/** Basis data item from GET /index/market/history/swap_basis */
+export interface FuturesCmPerpBasisData {
+  id: number;
+  contract_price: string;
+  index_price: string;
+  basis: string;
+  basis_rate: string;
+}
+
+/** Asset valuation from POST /swap-api/v1/swap_balance_valuation */
+export interface FuturesCmPerpAssetValuation {
+  valuation_asset: string;
+  balance: string;
+}
+
+/** Account info from POST /swap-api/v1/swap_account_info */
+export interface FuturesCmPerpAccountInfo {
+  symbol: string;
+  contract_code: string;
+  margin_balance: number;
+  margin_position: number;
+  margin_frozen: number;
+  margin_available: number;
+  profit_real?: number;
+  profit_unreal: number;
+  risk_rate: number | null;
+  new_risk_rate?: string | null;
+  trade_partition?: string;
+  withdraw_available: number;
+  liquidation_price: number | null;
+  lever_rate: number;
+  adjust_factor: number;
+  margin_static: number;
+}
+
+/** Position info from POST /swap-api/v1/swap_position_info */
+export interface FuturesCmPerpPositionInfo {
+  symbol: string;
+  contract_code: string;
+  volume: number;
+  available: number;
+  frozen: number;
+  cost_open: number;
+  cost_hold: number;
+  profit_unreal: number;
+  profit_rate: number;
+  profit: number;
+  position_margin: number;
+  lever_rate: number;
+  direction: string;
+  last_price: number;
+  adl_risk_percent?: string | number;
+  liq_px: string;
+  new_risk_rate?: string | null;
+  trade_partition?: string;
+}
+
+/** Position item in getCmPerpAccAndPosInfo positions[] */
+export interface FuturesCmPerpAccAndPosInfoPosition {
+  symbol: string;
+  contract_code: string;
+  volume: number;
+  available: number;
+  frozen: number;
+  cost_open: number;
+  cost_hold: number;
+  profit_unreal: number;
+  profit_rate: number;
+  profit: number;
+  position_margin: number;
+  lever_rate: number;
+  direction: string;
+  last_price: number;
+  adl_risk_percent?: string | number;
+}
+
+/** Account + positions from getCmPerpAccAndPosInfo */
+export interface FuturesCmPerpAccAndPosInfo {
+  symbol: string;
+  contract_code: string;
+  margin_balance: number;
+  margin_static: number;
+  margin_position: number;
+  margin_frozen: number;
+  margin_available: number;
+  profit_real?: number;
+  profit_unreal: number;
+  risk_rate: number | null;
+  withdraw_available: number;
+  liquidation_price: number | null;
+  lever_rate: number;
+  adjust_factor: number;
+  new_risk_rate?: string | null;
+  trade_partition?: string;
+  positions: FuturesCmPerpAccAndPosInfoPosition[];
+}
+
+/** Sub-auth error from swap_sub_auth and swap_sub_auth_list */
+export interface FuturesCmPerpSubPermissionsError {
+  sub_uid: string;
+  err_code: number | string;
+  err_msg: string;
+}
+
+/** Sub-auth response from updateCmPerpSubPermissions */
+export interface FuturesCmPerpUpdateSubPermissions {
+  errors: FuturesCmPerpSubPermissionsError[];
+  successes: string;
+}
+
+/** Sub-auth success item from swap_sub_auth_list */
+export interface FuturesCmPerpSubPermissionsSuccess {
+  query_id?: number;
+  sub_uid: string;
+  sub_auth: number | string;
+}
+
+/** Sub-auth list from getCmPerpSubPermissions */
+export interface FuturesCmPerpSubPermissions {
+  errors: FuturesCmPerpSubPermissionsError[];
+  successes: FuturesCmPerpSubPermissionsSuccess[];
+}
+
+/** Sub-account list item from getCmPerpSubAccounts list[] */
+export interface FuturesCmPerpSubAccountsItem {
+  symbol: string;
+  contract_code: string;
+  margin_balance: number;
+  liquidation_price: number | null;
+  risk_rate: number | null;
+  query_id?: number;
+}
+
+/** Sub-account entry from getCmPerpSubAccounts (data array element) */
+export interface FuturesCmPerpSubAccounts {
+  sub_uid: number;
+  list: FuturesCmPerpSubAccountsItem[];
+}
+
+/** Account info item from getCmPerpSubAccountsAssets account_info_list[] */
+export interface FuturesCmPerpSubAccountsAssetsAccount {
+  symbol: string;
+  contract_code: string;
+  margin_balance: number;
+  liquidation_price: number | null;
+  risk_rate: number | null;
+}
+
+/** Sub-list item from getCmPerpSubAccountsAssets sub_list[] */
+export interface FuturesCmPerpSubAccountsAssetsSub {
+  sub_uid: number;
+  account_info_list: FuturesCmPerpSubAccountsAssetsAccount[];
+}
+
+/** Response from getCmPerpSubAccountsAssets */
+export interface FuturesCmPerpSubAccountsAssets {
+  total_page: number;
+  current_page: number;
+  total_size: number;
+  sub_list: FuturesCmPerpSubAccountsAssetsSub[];
+}
+
+/** Sub-account account info from getCmPerpSubAccountAssets (data array element) */
+export interface FuturesCmPerpSubAccountAssets {
+  symbol: string;
+  contract_code: string;
+  margin_balance: number;
+  margin_position: number;
+  margin_frozen: number;
+  margin_available: number;
+  profit_real?: number;
+  profit_unreal: number;
+  risk_rate: number | null;
+  liquidation_price: number | null;
+  withdraw_available: number;
+  lever_rate: number;
+  adjust_factor: number;
+  margin_static: number;
+  new_risk_rate?: string | null;
+  trade_partition?: string;
+}
+
+/** Sub-account position from getCmPerpSubPositions (data array element) */
+export interface FuturesCmPerpSubPositions {
+  symbol: string;
+  contract_code: string;
+  volume: number;
+  available: number;
+  frozen: number;
+  cost_open: number;
+  cost_hold: number;
+  profit_unreal: number;
+  profit_rate: number;
+  profit: number;
+  position_margin: number;
+  lever_rate: number;
+  direction: string;
+  last_price: number;
+  adl_risk_percent?: string | number;
+  liq_px: string;
+  new_risk_rate?: string | null;
+  trade_partition?: string;
+}
+
+/** Financial record from POST /swap-api/v3/swap_financial_record and swap_financial_record_exact */
+export interface FuturesCmPerpFinancialRecord {
+  query_id: number;
+  id: number | string;
+  ts: number;
+  symbol: string;
+  contract_code: string;
+  type: number;
+  amount: number | string;
+}
+
+/** Available leverage from getCmPerpAvailableLeverage */
+export interface FuturesCmPerpAvailableLeverage {
+  contract_code: string;
+  available_level_rate: string;
+}
+
+/** Order limit list item from swap_order_limit list[] */
+export interface FuturesCmPerpOrderLimitList {
+  symbol: string;
+  contract_code: string;
+  open_limit: number;
+  close_limit: number;
+}
+
+/** Order limit from POST /swap-api/v1/swap_order_limit */
+export interface FuturesCmPerpOrderLimit {
+  order_price_type: string;
+  list: FuturesCmPerpOrderLimitList[];
+}
+
+/** Fee from POST /swap-api/v1/swap_fee */
+export interface FuturesCmPerpFee {
+  symbol: string;
+  contract_code: string;
+  open_maker_fee: string;
+  open_taker_fee: string;
+  close_maker_fee: string;
+  close_taker_fee: string;
+  fee_asset: string;
+  delivery_fee?: string;
+}
+
+/** Transfer limit from POST /swap-api/v1/swap_transfer_limit */
+export interface FuturesCmPerpTransferLimit {
+  symbol: string;
+  contract_code: string;
+  transfer_in_max_each: number;
+  transfer_in_min_each: number;
+  transfer_out_max_each: number;
+  transfer_out_min_each: number;
+  transfer_in_max_daily: number;
+  transfer_out_max_daily: number;
+  net_transfer_in_max_daily: number;
+  net_transfer_out_max_daily: number;
+}
+
+/** Position limit from POST /swap-api/v1/swap_position_limit */
+export interface FuturesCmPerpPositionLimit {
+  symbol: string;
+  contract_code: string;
+  buy_limit: number;
+  sell_limit: number;
+}
+
+/** Master-sub transfer from POST /swap-api/v1/swap_master_sub_transfer */
+export interface FuturesCmPerpMasterSubTransfer {
+  order_id: string;
+  client_order_id?: number;
+}
+
+/** Transfer record item from getCmPerpMasterSubTransfers */
+export interface FuturesCmPerpMasterSubTransfersItem {
+  id: number;
+  ts: number;
+  symbol: string;
+  contract_code: string;
+  sub_uid: string;
+  sub_account_name: string;
+  transfer_type: number;
+  amount: number | string;
+}
+
+/** Master-sub transfers from getCmPerpMasterSubTransfers */
+export interface FuturesCmPerpMasterSubTransfers {
+  total_page: number;
+  current_page: number;
+  total_size: number;
+  transfer_record: FuturesCmPerpMasterSubTransfersItem[];
+}
+
+/** API trading status COR from getCmPerpApiStatus */
+export interface FuturesCmPerpApiStatusCor {
+  orders_threshold: number;
+  orders: number;
+  invalid_cancel_orders: number;
+  cancel_ratio_threshold: number;
+  cancel_ratio: number;
+  is_trigger: number;
+  is_active: number;
+}
+
+/** API trading status TDN from getCmPerpApiStatus */
+export interface FuturesCmPerpApiStatusTdn {
+  disables_threshold: number;
+  disables: number;
+  is_trigger: number;
+  is_active: number;
+}
+
+/** API trading status from getCmPerpApiStatus */
+export interface FuturesCmPerpApiStatus {
+  is_disable: number;
+  order_price_types: string;
+  disable_reason: string;
+  disable_interval: number;
+  recovery_time: number;
+  COR: FuturesCmPerpApiStatusCor;
+  TDN: FuturesCmPerpApiStatusTdn;
+}
+
 /** Risk reserve balance from GET /v1/insurance_fund_info (CMPerp) */
 export interface FuturesCmPerpRiskReserveBalance {
   insurance_fund: string;

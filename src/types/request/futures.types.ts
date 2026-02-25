@@ -2181,6 +2181,149 @@ export interface FuturesCmPerpRiskReserveHistoryReq {
   limit?: number;
 }
 
+/** Req for POST /swap-api/v1/swap_sub_account_list */
+export interface FuturesCmPerpSubAccountsReq {
+  contract_code?: string;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+}
+
+/** Req for POST /swap-api/v1/swap_sub_account_info_list */
+export interface FuturesCmPerpSubAccountsAssetsReq {
+  contract_code?: string;
+  page_index?: number;
+  page_size?: number;
+}
+
+/** Req for POST /swap-api/v1/swap_order_limit */
+export interface FuturesCmPerpOrderLimitReq {
+  contract_code?: string;
+  order_price_type: string;
+}
+
+/** Req for POST /swap-api/v1/swap_master_sub_transfer */
+export interface FuturesCmPerpMasterSubTransferReq {
+  sub_uid: number;
+  contract_code: string;
+  amount: number | string;
+  type: 'master_to_sub' | 'sub_to_master';
+  client_order_id?: number;
+}
+
+/** Req for getCmPerpMasterSubTransfers */
+export interface FuturesCmPerpMasterSubTransfersReq {
+  contract_code: string;
+  transfer_type?: string;
+  create_date: number;
+  page_index?: number;
+  page_size?: number;
+}
+
+/** Req for POST /swap-api/v3/swap_financial_record */
+export interface FuturesCmPerpFinancialRecordReq {
+  contract: string;
+  type?: string;
+  start_time?: number;
+  end_time?: number;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+}
+
+/** Req for POST /swap-api/v3/swap_financial_record_exact. Same params as swap_financial_record. */
+export type FuturesCmPerpFinancialRecordExactReq =
+  FuturesCmPerpFinancialRecordReq;
+
+/** Req for GET /swap-api/v1/swap_sub_auth_list */
+export interface FuturesCmPerpSubPermissionsReq {
+  sub_uid?: string;
+  start_time?: number;
+  end_time?: number;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+}
+
+/** Req for GET /index/market/history/swap_estimated_rate_kline */
+export interface FuturesCmPerpFundingRateKlinesReq {
+  contract_code: string;
+  period:
+    | '1min'
+    | '5min'
+    | '15min'
+    | '30min'
+    | '60min'
+    | '4hour'
+    | '1day'
+    | '1week'
+    | '1mon';
+  size: number;
+}
+
+/** Req for GET /index/market/history/swap_basis */
+export interface FuturesCmPerpBasisDataReq {
+  contract_code: string;
+  period:
+    | '1min'
+    | '5min'
+    | '15min'
+    | '30min'
+    | '60min'
+    | '4hour'
+    | '1day'
+    | '1mon';
+  size: number;
+  basis_price_type?: 'open' | 'close' | 'high' | 'low' | 'average';
+}
+
+/** Req for GET /index/market/history/swap_premium_index_kline */
+export interface FuturesCmPerpPremiumIndexKlinesReq {
+  contract_code: string;
+  period:
+    | '1min'
+    | '5min'
+    | '15min'
+    | '30min'
+    | '60min'
+    | '4hour'
+    | '1day'
+    | '1week'
+    | '1mon';
+  size: number;
+}
+
+/** Req for GET /index/market/history/swap_mark_price_kline */
+export interface FuturesCmPerpMarkPriceKlinesReq {
+  contract_code: string;
+  period:
+    | '1min'
+    | '5min'
+    | '15min'
+    | '30min'
+    | '60min'
+    | '4hour'
+    | '1day'
+    | '1week'
+    | '1mon';
+  size: number;
+}
+
+/** Req for GET /swap-ex/market/history/kline. Either size or (from+to) required. */
+export interface FuturesCmPerpKlinesReq {
+  contract_code: string;
+  period:
+    | '1min'
+    | '5min'
+    | '15min'
+    | '30min'
+    | '60min'
+    | '1hour'
+    | '4hour'
+    | '1day'
+    | '1mon';
+  size?: number;
+  from?: number;
+  to?: number;
+}
+
 /** Req for GET /swap-api/v1/swap_historical_funding_rate */
 export interface FuturesCmPerpHistoricalFundingRateReq {
   contract_code: string;

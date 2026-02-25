@@ -65,11 +65,24 @@ import type {
   FuturesCmDeliverySubmitTriggerOrderReq,
   FuturesCmDeliveryUpdateLeverageReq,
   FuturesCmDeliveryUserSettlementRecordsReq,
+  FuturesCmPerpBasisDataReq,
+  FuturesCmPerpFinancialRecordExactReq,
+  FuturesCmPerpFinancialRecordReq,
+  FuturesCmPerpFundingRateKlinesReq,
   FuturesCmPerpGetOpenInterestReq,
   FuturesCmPerpHistoricalFundingRateReq,
+  FuturesCmPerpKlinesReq,
   FuturesCmPerpLiquidationOrdersReq,
+  FuturesCmPerpMarkPriceKlinesReq,
+  FuturesCmPerpMasterSubTransferReq,
+  FuturesCmPerpMasterSubTransfersReq,
+  FuturesCmPerpOrderLimitReq,
+  FuturesCmPerpPremiumIndexKlinesReq,
   FuturesCmPerpRiskReserveHistoryReq,
   FuturesCmPerpSettlementRecordsReq,
+  FuturesCmPerpSubAccountsAssetsReq,
+  FuturesCmPerpSubAccountsReq,
+  FuturesCmPerpSubPermissionsReq,
   FuturesCrossSubmitOrderReq,
   FuturesGetBasisDataReq,
   FuturesGetContractInfoReq,
@@ -238,27 +251,56 @@ import type {
   FuturesCmDeliveryTriggerHistoryOrders,
   FuturesCmDeliveryTriggerOpenOrders,
   FuturesCmDeliveryUserSettlementRecords,
+  FuturesCmPerp24hTicker,
+  FuturesCmPerp24hTickers,
+  FuturesCmPerpAccAndPosInfo,
+  FuturesCmPerpAccountInfo,
   FuturesCmPerpAccountRatio,
   FuturesCmPerpAdjustFactor,
+  FuturesCmPerpApiStatus,
+  FuturesCmPerpAssetValuation,
+  FuturesCmPerpAvailableLeverage,
+  FuturesCmPerpBasisData,
   FuturesCmPerpContractElements,
-  FuturesCmPerpContractElementsContractInfo,
   FuturesCmPerpContractInfo,
   FuturesCmPerpEstimatedSettlementPrice,
+  FuturesCmPerpFee,
+  FuturesCmPerpFinancialRecord,
   FuturesCmPerpFundingRate,
+  FuturesCmPerpFundingRateKline,
   FuturesCmPerpHistoricalFundingRatePage,
   FuturesCmPerpIndexConstituents,
   FuturesCmPerpIndexPrice,
+  FuturesCmPerpKline,
+  FuturesCmPerpLastTrade,
   FuturesCmPerpLiquidationOrder,
+  FuturesCmPerpMarketBbo,
+  FuturesCmPerpMarketDepth,
+  FuturesCmPerpMarkPriceKline,
+  FuturesCmPerpMasterSubTransfer,
+  FuturesCmPerpMasterSubTransfers,
   FuturesCmPerpOpenInterest,
   FuturesCmPerpOpenInterestCurrent,
+  FuturesCmPerpOrderLimit,
+  FuturesCmPerpPositionInfo,
+  FuturesCmPerpPositionLimit,
   FuturesCmPerpPositionRatio,
+  FuturesCmPerpPremiumIndexKline,
   FuturesCmPerpPriceLimit,
   FuturesCmPerpRiskReserveBalance,
   FuturesCmPerpRiskReserveHistory,
   FuturesCmPerpSettlementRecord,
   FuturesCmPerpSettlementRecordsPage,
+  FuturesCmPerpSubAccountAssets,
+  FuturesCmPerpSubAccounts,
+  FuturesCmPerpSubAccountsAssets,
+  FuturesCmPerpSubPermissions,
+  FuturesCmPerpSubPositions,
   FuturesCmPerpSystemStatus,
   FuturesCmPerpTieredMargin,
+  FuturesCmPerpTradeHistory,
+  FuturesCmPerpTransferLimit,
+  FuturesCmPerpUpdateSubPermissions,
   FuturesContractElements,
   FuturesContractInfo,
   FuturesCrossAccountInfo,
@@ -3888,6 +3930,400 @@ export class FuturesClient extends BaseRestClient {
   /**
    *
    * Coin-M Perpetual - Market Data
+   *
+   */
+
+  /**
+   * Get Market Depth (CMPerp)
+   *
+   * Order book (asks/bids). type: step0=raw 150 levels; step1-5,14-17=merged 150; step6=raw 20/30; step7-13,18-19=merged 20/30. No signature. Rate limit: 800/s per IP.
+   */
+  getCmPerpMarketDepth(params: {
+    contract_code: string;
+    type: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpMarketDepth, 'tick'>> {
+    return this.get('/swap-ex/market/depth', params);
+  }
+
+  /**
+   * Get Market BBO (CMPerp)
+   *
+   * Best bid/offer. Omit contract_code for all. No signature. Rate limit: 800/s per IP.
+   */
+  getCmPerpMarketBbo(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpMarketBbo[], 'ticks'>> {
+    return this.get('/swap-ex/market/bbo', params ?? {});
+  }
+
+  /**
+   * Get Kline Data (CMPerp)
+   *
+   * Candlestick data. Either size or (from+to) required. No signature. Rate limit: 800/s per IP.
+   */
+  getCmPerpKlines(
+    params: FuturesCmPerpKlinesReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpKline[]>> {
+    return this.get('/swap-ex/market/history/kline', params);
+  }
+
+  /**
+   * Get Mark Price Kline (CMPerp)
+   *
+   * Mark price candlestick data. No signature. Rate limit: 800/s per IP.
+   */
+  getCmPerpMarkPriceKlines(
+    params: FuturesCmPerpMarkPriceKlinesReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpMarkPriceKline[]>> {
+    return this.get('/index/market/history/swap_mark_price_kline', params);
+  }
+
+  /**
+   * Get Market Data Overview (CMPerp)
+   *
+   * 24h ticker + best bid/ask for one contract. No signature. Rate limit: 800/s per IP.
+   */
+  getCmPerp24hTicker(params: {
+    contract_code: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerp24hTicker, 'tick'>> {
+    return this.get('/swap-ex/market/detail/merged', params);
+  }
+
+  /**
+   * Get Batch Market Data Overview (CMPerp V2)
+   *
+   * 24h tickers + best bid/ask for one or all contracts. Omit contract_code for all. No signature. Data updated every 50ms.
+   */
+  getCmPerp24hTickers(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerp24hTickers[], 'ticks'>> {
+    return this.get('/v2/swap-ex/market/detail/batch_merged', params ?? {});
+  }
+
+  /**
+   * Get Last Trade (CMPerp)
+   *
+   * Latest trade for a contract. Omit contract_code for all. No signature. Rate limit: 800/s per IP.
+   */
+  getCmPerpLastTrade(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpLastTrade, 'tick'>> {
+    return this.get('/swap-ex/market/trade', params ?? {});
+  }
+
+  /**
+   * Get Trade History (CMPerp)
+   *
+   * Batch of trade records for a contract. No signature. Rate limit: 800/s per IP.
+   */
+  getCmPerpTradeHistory(params: {
+    contract_code: string;
+    size: number;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpTradeHistory[]>> {
+    return this.get('/swap-ex/market/history/trade', params);
+  }
+
+  /**
+   * Get Premium Index Kline (CMPerp)
+   *
+   * Premium index candlestick data. No signature. Rate limit: 800/s per IP.
+   */
+  getCmPerpPremiumIndexKlines(
+    params: FuturesCmPerpPremiumIndexKlinesReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpPremiumIndexKline[]>> {
+    return this.get('/index/market/history/swap_premium_index_kline', params);
+  }
+
+  /**
+   * Get Estimated Funding Rate Kline (CMPerp)
+   *
+   * Estimated funding rate candlestick data. No signature. Rate limit: 800/s per IP.
+   */
+  getCmPerpFundingRateKlines(
+    params: FuturesCmPerpFundingRateKlinesReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpFundingRateKline[]>> {
+    return this.get('/index/market/history/swap_estimated_rate_kline', params);
+  }
+
+  /**
+   * Get Basis Data (CMPerp)
+   *
+   * Basis (contract - index) kline data. basis_price_type default: open. No signature. Rate limit: 800/s per IP.
+   */
+  getCmPerpBasisData(
+    params: FuturesCmPerpBasisDataReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpBasisData[]>> {
+    return this.get('/index/market/history/swap_basis', params);
+  }
+
+  /**
+   *
+   * Coin-M Perpetual - Account
+   *
+   */
+
+  /**
+   * Query Asset Valuation (CMPerp)
+   *
+   * Total asset valuation in fiat. valuation_asset optional, defaults to BTC. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmPerpAssetValuation(params?: {
+    valuation_asset?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpAssetValuation[]>> {
+    return this.postPrivate('/swap-api/v1/swap_balance_valuation', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Account Info (CMPerp)
+   *
+   * User's account info per contract. Omit contract_code for all. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmPerpAccountInfo(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpAccountInfo[]>> {
+    return this.postPrivate('/swap-api/v1/swap_account_info', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Position Info (CMPerp)
+   *
+   * User's positions. Omit contract_code for all. Signature required. Rate limit: 72/3s per UID. Query with contract_code to avoid 1080 when contracts in settlement.
+   */
+  getCmPerpPositionInfo(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpPositionInfo[]>> {
+    return this.postPrivate('/swap-api/v1/swap_position_info', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Assets And Positions (CMPerp)
+   *
+   * Combined account + positions for contract. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCmPerpAccAndPosInfo(params: {
+    contract_code: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpAccAndPosInfo[]>> {
+    return this.postPrivate('/swap-api/v1/swap_account_position_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Sub-Account Trading Permissions (CMPerp)
+   *
+   * List sub-accounts and their trading permission status. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCmPerpSubPermissions(
+    params?: FuturesCmPerpSubPermissionsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpSubPermissions>> {
+    return this.getPrivate('/swap-api/v1/swap_sub_auth_list', params);
+  }
+
+  /**
+   * Set Sub-Account Trading Permissions (CMPerp)
+   *
+   * Enable/disable trading for sub-accounts. Max 10 sub UIDs per request. Signature required. Trade permission.
+   */
+  updateCmPerpSubPermissions(params: {
+    sub_uid: string;
+    sub_auth: 0 | 1;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpUpdateSubPermissions>> {
+    return this.postPrivate('/swap-api/v1/swap_sub_auth', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Assets of All Sub-Accounts (CMPerp)
+   *
+   * Assets info of all sub-accounts under master. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmPerpSubAccounts(
+    params?: FuturesCmPerpSubAccountsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpSubAccounts[]>> {
+    return this.postPrivate('/swap-api/v1/swap_sub_account_list', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Batch of Sub-Account Assets (CMPerp)
+   *
+   * Batch query sub-account assets with pagination. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmPerpSubAccountsAssets(
+    params?: FuturesCmPerpSubAccountsAssetsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpSubAccountsAssets>> {
+    return this.postPrivate('/swap-api/v1/swap_sub_account_info_list', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Single Sub-Account Assets (CMPerp)
+   *
+   * Assets info of a single sub-account. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmPerpSubAccountAssets(params: {
+    sub_uid: number;
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpSubAccountAssets[]>> {
+    return this.postPrivate('/swap-api/v1/swap_sub_account_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Single Sub-Account Positions (CMPerp)
+   *
+   * Position info of a single sub-account. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmPerpSubPositions(params: {
+    sub_uid: number;
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpSubPositions[]>> {
+    return this.postPrivate('/swap-api/v1/swap_sub_position_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Financial Records (CMPerp)
+   *
+   * Account financial records. Window max 48h, within 90 days. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCmPerpFinancialRecords(
+    params: FuturesCmPerpFinancialRecordReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpFinancialRecord[]>> {
+    return this.postPrivate('/swap-api/v3/swap_financial_record', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Financial Records Exact (CMPerp)
+   *
+   * Financial records via multiple fields. Same params as getCmPerpFinancialRecords. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCmPerpFinancialRecordsExact(
+    params: FuturesCmPerpFinancialRecordExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpFinancialRecord[]>> {
+    return this.postPrivate('/swap-api/v3/swap_financial_record_exact', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Available Leverage (CMPerp)
+   *
+   * User's available leverage per contract. Omit contract_code for all. Signature required. Rate limit: 72/3s per UID.
+   */
+  getCmPerpAvailableLeverage(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpAvailableLeverage[]>> {
+    return this.postPrivate('/swap-api/v1/swap_available_level_rate', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Order Limit (CMPerp)
+   *
+   * Max open/close order limits per contract for given order type. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCmPerpOrderLimit(
+    params: FuturesCmPerpOrderLimitReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpOrderLimit>> {
+    return this.postPrivate('/swap-api/v1/swap_order_limit', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Trading Fee (CMPerp)
+   *
+   * Maker/taker fee rates per contract. Omit contract_code for all. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCmPerpFee(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpFee[]>> {
+    return this.postPrivate('/swap-api/v1/swap_fee', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Transfer Limit (CMPerp)
+   *
+   * Transfer in/out limits per contract. Omit contract_code for all. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCmPerpTransferLimit(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpTransferLimit[]>> {
+    return this.postPrivate('/swap-api/v1/swap_transfer_limit', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Query Position Limit (CMPerp)
+   *
+   * Max long/short position limits per contract. Omit contract_code for all. Signature required. Rate limit: 144/3s per UID.
+   */
+  getCmPerpPositionLimit(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpPositionLimit[]>> {
+    return this.postPrivate('/swap-api/v1/swap_position_limit', {
+      body: params ?? {},
+    });
+  }
+
+  /**
+   * Master-Sub Transfer (CMPerp)
+   *
+   * Transfer between master and sub account. Rate limit 10/min per master-sub pair. Signature required.
+   */
+  transferCmPerpMasterSub(
+    params: FuturesCmPerpMasterSubTransferReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpMasterSubTransfer>> {
+    return this.postPrivate('/swap-api/v1/swap_master_sub_transfer', {
+      body: params,
+    });
+  }
+
+  /**
+   * Master-Sub Transfer Records (CMPerp)
+   *
+   * Query transfer records between master and sub. transfer_type: 34=to sub, 35=from sub. create_date: days (≤90). Signature required.
+   */
+  getCmPerpMasterSubTransfers(
+    params: FuturesCmPerpMasterSubTransfersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpMasterSubTransfers>> {
+    return this.postPrivate('/swap-api/v1/swap_master_sub_transfer_record', {
+      body: params,
+    });
+  }
+
+  /**
+   * API Trading Status (CMPerp)
+   *
+   * Query API indicator disable info (COR/TDN). Signature required. Rate limit: 144/3s per UID.
+   */
+  getCmPerpApiStatus(): Promise<
+    FuturesAPISuccessResponse<FuturesCmPerpApiStatus[]>
+  > {
+    return this.getPrivate('/swap-api/v1/swap_api_trading_status');
+  }
+
+  /**
+   *
+   * Coin-M Perpetual - Trade
    *
    */
 }
