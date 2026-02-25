@@ -66,23 +66,53 @@ import type {
   FuturesCmDeliveryUpdateLeverageReq,
   FuturesCmDeliveryUserSettlementRecordsReq,
   FuturesCmPerpBasisDataReq,
+  FuturesCmPerpCancelAfterReq,
+  FuturesCmPerpCancelAllOrdersReq,
+  FuturesCmPerpCancelAllTpslOrdersReq,
+  FuturesCmPerpCancelAllTrailingOrdersReq,
+  FuturesCmPerpCancelAllTriggerOrdersReq,
+  FuturesCmPerpCancelOrderReq,
+  FuturesCmPerpCancelTpslOrderReq,
+  FuturesCmPerpCancelTrailingOrderReq,
+  FuturesCmPerpCancelTriggerOrderReq,
+  FuturesCmPerpFillsExactReq,
+  FuturesCmPerpFillsReq,
   FuturesCmPerpFinancialRecordExactReq,
   FuturesCmPerpFinancialRecordReq,
   FuturesCmPerpFundingRateKlinesReq,
   FuturesCmPerpGetOpenInterestReq,
   FuturesCmPerpHistoricalFundingRateReq,
+  FuturesCmPerpHistoryOrdersExactReq,
+  FuturesCmPerpHistoryOrdersReq,
   FuturesCmPerpKlinesReq,
+  FuturesCmPerpLightningCloseReq,
   FuturesCmPerpLiquidationOrdersReq,
   FuturesCmPerpMarkPriceKlinesReq,
   FuturesCmPerpMasterSubTransferReq,
   FuturesCmPerpMasterSubTransfersReq,
+  FuturesCmPerpOpenOrdersReq,
+  FuturesCmPerpOrderDetailReq,
+  FuturesCmPerpOrderInfoReq,
   FuturesCmPerpOrderLimitReq,
   FuturesCmPerpPremiumIndexKlinesReq,
+  FuturesCmPerpRelationTpslOrderReq,
   FuturesCmPerpRiskReserveHistoryReq,
   FuturesCmPerpSettlementRecordsReq,
   FuturesCmPerpSubAccountsAssetsReq,
   FuturesCmPerpSubAccountsReq,
+  FuturesCmPerpSubmitBatchOrderReq,
+  FuturesCmPerpSubmitOrderReq,
   FuturesCmPerpSubPermissionsReq,
+  FuturesCmPerpTpslHisOrdersReq,
+  FuturesCmPerpTpslOpenOrdersReq,
+  FuturesCmPerpTpslOrderReq,
+  FuturesCmPerpTrailingHisOrdersReq,
+  FuturesCmPerpTrailingOpenOrdersReq,
+  FuturesCmPerpTrailingOrderReq,
+  FuturesCmPerpTriggerHisOrdersReq,
+  FuturesCmPerpTriggerOpenOrdersReq,
+  FuturesCmPerpTriggerOrderReq,
+  FuturesCmPerpUpdateLeverageReq,
   FuturesCrossSubmitOrderReq,
   FuturesGetBasisDataReq,
   FuturesGetContractInfoReq,
@@ -261,18 +291,24 @@ import type {
   FuturesCmPerpAssetValuation,
   FuturesCmPerpAvailableLeverage,
   FuturesCmPerpBasisData,
+  FuturesCmPerpBatchOrder,
+  FuturesCmPerpCancelAfter,
+  FuturesCmPerpCancelOrder,
   FuturesCmPerpContractElements,
   FuturesCmPerpContractInfo,
   FuturesCmPerpEstimatedSettlementPrice,
   FuturesCmPerpFee,
+  FuturesCmPerpFill,
   FuturesCmPerpFinancialRecord,
   FuturesCmPerpFundingRate,
   FuturesCmPerpFundingRateKline,
   FuturesCmPerpHistoricalFundingRatePage,
+  FuturesCmPerpHistoryOrder,
   FuturesCmPerpIndexConstituents,
   FuturesCmPerpIndexPrice,
   FuturesCmPerpKline,
   FuturesCmPerpLastTrade,
+  FuturesCmPerpLightningClose,
   FuturesCmPerpLiquidationOrder,
   FuturesCmPerpMarketBbo,
   FuturesCmPerpMarketDepth,
@@ -281,25 +317,39 @@ import type {
   FuturesCmPerpMasterSubTransfers,
   FuturesCmPerpOpenInterest,
   FuturesCmPerpOpenInterestCurrent,
+  FuturesCmPerpOpenOrders,
+  FuturesCmPerpOrderDetail,
+  FuturesCmPerpOrderInfo,
   FuturesCmPerpOrderLimit,
   FuturesCmPerpPositionInfo,
   FuturesCmPerpPositionLimit,
   FuturesCmPerpPositionRatio,
   FuturesCmPerpPremiumIndexKline,
   FuturesCmPerpPriceLimit,
+  FuturesCmPerpRelationTpslOrder,
   FuturesCmPerpRiskReserveBalance,
   FuturesCmPerpRiskReserveHistory,
-  FuturesCmPerpSettlementRecord,
   FuturesCmPerpSettlementRecordsPage,
   FuturesCmPerpSubAccountAssets,
   FuturesCmPerpSubAccounts,
   FuturesCmPerpSubAccountsAssets,
+  FuturesCmPerpSubmitOrder,
   FuturesCmPerpSubPermissions,
   FuturesCmPerpSubPositions,
   FuturesCmPerpSystemStatus,
   FuturesCmPerpTieredMargin,
+  FuturesCmPerpTpslHisOrders,
+  FuturesCmPerpTpslOpenOrders,
+  FuturesCmPerpTpslOrder,
   FuturesCmPerpTradeHistory,
+  FuturesCmPerpTrailingHisOrders,
+  FuturesCmPerpTrailingOpenOrders,
+  FuturesCmPerpTrailingOrder,
   FuturesCmPerpTransferLimit,
+  FuturesCmPerpTriggerHisOrders,
+  FuturesCmPerpTriggerOpenOrders,
+  FuturesCmPerpTriggerOrder,
+  FuturesCmPerpUpdateLeverage,
   FuturesCmPerpUpdateSubPermissions,
   FuturesContractElements,
   FuturesContractInfo,
@@ -922,7 +972,7 @@ export class FuturesClient extends BaseRestClient {
     valuation_asset?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesBalanceValuation[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_balance_valuation', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -935,7 +985,7 @@ export class FuturesClient extends BaseRestClient {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesIsolatedAccountInfo[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_account_info', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -948,7 +998,7 @@ export class FuturesClient extends BaseRestClient {
     margin_account?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCrossAccountInfo[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_account_info', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -961,7 +1011,7 @@ export class FuturesClient extends BaseRestClient {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesPositionInfo[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_position_info', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -974,7 +1024,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesGetCrossPositionsReq,
   ): Promise<FuturesAPISuccessResponse<FuturesPositionInfo[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_position_info', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -1039,7 +1089,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesGetIsolatedSubAccountsReq,
   ): Promise<FuturesAPISuccessResponse<FuturesIsolatedSubAccountListEntry[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_sub_account_list', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -1052,7 +1102,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesGetCrossSubAccountsReq,
   ): Promise<FuturesAPISuccessResponse<FuturesCrossSubAccountListEntry[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_sub_account_list', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -1065,7 +1115,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesGetSubAccountsAssetsReq,
   ): Promise<FuturesAPISuccessResponse<FuturesSubAccountInfoList>> {
     return this.postPrivate('/linear-swap-api/v1/swap_sub_account_info_list', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -1079,7 +1129,7 @@ export class FuturesClient extends BaseRestClient {
   ): Promise<FuturesAPISuccessResponse<FuturesCrossSubAccountInfoList>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_sub_account_info_list',
-      { body: params ?? {} },
+      { body: params },
     );
   }
 
@@ -1174,7 +1224,7 @@ export class FuturesClient extends BaseRestClient {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesAvailableLevelRate[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_available_level_rate', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -1188,7 +1238,7 @@ export class FuturesClient extends BaseRestClient {
   ): Promise<FuturesAPISuccessResponse<FuturesCrossAvailableLevelRate[]>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_available_level_rate',
-      { body: params ?? {} },
+      { body: params },
     );
   }
 
@@ -1214,7 +1264,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesGetFeeReq,
   ): Promise<FuturesAPISuccessResponse<FuturesFee[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_fee', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -1227,7 +1277,7 @@ export class FuturesClient extends BaseRestClient {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesTransferLimit[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_transfer_limit', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -1240,7 +1290,7 @@ export class FuturesClient extends BaseRestClient {
     margin_account?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCrossTransferLimit[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_transfer_limit', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -1253,7 +1303,7 @@ export class FuturesClient extends BaseRestClient {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesPositionLimit[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_position_limit', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -1266,7 +1316,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesGetCrossPositionLimitReq,
   ): Promise<FuturesAPISuccessResponse<FuturesCrossPositionLimit[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_position_limit', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -1280,7 +1330,7 @@ export class FuturesClient extends BaseRestClient {
     lever_rate?: number;
   }): Promise<FuturesAPISuccessResponse<FuturesLeverPositionLimit[]>> {
     return this.postPrivate('/linear-swap-api/v1/swap_lever_position_limit', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -1295,7 +1345,7 @@ export class FuturesClient extends BaseRestClient {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_lever_position_limit',
       {
-        body: params ?? {},
+        body: params,
       },
     );
   }
@@ -1615,7 +1665,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesGetOpenOrdersReq,
   ): Promise<FuturesAPISuccessResponse<FuturesOpenOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_openorders', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -1628,7 +1678,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesGetCrossOpenOrdersReq,
   ): Promise<FuturesAPISuccessResponse<FuturesOpenOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_cross_openorders', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -2445,7 +2495,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesV5CancelAllOrdersReq,
   ): Promise<FuturesAPISuccessResponse<FuturesV5PlaceBatchOrderRespItem[]>> {
     return this.postPrivate('/v5/trade/cancel_all_orders', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -3087,7 +3137,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesCmDeliverySubAccountListReq,
   ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryAllSubAccount[]>> {
     return this.postPrivate('/api/v1/contract_sub_account_list', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -3100,7 +3150,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesCmDeliverySubAccountInfoListReq,
   ): Promise<FuturesAPISuccessResponse<FuturesCmDeliverySubAccountsAssets>> {
     return this.postPrivate('/api/v1/contract_sub_account_info_list', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -3195,7 +3245,7 @@ export class FuturesClient extends BaseRestClient {
     symbol?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryFee[]>> {
     return this.postPrivate('/api/v1/contract_fee', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -3208,7 +3258,7 @@ export class FuturesClient extends BaseRestClient {
     symbol?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTransferLimit[]>> {
     return this.postPrivate('/api/v1/contract_transfer_limit', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -3221,7 +3271,7 @@ export class FuturesClient extends BaseRestClient {
     symbol?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryPositionLimit[]>> {
     return this.postPrivate('/api/v1/contract_position_limit', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -3284,7 +3334,7 @@ export class FuturesClient extends BaseRestClient {
     symbol?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryLeverageRate[]>> {
     return this.postPrivate('/api/v1/contract_available_level_rate', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -3407,7 +3457,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesCmDeliveryGetOpenOrdersReq,
   ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryOpenOrders>> {
     return this.postPrivate('/api/v1/contract_openorders', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -3706,7 +3756,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerpAdjustFactor(params?: {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpAdjustFactor[]>> {
-    return this.get('/swap-api/v1/swap_adjustfactor', params ?? {});
+    return this.get('/swap-api/v1/swap_adjustfactor', params);
   }
 
   /**
@@ -3728,7 +3778,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerpTieredMargin(params?: {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpTieredMargin[]>> {
-    return this.get('/swap-api/v1/swap_ladder_margin', params ?? {});
+    return this.get('/swap-api/v1/swap_ladder_margin', params);
   }
 
   /**
@@ -3765,10 +3815,7 @@ export class FuturesClient extends BaseRestClient {
   }): Promise<
     FuturesAPISuccessResponse<FuturesCmPerpEstimatedSettlementPrice[]>
   > {
-    return this.get(
-      '/swap-api/v1/swap_estimated_settlement_price',
-      params ?? {},
-    );
+    return this.get('/swap-api/v1/swap_estimated_settlement_price', params);
   }
 
   /**
@@ -3779,7 +3826,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerpSystemStatus(params?: {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpSystemStatus[]>> {
-    return this.get('/swap-api/v1/swap_api_state', params ?? {});
+    return this.get('/swap-api/v1/swap_api_state', params);
   }
 
   /**
@@ -3801,7 +3848,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerpFundingRates(params?: {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpFundingRate[]>> {
-    return this.get('/swap-api/v1/swap_batch_funding_rate', params ?? {});
+    return this.get('/swap-api/v1/swap_batch_funding_rate', params);
   }
 
   /**
@@ -3847,7 +3894,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerpContractInfo(params?: {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpContractInfo[]>> {
-    return this.get('/swap-api/v1/swap_contract_info', params ?? {});
+    return this.get('/swap-api/v1/swap_contract_info', params);
   }
 
   /**
@@ -3858,7 +3905,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerpIndexPrice(params?: {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpIndexPrice[]>> {
-    return this.get('/swap-api/v1/swap_index', params ?? {});
+    return this.get('/swap-api/v1/swap_index', params);
   }
 
   /**
@@ -3869,7 +3916,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerpContractElements(params?: {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpContractElements[]>> {
-    return this.get('/swap-api/v1/swap_query_elements', params ?? {});
+    return this.get('/swap-api/v1/swap_query_elements', params);
   }
 
   /**
@@ -3913,7 +3960,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerpPriceLimit(params?: {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpPriceLimit[]>> {
-    return this.get('/swap-api/v1/swap_price_limit', params ?? {});
+    return this.get('/swap-api/v1/swap_price_limit', params);
   }
 
   /**
@@ -3924,7 +3971,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerpCurrentOpenInterest(params?: {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpOpenInterestCurrent[]>> {
-    return this.get('/swap-api/v1/swap_open_interest', params ?? {});
+    return this.get('/swap-api/v1/swap_open_interest', params);
   }
 
   /**
@@ -3953,7 +4000,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerpMarketBbo(params?: {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpMarketBbo[], 'ticks'>> {
-    return this.get('/swap-ex/market/bbo', params ?? {});
+    return this.get('/swap-ex/market/bbo', params);
   }
 
   /**
@@ -3997,7 +4044,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerp24hTickers(params?: {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerp24hTickers[], 'ticks'>> {
-    return this.get('/v2/swap-ex/market/detail/batch_merged', params ?? {});
+    return this.get('/v2/swap-ex/market/detail/batch_merged', params);
   }
 
   /**
@@ -4008,7 +4055,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerpLastTrade(params?: {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpLastTrade, 'tick'>> {
-    return this.get('/swap-ex/market/trade', params ?? {});
+    return this.get('/swap-ex/market/trade', params);
   }
 
   /**
@@ -4071,7 +4118,7 @@ export class FuturesClient extends BaseRestClient {
     valuation_asset?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpAssetValuation[]>> {
     return this.postPrivate('/swap-api/v1/swap_balance_valuation', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -4084,7 +4131,7 @@ export class FuturesClient extends BaseRestClient {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpAccountInfo[]>> {
     return this.postPrivate('/swap-api/v1/swap_account_info', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -4097,7 +4144,7 @@ export class FuturesClient extends BaseRestClient {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpPositionInfo[]>> {
     return this.postPrivate('/swap-api/v1/swap_position_info', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -4148,7 +4195,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesCmPerpSubAccountsReq,
   ): Promise<FuturesAPISuccessResponse<FuturesCmPerpSubAccounts[]>> {
     return this.postPrivate('/swap-api/v1/swap_sub_account_list', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -4161,7 +4208,7 @@ export class FuturesClient extends BaseRestClient {
     params?: FuturesCmPerpSubAccountsAssetsReq,
   ): Promise<FuturesAPISuccessResponse<FuturesCmPerpSubAccountsAssets>> {
     return this.postPrivate('/swap-api/v1/swap_sub_account_info_list', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -4228,7 +4275,7 @@ export class FuturesClient extends BaseRestClient {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpAvailableLeverage[]>> {
     return this.postPrivate('/swap-api/v1/swap_available_level_rate', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -4254,7 +4301,7 @@ export class FuturesClient extends BaseRestClient {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpFee[]>> {
     return this.postPrivate('/swap-api/v1/swap_fee', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -4267,7 +4314,7 @@ export class FuturesClient extends BaseRestClient {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpTransferLimit[]>> {
     return this.postPrivate('/swap-api/v1/swap_transfer_limit', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -4280,7 +4327,7 @@ export class FuturesClient extends BaseRestClient {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpPositionLimit[]>> {
     return this.postPrivate('/swap-api/v1/swap_position_limit', {
-      body: params ?? {},
+      body: params,
     });
   }
 
@@ -4326,4 +4373,400 @@ export class FuturesClient extends BaseRestClient {
    * Coin-M Perpetual - Trade
    *
    */
+
+  /**
+   * Cancel-After (CMPerp)
+   *
+   * Dead Man's Switch: enable/disable auto-cancel of all pending orders after countdown. Refresh before timer ends to keep orders. Trade permission.
+   */
+  setCmPerpCancelAfter(
+    params: FuturesCmPerpCancelAfterReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelAfter>> {
+    return this.postPrivate('/swap-api/v1/swap-cancel-after', {
+      body: params,
+    });
+  }
+
+  /**
+   * Place Order (CMPerp)
+   *
+   * Place order for coin-m perpetual. Trade permission. Rate limit: 36/3s per UID.
+   */
+  submitCmPerpOrder(
+    params: FuturesCmPerpSubmitOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpSubmitOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * Place Batch Orders (CMPerp)
+   *
+   * Place up to 25 orders. Trade permission. Rate limit: 36/3s per UID.
+   */
+  submitCmPerpBatchOrder(
+    params: FuturesCmPerpSubmitBatchOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpBatchOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_batchorder', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel Order (CMPerp)
+   *
+   * Cancel by order_id or client_order_id. One required, max 10. Trade permission.
+   */
+  cancelCmPerpOrder(
+    params: FuturesCmPerpCancelOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel All Orders (CMPerp)
+   *
+   * Cancel all orders for contract. Optional direction/offset filter. Trade permission.
+   */
+  cancelCmPerpAllOrders(
+    params: FuturesCmPerpCancelAllOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * Switch Leverage (CMPerp)
+   *
+   * Switch leverage for contract. Rate limit 1/3s. Trade permission.
+   */
+  updateCmPerpLeverage(
+    params: FuturesCmPerpUpdateLeverageReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpUpdateLeverage>> {
+    return this.postPrivate('/swap-api/v1/swap_switch_lever_rate', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Order Info (CMPerp)
+   *
+   * Query order(s) by order_id or client_order_id. One required, max 50. Cancel info: last 2h. Read permission.
+   */
+  getCmPerpOrderInfo(
+    params: FuturesCmPerpOrderInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpOrderInfo[]>> {
+    return this.postPrivate('/swap-api/v1/swap_order_info', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Order Detail (CMPerp)
+   *
+   * Order details with trades. With created_at+order_type: last 6h; without: last 2h. Read permission.
+   */
+  getCmPerpOrderDetail(
+    params: FuturesCmPerpOrderDetailReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpOrderDetail>> {
+    return this.postPrivate('/swap-api/v1/swap_order_detail', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Open Orders (CMPerp)
+   *
+   * Current unfilled orders. Omit contract_code for all. Read permission.
+   */
+  getCmPerpOpenOrders(
+    params?: FuturesCmPerpOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpOpenOrders>> {
+    return this.postPrivate('/swap-api/v1/swap_openorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get History Orders (CMPerp)
+   *
+   * History orders. Window max 48h, within 90d. Cancelled orders: last 2h. Read permission.
+   */
+  getCmPerpHistoryOrders(
+    params: FuturesCmPerpHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpHistoryOrder[]>> {
+    return this.postPrivate('/swap-api/v3/swap_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get History Orders Exact (CMPerp)
+   *
+   * History orders via multiple fields. Adds price_type filter. Same window rules. Read permission.
+   */
+  getCmPerpHistoryOrdersExact(
+    params: FuturesCmPerpHistoryOrdersExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpHistoryOrder[]>> {
+    return this.postPrivate('/swap-api/v3/swap_hisorders_exact', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Match Results (CMPerp)
+   *
+   * History match/trade results. Window max 48h, within 90d. Read permission.
+   */
+  getCmPerpFills(
+    params: FuturesCmPerpFillsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpFill[]>> {
+    return this.postPrivate('/swap-api/v3/swap_matchresults', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Match Results Exact (CMPerp)
+   *
+   * History match results via multiple fields. Same params as getCmPerpFills. Read permission.
+   */
+  getCmPerpFillsExact(
+    params: FuturesCmPerpFillsExactReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpFill[]>> {
+    return this.postPrivate('/swap-api/v3/swap_matchresults_exact', {
+      body: params,
+    });
+  }
+
+  /**
+   * Lightning Close (CMPerp)
+   *
+   * Close position at rival price + optimal 30 levels. Unfilled becomes limit. Default order_price_type: lightning. Trade permission.
+   */
+  submitCmPerpLightningClose(
+    params: FuturesCmPerpLightningCloseReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpLightningClose>> {
+    return this.postPrivate('/swap-api/v1/swap_lightning_close_position', {
+      body: params,
+    });
+  }
+
+  /**
+   *
+   * Coin-M Perpetual - Strategy Order
+   *
+   */
+
+  /**
+   * Place Trigger Order (CMPerp)
+   *
+   * ge: trigger when price >= trigger_price; le: <=. order_price needed for limit. Rate limit 5/s. Trade permission.
+   */
+  submitCmPerpTriggerOrder(
+    params: FuturesCmPerpTriggerOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTriggerOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_trigger_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel Trigger Order (CMPerp)
+   *
+   * Cancel by order_id. Max 10. Rate limit 5/s. Trade permission.
+   */
+  cancelCmPerpTriggerOrder(
+    params: FuturesCmPerpCancelTriggerOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_trigger_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel All Trigger Orders (CMPerp)
+   *
+   * Cancel all trigger orders for contract. Optional direction/offset filter. Rate limit 5/s. Trade permission.
+   */
+  cancelCmPerpAllTriggerOrders(
+    params: FuturesCmPerpCancelAllTriggerOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_trigger_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Trigger Open Orders (CMPerp)
+   *
+   * Current unfilled trigger orders. Read permission.
+   */
+  getCmPerpTriggerOpenOrders(
+    params: FuturesCmPerpTriggerOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTriggerOpenOrders>> {
+    return this.postPrivate('/swap-api/v1/swap_trigger_openorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Trigger History Orders (CMPerp)
+   *
+   * Trigger order history. create_date: days (max 90). Default query completed (status 4,5,6). Read permission.
+   */
+  getCmPerpTriggerHisOrders(
+    params: FuturesCmPerpTriggerHisOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTriggerHisOrders>> {
+    return this.postPrivate('/swap-api/v1/swap_trigger_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Set TPSL Order (CMPerp)
+   *
+   * Take-profit and/or stop-loss for existing position. At least one trigger price required. Rate limit 5/s. Trade permission.
+   */
+  submitCmPerpTpslOrder(
+    params: FuturesCmPerpTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTpslOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_tpsl_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel TPSL Order (CMPerp)
+   *
+   * Cancel by order_id. Max 10. Rate limit 5/s. Trade permission.
+   */
+  cancelCmPerpTpslOrder(
+    params: FuturesCmPerpCancelTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_tpsl_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel All TPSL Orders (CMPerp)
+   *
+   * Cancel all TPSL orders for contract. Optional direction filter. Rate limit 5/s. Trade permission.
+   */
+  cancelCmPerpAllTpslOrders(
+    params: FuturesCmPerpCancelAllTpslOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_tpsl_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get TPSL Open Orders (CMPerp)
+   *
+   * Current open take-profit and stop-loss orders. Read permission.
+   */
+  getCmPerpTpslOpenOrders(
+    params: FuturesCmPerpTpslOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTpslOpenOrders>> {
+    return this.postPrivate('/swap-api/v1/swap_tpsl_openorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get TPSL History Orders (CMPerp)
+   *
+   * TPSL order history. create_date: days (max 90). Read permission.
+   */
+  getCmPerpTpslHisOrders(
+    params: FuturesCmPerpTpslHisOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTpslHisOrders>> {
+    return this.postPrivate('/swap-api/v1/swap_tpsl_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Relation TPSL Order (CMPerp)
+   *
+   * TPSL order info related to a position-opening order. order_id = open order id. Read permission.
+   */
+  getCmPerpRelationTpslOrder(
+    params: FuturesCmPerpRelationTpslOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpRelationTpslOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_relation_tpsl_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * Place Trailing Order (CMPerp)
+   *
+   * Trailing order with callback rate. formula_price = market*(1±callback_rate). Rate limit 5/s. Trade permission.
+   */
+  submitCmPerpTrailingOrder(
+    params: FuturesCmPerpTrailingOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTrailingOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_track_order', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel Trailing Order (CMPerp)
+   *
+   * Cancel by order_id. Max 10. Rate limit 5/s. Trade permission.
+   */
+  cancelCmPerpTrailingOrder(
+    params: FuturesCmPerpCancelTrailingOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_track_cancel', {
+      body: params,
+    });
+  }
+
+  /**
+   * Cancel All Trailing Orders (CMPerp)
+   *
+   * Cancel all trailing orders for contract. Optional direction/offset filter. Rate limit 5/s. Trade permission.
+   */
+  cancelCmPerpAllTrailingOrders(
+    params: FuturesCmPerpCancelAllTrailingOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+    return this.postPrivate('/swap-api/v1/swap_track_cancelall', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Trailing Open Orders (CMPerp)
+   *
+   * Current unfilled trailing orders. Read permission.
+   */
+  getCmPerpTrailingOpenOrders(
+    params: FuturesCmPerpTrailingOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTrailingOpenOrders>> {
+    return this.postPrivate('/swap-api/v1/swap_track_openorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Trailing History Orders (CMPerp)
+   *
+   * Trailing order history. create_date: days (max 90). Read permission.
+   */
+  getCmPerpTrailingHisOrders(
+    params: FuturesCmPerpTrailingHisOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTrailingHisOrders>> {
+    return this.postPrivate('/swap-api/v1/swap_track_hisorders', {
+      body: params,
+    });
+  }
 }

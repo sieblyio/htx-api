@@ -2201,6 +2201,299 @@ export interface FuturesCmPerpOrderLimitReq {
   order_price_type: string;
 }
 
+/** Req for POST /swap-api/v1/swap_cancel_after. Dead Man's Switch: auto-cancel pending orders if not refreshed. */
+export interface FuturesCmPerpCancelAfterReq {
+  /** 1: enable, 0: disable */
+  on_off: 0 | 1;
+  /** Countdown ms. Min 5000, default 5000. */
+  time_out?: number;
+}
+
+/** Order price type for swap_order and swap_batchorder (CMPerp) */
+export type FuturesCmPerpSubmitOrderPriceType =
+  | 'limit'
+  | 'opponent'
+  | 'post_only'
+  | 'optimal_5'
+  | 'optimal_10'
+  | 'optimal_20'
+  | 'ioc'
+  | 'fok'
+  | 'opponent_ioc'
+  | 'optimal_5_ioc'
+  | 'optimal_10_ioc'
+  | 'optimal_20_ioc'
+  | 'opponent_fok'
+  | 'optimal_5_fok'
+  | 'optimal_10_fok'
+  | 'optimal_20_fok';
+
+/** Req for POST /swap-api/v1/swap_order. Place order (CMPerp). */
+export interface FuturesCmPerpSubmitOrderReq {
+  contract_code: string;
+  direction: 'buy' | 'sell';
+  offset: 'open' | 'close';
+  volume: number;
+  lever_rate: number;
+  order_price_type: FuturesCmPerpSubmitOrderPriceType;
+  price?: number | string;
+  client_order_id?: number;
+  tp_trigger_price?: number | string;
+  tp_order_price?: number | string;
+  tp_order_price_type?: string;
+  sl_trigger_price?: number | string;
+  sl_order_price?: number | string;
+  sl_order_price_type?: string;
+  price_protect?: boolean;
+  self_match_prevent?: 0 | 1;
+}
+
+/** Req for POST /swap-api/v1/swap_batchorder. Max 25 orders (CMPerp). */
+export interface FuturesCmPerpSubmitBatchOrderReq {
+  orders_data: FuturesCmPerpSubmitOrderReq[];
+}
+
+/** Req for cancelCmPerpOrder. One of order_id or client_order_id required. Max 10. */
+export interface FuturesCmPerpCancelOrderReq {
+  contract_code: string;
+  order_id?: string;
+  client_order_id?: string;
+}
+
+/** Req for cancelCmPerpAllOrders. Optional direction/offset filter. */
+export interface FuturesCmPerpCancelAllOrdersReq {
+  contract_code: string;
+  direction?: 'buy' | 'sell';
+  offset?: 'open' | 'close';
+}
+
+/** Req for updateCmPerpLeverage. Rate limit 1/3s. */
+export interface FuturesCmPerpUpdateLeverageReq {
+  contract_code: string;
+  lever_rate: number;
+}
+
+/** Req for getCmPerpOrderInfo. One of order_id or client_order_id required. Max 50. */
+export interface FuturesCmPerpOrderInfoReq {
+  contract_code: string;
+  order_id?: string;
+  client_order_id?: string;
+}
+
+/** Req for getCmPerpOrderDetail. created_at improves query performance, cannot be 0. */
+export interface FuturesCmPerpOrderDetailReq {
+  contract_code: string;
+  order_id: number | string;
+  created_at?: number;
+  order_type?: number;
+  page_index?: number;
+  page_size?: number;
+}
+
+/** Req for getCmPerpOpenOrders. Omit contract_code for all. */
+export interface FuturesCmPerpOpenOrdersReq {
+  contract_code?: string;
+  page_index?: number;
+  page_size?: number;
+  sort_by?: 'created_at' | 'update_time';
+  trade_type?: 0 | 1 | 2 | 3 | 4;
+}
+
+/** Req for getCmPerpHistoryOrders. contract required. Window max 48h, within 90d. Cancel info: last 2h. */
+export interface FuturesCmPerpHistoryOrdersReq {
+  contract: string;
+  /** 0:all, 1:buy long, 2:sell short, 3:buy short, 4:sell long, 5:sell liq, 6:buy liq, 7:Delivery long, 8:Delivery short, 11:reduce close long, 12:reduce close short */
+  trade_type: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 11 | 12;
+  /** 1:All Orders, 2:Order in Finished Status */
+  type: 1 | 2;
+  /** 0:all, or comma-separated e.g. "3,4,5" */
+  status: string;
+  start_time?: number;
+  end_time?: number;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+}
+
+/** Req for getCmPerpHistoryOrdersExact. Same as HistoryOrdersReq + price_type filter. */
+export interface FuturesCmPerpHistoryOrdersExactReq {
+  contract: string;
+  trade_type: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 11 | 12;
+  type: 1 | 2;
+  status: string;
+  price_type?: string;
+  start_time?: number;
+  end_time?: number;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+}
+
+/** Req for getCmPerpFills. Window max 48h, within 90d. */
+export interface FuturesCmPerpFillsReq {
+  contract: string;
+  /** 0:All, 1:Open long, 2:Open short, 3:Close short, 4:Close long, 5:Liquidate long, 6:Liquidate short */
+  trade_type: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  start_time?: number;
+  end_time?: number;
+  direct?: 'next' | 'prev';
+  from_id?: number;
+}
+
+/** Req for getCmPerpFillsExact. Same params as FillsReq. */
+export type FuturesCmPerpFillsExactReq = FuturesCmPerpFillsReq;
+
+/** Req for submitCmPerpLightningClose. Lightning close = rival price + optimal 30 levels; unfilled becomes limit. */
+export interface FuturesCmPerpLightningCloseReq {
+  contract_code: string;
+  volume: number;
+  direction: 'buy' | 'sell';
+  client_order_id?: number;
+  order_price_type?: 'lightning' | 'lightning_fok' | 'lightning_ioc';
+}
+
+/** Req for submitCmPerpTriggerOrder. Rate limit 5/s. */
+export interface FuturesCmPerpTriggerOrderReq {
+  contract_code: string;
+  trigger_type: 'ge' | 'le';
+  trigger_price: number | string;
+  order_price?: number | string;
+  order_price_type?: 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  volume: number;
+  direction: 'buy' | 'sell';
+  offset: 'open' | 'close';
+  lever_rate?: number;
+}
+
+/** Req for cancelCmPerpTriggerOrder. Max 10 order_ids. Rate limit 5/s. */
+export interface FuturesCmPerpCancelTriggerOrderReq {
+  contract_code: string;
+  order_id: string;
+}
+
+/** Req for cancelCmPerpAllTriggerOrders. Optional direction/offset filter. Rate limit 5/s. */
+export interface FuturesCmPerpCancelAllTriggerOrdersReq {
+  contract_code: string;
+  direction?: 'buy' | 'sell';
+  offset?: 'open' | 'close';
+}
+
+/** Req for getCmPerpTriggerOpenOrders. */
+export interface FuturesCmPerpTriggerOpenOrdersReq {
+  contract_code: string;
+  page_index?: number;
+  page_size?: number;
+  trade_type?: 0 | 1 | 2 | 3 | 4;
+}
+
+/** Req for getCmPerpTriggerHisOrders. create_date: days, max 90. Default query completed (status 4,5,6). */
+export interface FuturesCmPerpTriggerHisOrdersReq {
+  contract_code: string;
+  /** 0:All, 1:Open Long, 2:Close Short, 3:Open Short, 4:Close Long */
+  trade_type: 0 | 1 | 2 | 3 | 4;
+  /** 0:all, 4:submitted, 5:failed, 6:cancelled. Comma-separated allowed */
+  status: string;
+  create_date: number;
+  page_index?: number;
+  page_size?: number;
+  sort_by?: 'created_at' | 'update_time';
+}
+
+/** Req for submitCmPerpTpslOrder. At least one of tp_trigger_price or sl_trigger_price required. Rate limit 5/s. */
+export interface FuturesCmPerpTpslOrderReq {
+  contract_code: string;
+  direction: 'buy' | 'sell';
+  volume: number | string;
+  tp_trigger_price?: number | string;
+  tp_order_price?: number | string;
+  tp_order_price_type?: 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  sl_trigger_price?: number | string;
+  sl_order_price?: number | string;
+  sl_order_price_type?: 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  price_protect?: boolean;
+}
+
+/** Req for cancelCmPerpTpslOrder. Max 10 order_ids. Rate limit 5/s. */
+export interface FuturesCmPerpCancelTpslOrderReq {
+  contract_code: string;
+  order_id: string;
+}
+
+/** Req for cancelCmPerpAllTpslOrders. Optional direction filter. Rate limit 5/s. */
+export interface FuturesCmPerpCancelAllTpslOrdersReq {
+  contract_code: string;
+  direction?: 'buy' | 'sell';
+}
+
+/** Req for getCmPerpTpslOpenOrders. */
+export interface FuturesCmPerpTpslOpenOrdersReq {
+  contract_code: string;
+  page_index?: number;
+  page_size?: number;
+  trade_type?: 0 | 3 | 4;
+}
+
+/** Req for getCmPerpTpslHisOrders. create_date: days, max 90. */
+export interface FuturesCmPerpTpslHisOrdersReq {
+  contract_code: string;
+  /** 0:all, 4:submitted, 5:failed, 6:cancelled, 11:expired. Comma-separated allowed */
+  status: string;
+  create_date: number;
+  page_index?: number;
+  page_size?: number;
+  sort_by?: 'created_at' | 'update_time';
+}
+
+/** Req for getCmPerpRelationTpslOrder. order_id = open order id. */
+export interface FuturesCmPerpRelationTpslOrderReq {
+  contract_code: string;
+  order_id: number | string;
+}
+
+/** Req for submitCmPerpTrailingOrder. callback_rate min 0.001 (0.1%). Rate limit 5/s. */
+export interface FuturesCmPerpTrailingOrderReq {
+  contract_code: string;
+  direction: 'buy' | 'sell';
+  offset: 'open' | 'close';
+  volume: number | string;
+  callback_rate: number | string;
+  active_price: number | string;
+  order_price_type: 'optimal_5' | 'optimal_10' | 'optimal_20' | 'formula_price';
+  lever_rate?: number;
+}
+
+/** Req for cancelCmPerpTrailingOrder. Max 10 order_ids. Rate limit 5/s. */
+export interface FuturesCmPerpCancelTrailingOrderReq {
+  contract_code: string;
+  order_id: string;
+}
+
+/** Req for cancelCmPerpAllTrailingOrders. Optional direction/offset filter. Rate limit 5/s. */
+export interface FuturesCmPerpCancelAllTrailingOrdersReq {
+  contract_code: string;
+  direction?: 'buy' | 'sell';
+  offset?: 'open' | 'close';
+}
+
+/** Req for getCmPerpTrailingOpenOrders. */
+export interface FuturesCmPerpTrailingOpenOrdersReq {
+  contract_code: string;
+  trade_type?: 0 | 1 | 2 | 3 | 4;
+  page_index?: number;
+  page_size?: number;
+}
+
+/** Req for getCmPerpTrailingHisOrders. create_date: days, max 90. */
+export interface FuturesCmPerpTrailingHisOrdersReq {
+  contract_code: string;
+  /** 0:all, 4:success, 5:failed, 6:cancelled. Comma-separated allowed */
+  status: string;
+  /** 0:all, 1:buy long, 2:sell short, 3:buy short, 4:sell long */
+  trade_type: 0 | 1 | 2 | 3 | 4;
+  create_date: number;
+  page_index?: number;
+  page_size?: number;
+  sort_by?: 'create_date' | 'update_time';
+}
+
 /** Req for POST /swap-api/v1/swap_master_sub_transfer */
 export interface FuturesCmPerpMasterSubTransferReq {
   sub_uid: number;
