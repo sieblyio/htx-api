@@ -2744,11 +2744,11 @@ export class FuturesClient extends BaseRestClient {
   }
 
   /**
-   * Query Open Interest (CM)
+   * Query Historical Open Interest (CM)
    *
    * Get historical open interest. No signature. Rate limit: 120/3s per IP.
    */
-  getCmOpenInterest(
+  getCmHistoricalOpenInterest(
     params: FuturesCmDeliveryOpenInterestReq,
   ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryOpenInterest>> {
     return this.get('/api/v1/contract_his_open_interest', params);
@@ -2759,7 +2759,7 @@ export class FuturesClient extends BaseRestClient {
    *
    * Get tiered margin by leverage. No signature. Rate limit: 120/3s per IP.
    */
-  getCmLadderMargin(params?: {
+  getCmTieredMargin(params?: {
     symbol?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryLadderMargin[]>> {
     return this.get('/api/v1/contract_ladder_margin', params);
@@ -2770,7 +2770,7 @@ export class FuturesClient extends BaseRestClient {
    *
    * Net long/short accounts ratio. No signature. Rate limit: 120/3s per IP.
    */
-  getCmAccountSentiment(params: {
+  getCmAccountRatio(params: {
     symbol: string;
     period: '5min' | '15min' | '30min' | '60min' | '4hour' | '1day';
   }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryEliteAccountRatio>> {
@@ -2782,7 +2782,7 @@ export class FuturesClient extends BaseRestClient {
    *
    * Net long/short position ratio. No signature. Rate limit: 120/3s per IP.
    */
-  getCmPositionSentiment(params: {
+  getCmPositionRatio(params: {
     symbol: string;
     period: '5min' | '15min' | '30min' | '60min' | '4hour' | '1day';
   }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryElitePositionRatio>> {
@@ -2847,11 +2847,11 @@ export class FuturesClient extends BaseRestClient {
   }
 
   /**
-   * Get Contract Open Interest (CM)
+   * Get Open Interest (CM)
    *
    * Current open interest and 24h trading volume. No signature. Rate limit: 120/3s per IP.
    */
-  getCmContractOpenInterest(
+  getCmOpenInterest(
     params?: FuturesCmDeliveryContractOpenInterestReq,
   ): Promise<
     FuturesAPISuccessResponse<FuturesCmDeliveryContractOpenInterest[]>
@@ -2906,11 +2906,11 @@ export class FuturesClient extends BaseRestClient {
   }
 
   /**
-   * Get Contract Index Price (CM)
+   * Get Index Price (CM)
    *
    * Index price for symbol(s). No signature. Rate limit: 120/3s per IP.
    */
-  getCmIndex(params?: {
+  getCmIndexPrice(params?: {
     symbol?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryIndex[]>> {
     return this.get('/api/v1/contract_index', params);
@@ -3764,7 +3764,7 @@ export class FuturesClient extends BaseRestClient {
    *
    * Open interest by period. No signature.
    */
-  getCmPerpOpenInterest(
+  getCmPerpHistoricalOpenInterest(
     params: FuturesCmPerpGetOpenInterestReq,
   ): Promise<FuturesAPISuccessResponse<FuturesCmPerpOpenInterest>> {
     return this.get('/swap-api/v1/swap_his_open_interest', params);
@@ -3946,7 +3946,7 @@ export class FuturesClient extends BaseRestClient {
    *
    * Historical risk fund data by day. No signature. Rate limit: 144/3s per UID.
    */
-  getCmPerpHistoryRiskReserves(
+  getCmPerpRiskReserveHistory(
     params?: FuturesCmPerpRiskReserveHistoryReq,
   ): Promise<FuturesAPISuccessResponse<FuturesCmPerpRiskReserveHistory[]>> {
     return this.get('/v1/insurance_fund_history', params);
@@ -3968,7 +3968,7 @@ export class FuturesClient extends BaseRestClient {
    *
    * Current position quantity and 24h trading volume per contract. No signature. Omit contract_code for all.
    */
-  getCmPerpCurrentOpenInterest(params?: {
+  getCmPerpOpenInterest(params?: {
     contract_code?: string;
   }): Promise<FuturesAPISuccessResponse<FuturesCmPerpOpenInterestCurrent[]>> {
     return this.get('/swap-api/v1/swap_open_interest', params);

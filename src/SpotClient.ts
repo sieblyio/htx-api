@@ -481,7 +481,7 @@ export class SpotClient extends BaseRestClient {
   updateFeeDeductionMethod(params: {
     switchType: 0 | 1 | 2;
     deductionCurrency?: string;
-  }): Promise<SpotAPISuccessResponse<{}>> {
+  }): Promise<SpotAPISuccessResponse<null>> {
     return this.postPrivate('/v1/account/fee/switch', { body: params });
   }
 

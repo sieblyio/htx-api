@@ -2,6 +2,21 @@
  * Reference
  */
 
+/** Paginated response base. Use FuturesPaginatedData or FuturesPaginatedSettlement for specific data keys. */
+export interface FuturesPaginatedBase {
+  total_page: number;
+  current_page: number;
+  total_size: number;
+}
+
+/** Paginated response with `data` array (e.g. historical funding rate, liquidation orders). */
+export type FuturesPaginatedData<T> = FuturesPaginatedBase & { data: T[] };
+
+/** Paginated response with `settlement_record` array. */
+export type FuturesPaginatedSettlement<T> = FuturesPaginatedBase & {
+  settlement_record: T[];
+};
+
 /** Funding rate from swap_funding_rate and swap_batch_funding_rate */
 export interface FuturesFundingRate {
   funding_rate: string;
@@ -28,12 +43,8 @@ export interface FuturesHistoricalFundingRate {
 }
 
 /** Paginated wrapper for swap_historical_funding_rate data */
-export interface FuturesHistoricalFundingRatePage {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  data: FuturesHistoricalFundingRate[];
-}
+export type FuturesHistoricalFundingRatePage =
+  FuturesPaginatedData<FuturesHistoricalFundingRate>;
 
 /** Liquidation order item from swap_liquidation_orders */
 export interface FuturesLiquidationOrder {
@@ -64,12 +75,8 @@ export interface FuturesSettlementRecord {
 }
 
 /** Paginated settlement records from swap_settlement_records */
-export interface FuturesSettlementRecordsPage {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  settlement_record: FuturesSettlementRecord[];
-}
+export type FuturesSettlementRecordsPage =
+  FuturesPaginatedSettlement<FuturesSettlementRecord>;
 
 /** Elite ratio list item (account and position) */
 export interface FuturesEliteRatioList {
@@ -184,15 +191,15 @@ export interface FuturesInsuranceFundHistory {
   date: string;
 }
 
-/** Price limit item from swap_price_limit */
+/** Price limit item from swap_price_limit. business_type, pair, contract_type optional for CM products. */
 export interface FuturesPriceLimit {
   symbol: string;
   contract_code: string;
   high_limit: number;
   low_limit: number;
-  business_type: string;
-  pair: string;
-  contract_type: string;
+  business_type?: string;
+  pair?: string;
+  contract_type?: string;
 }
 
 /** Open interest item from swap_open_interest */
@@ -232,9 +239,10 @@ export interface FuturesContractInfo {
   trade_partition?: string;
 }
 
-/** Index price item from swap_index */
+/** Index price item from swap_index. symbol optional (CM Delivery uses symbol). */
 export interface FuturesIndexPrice {
-  contract_code: string;
+  contract_code?: string;
+  symbol?: string;
   index_price: number;
   index_ts: number;
 }
@@ -2218,12 +2226,8 @@ export interface FuturesCmPerpHistoricalFundingRate {
 }
 
 /** Paginated wrapper for GET /swap-api/v1/swap_historical_funding_rate */
-export interface FuturesCmPerpHistoricalFundingRatePage {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  data: FuturesCmPerpHistoricalFundingRate[];
-}
+export type FuturesCmPerpHistoricalFundingRatePage =
+  FuturesPaginatedData<FuturesCmPerpHistoricalFundingRate>;
 
 /** Item from GET /swap-api/v3/swap_liquidation_orders data[] */
 export interface FuturesCmPerpLiquidationOrder {
@@ -2249,12 +2253,8 @@ export interface FuturesCmPerpSettlementRecord {
 }
 
 /** Paginated wrapper for GET /swap-api/v1/swap_settlement_records */
-export interface FuturesCmPerpSettlementRecordsPage {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  settlement_record: FuturesCmPerpSettlementRecord[];
-}
+export type FuturesCmPerpSettlementRecordsPage =
+  FuturesPaginatedSettlement<FuturesCmPerpSettlementRecord>;
 
 /** Index constituents from GET /swap-api/market/swap_constituents. data is object. */
 export interface FuturesCmPerpIndexConstituents {
@@ -2277,20 +2277,11 @@ export interface FuturesCmPerpContractInfo {
   contract_status: number;
 }
 
-/** Item from GET /swap-api/v1/swap_index data[] */
-export interface FuturesCmPerpIndexPrice {
-  contract_code: string;
-  index_price: number;
-  index_ts: number;
-}
+/** Item from GET /swap-api/v1/swap_index data[]. Unified with FuturesIndexPrice. */
+export type FuturesCmPerpIndexPrice = FuturesIndexPrice;
 
-/** Item from GET /swap-api/v1/swap_price_limit data[] */
-export interface FuturesCmPerpPriceLimit {
-  symbol: string;
-  contract_code: string;
-  high_limit: number;
-  low_limit: number;
-}
+/** Item from GET /swap-api/v1/swap_price_limit data[]. Unified with FuturesPriceLimit. */
+export type FuturesCmPerpPriceLimit = FuturesPriceLimit;
 
 /** Item from GET /swap-api/v1/swap_open_interest data[] */
 export interface FuturesCmPerpOpenInterestCurrent {
@@ -3276,17 +3267,11 @@ export interface FuturesCmPerpFill {
   order_source: string;
 }
 
-/** Risk reserve balance from GET /v1/insurance_fund_info (CMPerp) */
-export interface FuturesCmPerpRiskReserveBalance {
-  insurance_fund: string;
-}
+/** Risk reserve balance from GET /v1/insurance_fund_info (CMPerp). Unified with FuturesInsuranceFundInfo. */
+export type FuturesCmPerpRiskReserveBalance = FuturesInsuranceFundInfo;
 
-/** Historical risk reserve item from GET /v1/insurance_fund_history (CMPerp) */
-export interface FuturesCmPerpRiskReserveHistory {
-  query_id: number;
-  insurance_fund: string;
-  date: string;
-}
+/** Historical risk reserve item from GET /v1/insurance_fund_history (CMPerp). Unified with FuturesInsuranceFundHistory. */
+export type FuturesCmPerpRiskReserveHistory = FuturesInsuranceFundHistory;
 
 /** Item from GET /swap-api/v1/swap_query_elements data[] */
 export interface FuturesCmPerpContractElements {
@@ -4266,27 +4251,14 @@ export interface FuturesCmDeliveryLeverageRate {
   available_level_rate: string;
 }
 
-/** GET /v1/insurance_fund_info */
-export interface FuturesCmDeliveryInsuranceFund {
-  insurance_fund: string;
-  quote_currency?: string;
-}
+/** GET /v1/insurance_fund_info (CM Delivery). Unified with FuturesInsuranceFundInfo. */
+export type FuturesCmDeliveryInsuranceFund = FuturesInsuranceFundInfo;
 
-/** GET /v1/insurance_fund_history */
-export interface FuturesCmDeliveryInsuranceFundHistory {
-  query_id: number;
-  insurance_fund: string;
-  date: string;
-}
+/** GET /v1/insurance_fund_history (CM Delivery). Unified with FuturesInsuranceFundHistory. */
+export type FuturesCmDeliveryInsuranceFundHistory = FuturesInsuranceFundHistory;
 
-/** GET /api/v1/contract_price_limit */
-export interface FuturesCmDeliveryPriceLimit {
-  symbol: string;
-  contract_code: string;
-  contract_type: string;
-  high_limit: number;
-  low_limit: number;
-}
+/** GET /api/v1/contract_price_limit. Unified with FuturesPriceLimit. */
+export type FuturesCmDeliveryPriceLimit = FuturesPriceLimit;
 
 /** GET /api/v1/contract_open_interest */
 export interface FuturesCmDeliveryContractOpenInterest {
@@ -4345,27 +4317,18 @@ export interface FuturesCmDeliveryContractInfo {
   contract_status: number;
 }
 
-/** GET /api/v1/contract_index */
-export interface FuturesCmDeliveryIndex {
-  symbol: string;
-  index_price: number;
-  index_ts: number;
-}
+/** GET /api/v1/contract_index. Unified with FuturesIndexPrice (uses symbol). */
+export type FuturesCmDeliveryIndex = FuturesIndexPrice;
 
-/** Index component from contract_constituents */
-export interface FuturesCmDeliveryConstituentComponent {
-  exchange: string;
-  symbol: string;
-  symbol_price: string;
-  weights: string;
-}
+/** Index component from contract_constituents. Alias of FuturesIndexConstituentComponent. */
+export type FuturesCmDeliveryConstituentComponent = FuturesIndexConstituentComponent;
 
 /** GET /api/market/contract_constituents */
 export interface FuturesCmDeliveryConstituents {
   symbol: string;
   ts: number;
   index_price: string;
-  components: FuturesCmDeliveryConstituentComponent[];
+  components: FuturesIndexConstituentComponent[];
 }
 
 /** Contract info sub-item in query elements */

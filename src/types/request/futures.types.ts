@@ -1573,7 +1573,7 @@ export interface FuturesV5MarketRiskLimitReq {
  */
 
 /** Req for GET /api/v1/contract_adjustfactor. Tiered adjustment factor. Inlined in getCmAdjustFactor - params?: { symbol?: string } */
-/** Req for GET /api/v1/contract_ladder_margin. Tiered margin. Inlined in getCmLadderMargin - params?: { symbol?: string } */
+/** Req for GET /api/v1/contract_ladder_margin. Tiered margin. Inlined in getCmTieredMargin - params?: { symbol?: string } */
 
 /** Req for GET /api/v1/contract_his_open_interest. Historical open interest. */
 export interface FuturesCmDeliveryOpenInterestReq {
@@ -1584,8 +1584,8 @@ export interface FuturesCmDeliveryOpenInterestReq {
   size?: number;
 }
 
-/** Req for GET /api/v1/contract_elite_account_ratio. Top trader sentiment - account. Inlined in getCmAccountSentiment - params: { symbol, period } */
-/** Req for GET /api/v1/contract_elite_position_ratio. Top trader sentiment - position. Inlined in getCmPositionSentiment - params: { symbol, period } */
+/** Req for GET /api/v1/contract_elite_account_ratio. Top trader sentiment - account. Inlined in getCmAccountRatio - params: { symbol, period } */
+/** Req for GET /api/v1/contract_elite_position_ratio. Top trader sentiment - position. Inlined in getCmPositionRatio - params: { symbol, period } */
 
 /** Req for GET /api/v3/contract_liquidation_orders. Liquidation orders. */
 export interface FuturesCmDeliveryLiquidationOrdersReq {
@@ -1677,8 +1677,8 @@ export interface FuturesCmDeliveryMarkPriceKlinesReq {
   size: number;
 }
 
-/** Req for GET /api/v1/contract_index. Index price. Inlined in getCmIndex - params?: { symbol?: string } */
-/** Req for GET /api/market/contract_constituents. Index components. Inlined in getCmIndexConstituents - params: { symbol: string } */
+/** Req for GET /api/v1/contract_index. Index price. Inlined in getCmIndexPrice - params?: { symbol?: string } */
+/** Req for GET /api/market/contract_constituents. Index constituents. Inlined in getCmIndexConstituents - params: { symbol: string } */
 /** Req for GET /api/v1/contract_query_elements. Contract elements. Inlined in getCmContractElements - params?: { contract_code?: string } */
 
 /** Req for GET /index/market/history/index. Index kline data. */
