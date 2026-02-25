@@ -1661,7 +1661,7 @@ export interface FuturesCmDeliveryKlinesReq {
   to?: number;
 }
 
-/** Req for GET /index/market/history/mark_price_kline. Aligned with getCmMarkPriceKlines. */
+/** Req for GET /index/market/history/mark_price_kline. Aligned with getCmMarkKlines. */
 export interface FuturesCmDeliveryMarkPriceKlinesReq {
   symbol: string;
   period:

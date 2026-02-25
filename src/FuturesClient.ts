@@ -227,8 +227,6 @@ import type {
   FuturesCmDeliveryApiTradingStatus,
   FuturesCmDeliveryAssetPositionInfo,
   FuturesCmDeliveryAssetValuation,
-  FuturesCmDeliveryBasisData,
-  FuturesCmDeliveryConstituents,
   FuturesCmDeliveryContractInfo,
   FuturesCmDeliveryContractOpenInterest,
   FuturesCmDeliveryDeliveryPrice,
@@ -238,18 +236,9 @@ import type {
   FuturesCmDeliveryFee,
   FuturesCmDeliveryFinancialRecord,
   FuturesCmDeliveryHistoryOrder,
-  FuturesCmDeliveryIndex,
-  FuturesCmDeliveryIndexKline,
-  FuturesCmDeliveryInsuranceFund,
-  FuturesCmDeliveryInsuranceFundHistory,
-  FuturesCmDeliveryKline,
   FuturesCmDeliveryLadderMargin,
-  FuturesCmDeliveryLastTrade,
   FuturesCmDeliveryLeverageRate,
   FuturesCmDeliveryLiquidationOrder,
-  FuturesCmDeliveryMarketBbo,
-  FuturesCmDeliveryMarketDepth,
-  FuturesCmDeliveryMarkPriceKline,
   FuturesCmDeliveryMasterSubTransfer,
   FuturesCmDeliveryMasterSubTransfers,
   FuturesCmDeliveryMatchResult,
@@ -260,7 +249,6 @@ import type {
   FuturesCmDeliveryOrderLimit,
   FuturesCmDeliveryPositionInfo,
   FuturesCmDeliveryPositionLimit,
-  FuturesCmDeliveryPriceLimit,
   FuturesCmDeliveryQueryElements,
   FuturesCmDeliveryRelationTpslOrder,
   FuturesCmDeliverySettlementRecords,
@@ -270,19 +258,15 @@ import type {
   FuturesCmDeliverySubPermissions,
   FuturesCmDeliverySubPositionInfo,
   FuturesCmDeliverySwitchLeverRate,
-  FuturesCmDeliveryTicker,
   FuturesCmDeliveryTpslHistoryOrders,
   FuturesCmDeliveryTpslOpenOrders,
   FuturesCmDeliveryTpslOrder,
-  FuturesCmDeliveryTradeHistory,
   FuturesCmDeliveryTrailingHistoryOrders,
   FuturesCmDeliveryTrailingOpenOrders,
   FuturesCmDeliveryTransferLimit,
   FuturesCmDeliveryTriggerHistoryOrders,
   FuturesCmDeliveryTriggerOpenOrders,
   FuturesCmDeliveryUserSettlementRecords,
-  FuturesCmPerp24hTicker,
-  FuturesCmPerp24hTickers,
   FuturesCmPerpAccAndPosInfo,
   FuturesCmPerpAccountInfo,
   FuturesCmPerpAccountRatio,
@@ -290,7 +274,6 @@ import type {
   FuturesCmPerpApiStatus,
   FuturesCmPerpAssetValuation,
   FuturesCmPerpAvailableLeverage,
-  FuturesCmPerpBasisData,
   FuturesCmPerpBatchOrder,
   FuturesCmPerpCancelAfter,
   FuturesCmPerpCancelOrder,
@@ -301,18 +284,10 @@ import type {
   FuturesCmPerpFill,
   FuturesCmPerpFinancialRecord,
   FuturesCmPerpFundingRate,
-  FuturesCmPerpFundingRateKline,
   FuturesCmPerpHistoricalFundingRatePage,
   FuturesCmPerpHistoryOrder,
-  FuturesCmPerpIndexConstituents,
-  FuturesCmPerpIndexPrice,
-  FuturesCmPerpKline,
-  FuturesCmPerpLastTrade,
   FuturesCmPerpLightningClose,
   FuturesCmPerpLiquidationOrder,
-  FuturesCmPerpMarketBbo,
-  FuturesCmPerpMarketDepth,
-  FuturesCmPerpMarkPriceKline,
   FuturesCmPerpMasterSubTransfer,
   FuturesCmPerpMasterSubTransfers,
   FuturesCmPerpOpenInterest,
@@ -324,11 +299,7 @@ import type {
   FuturesCmPerpPositionInfo,
   FuturesCmPerpPositionLimit,
   FuturesCmPerpPositionRatio,
-  FuturesCmPerpPremiumIndexKline,
-  FuturesCmPerpPriceLimit,
   FuturesCmPerpRelationTpslOrder,
-  FuturesCmPerpRiskReserveBalance,
-  FuturesCmPerpRiskReserveHistory,
   FuturesCmPerpSettlementRecordsPage,
   FuturesCmPerpSubAccountAssets,
   FuturesCmPerpSubAccounts,
@@ -341,7 +312,6 @@ import type {
   FuturesCmPerpTpslHisOrders,
   FuturesCmPerpTpslOpenOrders,
   FuturesCmPerpTpslOrder,
-  FuturesCmPerpTradeHistory,
   FuturesCmPerpTrailingHisOrders,
   FuturesCmPerpTrailingOpenOrders,
   FuturesCmPerpTrailingOrder,
@@ -386,13 +356,11 @@ import type {
   FuturesIsolatedSubAccountInfo,
   FuturesIsolatedSubAccountListEntry,
   FuturesKline,
-  FuturesLastTradeTick,
+  FuturesLastTrade,
   FuturesLeverPositionLimit,
   FuturesLinearSwapOverviewAccountInfo,
   FuturesLiquidationOrder,
   FuturesMarketDepthTick,
-  FuturesMarketOverviewBatchTick,
-  FuturesMarketOverviewTick,
   FuturesMarkPriceKline,
   FuturesMasterSubTransfer,
   FuturesMasterSubTransferRecord,
@@ -414,13 +382,14 @@ import type {
   FuturesSubmitOrder,
   FuturesSwitchLeverRate,
   FuturesSwitchPositionMode,
+  FuturesTicker,
   FuturesTimestamp,
   FuturesTpslHisOrders,
   FuturesTpslOpenOrders,
   FuturesTpslOrder,
   FuturesTrackHisOrders,
   FuturesTrackOpenOrders,
-  FuturesTradeHistoryGroup,
+  FuturesTradeHistory,
   FuturesTransferLimit,
   FuturesTriggerHisOrders,
   FuturesTriggerOpenOrders,
@@ -841,7 +810,7 @@ export class FuturesClient extends BaseRestClient {
   }
 
   /**
-   * Get Mark Price Kline
+   * Get Mark Klines
    *
    * Mark price candlestick data. No signature. Rate limit: 800/s per IP.
    */
@@ -855,28 +824,26 @@ export class FuturesClient extends BaseRestClient {
   }
 
   /**
-   * Get Market Data Overview
+   * Get Ticker
    *
    * 24h ticker + best bid/ask for one contract. No signature. Rate limit: 800/s per IP.
    */
-  getMarketOverview(params: {
+  getTicker(params: {
     contract_code: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesMarketOverviewTick, 'tick'>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesTicker, 'tick'>> {
     return this.get('/linear-swap-ex/market/detail/merged', params);
   }
 
   /**
-   * Get Batch Market Data Overview (V2)
+   * Get Tickers (V2)
    *
    * 24h tickers + best bid/ask for one or all contracts. business_type required for futures. No signature.
    * Rate limit: 800/s per IP. Data updated every 50ms.
    */
-  getMarketOverviewBatch(params?: {
+  getTickers(params?: {
     contract_code?: string;
     business_type?: 'futures' | 'swap' | 'all';
-  }): Promise<
-    FuturesAPISuccessResponse<FuturesMarketOverviewBatchTick[], 'ticks'>
-  > {
+  }): Promise<FuturesAPISuccessResponse<FuturesTicker[], 'ticks'>> {
     return this.get('/v2/linear-swap-ex/market/detail/batch_merged', params);
   }
 
@@ -889,7 +856,7 @@ export class FuturesClient extends BaseRestClient {
   getLastTrade(params?: {
     contract_code?: string;
     business_type?: 'futures' | 'swap' | 'all';
-  }): Promise<FuturesAPISuccessResponse<FuturesLastTradeTick, 'tick'>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesLastTrade, 'tick'>> {
     return this.get('/linear-swap-ex/market/trade', params);
   }
 
@@ -901,7 +868,7 @@ export class FuturesClient extends BaseRestClient {
   getTradeHistory(params: {
     contract_code: string;
     size: number;
-  }): Promise<FuturesAPISuccessResponse<FuturesTradeHistoryGroup[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesTradeHistory[]>> {
     return this.get('/linear-swap-ex/market/history/trade', params);
   }
 
@@ -2817,7 +2784,7 @@ export class FuturesClient extends BaseRestClient {
    * Total risk funds for all business lines, priced in USDT. No signature.
    */
   getCmRiskReserveBalance(): Promise<
-    FuturesAPISuccessResponse<FuturesCmDeliveryInsuranceFund>
+    FuturesAPISuccessResponse<FuturesInsuranceFundInfo>
   > {
     return this.get('/v1/insurance_fund_info');
   }
@@ -2829,9 +2796,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmRiskReserveHistory(
     params?: FuturesCmDeliveryRiskReserveHistoryReq,
-  ): Promise<
-    FuturesAPISuccessResponse<FuturesCmDeliveryInsuranceFundHistory[]>
-  > {
+  ): Promise<FuturesAPISuccessResponse<FuturesInsuranceFundHistory[]>> {
     return this.get('/v1/insurance_fund_history', params);
   }
 
@@ -2842,7 +2807,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmContractLimit(
     params?: FuturesCmDeliveryContractLimitReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryPriceLimit[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesPriceLimit[]>> {
     return this.get('/api/v1/contract_price_limit', params);
   }
 
@@ -2912,7 +2877,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmIndexPrice(params?: {
     symbol?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryIndex[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesIndexPrice[]>> {
     return this.get('/api/v1/contract_index', params);
   }
 
@@ -2923,7 +2888,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmIndexConstituents(params: {
     symbol: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryConstituents>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesIndexConstituents>> {
     return this.get('/api/market/contract_constituents', params);
   }
 
@@ -2952,7 +2917,7 @@ export class FuturesClient extends BaseRestClient {
   getCmMarketDepth(params: {
     symbol: string;
     type: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryMarketDepth, 'tick'>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesMarketDepthTick, 'tick'>> {
     return this.get('/market/depth', params);
   }
 
@@ -2963,9 +2928,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmMarketBbo(params?: {
     symbol?: string;
-  }): Promise<
-    FuturesAPISuccessResponse<FuturesCmDeliveryMarketBbo[], 'ticks'>
-  > {
+  }): Promise<FuturesAPISuccessResponse<FuturesBboTick[], 'ticks'>> {
     return this.get('/market/bbo', params);
   }
 
@@ -2976,40 +2939,40 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmKlines(
     params: FuturesCmDeliveryKlinesReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryKline[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesKline[]>> {
     return this.get('/market/history/kline', params);
   }
 
   /**
-   * Get Mark Price Kline (CM)
+   * Get Mark Klines (CM)
    *
    * Mark price candlestick data. No signature. Rate limit: 800/s per IP.
    */
-  getCmMarkPriceKlines(
+  getCmMarkKlines(
     params: FuturesCmDeliveryMarkPriceKlinesReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryMarkPriceKline[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMarkPriceKline[]>> {
     return this.get('/index/market/history/mark_price_kline', params);
   }
 
   /**
-   * Get Market Data Overview (CM)
+   * Get Ticker (CM)
    *
    * 24h ticker + best bid/ask for one contract. symbol required. No signature. Rate limit: 800/s per IP.
    */
   getCmTicker(params: {
     symbol: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTicker, 'tick'>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesTicker, 'tick'>> {
     return this.get('/market/detail/merged', params);
   }
 
   /**
-   * Get Batch Market Data Overview (CM V2)
+   * Get Tickers (CM V2)
    *
    * 24h tickers + best bid/ask for one or all contracts. Omit symbol for all. No signature. Rate limit: 800/s per IP. Data updated every 50ms.
    */
   getCmTickers(params?: {
     symbol?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTicker[], 'ticks'>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesTicker[], 'ticks'>> {
     return this.get('/v2/market/detail/batch_merged', params);
   }
 
@@ -3018,9 +2981,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Latest trade for a contract. Omit symbol for all. No signature. Rate limit: 800/s per IP.
    */
-  getCmLastrade(params?: {
+  getCmLastTrade(params?: {
     symbol?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryLastTrade, 'tick'>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesLastTrade, 'tick'>> {
     return this.get('/market/trade', params);
   }
 
@@ -3032,7 +2995,7 @@ export class FuturesClient extends BaseRestClient {
   getCmTradeHistory(params: {
     symbol: string;
     size: number;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTradeHistory[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesTradeHistory[]>> {
     return this.get('/market/history/trade', params);
   }
 
@@ -3043,7 +3006,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmIndexKlines(
     params: FuturesCmDeliveryIndexKlinesReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryIndexKline[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesKline[]>> {
     return this.get('/index/market/history/index', params);
   }
 
@@ -3054,7 +3017,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmBasisData(
     params: FuturesCmDeliveryBasisDataReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryBasisData[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesBasis[]>> {
     return this.get('/index/market/history/basis', params);
   }
 
@@ -3904,7 +3867,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpIndexPrice(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpIndexPrice[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesIndexPrice[]>> {
     return this.get('/swap-api/v1/swap_index', params);
   }
 
@@ -3926,7 +3889,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpIndexConstituents(params: {
     contract_code: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpIndexConstituents>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesIndexConstituents>> {
     return this.get('/swap-api/market/swap_constituents', params);
   }
 
@@ -3936,7 +3899,7 @@ export class FuturesClient extends BaseRestClient {
    * Total risk funds for all business lines, priced in USDT. No signature. Rate limit: 144/3s per UID.
    */
   getCmPerpRiskReserveBalance(): Promise<
-    FuturesAPISuccessResponse<FuturesCmPerpRiskReserveBalance>
+    FuturesAPISuccessResponse<FuturesInsuranceFundInfo>
   > {
     return this.get('/v1/insurance_fund_info');
   }
@@ -3948,7 +3911,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpRiskReserveHistory(
     params?: FuturesCmPerpRiskReserveHistoryReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpRiskReserveHistory[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesInsuranceFundHistory[]>> {
     return this.get('/v1/insurance_fund_history', params);
   }
 
@@ -3959,7 +3922,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpPriceLimit(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpPriceLimit[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesPriceLimit[]>> {
     return this.get('/swap-api/v1/swap_price_limit', params);
   }
 
@@ -3988,7 +3951,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerpMarketDepth(params: {
     contract_code: string;
     type: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpMarketDepth, 'tick'>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesMarketDepthTick, 'tick'>> {
     return this.get('/swap-ex/market/depth', params);
   }
 
@@ -3999,7 +3962,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpMarketBbo(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpMarketBbo[], 'ticks'>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesBboTick[], 'ticks'>> {
     return this.get('/swap-ex/market/bbo', params);
   }
 
@@ -4010,40 +3973,40 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpKlines(
     params: FuturesCmPerpKlinesReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpKline[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesKline[]>> {
     return this.get('/swap-ex/market/history/kline', params);
   }
 
   /**
-   * Get Mark Price Kline (CMPerp)
+   * Get Mark Klines (CMPerp)
    *
    * Mark price candlestick data. No signature. Rate limit: 800/s per IP.
    */
-  getCmPerpMarkPriceKlines(
+  getCmPerpMarkKlines(
     params: FuturesCmPerpMarkPriceKlinesReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpMarkPriceKline[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMarkPriceKline[]>> {
     return this.get('/index/market/history/swap_mark_price_kline', params);
   }
 
   /**
-   * Get Market Data Overview (CMPerp)
+   * Get Ticker (CMPerp)
    *
    * 24h ticker + best bid/ask for one contract. No signature. Rate limit: 800/s per IP.
    */
-  getCmPerp24hTicker(params: {
+  getCmPerpTicker(params: {
     contract_code: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmPerp24hTicker, 'tick'>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesTicker, 'tick'>> {
     return this.get('/swap-ex/market/detail/merged', params);
   }
 
   /**
-   * Get Batch Market Data Overview (CMPerp V2)
+   * Get Tickers (CMPerp V2)
    *
    * 24h tickers + best bid/ask for one or all contracts. Omit contract_code for all. No signature. Data updated every 50ms.
    */
-  getCmPerp24hTickers(params?: {
+  getCmPerpTickers(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmPerp24hTickers[], 'ticks'>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesTicker[], 'ticks'>> {
     return this.get('/v2/swap-ex/market/detail/batch_merged', params);
   }
 
@@ -4054,7 +4017,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpLastTrade(params?: {
     contract_code?: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpLastTrade, 'tick'>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesLastTrade, 'tick'>> {
     return this.get('/swap-ex/market/trade', params);
   }
 
@@ -4066,7 +4029,7 @@ export class FuturesClient extends BaseRestClient {
   getCmPerpTradeHistory(params: {
     contract_code: string;
     size: number;
-  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpTradeHistory[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesTradeHistory[]>> {
     return this.get('/swap-ex/market/history/trade', params);
   }
 
@@ -4077,7 +4040,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpPremiumIndexKlines(
     params: FuturesCmPerpPremiumIndexKlinesReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpPremiumIndexKline[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMarkPriceKline[]>> {
     return this.get('/index/market/history/swap_premium_index_kline', params);
   }
 
@@ -4088,7 +4051,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpFundingRateKlines(
     params: FuturesCmPerpFundingRateKlinesReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpFundingRateKline[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMarkPriceKline[]>> {
     return this.get('/index/market/history/swap_estimated_rate_kline', params);
   }
 
@@ -4099,7 +4062,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpBasisData(
     params: FuturesCmPerpBasisDataReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpBasisData[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesBasis[]>> {
     return this.get('/index/market/history/swap_basis', params);
   }
 

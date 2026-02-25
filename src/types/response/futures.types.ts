@@ -255,9 +255,10 @@ export interface FuturesIndexConstituentComponent {
   weights: string;
 }
 
-/** Index constituents data from swap_contract_constituents. data is object, not array. */
+/** Index constituents data from swap_contract_constituents. contract_code or symbol per product. */
 export interface FuturesIndexConstituents {
-  contract_code: string;
+  contract_code?: string;
+  symbol?: string;
   index_price: string;
   ts: number;
   components: FuturesIndexConstituentComponent[];
@@ -350,28 +351,29 @@ export interface FuturesContractElements {
  * Market
  */
 
-/** Market depth tick from /linear-swap-ex/market/depth. Payload in "tick". */
+/** Market depth tick from market/depth. ch, id, mrid, version optional per product. Payload in "tick". */
 export interface FuturesMarketDepthTick {
   asks: [number, number][];
   bids: [number, number][];
-  ch: string;
-  id: number;
-  mrid: number;
+  ch?: string;
+  id?: number;
+  mrid?: number;
   ts: number;
-  version: number;
+  version?: number;
 }
 
-/** BBO tick from /linear-swap-ex/market/bbo. ask/bid: [price, qty] */
+/** BBO tick from market/bbo. contract_code or symbol per product. ask/bid: [price, qty]. */
 export interface FuturesBboTick {
-  contract_code: string;
-  business_type: string;
+  contract_code?: string;
+  symbol?: string;
+  business_type?: string;
   mrid: number;
   ask: [number, number];
   bid: [number, number];
   ts: number;
 }
 
-/** Kline item from /linear-swap-ex/market/history/kline */
+/** Kline item from market/history/kline. trade_turnover optional per product. */
 export interface FuturesKline {
   id: number;
   vol: number;
@@ -381,7 +383,7 @@ export interface FuturesKline {
   low: number;
   high: number;
   amount: number;
-  trade_turnover: number;
+  trade_turnover?: number;
 }
 
 /** Basis data item from /index/market/history/linear_swap_basis and /index/market/history/basis */
@@ -393,7 +395,7 @@ export interface FuturesBasis {
   basis_rate: string;
 }
 
-/** Mark price kline item. Also used for premium index and estimated rate kline. Price/vol fields as strings. */
+/** Mark price kline item. Also used for premium index and estimated rate kline. trade_turnover optional. */
 export interface FuturesMarkPriceKline {
   id: number;
   vol: string;
@@ -403,11 +405,11 @@ export interface FuturesMarkPriceKline {
   low: string;
   high: string;
   amount: string;
-  trade_turnover: string;
+  trade_turnover?: string;
 }
 
-/** Market overview tick from /linear-swap-ex/market/detail/merged. 24h summary + best bid/ask. Payload in "tick". */
-export interface FuturesMarketOverviewTick {
+/** 24h ticker from market detail/merged. contract_code, symbol, business_type optional per product. */
+export interface FuturesTicker {
   id: number;
   ts: number;
   amount: string;
@@ -417,37 +419,54 @@ export interface FuturesMarketOverviewTick {
   close: string;
   low: string;
   high: string;
-  trade_turnover: string;
+  trade_turnover?: string;
   ask: [number, number];
   bid: [number, number];
+  contract_code?: string;
+  symbol?: string;
+  business_type?: string;
+  number_of?: string;
 }
 
-/** Trade item from last trade and history trade */
+/** @deprecated Use FuturesTicker */
+export interface FuturesMarketOverviewTick extends FuturesTicker {}
+
+/** @deprecated Use FuturesTicker */
+export interface FuturesMarketOverviewBatchTick extends FuturesTicker {}
+
+/** Trade item from last trade and history trade. symbol, contract_code, business_type, trade_turnover optional per product. */
 export interface FuturesTrade {
   id: number;
   price: string | number;
   amount: string | number;
   direction: string;
   ts: number;
-  quantity: string | number;
+  quantity?: string | number;
   contract_code?: string;
   business_type?: string;
-  trade_turnover: string | number;
+  trade_turnover?: string | number;
+  symbol?: string;
 }
 
-/** Last trade tick from /linear-swap-ex/market/trade. Payload in "tick". */
-export interface FuturesLastTradeTick {
+/** Last trade tick from market/trade. Payload in "tick". */
+export interface FuturesLastTrade {
   id: number;
   ts: number;
   data: FuturesTrade[];
 }
 
-/** Trade history group from /linear-swap-ex/market/history/trade. Each group has trades by timestamp. */
-export interface FuturesTradeHistoryGroup {
+/** @deprecated Use FuturesLastTrade */
+export interface FuturesLastTradeTick extends FuturesLastTrade {}
+
+/** Trade history group from market/history/trade. Each group has trades by timestamp. */
+export interface FuturesTradeHistory {
   id: number;
   ts: number;
   data: FuturesTrade[];
 }
+
+/** @deprecated Use FuturesTradeHistory */
+export interface FuturesTradeHistoryGroup extends FuturesTradeHistory {}
 
 /** Open interest tick item from swap_his_open_interest */
 export interface FuturesOpenInterestTick {
@@ -467,23 +486,6 @@ export interface FuturesHistoricalOpenInterest {
   tick: FuturesOpenInterestTick[];
 }
 
-/** Batch market overview tick from /v2/linear-swap-ex/market/detail/batch_merged */
-export interface FuturesMarketOverviewBatchTick {
-  contract_code: string;
-  business_type: string;
-  id: number;
-  ts: number;
-  amount: string;
-  count: number;
-  vol: string;
-  number_of: string;
-  open: string;
-  close: string;
-  low: string;
-  high: string;
-  ask: [number, number];
-  bid: [number, number];
-}
 
 /**
  * Account
@@ -2277,11 +2279,6 @@ export interface FuturesCmPerpContractInfo {
   contract_status: number;
 }
 
-/** Item from GET /swap-api/v1/swap_index data[]. Unified with FuturesIndexPrice. */
-export type FuturesCmPerpIndexPrice = FuturesIndexPrice;
-
-/** Item from GET /swap-api/v1/swap_price_limit data[]. Unified with FuturesPriceLimit. */
-export type FuturesCmPerpPriceLimit = FuturesPriceLimit;
 
 /** Item from GET /swap-api/v1/swap_open_interest data[] */
 export interface FuturesCmPerpOpenInterestCurrent {
@@ -3267,11 +3264,6 @@ export interface FuturesCmPerpFill {
   order_source: string;
 }
 
-/** Risk reserve balance from GET /v1/insurance_fund_info (CMPerp). Unified with FuturesInsuranceFundInfo. */
-export type FuturesCmPerpRiskReserveBalance = FuturesInsuranceFundInfo;
-
-/** Historical risk reserve item from GET /v1/insurance_fund_history (CMPerp). Unified with FuturesInsuranceFundHistory. */
-export type FuturesCmPerpRiskReserveHistory = FuturesInsuranceFundHistory;
 
 /** Item from GET /swap-api/v1/swap_query_elements data[] */
 export interface FuturesCmPerpContractElements {
@@ -3421,8 +3413,6 @@ export interface FuturesCmDeliveryIndexKline {
   amount: number;
 }
 
-/** Market depth from GET /market/depth. Same structure as FuturesMarketDepthTick. Alias: getCmMarketDepth. */
-export type FuturesCmDeliveryMarketDepth = FuturesMarketDepthTick;
 
 /** Asset valuation from POST /api/v1/contract_balance_valuation. Same structure as FuturesBalanceValuation. Alias: getCmAssetValuation. */
 export type FuturesCmDeliveryAssetValuation = FuturesBalanceValuation;
@@ -3554,8 +3544,6 @@ export interface FuturesCmDeliveryPositionInfo {
   trade_partition: string;
 }
 
-/** Basis data from GET /index/market/history/basis. Same structure as FuturesBasis. Alias: getCmBasisData. */
-export type FuturesCmDeliveryBasisData = FuturesBasis;
 
 /** Liquidation order from GET /api/v3/contract_liquidation_orders */
 export interface FuturesCmDeliveryLiquidationOrder {
@@ -4251,14 +4239,7 @@ export interface FuturesCmDeliveryLeverageRate {
   available_level_rate: string;
 }
 
-/** GET /v1/insurance_fund_info (CM Delivery). Unified with FuturesInsuranceFundInfo. */
-export type FuturesCmDeliveryInsuranceFund = FuturesInsuranceFundInfo;
 
-/** GET /v1/insurance_fund_history (CM Delivery). Unified with FuturesInsuranceFundHistory. */
-export type FuturesCmDeliveryInsuranceFundHistory = FuturesInsuranceFundHistory;
-
-/** GET /api/v1/contract_price_limit. Unified with FuturesPriceLimit. */
-export type FuturesCmDeliveryPriceLimit = FuturesPriceLimit;
 
 /** GET /api/v1/contract_open_interest */
 export interface FuturesCmDeliveryContractOpenInterest {
@@ -4317,11 +4298,6 @@ export interface FuturesCmDeliveryContractInfo {
   contract_status: number;
 }
 
-/** GET /api/v1/contract_index. Unified with FuturesIndexPrice (uses symbol). */
-export type FuturesCmDeliveryIndex = FuturesIndexPrice;
-
-/** Index component from contract_constituents. Alias of FuturesIndexConstituentComponent. */
-export type FuturesCmDeliveryConstituentComponent = FuturesIndexConstituentComponent;
 
 /** GET /api/market/contract_constituents */
 export interface FuturesCmDeliveryConstituents {
