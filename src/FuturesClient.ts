@@ -109,7 +109,7 @@ import type {
   FuturesCmPerpTrailingHisOrdersReq,
   FuturesCmPerpTrailingOpenOrdersReq,
   FuturesCmPerpTrailingOrderReq,
-  FuturesCmPerpTriggerHisOrdersReq,
+  FuturesCmPerpTriggerHistoryOrdersReq,
   FuturesCmPerpTriggerOpenOrdersReq,
   FuturesCmPerpTriggerOrderReq,
   FuturesCmPerpUpdateLeverageReq,
@@ -129,18 +129,18 @@ import type {
   FuturesGetCrossOrderInfoReq,
   FuturesGetCrossPositionLimitReq,
   FuturesGetCrossPositionsReq,
+  FuturesGetCrossRelationTpslOrderReq,
   FuturesGetCrossSubAccountsAssetsReq,
   FuturesGetCrossSubAccountsReq,
   FuturesGetCrossSubPositionsReq,
   FuturesGetCrossTieredMarginReq,
   FuturesGetCrossTpslHistoryOrdersReq,
   FuturesGetCrossTpslOpenOrdersReq,
-  FuturesGetCrossTpSlOrderInfoReq,
   FuturesGetCrossTradeStateReq,
   FuturesGetCrossTrailingHistoryOrdersReq,
   FuturesGetCrossTrailingOpenOrdersReq,
+  FuturesGetCrossTriggerHistoryOrdersReq,
   FuturesGetCrossTriggerOpenOrdersReq,
-  FuturesGetCrossTriggerOrderHistoryReq,
   FuturesGetEstimatedSettlementPriceReq,
   FuturesGetFeeReq,
   FuturesGetFillsExactReq,
@@ -171,8 +171,8 @@ import type {
   FuturesGetTpslOpenOrdersReq,
   FuturesGetTrailingHistoryOrdersReq,
   FuturesGetTrailingOpenOrdersReq,
+  FuturesGetTriggerHistoryOrdersReq,
   FuturesGetTriggerOpenOrdersReq,
-  FuturesGetTriggerOrderHistoryReq,
   FuturesGetUnifiedMarginAdjustmentsReq,
   FuturesSetCancelAfterReq,
   FuturesSubmitBatchOrderReq,
@@ -243,7 +243,6 @@ import type {
   FuturesCmDeliveryPositionInfo,
   FuturesCmDeliveryPositionLimit,
   FuturesCmDeliveryQueryElements,
-  FuturesCmDeliveryRelationTpslOrder,
   FuturesCmDeliverySettlementRecords,
   FuturesCmDeliverySubAccountAssets,
   FuturesCmDeliverySubAccountsAssets,
@@ -251,7 +250,6 @@ import type {
   FuturesCmDeliverySwitchLeverRate,
   FuturesCmDeliveryTpslHistoryOrders,
   FuturesCmDeliveryTpslOpenOrders,
-  FuturesCmDeliveryTpslOrder,
   FuturesCmDeliveryTrailingHistoryOrders,
   FuturesCmDeliveryTrailingOpenOrders,
   FuturesCmDeliveryTransferLimit,
@@ -280,7 +278,6 @@ import type {
   FuturesCmPerpPositionInfo,
   FuturesCmPerpPositionLimit,
   FuturesCmPerpPositionRatio,
-  FuturesCmPerpRelationTpslOrder,
   FuturesCmPerpSettlementRecordsPage,
   FuturesCmPerpSubAccountAssets,
   FuturesCmPerpSubAccounts,
@@ -290,14 +287,11 @@ import type {
   FuturesCmPerpTieredMargin,
   FuturesCmPerpTpslHisOrders,
   FuturesCmPerpTpslOpenOrders,
-  FuturesCmPerpTpslOrder,
   FuturesCmPerpTrailingHisOrders,
   FuturesCmPerpTrailingOpenOrders,
-  FuturesCmPerpTrailingOrder,
   FuturesCmPerpTransferLimit,
-  FuturesCmPerpTriggerHisOrders,
+  FuturesCmPerpTriggerHistoryOrders,
   FuturesCmPerpTriggerOpenOrders,
-  FuturesCmPerpTriggerOrder,
   FuturesCmPerpUpdateLeverage,
   FuturesCmPerpUpdateSubPermissions,
   FuturesContractElements,
@@ -370,7 +364,7 @@ import type {
   FuturesTrackOpenOrders,
   FuturesTradeHistory,
   FuturesTransferLimit,
-  FuturesTriggerHisOrders,
+  FuturesTriggerHistoryOrders,
   FuturesTriggerOpenOrders,
   FuturesUnifiedAccountInfo,
   FuturesV5AccountBalance,
@@ -1910,9 +1904,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Isolated margin only. Read permission. Default query completed orders (status 4, 5, 6).
    */
-  getTriggerOrderHistory(
-    params: FuturesGetTriggerOrderHistoryReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTriggerHisOrders>> {
+  getTriggerHistoryOrders(
+    params: FuturesGetTriggerHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTriggerHistoryOrders>> {
     return this.postPrivate('/linear-swap-api/v1/swap_trigger_hisorders', {
       body: params,
     });
@@ -1923,9 +1917,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read permission.
    */
-  getCrossTriggerOrderHistory(
-    params: FuturesGetCrossTriggerOrderHistoryReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesTriggerHisOrders>> {
+  getCrossTriggerHistoryOrders(
+    params: FuturesGetCrossTriggerHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesTriggerHistoryOrders>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_trigger_hisorders',
       { body: params },
@@ -2063,11 +2057,11 @@ export class FuturesClient extends BaseRestClient {
   }
 
   /**
-   * [Isolated] Query Info Of Take-profit and Stop-loss Order That Related To Position Opening Order
+   * [Isolated] Query Relation TPSL Order
    *
-   * Isolated margin only. Read permission.
+   * TPSL order info related to position-opening order. Isolated margin only. Read permission.
    */
-  getTpSlOrderInfo(params: {
+  getRelationTpslOrder(params: {
     contract_code: string;
     order_id: number | string;
   }): Promise<FuturesAPISuccessResponse<FuturesRelationTpslOrder>> {
@@ -2077,12 +2071,12 @@ export class FuturesClient extends BaseRestClient {
   }
 
   /**
-   * [Cross] Query Info Of Take-profit and Stop-loss Order That Related To Position Opening Order
+   * [Cross] Query Relation TPSL Order
    *
-   * Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read permission.
+   * TPSL order info related to position-opening order. Cross margin only. One of pair or contract_code required. Read permission.
    */
-  getCrossTpSlOrderInfo(
-    params: FuturesGetCrossTpSlOrderInfoReq,
+  getCrossRelationTpslOrder(
+    params: FuturesGetCrossRelationTpslOrderReq,
   ): Promise<FuturesAPISuccessResponse<FuturesRelationTpslOrder>> {
     return this.postPrivate(
       '/linear-swap-api/v1/swap_cross_relation_tpsl_order',
@@ -3546,7 +3540,7 @@ export class FuturesClient extends BaseRestClient {
    */
   submitCmTpslOrder(
     params: FuturesCmDeliverySubmitTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryTpslOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslOrder>> {
     return this.postPrivate('/api/v1/contract_tpsl_order', {
       body: params,
     });
@@ -3611,7 +3605,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmRelationTpslOrder(
     params: FuturesCmDeliveryGetRelationTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryRelationTpslOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesRelationTpslOrder>> {
     return this.postPrivate('/api/v1/contract_relation_tpsl_order', {
       body: params,
     });
@@ -4511,7 +4505,7 @@ export class FuturesClient extends BaseRestClient {
    */
   submitCmPerpTriggerOrder(
     params: FuturesCmPerpTriggerOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTriggerOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
     return this.postPrivate('/swap-api/v1/swap_trigger_order', {
       body: params,
     });
@@ -4561,9 +4555,9 @@ export class FuturesClient extends BaseRestClient {
    *
    * Trigger order history. create_date: days (max 90). Default query completed (status 4,5,6). Read permission.
    */
-  getCmPerpTriggerHisOrders(
-    params: FuturesCmPerpTriggerHisOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTriggerHisOrders>> {
+  getCmPerpTriggerHistoryOrders(
+    params: FuturesCmPerpTriggerHistoryOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTriggerHistoryOrders>> {
     return this.postPrivate('/swap-api/v1/swap_trigger_hisorders', {
       body: params,
     });
@@ -4576,7 +4570,7 @@ export class FuturesClient extends BaseRestClient {
    */
   submitCmPerpTpslOrder(
     params: FuturesCmPerpTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTpslOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesTpslOrder>> {
     return this.postPrivate('/swap-api/v1/swap_tpsl_order', {
       body: params,
     });
@@ -4641,7 +4635,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpRelationTpslOrder(
     params: FuturesCmPerpRelationTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpRelationTpslOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesRelationTpslOrder>> {
     return this.postPrivate('/swap-api/v1/swap_relation_tpsl_order', {
       body: params,
     });
@@ -4654,7 +4648,7 @@ export class FuturesClient extends BaseRestClient {
    */
   submitCmPerpTrailingOrder(
     params: FuturesCmPerpTrailingOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTrailingOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
     return this.postPrivate('/swap-api/v1/swap_track_order', {
       body: params,
     });

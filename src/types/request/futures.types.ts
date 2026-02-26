@@ -965,8 +965,8 @@ export interface FuturesGetCrossTriggerOpenOrdersReq {
   trade_type?: 0 | 1 | 2 | 3 | 4 | 17 | 18;
 }
 
-/** Req for POST /linear-swap-api/v1/swap_trigger_hisorders. [Isolated] Query Trigger Order History. Isolated margin only. Read. Default query completed (status 4,5,6). */
-export interface FuturesGetTriggerOrderHistoryReq {
+/** Req for POST /linear-swap-api/v1/swap_trigger_hisorders. getTriggerHistoryOrders. Isolated. Read. Default query completed (status 4,5,6). */
+export interface FuturesGetTriggerHistoryOrdersReq {
   /** Contract code (e.g. BTC-USDT) */
   contract_code: string;
   /** 0: all, 1: open long, 2: close short, 3: open short, 4: close long, 17: buy(one-way), 18: sell(one-way) */
@@ -1095,8 +1095,8 @@ export interface FuturesCancelAllCrossTpslOrdersReq {
   direction?: 'buy' | 'sell';
 }
 
-/** Req for POST /linear-swap-api/v1/swap_cross_trigger_hisorders. [Cross] Query Trigger Order History. Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read. */
-export interface FuturesGetCrossTriggerOrderHistoryReq {
+/** Req for POST /linear-swap-api/v1/swap_cross_trigger_hisorders. getCrossTriggerHistoryOrders. Cross. One of pair or contract_code required. Read. */
+export interface FuturesGetCrossTriggerHistoryOrdersReq {
   /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625 */
   contract_code?: string;
   /** Pair (e.g. BTC-USDT) */
@@ -1175,8 +1175,8 @@ export interface FuturesGetCrossTpslHistoryOrdersReq {
   sort_by?: 'created_at' | 'update_time';
 }
 
-/** Req for POST /linear-swap-api/v1/swap_cross_relation_tpsl_order. [Cross] Query TPSL orders related to position opening order. Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read. */
-export interface FuturesGetCrossTpSlOrderInfoReq {
+/** Req for POST /linear-swap-api/v1/swap_cross_relation_tpsl_order. getCrossRelationTpslOrder. Cross. One of pair or contract_code required. Read. */
+export interface FuturesGetCrossRelationTpslOrderReq {
   /** Contract code. swap: BTC-USDT; future: BTC-USDT-210625 */
   contract_code?: string;
   /** Pair (e.g. BTC-USDT) */
@@ -2384,8 +2384,8 @@ export interface FuturesCmPerpTriggerOpenOrdersReq {
   trade_type?: 0 | 1 | 2 | 3 | 4;
 }
 
-/** Req for getCmPerpTriggerHisOrders. create_date: days, max 90. Default query completed (status 4,5,6). */
-export interface FuturesCmPerpTriggerHisOrdersReq {
+/** Req for getCmPerpTriggerHistoryOrders. create_date: days, max 90. Default query completed (status 4,5,6). */
+export interface FuturesCmPerpTriggerHistoryOrdersReq {
   contract_code: string;
   /** 0:All, 1:Open Long, 2:Close Short, 3:Open Short, 4:Close Long */
   trade_type: 0 | 1 | 2 | 3 | 4;
