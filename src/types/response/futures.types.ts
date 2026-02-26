@@ -27,6 +27,9 @@ export type FuturesPaginatedTransferRecord<T> = FuturesPaginatedBase & {
   transfer_record: T[];
 };
 
+/** Paginated response with `orders` array (open orders, trigger orders, etc.). */
+export type FuturesPaginatedOrders<T> = FuturesPaginatedBase & { orders: T[] };
+
 /** Funding rate from swap_funding_rate and swap_batch_funding_rate */
 export interface FuturesFundingRate {
   funding_rate: string;
@@ -1103,7 +1106,7 @@ export interface FuturesSwitchPositionMode {
   position_mode: string;
 }
 
-/** Order info item from swap_order_info and swap_cross_order_info */
+/** Order info item from getOrderInfo, getCmOrderInfo, getCmPerpOrderInfo. Product-specific fields optional. */
 export interface FuturesOrderInfo {
   symbol: string;
   contract_code: string;
@@ -1116,41 +1119,41 @@ export interface FuturesOrderInfo {
   lever_rate: number;
   order_id: number | string;
   order_id_str: string;
-  client_order_id: number | string;
+  client_order_id: number | string | null;
   created_at: number;
-  canceled_at: number;
+  canceled_at: number | null;
   trade_volume: number;
   trade_turnover: number;
   fee: number;
-  trade_avg_price: number;
+  trade_avg_price: number | null;
   margin_frozen: number;
-  margin_asset: string;
   profit: number;
   status: number;
   order_source: string;
   fee_asset: string;
-  liquidation_type: string;
-  margin_mode: string;
-  margin_account: string;
+  liquidation_type: string | null;
   is_tpsl: number;
   real_profit: number;
-  reduce_only: number;
-  fee_amount: number;
-  fee_quote_amount: number;
-  self_match_prevent_new: string;
-  canceled_source?: string;
-  self_match_prevent?: number;
-  /** Cross margin only */
+  update_time?: number;
+  /** USDM only */
+  margin_asset?: string;
+  margin_mode?: string;
+  margin_account?: string;
+  reduce_only?: number;
+  fee_amount?: number;
+  fee_quote_amount?: number;
+  self_match_prevent_new?: string;
+  /** CM Delivery: required; USDM/CM Perp: optional */
   contract_type?: string;
   pair?: string;
   business_type?: string;
+  canceled_source?: string;
+  self_match_prevent?: number;
 }
 
-/** Order detail trade item (trades array element) from swap_order_detail and swap_cross_order_detail */
+/** Order detail trade item (trades array) from getOrderDetail, getCmOrderDetail, getCmPerpOrderDetail */
 export interface FuturesOrderDetailTrade {
   id: string;
-  fee_asse?: string;
-  price?: string;
   trade_id: number | string;
   trade_price: number;
   trade_volume: number;
@@ -1160,10 +1163,14 @@ export interface FuturesOrderDetailTrade {
   created_at: number;
   profit: number;
   real_profit: number;
+  fee_asse?: string;
+  price?: string;
   fee_asset?: string;
+  canceled_source?: string;
+  self_match_prevent?: string | number;
 }
 
-/** Order detail data from swap_order_detail and swap_cross_order_detail */
+/** Order detail from getOrderDetail, getCmOrderDetail, getCmPerpOrderDetail. Product-specific fields optional. */
 export interface FuturesOrderDetail {
   symbol: string;
   contract_code: string;
@@ -1177,12 +1184,11 @@ export interface FuturesOrderDetail {
   order_source: string;
   order_price_type: string;
   margin_frozen: number;
-  margin_asset: string;
   profit: number;
   order_id: number | string;
   order_id_str: string;
-  client_order_id: number | string;
-  order_type: string;
+  client_order_id: number | string | null;
+  order_type: number | string;
   status: number;
   trade_volume: number;
   trade_turnover: number;
@@ -1196,19 +1202,21 @@ export interface FuturesOrderDetail {
   fee_asset: string;
   fee: number;
   liquidation_type: string;
-  margin_mode: string;
-  margin_account: string;
   is_tpsl: number;
   real_profit: number;
-  reduce_only: number;
-  self_match_prevent_new: string;
   trades: FuturesOrderDetailTrade[];
-  canceled_source?: string;
-  self_match_prevent?: number;
-  /** Cross margin only */
+  /** USDM only */
+  margin_asset?: string;
+  margin_mode?: string;
+  margin_account?: string;
+  reduce_only?: number;
+  self_match_prevent_new?: string;
+  /** CM Delivery: required; USDM/CM Perp: optional */
   contract_type?: string;
   pair?: string;
   business_type?: string;
+  canceled_source?: string;
+  self_match_prevent?: number;
 }
 
 /** Open order item from swap_openorders and swap_cross_openorders */
@@ -1250,26 +1258,20 @@ export interface FuturesOpenOrder {
   business_type?: string;
 }
 
-/** Open orders response data from swap_openorders and swap_cross_openorders */
-export interface FuturesOpenOrders {
-  orders: FuturesOpenOrder[];
-  total_page: number;
-  current_page: number;
-  total_size: number;
+/** Open orders response from swap_openorders and swap_cross_openorders */
+export type FuturesOpenOrders = FuturesPaginatedOrders<FuturesOpenOrder> & {
   self_match_prevent_new: string;
   self_match_prevent?: number;
   canceled_source?: string;
-}
+};
 
-/** History order item from swap_hisorders and swap_cross_hisorders */
+/** History order from getHistoryOrders, getCmHistoryOrders, getCmPerpHistoryOrders. Product-specific optional. */
 export interface FuturesHistoryOrder {
   query_id: number;
   order_id: number | string;
   order_id_str: string;
   symbol: string;
   contract_code: string;
-  margin_mode: string;
-  margin_account: string;
   lever_rate: number;
   direction: string;
   offset: string;
@@ -1280,10 +1282,8 @@ export interface FuturesHistoryOrder {
   order_source: string;
   order_price_type: string | number;
   order_type: number;
-  margin_asset: string;
   margin_frozen: number;
   profit: number;
-  real_profit: number;
   trade_volume: number;
   trade_turnover: number;
   fee: number;
@@ -1292,27 +1292,30 @@ export interface FuturesHistoryOrder {
   fee_asset: string;
   liquidation_type: string;
   is_tpsl: number;
-  reduce_only: number;
-  self_match_prevent_new: string;
-  canceled_source?: string;
-  self_match_prevent?: number;
-  /** Cross margin only */
+  real_profit: number;
+  /** USDM only */
+  margin_mode?: string;
+  margin_account?: string;
+  margin_asset?: string;
+  reduce_only?: number;
+  self_match_prevent_new?: string;
+  /** CM Delivery: required; USDM/CM Perp: optional */
   contract_type?: string;
   pair?: string;
   business_type?: string;
+  canceled_source?: string;
+  self_match_prevent?: number;
 }
 
-/** History match result item from swap_matchresults, swap_cross_matchresults, swap_matchresults_exact, swap_cross_matchresults_exact */
+/** Fill / match result from getFills, getCmFills, getCmPerpFills. Product-specific optional. */
 export interface FuturesMatchResult {
   id: string;
   query_id: number;
-  match_id: number;
-  order_id: number;
+  match_id: number | string;
+  order_id: number | string;
   order_id_str: string;
   symbol: string;
   contract_code: string;
-  margin_mode: string;
-  margin_account: string;
   direction: string;
   offset: string;
   trade_volume: number;
@@ -1320,17 +1323,20 @@ export interface FuturesMatchResult {
   trade_turnover: number;
   create_date: number;
   offset_profitloss: number;
-  real_profit: number;
   trade_fee: number;
   role: string;
+  real_profit: number;
   fee_asset: string;
   order_source: string;
-  reduce_only: number;
-  /** Cross / swap_matchresults; absent in swap_matchresults_exact isolated */
+  /** USDM only */
+  margin_mode?: string;
+  margin_account?: string;
+  reduce_only?: number;
+  /** CM Delivery: required; USDM/CM Perp: optional */
   contract_type?: string;
   pair?: string;
   business_type?: string;
-  /** Exact endpoints only */
+  /** getFillsExact only */
   ht_price?: string;
 }
 
@@ -1404,13 +1410,9 @@ export interface FuturesTriggerOrderOpenOrder {
   business_type?: string;
 }
 
-/** Trigger open orders response data from swap_trigger_openorders and swap_cross_trigger_openorders */
-export interface FuturesTriggerOpenOrders {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  orders: FuturesTriggerOrderOpenOrder[];
-}
+/** Trigger open orders response from swap_trigger_openorders and swap_cross_trigger_openorders */
+export type FuturesTriggerOpenOrders =
+  FuturesPaginatedOrders<FuturesTriggerOrderOpenOrder>;
 
 /** Trigger order history item from swap_trigger_hisorders and swap_cross_trigger_hisorders */
 export interface FuturesTriggerOrderHisOrder {
@@ -1447,13 +1449,9 @@ export interface FuturesTriggerOrderHisOrder {
   business_type?: string;
 }
 
-/** Trigger history orders response data from swap_trigger_hisorders and swap_cross_trigger_hisorders */
-export interface FuturesTriggerHisOrders {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  orders: FuturesTriggerOrderHisOrder[];
-}
+/** Trigger history orders response from swap_trigger_hisorders and swap_cross_trigger_hisorders */
+export type FuturesTriggerHisOrders =
+  FuturesPaginatedOrders<FuturesTriggerOrderHisOrder>;
 
 /** TP/SL order result; when only TP or only SL is set, the other is empty */
 export interface FuturesTpslOrderResult {
@@ -1495,13 +1493,9 @@ export interface FuturesTpslOpenOrder {
   business_type?: string;
 }
 
-/** TPSL open orders response data from swap_tpsl_openorders and swap_cross_tpsl_openorders */
-export interface FuturesTpslOpenOrders {
-  total_page: number;
-  total_size: number;
-  current_page: number;
-  orders: FuturesTpslOpenOrder[];
-}
+/** TPSL open orders response from swap_tpsl_openorders and swap_cross_tpsl_openorders */
+export type FuturesTpslOpenOrders =
+  FuturesPaginatedOrders<FuturesTpslOpenOrder>;
 
 /** TPSL history order item from swap_tpsl_hisorders and swap_cross_tpsl_hisorders */
 export interface FuturesTpslHisOrder {
@@ -1537,13 +1531,8 @@ export interface FuturesTpslHisOrder {
   business_type?: string;
 }
 
-/** TPSL history orders response data from swap_tpsl_hisorders and swap_cross_tpsl_hisorders */
-export interface FuturesTpslHisOrders {
-  total_page: number;
-  total_size: number;
-  current_page: number;
-  orders: FuturesTpslHisOrder[];
-}
+/** TPSL history orders response from swap_tpsl_hisorders and swap_cross_tpsl_hisorders */
+export type FuturesTpslHisOrders = FuturesPaginatedOrders<FuturesTpslHisOrder>;
 
 /** TPSL order info item within relation_tpsl_order response */
 export interface FuturesRelationTpslOrderTpslInfo {
@@ -1629,12 +1618,8 @@ export interface FuturesTrackOpenOrder {
 }
 
 /** Trailing open orders response data from swap_track_openorders and swap_cross_track_openorders */
-export interface FuturesTrackOpenOrders {
-  total_page: number;
-  total_size: number;
-  current_page: number;
-  orders: FuturesTrackOpenOrder[];
-}
+export type FuturesTrackOpenOrders =
+  FuturesPaginatedOrders<FuturesTrackOpenOrder>;
 
 /** Trailing order history item from swap_track_hisorders and swap_cross_track_hisorders */
 export interface FuturesTrackHisOrder {
@@ -1672,13 +1657,9 @@ export interface FuturesTrackHisOrder {
   business_type?: string;
 }
 
-/** Trailing history orders response data from swap_track_hisorders and swap_cross_track_hisorders */
-export interface FuturesTrackHisOrders {
-  total_page: number;
-  total_size: number;
-  current_page: number;
-  orders: FuturesTrackHisOrder[];
-}
+/** Trailing history orders response from swap_track_hisorders and swap_cross_track_hisorders */
+export type FuturesTrackHisOrders =
+  FuturesPaginatedOrders<FuturesTrackHisOrder>;
 
 /** Cross swap item within unified_account_info */
 export interface FuturesUnifiedAccountCrossSwap {
@@ -2711,16 +2692,6 @@ export interface FuturesCmPerpCancelAfter {
   trigger_time: number;
 }
 
-/** Submit order response from submitCmPerpOrder */
-export interface FuturesCmPerpSubmitOrder {
-  order_id: number | string;
-  order_id_str: string;
-  client_order_id?: number;
-}
-
-/** Lightning close response from submitCmPerpLightningClose. Same structure as FuturesCmPerpSubmitOrder. */
-export type FuturesCmPerpLightningClose = FuturesCmPerpSubmitOrder;
-
 /** Trigger order response from submitCmPerpTriggerOrder */
 export interface FuturesCmPerpTriggerOrder {
   order_id: number | string;
@@ -2748,12 +2719,8 @@ export interface FuturesCmPerpTriggerOpenOrder {
 }
 
 /** Trigger open orders response from getCmPerpTriggerOpenOrders */
-export interface FuturesCmPerpTriggerOpenOrders {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  orders: FuturesCmPerpTriggerOpenOrder[];
-}
+export type FuturesCmPerpTriggerOpenOrders =
+  FuturesPaginatedOrders<FuturesCmPerpTriggerOpenOrder>;
 
 /** Trigger history order item from getCmPerpTriggerHisOrders */
 export interface FuturesCmPerpTriggerHisOrder {
@@ -2784,12 +2751,8 @@ export interface FuturesCmPerpTriggerHisOrder {
 }
 
 /** Trigger history orders response from getCmPerpTriggerHisOrders */
-export interface FuturesCmPerpTriggerHisOrders {
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  orders: FuturesCmPerpTriggerHisOrder[];
-}
+export type FuturesCmPerpTriggerHisOrders =
+  FuturesPaginatedOrders<FuturesCmPerpTriggerHisOrder>;
 
 /** TPSL order result from submitCmPerpTpslOrder. tp_order or sl_order empty when only the other is set. */
 export interface FuturesCmPerpTpslOrderResult {
@@ -2826,12 +2789,8 @@ export interface FuturesCmPerpTpslOpenOrder {
 }
 
 /** TPSL open orders response from getCmPerpTpslOpenOrders */
-export interface FuturesCmPerpTpslOpenOrders {
-  total_page: number;
-  total_size: number;
-  current_page: number;
-  orders: FuturesCmPerpTpslOpenOrder[];
-}
+export type FuturesCmPerpTpslOpenOrders =
+  FuturesPaginatedOrders<FuturesCmPerpTpslOpenOrder>;
 
 /** TPSL history order item from getCmPerpTpslHisOrders */
 export interface FuturesCmPerpTpslHisOrder {
@@ -2862,12 +2821,8 @@ export interface FuturesCmPerpTpslHisOrder {
 }
 
 /** TPSL history orders response from getCmPerpTpslHisOrders */
-export interface FuturesCmPerpTpslHisOrders {
-  total_page: number;
-  total_size: number;
-  current_page: number;
-  orders: FuturesCmPerpTpslHisOrder[];
-}
+export type FuturesCmPerpTpslHisOrders =
+  FuturesPaginatedOrders<FuturesCmPerpTpslHisOrder>;
 
 /** TPSL order info item from getCmPerpRelationTpslOrder tpsl_order_info[] */
 export interface FuturesCmPerpRelationTpslOrderTpslInfo {
@@ -2918,12 +2873,8 @@ export interface FuturesCmPerpTrailingOpenOrder {
 }
 
 /** Trailing open orders response from getCmPerpTrailingOpenOrders */
-export interface FuturesCmPerpTrailingOpenOrders {
-  total_page: number;
-  total_size: number;
-  current_page: number;
-  orders: FuturesCmPerpTrailingOpenOrder[];
-}
+export type FuturesCmPerpTrailingOpenOrders =
+  FuturesPaginatedOrders<FuturesCmPerpTrailingOpenOrder>;
 
 /** Trailing history order item from getCmPerpTrailingHisOrders */
 export interface FuturesCmPerpTrailingHisOrder {
@@ -2955,12 +2906,8 @@ export interface FuturesCmPerpTrailingHisOrder {
 }
 
 /** Trailing history orders response from getCmPerpTrailingHisOrders */
-export interface FuturesCmPerpTrailingHisOrders {
-  total_page: number;
-  total_size: number;
-  current_page: number;
-  orders: FuturesCmPerpTrailingHisOrder[];
-}
+export type FuturesCmPerpTrailingHisOrders =
+  FuturesPaginatedOrders<FuturesCmPerpTrailingHisOrder>;
 
 /** Relation TPSL order from getCmPerpRelationTpslOrder */
 export interface FuturesCmPerpRelationTpslOrder {
@@ -2990,132 +2937,10 @@ export interface FuturesCmPerpRelationTpslOrder {
   tpsl_order_info: FuturesCmPerpRelationTpslOrderTpslInfo[];
 }
 
-/** Batch order error item from submitCmPerpBatchOrder */
-export interface FuturesCmPerpBatchOrderError {
-  index: number;
-  err_code: number;
-  err_msg: string;
-}
-
-/** Batch order success item from submitCmPerpBatchOrder */
-export interface FuturesCmPerpBatchOrderSuccess {
-  index: number;
-  order_id: number | string;
-  order_id_str: string;
-  client_order_id?: number;
-}
-
-/** Batch order response from submitCmPerpBatchOrder */
-export interface FuturesCmPerpBatchOrder {
-  errors: FuturesCmPerpBatchOrderError[];
-  success: FuturesCmPerpBatchOrderSuccess[];
-}
-
-/** Cancel order error from cancelCmPerpOrder / cancelCmPerpAllOrders */
-export interface FuturesCmPerpCancelOrderError {
-  order_id: string;
-  err_code: number;
-  err_msg: string;
-}
-
-/** Cancel order response from cancelCmPerpOrder / cancelCmPerpAllOrders */
-export interface FuturesCmPerpCancelOrder {
-  errors: FuturesCmPerpCancelOrderError[];
-  successes: string;
-}
-
 /** Update leverage response from updateCmPerpLeverage */
 export interface FuturesCmPerpUpdateLeverage {
   contract_code: string;
   lever_rate: number;
-}
-
-/** Order info item from getCmPerpOrderInfo */
-export interface FuturesCmPerpOrderInfo {
-  symbol: string;
-  contract_code: string;
-  volume: number;
-  price: number;
-  order_price_type: string;
-  order_type: number;
-  direction: string;
-  offset: string;
-  lever_rate: number;
-  order_id: number | string;
-  order_id_str: string;
-  client_order_id: number | string | null;
-  created_at: number;
-  canceled_at: number;
-  trade_volume: number;
-  trade_turnover: number;
-  fee: number;
-  trade_avg_price: number | null;
-  margin_frozen: number;
-  profit: number;
-  status: number;
-  order_source: string;
-  fee_asset: string;
-  liquidation_type: string;
-  is_tpsl: number;
-  real_profit: number;
-  canceled_source?: string;
-  self_match_prevent?: number;
-}
-
-/** Order detail trade from getCmPerpOrderDetail trades[] */
-export interface FuturesCmPerpOrderDetailTrade {
-  id: string;
-  trade_id: number | string;
-  trade_price: number;
-  trade_volume: number;
-  trade_turnover: number;
-  trade_fee: number;
-  role: string;
-  created_at: number;
-  profit: number;
-  real_profit: number;
-  fee_asset?: string;
-  canceled_source?: string;
-  self_match_prevent?: number;
-}
-
-/** Order detail from getCmPerpOrderDetail */
-export interface FuturesCmPerpOrderDetail {
-  symbol: string;
-  contract_code: string;
-  lever_rate: number;
-  direction: string;
-  offset: string;
-  volume: number;
-  price: number;
-  created_at: number;
-  canceled_at: number;
-  order_source: string;
-  order_price_type: string;
-  margin_frozen: number;
-  profit: number;
-  order_id: number | string;
-  order_id_str: string;
-  client_order_id: number | string | null;
-  order_type: number | string;
-  status: number;
-  trade_volume: number;
-  trade_turnover: number;
-  trade_avg_price: number;
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  instrument_price: number;
-  final_interest: number;
-  adjust_value: number;
-  fee_asset: string;
-  fee: number;
-  liquidation_type: string;
-  is_tpsl: number;
-  real_profit: number;
-  trades: FuturesCmPerpOrderDetailTrade[];
-  canceled_source?: string;
-  self_match_prevent?: number;
 }
 
 /** Open order item from getCmPerpOpenOrders */
@@ -3152,69 +2977,11 @@ export interface FuturesCmPerpOpenOrder {
 }
 
 /** Open orders response from getCmPerpOpenOrders */
-export interface FuturesCmPerpOpenOrders {
-  orders: FuturesCmPerpOpenOrder[];
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  canceled_source?: string;
-  self_match_prevent?: number;
-}
-
-/** History order item from getCmPerpHistoryOrders / getCmPerpHistoryOrdersExact */
-export interface FuturesCmPerpHistoryOrder {
-  query_id: number;
-  order_id: number | string;
-  order_id_str: string;
-  symbol: string;
-  contract_code: string;
-  lever_rate: number;
-  direction: string;
-  offset: string;
-  volume: number;
-  price: number;
-  create_date: number;
-  update_time: number;
-  order_source: string;
-  order_price_type: string | number;
-  order_type: number;
-  margin_frozen: number;
-  profit: number;
-  trade_volume: number;
-  trade_turnover: number;
-  fee: number;
-  trade_avg_price: number;
-  status: number;
-  fee_asset: string;
-  liquidation_type: string;
-  is_tpsl: number;
-  real_profit: number;
-  canceled_source?: string;
-  self_match_prevent?: number;
-}
-
-/** Fill item from getCmPerpFills / getCmPerpFillsExact */
-export interface FuturesCmPerpFill {
-  query_id: number;
-  id: string;
-  match_id: number | string;
-  order_id: number | string;
-  order_id_str: string;
-  symbol: string;
-  contract_code: string;
-  direction: string;
-  offset: string;
-  trade_volume: number;
-  trade_price: number;
-  trade_turnover: number;
-  create_date: number;
-  offset_profitloss: number;
-  trade_fee: number;
-  role: string;
-  real_profit: number;
-  fee_asset: string;
-  order_source: string;
-}
+export type FuturesCmPerpOpenOrders =
+  FuturesPaginatedOrders<FuturesCmPerpOpenOrder> & {
+    canceled_source?: string;
+    self_match_prevent?: number;
+  };
 
 /** Item from GET /swap-api/v1/swap_query_elements data[] */
 export interface FuturesCmPerpContractElements {
@@ -3590,93 +3357,6 @@ export interface FuturesCmDeliverySwitchLeverRate {
   lever_rate: number;
 }
 
-/** Order info item from POST /api/v1/contract_order_info data[] */
-export interface FuturesCmDeliveryOrderInfo {
-  symbol: string;
-  contract_code: string;
-  contract_type: string;
-  volume: number;
-  price: number;
-  order_price_type: string;
-  order_type: number;
-  direction: string;
-  offset: string;
-  lever_rate: number;
-  order_id: number | string;
-  order_id_str: string;
-  client_order_id: number | string | null;
-  created_at: number;
-  trade_volume: number;
-  trade_turnover: number;
-  fee: number;
-  trade_avg_price: number;
-  margin_frozen: number;
-  profit: number;
-  status: number;
-  order_source: string;
-  fee_asset: string;
-  canceled_at: number;
-  liquidation_type: string;
-  is_tpsl: number;
-  real_profit: number;
-  canceled_source?: string;
-  self_match_prevent?: number;
-}
-
-/** Order detail trade item from POST /api/v1/contract_order_detail data.trades[] */
-export interface FuturesCmDeliveryOrderDetailTrade {
-  id: string;
-  trade_id: number | string;
-  trade_price: number;
-  trade_volume: number;
-  trade_turnover: number;
-  trade_fee: number;
-  role: string;
-  created_at: number;
-  profit: number;
-  real_profit: number;
-}
-
-/** Order detail from POST /api/v1/contract_order_detail */
-export interface FuturesCmDeliveryOrderDetail {
-  symbol: string;
-  contract_code: string;
-  contract_type: string;
-  lever_rate: number;
-  direction: string;
-  offset: string;
-  volume: number;
-  price: number;
-  created_at: number;
-  canceled_at: number;
-  order_source: string;
-  order_price_type: string;
-  margin_frozen: number;
-  profit: number;
-  order_id: number | string;
-  order_id_str: string;
-  client_order_id: number | string | null;
-  order_type: number | string;
-  status: number;
-  trade_volume: number;
-  trade_turnover: number;
-  trade_avg_price: number;
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  instrument_price: number;
-  final_interest: number;
-  adjust_value: number;
-  fee_asset: string;
-  fee: number;
-  liquidation_type: string;
-  is_tpsl: number;
-  real_profit: number;
-  trades: FuturesCmDeliveryOrderDetailTrade[];
-  canceled_source?: string;
-  self_match_prevent?: number;
-}
-
 /** Open order item from POST /api/v1/contract_openorders data.orders[] */
 export interface FuturesCmDeliveryOpenOrder {
   symbol: string;
@@ -3710,14 +3390,11 @@ export interface FuturesCmDeliveryOpenOrder {
 }
 
 /** Response from POST /api/v1/contract_openorders */
-export interface FuturesCmDeliveryOpenOrders {
-  orders: FuturesCmDeliveryOpenOrder[];
-  total_page: number;
-  current_page: number;
-  total_size: number;
-  self_match_prevent?: number;
-  canceled_source?: string;
-}
+export type FuturesCmDeliveryOpenOrders =
+  FuturesPaginatedOrders<FuturesCmDeliveryOpenOrder> & {
+    self_match_prevent?: number;
+    canceled_source?: string;
+  };
 
 /** Trigger open order item from POST /api/v1/contract_trigger_openorders data.orders[] */
 export interface FuturesCmDeliveryTriggerOpenOrder {
@@ -3741,12 +3418,8 @@ export interface FuturesCmDeliveryTriggerOpenOrder {
 }
 
 /** Response from POST /api/v1/contract_trigger_openorders */
-export interface FuturesCmDeliveryTriggerOpenOrders {
-  orders: FuturesCmDeliveryTriggerOpenOrder[];
-  total_page: number;
-  current_page: number;
-  total_size: number;
-}
+export type FuturesCmDeliveryTriggerOpenOrders =
+  FuturesPaginatedOrders<FuturesCmDeliveryTriggerOpenOrder>;
 
 /** Trigger history order item from POST /api/v1/contract_trigger_hisorders data.orders[] */
 export interface FuturesCmDeliveryTriggerHistoryOrder {
@@ -3778,12 +3451,8 @@ export interface FuturesCmDeliveryTriggerHistoryOrder {
 }
 
 /** Response from POST /api/v1/contract_trigger_hisorders */
-export interface FuturesCmDeliveryTriggerHistoryOrders {
-  orders: FuturesCmDeliveryTriggerHistoryOrder[];
-  total_page: number;
-  current_page: number;
-  total_size: number;
-}
+export type FuturesCmDeliveryTriggerHistoryOrders =
+  FuturesPaginatedOrders<FuturesCmDeliveryTriggerHistoryOrder>;
 
 /** TPSL order ids from POST /api/v1/contract_tpsl_order */
 export interface FuturesCmDeliveryTpslOrderIds {
@@ -3821,12 +3490,8 @@ export interface FuturesCmDeliveryTpslOpenOrder {
 }
 
 /** Response from POST /api/v1/contract_tpsl_openorders */
-export interface FuturesCmDeliveryTpslOpenOrders {
-  orders: FuturesCmDeliveryTpslOpenOrder[];
-  total_page: number;
-  current_page: number;
-  total_size: number;
-}
+export type FuturesCmDeliveryTpslOpenOrders =
+  FuturesPaginatedOrders<FuturesCmDeliveryTpslOpenOrder>;
 
 /** TPSL history order item from POST /api/v1/contract_tpsl_hisorders data.orders[] */
 export interface FuturesCmDeliveryTpslHistoryOrder {
@@ -3858,12 +3523,8 @@ export interface FuturesCmDeliveryTpslHistoryOrder {
 }
 
 /** Response from POST /api/v1/contract_tpsl_hisorders */
-export interface FuturesCmDeliveryTpslHistoryOrders {
-  orders: FuturesCmDeliveryTpslHistoryOrder[];
-  total_page: number;
-  current_page: number;
-  total_size: number;
-}
+export type FuturesCmDeliveryTpslHistoryOrders =
+  FuturesPaginatedOrders<FuturesCmDeliveryTpslHistoryOrder>;
 
 /** TPSL order info item from contract_relation_tpsl_order data.tpsl_order_info[] */
 export interface FuturesCmDeliveryRelationTpslOrderInfo {
@@ -3909,12 +3570,8 @@ export interface FuturesCmDeliveryTrailingOpenOrder {
 }
 
 /** Response from POST /api/v1/contract_track_openorders */
-export interface FuturesCmDeliveryTrailingOpenOrders {
-  orders: FuturesCmDeliveryTrailingOpenOrder[];
-  total_page: number;
-  current_page: number;
-  total_size: number;
-}
+export type FuturesCmDeliveryTrailingOpenOrders =
+  FuturesPaginatedOrders<FuturesCmDeliveryTrailingOpenOrder>;
 
 /** Trailing history order item from POST /api/v1/contract_track_hisorders data.orders[] */
 export interface FuturesCmDeliveryTrailingHistoryOrder {
@@ -3947,12 +3604,8 @@ export interface FuturesCmDeliveryTrailingHistoryOrder {
 }
 
 /** Response from POST /api/v1/contract_track_hisorders */
-export interface FuturesCmDeliveryTrailingHistoryOrders {
-  orders: FuturesCmDeliveryTrailingHistoryOrder[];
-  total_page: number;
-  current_page: number;
-  total_size: number;
-}
+export type FuturesCmDeliveryTrailingHistoryOrders =
+  FuturesPaginatedOrders<FuturesCmDeliveryTrailingHistoryOrder>;
 
 /** Response from POST /api/v1/contract_relation_tpsl_order */
 export interface FuturesCmDeliveryRelationTpslOrder {
@@ -3981,63 +3634,6 @@ export interface FuturesCmDeliveryRelationTpslOrder {
   fee_asset: string;
   canceled_at: number;
   tpsl_order_info: FuturesCmDeliveryRelationTpslOrderInfo[];
-}
-
-/** Match result item from POST /api/v3/contract_matchresults and contract_matchresults_exact data[] */
-export interface FuturesCmDeliveryMatchResult {
-  query_id: number;
-  id: string;
-  match_id: number;
-  order_id: number | string;
-  order_id_str: string;
-  symbol: string;
-  contract_type: string;
-  contract_code: string;
-  direction: string;
-  offset: string;
-  trade_volume: number;
-  trade_price: number;
-  trade_turnover: number;
-  create_date: number;
-  offset_profitloss: number;
-  trade_fee: number;
-  role: string;
-  real_profit: number;
-  fee_asset: string;
-  order_source: string;
-}
-
-/** History order item from POST /api/v3/contract_hisorders and contract_hisorders_exact data[] */
-export interface FuturesCmDeliveryHistoryOrder {
-  query_id: number;
-  order_id: number | string;
-  order_id_str: string;
-  symbol: string;
-  contract_code: string;
-  contract_type: string;
-  lever_rate: number;
-  direction: string;
-  offset: string;
-  volume: number;
-  price: number;
-  create_date: number;
-  update_time: number;
-  order_source: string;
-  order_price_type: number | string;
-  order_type: number;
-  margin_frozen: number;
-  profit: number;
-  trade_volume: number;
-  trade_turnover: number;
-  fee: number;
-  trade_avg_price: number;
-  status: number;
-  fee_asset: string;
-  liquidation_type: string;
-  is_tpsl: number | string;
-  real_profit: number;
-  canceled_source?: string;
-  self_match_prevent?: number;
 }
 
 /** Fee from POST /api/v1/contract_fee */

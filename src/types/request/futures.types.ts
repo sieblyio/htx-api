@@ -737,8 +737,8 @@ export interface FuturesGetCrossHistoryOrdersReq {
   from_id?: number;
 }
 
-/** Req for POST /linear-swap-api/v3/swap_matchresults. Isolated. History match results. One of contract or pair required. */
-export interface FuturesGetMatchResultsReq {
+/** Req for POST /linear-swap-api/v3/swap_matchresults. getFills. Isolated. One of contract or pair required. */
+export interface FuturesGetFillsReq {
   /** Contract code (e.g. BTC-USDT) */
   contract?: string;
   /** Pair (e.g. BTC-USDT) */
@@ -755,8 +755,8 @@ export interface FuturesGetMatchResultsReq {
   from_id?: number;
 }
 
-/** Req for POST /linear-swap-api/v3/swap_cross_matchresults. Cross. One of contract or pair required. */
-export interface FuturesGetCrossMatchResultsReq {
+/** Req for POST /linear-swap-api/v3/swap_cross_matchresults. getCrossFills. Cross. One of contract or pair required. */
+export interface FuturesGetCrossFillsReq {
   /** Contract code. swap: BTC-USDT, future: BTC-USDT-210625 */
   contract?: string;
   /** Pair (e.g. BTC-USDT) */
@@ -773,8 +773,8 @@ export interface FuturesGetCrossMatchResultsReq {
   from_id?: number;
 }
 
-/** Req for POST /linear-swap-api/v3/swap_matchresults_exact. Isolated. No pair param. */
-export interface FuturesGetMatchResultsExactReq {
+/** Req for POST /linear-swap-api/v3/swap_matchresults_exact. getFillsExact. Isolated. No pair param. */
+export interface FuturesGetFillsExactReq {
   /** Contract code (e.g. BTC-USDT). Required */
   contract: string;
   /** 0: All, 1: Open long, 2: Open short, 3: Close short, 4: Close long, 5: Liquidate long, 6: Liquidate short, 17: buy(one-way), 18: sell(one-way) */
@@ -789,8 +789,8 @@ export interface FuturesGetMatchResultsExactReq {
   from_id?: number;
 }
 
-/** Req for POST /linear-swap-api/v3/swap_cross_matchresults_exact. Cross. When both filled, contract preferred. */
-export interface FuturesGetCrossMatchResultsExactReq {
+/** Req for POST /linear-swap-api/v3/swap_cross_matchresults_exact. getCrossFillsExact. Cross. When both filled, contract preferred. */
+export interface FuturesGetCrossFillsExactReq {
   /** Contract code. swap: BTC-USDT, future: BTC-USDT-210625 */
   contract: string;
   /** Pair (e.g. BTC-USDT) */

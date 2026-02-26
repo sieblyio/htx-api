@@ -119,11 +119,11 @@ import type {
   FuturesGetContractPriceLimitReq,
   FuturesGetCrossAdjustFactorReq,
   FuturesGetCrossAvailableLeverageReq,
+  FuturesGetCrossFillsExactReq,
+  FuturesGetCrossFillsReq,
   FuturesGetCrossHistoryOrdersExactReq,
   FuturesGetCrossHistoryOrdersReq,
   FuturesGetCrossLeverageLimitsReq,
-  FuturesGetCrossMatchResultsExactReq,
-  FuturesGetCrossMatchResultsReq,
   FuturesGetCrossOpenOrdersReq,
   FuturesGetCrossOrderDetailReq,
   FuturesGetCrossOrderInfoReq,
@@ -143,6 +143,8 @@ import type {
   FuturesGetCrossTriggerOrderHistoryReq,
   FuturesGetEstimatedSettlementPriceReq,
   FuturesGetFeeReq,
+  FuturesGetFillsExactReq,
+  FuturesGetFillsReq,
   FuturesGetFinancialRecordsExactReq,
   FuturesGetFinancialRecordsReq,
   FuturesGetFundingRateKlinesReq,
@@ -155,8 +157,6 @@ import type {
   FuturesGetLiquidationOrdersReq,
   FuturesGetMarkKlinesReq,
   FuturesGetMasterSubTransfersReq,
-  FuturesGetMatchResultsExactReq,
-  FuturesGetMatchResultsReq,
   FuturesGetOpenInterestReq,
   FuturesGetOpenOrdersReq,
   FuturesGetOrderDetailReq,
@@ -234,15 +234,11 @@ import type {
   FuturesCmDeliveryEstimatedSettlementPrice,
   FuturesCmDeliveryFee,
   FuturesCmDeliveryFinancialRecord,
-  FuturesCmDeliveryHistoryOrder,
   FuturesCmDeliveryLadderMargin,
   FuturesCmDeliveryLeverageRate,
   FuturesCmDeliveryLiquidationOrder,
-  FuturesCmDeliveryMatchResult,
   FuturesCmDeliveryOpenInterest,
   FuturesCmDeliveryOpenOrders,
-  FuturesCmDeliveryOrderDetail,
-  FuturesCmDeliveryOrderInfo,
   FuturesCmDeliveryOrderLimit,
   FuturesCmDeliveryPositionInfo,
   FuturesCmDeliveryPositionLimit,
@@ -268,25 +264,18 @@ import type {
   FuturesCmPerpAdjustFactor,
   FuturesCmPerpApiStatus,
   FuturesCmPerpAvailableLeverage,
-  FuturesCmPerpBatchOrder,
   FuturesCmPerpCancelAfter,
-  FuturesCmPerpCancelOrder,
   FuturesCmPerpContractElements,
   FuturesCmPerpContractInfo,
   FuturesCmPerpEstimatedSettlementPrice,
   FuturesCmPerpFee,
-  FuturesCmPerpFill,
   FuturesCmPerpFinancialRecord,
   FuturesCmPerpFundingRate,
   FuturesCmPerpHistoricalFundingRatePage,
-  FuturesCmPerpHistoryOrder,
-  FuturesCmPerpLightningClose,
   FuturesCmPerpLiquidationOrder,
   FuturesCmPerpOpenInterest,
   FuturesCmPerpOpenInterestCurrent,
   FuturesCmPerpOpenOrders,
-  FuturesCmPerpOrderDetail,
-  FuturesCmPerpOrderInfo,
   FuturesCmPerpOrderLimit,
   FuturesCmPerpPositionInfo,
   FuturesCmPerpPositionLimit,
@@ -296,7 +285,6 @@ import type {
   FuturesCmPerpSubAccountAssets,
   FuturesCmPerpSubAccounts,
   FuturesCmPerpSubAccountsAssets,
-  FuturesCmPerpSubmitOrder,
   FuturesCmPerpSubPositions,
   FuturesCmPerpSystemStatus,
   FuturesCmPerpTieredMargin,
@@ -1693,12 +1681,12 @@ export class FuturesClient extends BaseRestClient {
   }
 
   /**
-   * Acquire History Match Results (Isolated)
+   * Acquire History Fills (Isolated)
    *
    * Matched trades history. One of contract or pair required. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
    */
-  getMatchResults(
-    params: FuturesGetMatchResultsReq,
+  getFills(
+    params: FuturesGetFillsReq,
   ): Promise<FuturesAPISuccessResponse<FuturesMatchResult[]>> {
     return this.postPrivate('/linear-swap-api/v3/swap_matchresults', {
       body: params,
@@ -1706,12 +1694,12 @@ export class FuturesClient extends BaseRestClient {
   }
 
   /**
-   * Get History Match Results (Cross)
+   * Get History Fills (Cross)
    *
    * Matched trades history. One of contract or pair required. Cross margin only. Read permission. Rate limit: 144/3s per UID.
    */
-  getCrossMatchResults(
-    params: FuturesGetCrossMatchResultsReq,
+  getCrossFills(
+    params: FuturesGetCrossFillsReq,
   ): Promise<FuturesAPISuccessResponse<FuturesMatchResult[]>> {
     return this.postPrivate('/linear-swap-api/v3/swap_cross_matchresults', {
       body: params,
@@ -1719,12 +1707,12 @@ export class FuturesClient extends BaseRestClient {
   }
 
   /**
-   * Get History Match Results via Multiple Fields (Isolated)
+   * Get History Fills via Multiple Fields (Isolated)
    *
    * Matched trades history. Isolated margin only. Read permission. Rate limit: 144/3s per UID.
    */
-  getMatchResultsExact(
-    params: FuturesGetMatchResultsExactReq,
+  getFillsExact(
+    params: FuturesGetFillsExactReq,
   ): Promise<FuturesAPISuccessResponse<FuturesMatchResult[]>> {
     return this.postPrivate('/linear-swap-api/v3/swap_matchresults_exact', {
       body: params,
@@ -1732,12 +1720,12 @@ export class FuturesClient extends BaseRestClient {
   }
 
   /**
-   * Get History Match Results via Multiple Fields (Cross)
+   * Get History Fills via Multiple Fields (Cross)
    *
    * Matched trades history. Cross margin only. Read permission. Rate limit: 144/3s per UID.
    */
-  getCrossMatchResultsExact(
-    params: FuturesGetCrossMatchResultsExactReq,
+  getCrossFillsExact(
+    params: FuturesGetCrossFillsExactReq,
   ): Promise<FuturesAPISuccessResponse<FuturesMatchResult[]>> {
     return this.postPrivate(
       '/linear-swap-api/v3/swap_cross_matchresults_exact',
@@ -3383,7 +3371,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmOrderInfo(
     params: FuturesCmDeliveryGetOrderInfoReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryOrderInfo[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderInfo[]>> {
     return this.postPrivate('/api/v1/contract_order_info', {
       body: params,
     });
@@ -3396,7 +3384,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmOrderDetail(
     params: FuturesCmDeliveryGetOrderDetailReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryOrderDetail>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderDetail>> {
     return this.postPrivate('/api/v1/contract_order_detail', {
       body: params,
     });
@@ -3422,7 +3410,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmHistoryOrders(
     params: FuturesCmDeliveryGetHistoryOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryHistoryOrder[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrder[]>> {
     return this.postPrivate('/api/v3/contract_hisorders', {
       body: params,
     });
@@ -3435,7 +3423,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmHistoryOrdersExact(
     params: FuturesCmDeliveryGetHistoryOrdersExactReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryHistoryOrder[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrder[]>> {
     return this.postPrivate('/api/v3/contract_hisorders_exact', {
       body: params,
     });
@@ -3448,7 +3436,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmFills(
     params: FuturesCmDeliveryGetFillsReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryMatchResult[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMatchResult[]>> {
     return this.postPrivate('/api/v3/contract_matchresults', {
       body: params,
     });
@@ -3461,18 +3449,18 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmFillsExact(
     params: FuturesCmDeliveryGetFillsExactReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliveryMatchResult[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMatchResult[]>> {
     return this.postPrivate('/api/v3/contract_matchresults_exact', {
       body: params,
     });
   }
 
   /**
-   * Place Flash Close Order (Future Trade)
+   * Place Lightning Close Order (Future Trade)
    *
    * Lightning close position. One of contract_code or (symbol+contract_type). volume, direction required. Trade permission. Rate limit: 36/3s per UID.
    */
-  submitCmFlashCloseOrder(
+  submitCmLightningCloseOrder(
     params: FuturesCmDeliverySubmitFlashCloseOrderReq,
   ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
     return this.postPrivate('/api/v1/lightning_close_position', {
@@ -4348,7 +4336,7 @@ export class FuturesClient extends BaseRestClient {
    */
   submitCmPerpOrder(
     params: FuturesCmPerpSubmitOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpSubmitOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
     return this.postPrivate('/swap-api/v1/swap_order', {
       body: params,
     });
@@ -4361,7 +4349,7 @@ export class FuturesClient extends BaseRestClient {
    */
   submitCmPerpBatchOrder(
     params: FuturesCmPerpSubmitBatchOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpBatchOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesBatchOrder>> {
     return this.postPrivate('/swap-api/v1/swap_batchorder', {
       body: params,
     });
@@ -4374,7 +4362,7 @@ export class FuturesClient extends BaseRestClient {
    */
   cancelCmPerpOrder(
     params: FuturesCmPerpCancelOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/swap-api/v1/swap_cancel', {
       body: params,
     });
@@ -4387,7 +4375,7 @@ export class FuturesClient extends BaseRestClient {
    */
   cancelCmPerpAllOrders(
     params: FuturesCmPerpCancelAllOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/swap-api/v1/swap_cancelall', {
       body: params,
     });
@@ -4413,7 +4401,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpOrderInfo(
     params: FuturesCmPerpOrderInfoReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpOrderInfo[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderInfo[]>> {
     return this.postPrivate('/swap-api/v1/swap_order_info', {
       body: params,
     });
@@ -4426,7 +4414,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpOrderDetail(
     params: FuturesCmPerpOrderDetailReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpOrderDetail>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesOrderDetail>> {
     return this.postPrivate('/swap-api/v1/swap_order_detail', {
       body: params,
     });
@@ -4452,7 +4440,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpHistoryOrders(
     params: FuturesCmPerpHistoryOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpHistoryOrder[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrder[]>> {
     return this.postPrivate('/swap-api/v3/swap_hisorders', {
       body: params,
     });
@@ -4465,7 +4453,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpHistoryOrdersExact(
     params: FuturesCmPerpHistoryOrdersExactReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpHistoryOrder[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesHistoryOrder[]>> {
     return this.postPrivate('/swap-api/v3/swap_hisorders_exact', {
       body: params,
     });
@@ -4478,7 +4466,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpFills(
     params: FuturesCmPerpFillsReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpFill[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMatchResult[]>> {
     return this.postPrivate('/swap-api/v3/swap_matchresults', {
       body: params,
     });
@@ -4491,20 +4479,20 @@ export class FuturesClient extends BaseRestClient {
    */
   getCmPerpFillsExact(
     params: FuturesCmPerpFillsExactReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpFill[]>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesMatchResult[]>> {
     return this.postPrivate('/swap-api/v3/swap_matchresults_exact', {
       body: params,
     });
   }
 
   /**
-   * Lightning Close (CMPerp)
+   * Lightning Close Order (CMPerp)
    *
    * Close position at rival price + optimal 30 levels. Unfilled becomes limit. Default order_price_type: lightning. Trade permission.
    */
-  submitCmPerpLightningClose(
+  submitCmPerpLightningCloseOrder(
     params: FuturesCmPerpLightningCloseReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpLightningClose>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesSubmitOrder>> {
     return this.postPrivate('/swap-api/v1/swap_lightning_close_position', {
       body: params,
     });
@@ -4536,7 +4524,7 @@ export class FuturesClient extends BaseRestClient {
    */
   cancelCmPerpTriggerOrder(
     params: FuturesCmPerpCancelTriggerOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/swap-api/v1/swap_trigger_cancel', {
       body: params,
     });
@@ -4549,7 +4537,7 @@ export class FuturesClient extends BaseRestClient {
    */
   cancelCmPerpAllTriggerOrders(
     params: FuturesCmPerpCancelAllTriggerOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/swap-api/v1/swap_trigger_cancelall', {
       body: params,
     });
@@ -4601,7 +4589,7 @@ export class FuturesClient extends BaseRestClient {
    */
   cancelCmPerpTpslOrder(
     params: FuturesCmPerpCancelTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/swap-api/v1/swap_tpsl_cancel', {
       body: params,
     });
@@ -4614,7 +4602,7 @@ export class FuturesClient extends BaseRestClient {
    */
   cancelCmPerpAllTpslOrders(
     params: FuturesCmPerpCancelAllTpslOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/swap-api/v1/swap_tpsl_cancelall', {
       body: params,
     });
@@ -4679,7 +4667,7 @@ export class FuturesClient extends BaseRestClient {
    */
   cancelCmPerpTrailingOrder(
     params: FuturesCmPerpCancelTrailingOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/swap-api/v1/swap_track_cancel', {
       body: params,
     });
@@ -4692,7 +4680,7 @@ export class FuturesClient extends BaseRestClient {
    */
   cancelCmPerpAllTrailingOrders(
     params: FuturesCmPerpCancelAllTrailingOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelOrder>> {
+  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/swap-api/v1/swap_track_cancelall', {
       body: params,
     });
