@@ -1,4 +1,177 @@
 /**
+ * Union Types (Request)
+ */
+
+/** Pagination direction */
+export type FuturesDirect = 'next' | 'prev';
+
+/** Buy or sell */
+export type FuturesDirection = 'buy' | 'sell';
+
+/** Open or close position */
+export type FuturesOffset = 'open' | 'close';
+
+/** Open, close, or both (hedge mode) */
+export type FuturesOffsetBoth = 'open' | 'close' | 'both';
+
+/** Position side (long, short, both) */
+export type FuturesPositionSide = 'long' | 'short' | 'both';
+
+/** Margin mode */
+export type FuturesMarginMode = 'cross' | 'isolated';
+
+/** Margin mode including all */
+export type FuturesMarginModeAll = 'cross' | 'isolated' | 'all';
+
+/** Business type filter */
+export type FuturesBusinessType = 'futures' | 'swap' | 'all';
+
+/** Contract type (delivery) */
+export type FuturesContractType =
+  | 'this_week'
+  | 'next_week'
+  | 'quarter'
+  | 'next_quarter';
+
+/** Kline period */
+export type FuturesKlinePeriod =
+  | '1min'
+  | '5min'
+  | '15min'
+  | '30min'
+  | '60min'
+  | '1hour'
+  | '4hour'
+  | '12hour'
+  | '1day'
+  | '1week'
+  | '1mon';
+
+/** Open interest / funding period */
+export type FuturesOpenInterestPeriod = '60min' | '4hour' | '12hour' | '1day';
+
+/** Sort field */
+export type FuturesSortBy = 'created_at' | 'update_time';
+
+/** Sort field (extended) */
+export type FuturesSortByExtended =
+  | 'create_date'
+  | 'update_time'
+  | 'created_at';
+
+/** Sort field (CmPerp) */
+export type FuturesSortByCmPerp = 'create_date' | 'update_time';
+
+/** Trigger condition */
+export type FuturesTriggerType = 'ge' | 'le';
+
+/** Basis price type */
+export type FuturesBasisPriceType =
+  | 'open'
+  | 'close'
+  | 'high'
+  | 'low'
+  | 'average';
+
+/** Transfer type */
+export type FuturesTransferType = 'master_to_sub' | 'sub_to_master';
+
+/** Margin adjust type */
+export type FuturesMarginAdjustType = 'add' | 'reduce';
+
+/** Self-match prevention */
+export type FuturesSelfMatchPrevent =
+  | 'cancel_taker'
+  | 'cancel_maker'
+  | 'cancel_both';
+
+/** Lightning order price type */
+export type FuturesLightningOrderPriceType =
+  | 'market'
+  | 'lightning_fok'
+  | 'lightning_ioc';
+
+/** Lightning order price type (CmDelivery) */
+export type FuturesLightningOrderPriceTypeCm =
+  | 'lightning'
+  | 'lightning_fok'
+  | 'lightning_ioc';
+
+/** Trigger order price type */
+export type FuturesTriggerOrderPriceType =
+  | 'limit'
+  | 'optimal_5'
+  | 'optimal_10'
+  | 'optimal_20';
+
+/** Trailing order price type */
+export type FuturesTrailingOrderPriceType =
+  | 'optimal_5'
+  | 'optimal_10'
+  | 'optimal_20'
+  | 'formula_price';
+
+/** V5 order type */
+export type FuturesV5OrderType = 'market' | 'limit' | 'post_only';
+
+/** Time in force */
+export type FuturesTimeInForce = 'fok' | 'ioc' | 'gtc';
+
+/** Trigger price type */
+export type FuturesTriggerPriceType = 'last' | 'market';
+
+/** Price match type */
+export type FuturesPriceMatch =
+  | 'opponent'
+  | 'optimal_5'
+  | 'optimal_10'
+  | 'optimal_20';
+
+/** Base order price types: limit, opponent, optimal_*, ioc, fok, *_ioc, *_fok */
+export type FuturesOrderPriceTypeBase =
+  | 'limit'
+  | 'opponent'
+  | 'optimal_5'
+  | 'optimal_10'
+  | 'optimal_20'
+  | 'ioc'
+  | 'fok'
+  | 'opponent_ioc'
+  | 'optimal_5_ioc'
+  | 'optimal_10_ioc'
+  | 'optimal_20_ioc'
+  | 'opponent_fok'
+  | 'optimal_5_fok'
+  | 'optimal_10_fok'
+  | 'optimal_20_fok';
+
+/** Order price type for swap_order and swap_cross_order. Base + market + post_only */
+export type FuturesSubmitOrderPriceType =
+  | FuturesOrderPriceTypeBase
+  | 'market'
+  | 'post_only';
+
+/** Order price type for swap_order_limit and contract_order_limit. Base + lightning variants */
+export type FuturesGetOrderLimitPriceType =
+  | FuturesOrderPriceTypeBase
+  | 'lightning'
+  | 'lightning_ioc'
+  | 'lightning_fok';
+
+/** Order price type for contract_order_limit (alias) */
+export type FuturesCmDeliveryOrderLimitPriceType =
+  FuturesGetOrderLimitPriceType;
+
+/** Order price type for contract_order and swap_order (Delivery/CMPerp). Base + post_only */
+export type FuturesCmDeliverySubmitOrderPriceType =
+  | FuturesOrderPriceTypeBase
+  | 'post_only';
+
+/** Order price type for swap_order and swap_batchorder (CMPerp) (alias) */
+export type FuturesCmPerpSubmitOrderPriceType =
+  FuturesCmDeliverySubmitOrderPriceType;
+
+/**
  * Reference Data
  */
 
@@ -25,7 +198,7 @@ export interface FuturesGetLiquidationOrdersReq {
   /** Query end time (ms). Default now. Within 90 days */
   end_time?: number;
   /** next=chronological, prev=reverse. Default prev */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Search from query_id for pagination */
   from_id?: number;
 }
@@ -53,7 +226,7 @@ export interface FuturesGetCrossTieredMarginReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** Default swap. futures, swap, all. Required for futures contract query */
-  business_type?: 'futures' | 'swap' | 'all';
+  business_type?: FuturesBusinessType;
 }
 
 export type FuturesGetEstimatedSettlementPriceReq =
@@ -69,7 +242,7 @@ export interface FuturesGetRiskReserveHistoryReq {
   /** Query end time (ms) */
   end_time?: number;
   /** next=chronological, prev=reverse. Default prev */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result depending on direct */
   from_id?: number;
   /** Items per page [1-100]. Default 10 */
@@ -81,13 +254,13 @@ export interface FuturesGetContractInfoReq {
   /** Contract code. Omit for all. swap: BTC-USDT; future: BTC-USDT-210625 */
   contract_code?: string;
   /** cross, isolated, or all. Filter by supported margin mode */
-  support_margin_mode?: 'cross' | 'isolated' | 'all';
+  support_margin_mode?: FuturesMarginModeAll;
   /** Pair (e.g. BTC-USDT) */
   pair?: string;
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** Default swap. futures, swap, all. Required for futures query */
-  business_type?: 'futures' | 'swap' | 'all';
+  business_type?: FuturesBusinessType;
 }
 
 /**
@@ -99,7 +272,7 @@ export interface FuturesGetKlinesReq {
   /** Contract code or type. swap: BTC-USDT; future: BTC-USDT-220325 or BTC-USDT-CW/NW/CQ/NQ */
   contract_code: string;
   /** 1min, 5min, 15min, 30min, 60min, 1hour, 4hour, 1day, 1mon */
-  period: string;
+  period: FuturesKlinePeriod;
   /** Items [1-2000]. Default 150. Ignored if from+to provided */
   size?: number;
   /** Start timestamp (seconds) */
@@ -117,7 +290,7 @@ export interface FuturesGetHistoricalOpenInterestReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** 60min, 4hour, 12hour, 1day */
-  period: string;
+  period: FuturesOpenInterestPeriod;
   /** Items [1-200]. Default 48 */
   size?: number;
   /** 1: cont, 2: cryptocurrency */
@@ -142,11 +315,11 @@ export interface FuturesGetBasisDataReq {
   /** Contract code or type */
   contract_code: string;
   /** 1min, 5min, 15min, 30min, 60min, 4hour, 1day, 1mon */
-  period: string;
+  period: FuturesKlinePeriod;
   /** Items [1-2000]. Default 150 */
   size: number;
   /** open, close, high, low, average. Default open */
-  basis_price_type?: 'open' | 'close' | 'high' | 'low' | 'average';
+  basis_price_type?: FuturesBasisPriceType;
 }
 
 /**
@@ -172,7 +345,7 @@ export interface FuturesGetSubPermissionsReq {
   /** End time of sub-account creation (ms) */
   end_time?: number;
   /** next=chronological, prev=reverse */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result */
   from_id?: number;
 }
@@ -182,7 +355,7 @@ export interface FuturesGetIsolatedSubAccountsReq {
   /** Contract code (e.g. BTC-USDT). Omit for all */
   contract_code?: string;
   /** next=chronological, prev=reverse. Default next */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result depending on direct */
   from_id?: number;
 }
@@ -192,7 +365,7 @@ export interface FuturesGetCrossSubAccountsReq {
   /** Margin account (e.g. USDT). Omit for all */
   margin_account?: string;
   /** next=chronological, prev=reverse. Default next */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result depending on direct */
   from_id?: number;
 }
@@ -242,7 +415,7 @@ export interface FuturesGetFinancialRecordsReq {
   /** Query end time (ms). Default now. Within 90 days */
   end_time?: number;
   /** next=chronological, prev=reverse. Default next */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result depending on direct */
   from_id?: number;
 }
@@ -259,29 +432,8 @@ export interface FuturesGetCrossAvailableLeverageReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** futures, swap, all. Required for futures. Default swap */
-  business_type?: 'futures' | 'swap' | 'all';
+  business_type?: FuturesBusinessType;
 }
-
-/** Order price type for swap_order_limit */
-export type FuturesGetOrderLimitPriceType =
-  | 'limit'
-  | 'opponent'
-  | 'lightning'
-  | 'optimal_5'
-  | 'optimal_10'
-  | 'optimal_20'
-  | 'fok'
-  | 'ioc'
-  | 'opponent_ioc'
-  | 'lightning_ioc'
-  | 'optimal_5_ioc'
-  | 'optimal_10_ioc'
-  | 'optimal_20_ioc'
-  | 'opponent_fok'
-  | 'lightning_fok'
-  | 'optimal_5_fok'
-  | 'optimal_10_fok'
-  | 'optimal_20_fok';
 
 /** Req for POST /linear-swap-api/v1/swap_order_limit. Supports cross and isolated. */
 export interface FuturesGetOrderLimitReq {
@@ -294,7 +446,7 @@ export interface FuturesGetOrderLimitReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** futures, swap, all. Required for futures. Default swap */
-  business_type?: 'futures' | 'swap' | 'all';
+  business_type?: FuturesBusinessType;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_fee. Supports cross and isolated. */
@@ -306,7 +458,7 @@ export interface FuturesGetFeeReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** futures, swap, all. Required for futures. Default swap */
-  business_type?: 'futures' | 'swap' | 'all';
+  business_type?: FuturesBusinessType;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_position_limit. Cross margin only. */
@@ -318,13 +470,13 @@ export interface FuturesGetCrossPositionLimitReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** futures, swap, all. Required for futures. Default swap */
-  business_type?: 'futures' | 'swap' | 'all';
+  business_type?: FuturesBusinessType;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_lever_position_limit. Cross margin only. */
 export interface FuturesGetCrossLeverageLimitsReq {
   /** futures, swap, all. Required for futures */
-  business_type?: 'futures' | 'swap' | 'all';
+  business_type?: FuturesBusinessType;
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** Pair (e.g. BTC-USDT) */
@@ -348,7 +500,7 @@ export interface FuturesTransferMasterSubReq {
   /** Transfer amount */
   amount: number | string;
   /** master_to_sub or sub_to_master */
-  type: 'master_to_sub' | 'sub_to_master';
+  type: FuturesTransferType;
   /** Optional client order ID [1, 9223372036854775807]. Valid 8h per transfer path */
   client_order_id?: number;
 }
@@ -381,40 +533,12 @@ export interface FuturesTransferInnerReq {
   client_order_id?: number;
 }
 
-/** Req for POST /linear-swap-api/v1/linear-cancel-after. Automatic order cancellation (Dead Man's Switch). */
-export interface FuturesSetCancelAfterReq {
-  /** 1: enable, 0: disable */
-  on_off: 0 | 1;
-  /** Countdown ms. Min 5000. Default 5000. Cancel all pending orders when timer expires. */
-  time_out?: number;
-}
-
-/** Order price type for swap_order and swap_cross_order */
-export type FuturesSubmitOrderPriceType =
-  | 'market'
-  | 'limit'
-  | 'opponent'
-  | 'post_only'
-  | 'optimal_5'
-  | 'optimal_10'
-  | 'optimal_20'
-  | 'ioc'
-  | 'fok'
-  | 'opponent_ioc'
-  | 'optimal_5_ioc'
-  | 'optimal_10_ioc'
-  | 'optimal_20_ioc'
-  | 'opponent_fok'
-  | 'optimal_5_fok'
-  | 'optimal_10_fok'
-  | 'optimal_20_fok';
-
 /** Req for POST /linear-swap-api/v1/swap_order. Isolated margin only. */
 export interface FuturesSubmitOrderReq {
   /** Contract code (e.g. BTC-USDT). Required */
   contract_code: string;
   /** buy or sell */
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   /** Order quantity */
   volume: number;
   /** Leverage rate */
@@ -422,7 +546,7 @@ export interface FuturesSubmitOrderReq {
   /** Order price type */
   order_price_type: FuturesSubmitOrderPriceType;
   /** open, close, both. Required in hedge mode */
-  offset?: 'open' | 'close' | 'both';
+  offset?: FuturesOffsetBoth;
   /** Price. Required for limit, post_only, ioc, fok */
   price?: number | string;
   /** 0: no, 1: yes */
@@ -446,7 +570,7 @@ export interface FuturesSubmitOrderReq {
   /** 0: allow self-trade, 1: prevent (default) */
   self_match_prevent?: 0 | 1;
   /** cancel_taker, cancel_maker, cancel_both */
-  self_match_prevent_new?: 'cancel_taker' | 'cancel_maker' | 'cancel_both';
+  self_match_prevent_new?: FuturesSelfMatchPrevent;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_order. Cross margin only. One of contract_code or (pair+contract_type) required. */
@@ -458,7 +582,7 @@ export interface FuturesCrossSubmitOrderReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** buy or sell */
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   /** Order quantity */
   volume: number;
   /** Leverage rate */
@@ -466,7 +590,7 @@ export interface FuturesCrossSubmitOrderReq {
   /** Order price type */
   order_price_type: FuturesSubmitOrderPriceType;
   /** open, close, both. Required in hedge mode */
-  offset?: 'open' | 'close' | 'both';
+  offset?: FuturesOffsetBoth;
   /** Price. Required for limit, post_only, ioc, fok */
   price?: number | string;
   /** 0: no, 1: yes */
@@ -488,7 +612,7 @@ export interface FuturesCrossSubmitOrderReq {
   /** 0: allow self-trade, 1: prevent (default) */
   self_match_prevent?: 0 | 1;
   /** cancel_taker, cancel_maker, cancel_both */
-  self_match_prevent_new?: 'cancel_taker' | 'cancel_maker' | 'cancel_both';
+  self_match_prevent_new?: FuturesSelfMatchPrevent;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_batchorder. Isolated. Max 10 orders. */
@@ -530,9 +654,9 @@ export interface FuturesCancelAllOrdersReq {
   /** Contract code (e.g. BTC-USDT). Required */
   contract_code: string;
   /** buy or sell. Omit for all */
-  direction?: 'buy' | 'sell';
+  direction?: FuturesDirection;
   /** open or close. Omit for all */
-  offset?: 'open' | 'close';
+  offset?: FuturesOffset;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_cancelall. Cross. One of contract_code or (pair+contract_type) required. */
@@ -544,9 +668,9 @@ export interface FuturesCancelCrossAllOrdersReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** buy or sell. Omit for all */
-  direction?: 'buy' | 'sell';
+  direction?: FuturesDirection;
   /** open or close. Omit for all */
-  offset?: 'open' | 'close';
+  offset?: FuturesOffset;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_switch_lever_rate. Cross margin only. One of contract_code or (pair+contract_type) required. */
@@ -626,7 +750,7 @@ export interface FuturesGetOpenOrdersReq {
   /** Page size. Default 20, max 50 */
   page_size?: number;
   /** created_at or update_time. Default created_at */
-  sort_by?: 'created_at' | 'update_time';
+  sort_by?: FuturesSortBy;
   /** 0: all, 1: buy long, 2: sell short, 3: buy short, 4: sell long, 17: buy(one-way), 18: sell(one-way) */
   trade_type?: 0 | 1 | 2 | 3 | 4 | 17 | 18;
 }
@@ -642,7 +766,7 @@ export interface FuturesGetCrossOpenOrdersReq {
   /** Page size. Default 20, max 50 */
   page_size?: number;
   /** created_at or update_time */
-  sort_by?: 'created_at' | 'update_time';
+  sort_by?: FuturesSortBy;
   /** 0: all, 1: buy long, 2: sell short, 3: buy short, 4: sell long, 17: buy(one-way), 18: sell(one-way) */
   trade_type?: 0 | 1 | 2 | 3 | 4 | 17 | 18;
 }
@@ -662,7 +786,7 @@ export interface FuturesGetHistoryOrdersReq {
   /** End time (ms). Default now */
   end_time?: number;
   /** next or prev. Default prev */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result */
   from_id?: number;
 }
@@ -686,7 +810,7 @@ export interface FuturesGetHistoryOrdersExactReq {
   /** End time (ms). Default now */
   end_time?: number;
   /** next or prev. Default prev */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result */
   from_id?: number;
 }
@@ -710,7 +834,7 @@ export interface FuturesGetCrossHistoryOrdersExactReq {
   /** End time (ms). Default now */
   end_time?: number;
   /** next or prev. Default prev */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result */
   from_id?: number;
 }
@@ -732,7 +856,7 @@ export interface FuturesGetCrossHistoryOrdersReq {
   /** End time (ms). Default now */
   end_time?: number;
   /** next or prev. Default prev */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result */
   from_id?: number;
 }
@@ -750,7 +874,7 @@ export interface FuturesGetFillsReq {
   /** End time (ms). Default now */
   end_time?: number;
   /** next or prev. Default prev */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result */
   from_id?: number;
 }
@@ -768,7 +892,7 @@ export interface FuturesGetCrossFillsReq {
   /** End time (ms). Default now */
   end_time?: number;
   /** next or prev. Default prev */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result */
   from_id?: number;
 }
@@ -784,7 +908,7 @@ export interface FuturesGetFillsExactReq {
   /** End time (ms). Default now */
   end_time?: number;
   /** next or prev. Default prev */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result */
   from_id?: number;
 }
@@ -802,7 +926,7 @@ export interface FuturesGetCrossFillsExactReq {
   /** End time (ms). Default now */
   end_time?: number;
   /** next or prev. Default prev */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result */
   from_id?: number;
 }
@@ -812,11 +936,11 @@ export interface FuturesSubmitLightningCloseOrderReq {
   /** Contract code (e.g. BTC-USDT). Case-insensitive */
   contract_code: string;
   /** buy: open, sell: close */
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   /** Client order ID. Unique per API, user-maintained */
   client_order_id?: number;
   /** market (default), lightning_fok, lightning_ioc */
-  order_price_type?: 'market' | 'lightning_fok' | 'lightning_ioc';
+  order_price_type?: FuturesLightningOrderPriceType;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_lightning_close_position. Cross. One of (pair+contract_type) or contract_code required. */
@@ -828,11 +952,11 @@ export interface FuturesSubmitCrossLightningCloseOrderReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** buy or sell */
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   /** Client order ID [1, 9223372036854775807] */
   client_order_id?: number;
   /** market (default), lightning_fok, lightning_ioc */
-  order_price_type?: 'market' | 'lightning_fok' | 'lightning_ioc';
+  order_price_type?: FuturesLightningOrderPriceType;
 }
 
 /** Req for GET /linear-swap-api/v1/swap_cross_trade_state. Cross margin only. */
@@ -844,7 +968,7 @@ export interface FuturesGetCrossTradeStateReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** futures, swap, all. Required for futures. Default swap */
-  business_type?: 'futures' | 'swap' | 'all';
+  business_type?: FuturesBusinessType;
 }
 
 /**
@@ -856,19 +980,19 @@ export interface FuturesSubmitTriggerOrderReq {
   /** Contract type (e.g. BTC-USDT) */
   contract_code: string;
   /** ge: Equal to or Greater than; le: Less than or Equal to */
-  trigger_type: 'ge' | 'le';
+  trigger_type: FuturesTriggerType;
   /** Trigger price */
   trigger_price: number | string;
   /** Order price (required when order_price_type is limit) */
   order_price?: number | string;
   /** limit (default), optimal_5, optimal_10, optimal_20 */
-  order_price_type?: 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  order_price_type?: FuturesTriggerOrderPriceType;
   /** Volume (number of contracts) */
   volume: number;
   /** buy or sell */
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   /** open, close, both. In hedge mode required; in one-way mode optional, must be both when filled */
-  offset?: 'open' | 'close' | 'both';
+  offset?: FuturesOffsetBoth;
   /** Leverage. Must match current position leverage when holding. High leverage = high risk */
   lever_rate?: number;
   /** 0: no, 1: yes. In hedge mode invalid; one-way: 0 when not filled. reduce_only=1 for open in one-way triggers error 1492 */
@@ -886,19 +1010,19 @@ export interface FuturesSubmitCrossTriggerOrderReq {
   /** 0: no, 1: yes. In hedge mode invalid; one-way: 0 when not filled. reduce_only=1 for open in one-way triggers error 1492 */
   reduce_only?: 0 | 1;
   /** ge: Equal to or Greater than; le: Less than or Equal to */
-  trigger_type: 'ge' | 'le';
+  trigger_type: FuturesTriggerType;
   /** Trigger price */
   trigger_price: number | string;
   /** Order price (required when order_price_type is limit) */
   order_price?: number | string;
   /** limit (default), optimal_5, optimal_10, optimal_20 */
-  order_price_type?: 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  order_price_type?: FuturesTriggerOrderPriceType;
   /** Volume (number of contracts) */
   volume: number;
   /** buy or sell */
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   /** open, close, both. In hedge mode required; in one-way mode optional, must be both when filled */
-  offset?: 'open' | 'close' | 'both';
+  offset?: FuturesOffsetBoth;
   /** Leverage. Long = short leverage. High leverage = high risk */
   lever_rate?: number;
 }
@@ -908,9 +1032,9 @@ export interface FuturesCancelAllTriggerOrdersReq {
   /** Contract code (e.g. BTC-USDT) */
   contract_code: string;
   /** Transaction direction; omit for all */
-  direction?: 'buy' | 'sell';
+  direction?: FuturesDirection;
   /** open, close; omit for all */
-  offset?: 'open' | 'close';
+  offset?: FuturesOffset;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_trigger_cancelall. [Cross] Cancel All Trigger Orders. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade. 5/s. Can fill only one of direction and offset to filter. */
@@ -922,9 +1046,9 @@ export interface FuturesCancelAllCrossTriggerOrdersReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** Transaction direction; omit for all */
-  direction?: 'buy' | 'sell';
+  direction?: FuturesDirection;
   /** open, close; omit for all */
-  offset?: 'open' | 'close';
+  offset?: FuturesOffset;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_trigger_cancel. [Cross] Cancel Trigger Order. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade. 5/s. */
@@ -980,7 +1104,7 @@ export interface FuturesGetTriggerHistoryOrdersReq {
   /** Page size. Default 20, max 50 */
   page_size?: number;
   /** created_at (default) or update_time; descending */
-  sort_by?: 'created_at' | 'update_time';
+  sort_by?: FuturesSortBy;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_tpsl_order. [Isolated] Set Take-profit and Stop-loss for existing position. Isolated margin only. At least one of tp_trigger_price and sl_trigger_price required. Trade. 5/s. */
@@ -988,7 +1112,7 @@ export interface FuturesSubmitTpslOrderReq {
   /** Contract code (e.g. BTC-USDT) */
   contract_code: string;
   /** buy or sell */
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   /** Volume (number of contracts) */
   volume: number | string;
   /** Take-profit trigger price */
@@ -1026,7 +1150,7 @@ export interface FuturesSubmitCrossTpslOrderReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** buy or sell */
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   /** Volume (number of contracts) */
   volume: number | string;
   /** Take-profit trigger price */
@@ -1055,13 +1179,7 @@ export interface FuturesSubmitCrossTpslOrderReq {
   price_protect?: boolean;
 }
 
-/** Req for POST /linear-swap-api/v1/swap_tpsl_cancel. [Isolated] Cancel a Take-profit and Stop-loss Order. Isolated margin only. Trade. 5/s. */
-export interface FuturesCancelTpslOrderReq {
-  /** Contract code (e.g. BTC-USDT) */
-  contract_code: string;
-  /** Order ID(s). Comma-separated, max 10 */
-  order_id: string;
-}
+/** Req for POST /linear-swap-api/v1/swap_tpsl_cancel. [Isolated] Cancel a Take-profit and Stop-loss Order. Isolated margin only. Trade. 5/s. Inlined in cancelTpslOrder - params: { contract_code, order_id } */
 
 /** Req for POST /linear-swap-api/v1/swap_cross_tpsl_cancel. [Cross] Cancel a Take-profit and Stop-loss Order. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade. 5/s. */
 export interface FuturesCancelCrossTpslOrderReq {
@@ -1075,13 +1193,7 @@ export interface FuturesCancelCrossTpslOrderReq {
   order_id: string;
 }
 
-/** Req for POST /linear-swap-api/v1/swap_tpsl_cancelall. [Isolated] Cancel all Take-profit and Stop-loss Orders. Isolated margin only. Trade. 5/s. */
-export interface FuturesCancelAllTpslOrdersReq {
-  /** Contract code (e.g. BTC-USDT) */
-  contract_code: string;
-  /** buy or sell; omit for all */
-  direction?: 'buy' | 'sell';
-}
+/** Req for POST /linear-swap-api/v1/swap_tpsl_cancelall. [Isolated] Cancel all Take-profit and Stop-loss Orders. Isolated margin only. Trade. 5/s. Inlined in cancelAllTpslOrders - params: { contract_code, direction? } */
 
 /** Req for POST /linear-swap-api/v1/swap_cross_tpsl_cancelall. [Cross] Cancel all Take-profit and Stop-loss Orders. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade. 5/s. */
 export interface FuturesCancelAllCrossTpslOrdersReq {
@@ -1092,7 +1204,7 @@ export interface FuturesCancelAllCrossTpslOrdersReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** buy or sell; omit for all */
-  direction?: 'buy' | 'sell';
+  direction?: FuturesDirection;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_trigger_hisorders. getCrossTriggerHistoryOrders. Cross. One of pair or contract_code required. Read. */
@@ -1112,7 +1224,7 @@ export interface FuturesGetCrossTriggerHistoryOrdersReq {
   /** Page size. Default 20, max 50 */
   page_size?: number;
   /** created_at (default) or update_time; descending */
-  sort_by?: 'created_at' | 'update_time';
+  sort_by?: FuturesSortBy;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_tpsl_openorders. [Isolated] Query Open Take-profit and Stop-loss Orders. Isolated margin only. Read. */
@@ -1154,7 +1266,7 @@ export interface FuturesGetTpslHistoryOrdersReq {
   /** Page size. Default 20, max 50 */
   page_size?: number;
   /** created_at (default) or update_time; descending */
-  sort_by?: 'created_at' | 'update_time';
+  sort_by?: FuturesSortBy;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_tpsl_hisorders. [Cross] Query Take-profit and Stop-loss History Orders. Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read. */
@@ -1172,7 +1284,7 @@ export interface FuturesGetCrossTpslHistoryOrdersReq {
   /** Page size. Default 20, max 50 */
   page_size?: number;
   /** created_at (default) or update_time; descending */
-  sort_by?: 'created_at' | 'update_time';
+  sort_by?: FuturesSortBy;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_relation_tpsl_order. getCrossRelationTpslOrder. Cross. One of pair or contract_code required. Read. */
@@ -1192,9 +1304,9 @@ export interface FuturesSubmitTrailingOrderReq {
   /** 0: no, 1: yes. In hedge mode invalid; one-way: 0 when not filled. reduce_only=1 for open triggers error 1492 */
   reduce_only?: 0 | 1;
   /** buy or sell */
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   /** open, close, both. Hedge mode required; one-way optional, must be both when filled */
-  offset?: 'open' | 'close' | 'both';
+  offset?: FuturesOffsetBoth;
   /** Leverage. Required when open, optional when close */
   lever_rate?: number;
   /** Volume (contracts) */
@@ -1204,7 +1316,7 @@ export interface FuturesSubmitTrailingOrderReq {
   /** Active price */
   active_price: number | string;
   /** optimal_5, optimal_10, optimal_20, formula_price */
-  order_price_type: 'optimal_5' | 'optimal_10' | 'optimal_20' | 'formula_price';
+  order_price_type: FuturesTrailingOrderPriceType;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_track_order. [Cross] Submit a Trailing Order. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade. 5/s. */
@@ -1218,9 +1330,9 @@ export interface FuturesSubmitCrossTrailingOrderReq {
   /** 0: no, 1: yes. In hedge mode invalid; one-way: 0 when not filled. reduce_only=1 for open triggers error 1492 */
   reduce_only?: 0 | 1;
   /** buy or sell */
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   /** open, close, both. Hedge mode required; one-way optional, must be both when filled */
-  offset?: 'open' | 'close' | 'both';
+  offset?: FuturesOffsetBoth;
   /** Leverage. Required when open, optional when close */
   lever_rate?: number;
   /** Volume (contracts) */
@@ -1230,16 +1342,10 @@ export interface FuturesSubmitCrossTrailingOrderReq {
   /** Active price */
   active_price: number | string;
   /** optimal_5, optimal_10, optimal_20, formula_price */
-  order_price_type: 'optimal_5' | 'optimal_10' | 'optimal_20' | 'formula_price';
+  order_price_type: FuturesTrailingOrderPriceType;
 }
 
-/** Req for POST /linear-swap-api/v1/swap_track_cancel. [Isolated] Cancel a Trailing Order. Isolated margin only. Trade. 5/s. */
-export interface FuturesCancelTrailingOrderReq {
-  /** Contract code (e.g. BTC-USDT) */
-  contract_code: string;
-  /** Trailing order ID(s). Comma-separated, max 10 */
-  order_id: string;
-}
+/** Req for POST /linear-swap-api/v1/swap_track_cancel. [Isolated] Cancel a Trailing Order. Isolated margin only. Trade. 5/s. Inlined in cancelTrailingOrder - params: { contract_code, order_id } */
 
 /** Req for POST /linear-swap-api/v1/swap_cross_track_cancel. [Cross] Cancel a Trailing Order. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Trade. 5/s. */
 export interface FuturesCancelCrossTrailingOrderReq {
@@ -1258,9 +1364,9 @@ export interface FuturesCancelAllTrailingOrdersReq {
   /** Contract code (e.g. BTC-USDT) */
   contract_code: string;
   /** buy or sell; omit for all */
-  direction?: 'buy' | 'sell';
+  direction?: FuturesDirection;
   /** open or close; omit for all */
-  offset?: 'open' | 'close';
+  offset?: FuturesOffset;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_track_cancelall. [Cross] Cancel All Trailing Orders. Cross margin only. One of (pair+contract_type) or contract_code required; contract_code preferred when all filled. Can fill only one of direction and offset to filter. Trade. 5/s. */
@@ -1272,9 +1378,9 @@ export interface FuturesCancelAllCrossTrailingOrdersReq {
   /** swap, this_week, next_week, quarter, next_quarter */
   contract_type?: string;
   /** buy or sell; omit for all */
-  direction?: 'buy' | 'sell';
+  direction?: FuturesDirection;
   /** open or close; omit for all */
-  offset?: 'open' | 'close';
+  offset?: FuturesOffset;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_track_openorders. [Isolated] Current unfilled trailing orders. Isolated margin only. Read. */
@@ -1318,7 +1424,7 @@ export interface FuturesGetTrailingHistoryOrdersReq {
   /** Page size. Default 20, max 50 */
   page_size?: number;
   /** create_date or update_time; descending */
-  sort_by?: 'create_date' | 'update_time' | 'created_at';
+  sort_by?: FuturesSortByExtended;
 }
 
 /** Req for POST /linear-swap-api/v1/swap_cross_track_hisorders. [Cross] Get History Trailing Orders. Cross margin only. One of pair or contract_code required; contract_code preferred when both filled. Read. */
@@ -1338,7 +1444,7 @@ export interface FuturesGetCrossTrailingHistoryOrdersReq {
   /** Page size. Default 20, max 50 */
   page_size?: number;
   /** create_date or update_time; descending */
-  sort_by?: 'create_date' | 'update_time' | 'created_at';
+  sort_by?: FuturesSortByExtended;
 }
 
 /**
@@ -1372,7 +1478,7 @@ export interface FuturesGetUnifiedMarginAdjustmentsReq {
   /** Query end time (ms). [(present-90d), present] */
   end_time?: number;
   /** prev: forward query; next: backward query */
-  direct?: 'prev' | 'next';
+  direct?: FuturesDirect;
   /** prev: min query_id from last result; next: max query_id from last result */
   from_id?: number;
 }
@@ -1382,7 +1488,7 @@ export interface FuturesV5BillsReq {
   /** Contract code (e.g. BTC-USDT, ETH-USDT) */
   contract_code?: string;
   /** cross: Cross margin; isolated: Isolated margin */
-  margin_mode?: 'cross' | 'isolated';
+  margin_mode?: FuturesMarginMode;
   /** Financial type; comma-separated for multiple. e.g. 3,4,5,6 */
   type?: string;
   /** Start time (ms). Default: now - 48h */
@@ -1394,7 +1500,7 @@ export interface FuturesV5BillsReq {
   /** Page size, default 10, max 100 */
   limit?: number;
   /** prev | next */
-  direct?: 'prev' | 'next';
+  direct?: FuturesDirect;
 }
 
 /** Req for POST /v5/trade/cancel_order. Cancel a single order. */
@@ -1418,27 +1524,27 @@ export interface FuturesV5CancelBatchOrdersReq {
 /** Req for POST /v5/trade/cancel_all_orders. Cancel all open orders. */
 export interface FuturesV5CancelAllOrdersReq {
   contract_code?: string;
-  side?: 'buy' | 'sell';
-  position_side?: 'long' | 'short' | 'both';
+  side?: FuturesDirection;
+  position_side?: FuturesPositionSide;
 }
 
 /** Req for POST /v5/trade/position. Close all of a symbol at market price. */
 export interface FuturesV5ClosePositionReq {
   contract_code: string;
-  margin_mode: 'cross' | 'isolated';
-  position_side: 'long' | 'short' | 'both';
+  margin_mode: FuturesMarginMode;
+  position_side: FuturesPositionSide;
   client_order_id?: string;
 }
 
 /** Req for GET /v5/trade/order/opens. Get unfilled orders. */
 export interface FuturesV5OpenOrdersReq {
   contract_code?: string;
-  margin_mode?: 'cross' | 'isolated';
+  margin_mode?: FuturesMarginMode;
   order_id?: string;
   client_order_id?: string;
   from?: number;
   limit?: number;
-  direct?: 'prev' | 'next';
+  direct?: FuturesDirect;
 }
 
 /** Req for GET /v5/trade/order/details. Execution details (last 3 days). */
@@ -1449,27 +1555,27 @@ export interface FuturesV5OrderDetailsReq {
   end_time?: string | number;
   from?: number;
   limit?: number;
-  direct?: 'prev' | 'next';
+  direct?: FuturesDirect;
 }
 
 /** Req for GET /v5/trade/order/history. Get order history. */
 export interface FuturesV5OrderHistoryReq {
   contract_code: string;
-  margin_mode: 'cross' | 'isolated';
+  margin_mode: FuturesMarginMode;
   state?: string;
-  type?: 'market' | 'limit' | 'post_only';
+  type?: FuturesV5OrderType;
   price_match?: string;
   start_time?: string | number;
   end_time?: string | number;
   from?: number;
   limit?: number;
-  direct?: 'prev' | 'next';
+  direct?: FuturesDirect;
 }
 
 /** Req for GET /v5/trade/order. Get single order info. */
 export interface FuturesV5OrderInfoReq {
   contract_code: string;
-  margin_mode?: 'cross' | 'isolated';
+  margin_mode?: FuturesMarginMode;
   order_id?: string;
   client_order_id?: string;
 }
@@ -1483,76 +1589,66 @@ export interface FuturesV5CancelAfterReq {
 /** Req for POST /v5/trade/order. Place a single order. */
 export interface FuturesV5SubmitOrderReq {
   contract_code: string;
-  margin_mode: 'cross' | 'isolated';
-  side: 'buy' | 'sell';
-  type: 'market' | 'limit' | 'post_only';
+  margin_mode: FuturesMarginMode;
+  side: FuturesDirection;
+  type: FuturesV5OrderType;
   volume: string;
-  position_side?: 'long' | 'short' | 'both';
-  price_match?: 'opponent' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  position_side?: FuturesPositionSide;
+  price_match?: FuturesPriceMatch;
   client_order_id?: string;
   price?: string | number;
   reduce_only?: 0 | 1;
-  time_in_force?: 'fok' | 'ioc' | 'gtc';
+  time_in_force?: FuturesTimeInForce;
   tp_trigger_price?: string;
   tp_order_price?: string;
-  tp_type?: 'market' | 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
-  tp_trigger_price_type?: 'last' | 'market';
+  tp_type?: FuturesTriggerOrderPriceType | 'market';
+  tp_trigger_price_type?: FuturesTriggerPriceType;
   sl_trigger_price?: string;
   sl_order_price?: string;
-  sl_type?: 'market' | 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
-  sl_trigger_price_type?: 'last' | 'market';
+  sl_type?: FuturesTriggerOrderPriceType | 'market';
+  sl_trigger_price_type?: FuturesTriggerPriceType;
   price_protect?: boolean;
-  self_match_prevent?: 'cancel_taker' | 'cancel_maker' | 'cancel_both';
+  self_match_prevent?: FuturesSelfMatchPrevent;
 }
 
 /**
  * USDT Margined Futures Multi Asset - Positions (v5 API)
  */
 
-/** Req for GET /v5/trade/position/opens. Get current positions. */
-export interface FuturesV5OpenPositionsReq {
-  contract_code?: string;
-}
+/** Req for GET /v5/trade/position/opens. Get current positions. Inlined in getMultiAssetPositions - params?: { contract_code? } */
 
 /** Req for GET /v5/position/lever. Get leverage list. */
 export interface FuturesV5LeverListReq {
   contract_code?: string;
-  margin_mode?: 'cross' | 'isolated';
-  position_side?: 'long' | 'short' | 'both';
+  margin_mode?: FuturesMarginMode;
+  position_side?: FuturesPositionSide;
 }
 
 /** Req for POST /v5/position/lever. Set leverage. */
 export interface FuturesV5SetLeverageReq {
   contract_code: string;
-  margin_mode: 'cross' | 'isolated';
+  margin_mode: FuturesMarginMode;
   lever_rate: string | number;
   /** Required when isolated margin in two-way position mode */
-  position_side?: 'long' | 'short' | 'both';
+  position_side?: FuturesPositionSide;
 }
 
-/** Req for POST /v5/position/mode. Set position mode. */
-export interface FuturesV5SetPositionModeReq {
-  position_mode: 'single_side' | 'dual_side';
-}
+/** Req for POST /v5/position/mode. Set position mode. Inlined in updateMultiAssetPositionMode - params: { position_mode } */
 
 /** Req for GET /v5/position/risk/limit. Get current position risk limit. */
 export interface FuturesV5RiskLimitReq {
   contract_code?: string;
-  margin_mode?: 'cross' | 'isolated';
-  position_side?: 'long' | 'short' | 'both';
+  margin_mode?: FuturesMarginMode;
+  position_side?: FuturesPositionSide;
 }
 
-/** Req for GET /v5/position/risk/limit_tier. Query risk limit tiers. */
-export interface FuturesV5RiskLimitTierReq {
-  contract_code: string;
-  margin_mode?: 'cross' | 'isolated';
-}
+/** Req for GET /v5/position/risk/limit_tier. Query risk limit tiers. Inlined in getMultiAssetRiskLimitTiers - params: { contract_code, margin_mode? } */
 
 /** Req for POST /v5/position/margin. Adjust margin for isolated positions. */
 export interface FuturesV5AdjustMarginReq {
   contract_code: string;
-  position_side: 'long' | 'short' | 'both';
-  type: 'add' | 'reduce';
+  position_side: FuturesPositionSide;
+  type: FuturesMarginAdjustType;
   amount: string;
   currency?: string;
 }
@@ -1564,7 +1660,7 @@ export interface FuturesV5AdjustMarginReq {
 /** Req for GET /v5/market/risk/limit. Get futures risk limit table. */
 export interface FuturesV5MarketRiskLimitReq {
   contract_code?: string;
-  margin_mode?: 'cross' | 'isolated';
+  margin_mode?: FuturesMarginMode;
   tier?: string | number;
 }
 
@@ -1578,8 +1674,8 @@ export interface FuturesV5MarketRiskLimitReq {
 /** Req for GET /api/v1/contract_his_open_interest. Historical open interest. */
 export interface FuturesCmDeliveryOpenInterestReq {
   symbol: string;
-  contract_type: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
-  period: '60min' | '4hour' | '12hour' | '1day';
+  contract_type: FuturesContractType;
+  period: FuturesOpenInterestPeriod;
   amount_type: 1 | 2;
   size?: number;
 }
@@ -1593,7 +1689,7 @@ export interface FuturesCmDeliveryLiquidationOrdersReq {
   trade_type: 0 | 5 | 6;
   start_time?: number;
   end_time?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
 }
 
@@ -1610,7 +1706,7 @@ export interface FuturesCmDeliverySettlementRecordsReq {
 export interface FuturesCmDeliveryRiskReserveHistoryReq {
   start_time?: number;
   end_time?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
   limit?: number;
 }
@@ -1618,14 +1714,14 @@ export interface FuturesCmDeliveryRiskReserveHistoryReq {
 /** Req for GET /api/v1/contract_price_limit. Contract price limits. Aligned with getCmContractLimit. */
 export interface FuturesCmDeliveryContractLimitReq {
   symbol?: string;
-  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  contract_type?: FuturesContractType;
   contract_code?: string;
 }
 
 /** Req for GET /api/v1/contract_open_interest. Current open interest. */
 export interface FuturesCmDeliveryContractOpenInterestReq {
   symbol?: string;
-  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  contract_type?: FuturesContractType;
   contract_code?: string;
 }
 
@@ -1636,7 +1732,7 @@ export interface FuturesCmDeliveryContractOpenInterestReq {
 /** Req for GET /api/v1/contract_contract_info. Contract info. */
 export interface FuturesCmDeliveryContractInfoReq {
   symbol?: string;
-  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  contract_type?: FuturesContractType;
   contract_code?: string;
 }
 
@@ -1646,16 +1742,7 @@ export interface FuturesCmDeliveryContractInfoReq {
 /** Req for GET /market/history/kline. Either size or (from+to) required. Aligned with getCmKlines. */
 export interface FuturesCmDeliveryKlinesReq {
   symbol: string;
-  period:
-    | '1min'
-    | '5min'
-    | '15min'
-    | '30min'
-    | '60min'
-    | '1hour'
-    | '4hour'
-    | '1day'
-    | '1mon';
+  period: FuturesKlinePeriod;
   size?: number;
   from?: number;
   to?: number;
@@ -1664,16 +1751,7 @@ export interface FuturesCmDeliveryKlinesReq {
 /** Req for GET /index/market/history/mark_price_kline. Aligned with getCmMarkKlines. */
 export interface FuturesCmDeliveryMarkPriceKlinesReq {
   symbol: string;
-  period:
-    | '1min'
-    | '5min'
-    | '15min'
-    | '30min'
-    | '60min'
-    | '4hour'
-    | '1day'
-    | '1week'
-    | '1mon';
+  period: FuturesKlinePeriod;
   size: number;
 }
 
@@ -1684,15 +1762,7 @@ export interface FuturesCmDeliveryMarkPriceKlinesReq {
 /** Req for GET /index/market/history/index. Index kline data. */
 export interface FuturesCmDeliveryIndexKlinesReq {
   symbol: string;
-  period:
-    | '1min'
-    | '5min'
-    | '15min'
-    | '30min'
-    | '60min'
-    | '4hour'
-    | '1day'
-    | '1mon';
+  period: FuturesKlinePeriod;
   size: number;
 }
 
@@ -1701,7 +1771,7 @@ export interface FuturesCmDeliverySubPermissionsReq {
   sub_uid?: string;
   start_time?: number;
   end_time?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
 }
 
@@ -1711,7 +1781,7 @@ export interface FuturesCmDeliveryFinancialRecordReq {
   type?: string;
   start_time?: number;
   end_time?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
 }
 
@@ -1728,51 +1798,11 @@ export interface FuturesCmDeliveryUserSettlementRecordsReq {
   page_size?: number;
 }
 
-/** Order price type for contract_order_limit */
-export type FuturesCmDeliveryOrderLimitPriceType =
-  | 'limit'
-  | 'opponent'
-  | 'lightning'
-  | 'optimal_5'
-  | 'optimal_10'
-  | 'optimal_20'
-  | 'fok'
-  | 'ioc'
-  | 'opponent_ioc'
-  | 'lightning_ioc'
-  | 'optimal_5_ioc'
-  | 'optimal_10_ioc'
-  | 'optimal_20_ioc'
-  | 'opponent_fok'
-  | 'lightning_fok'
-  | 'optimal_5_fok'
-  | 'optimal_10_fok'
-  | 'optimal_20_fok';
-
 /** Req for POST /api/v1/contract_order_limit */
 export interface FuturesCmDeliveryOrderLimitReq {
   order_price_type: FuturesCmDeliveryOrderLimitPriceType;
   symbol?: string;
 }
-
-/** Order price type for POST /api/v1/contract_order. Delivery futures (weekly/quarterly). */
-export type FuturesCmDeliverySubmitOrderPriceType =
-  | 'limit'
-  | 'opponent'
-  | 'post_only'
-  | 'optimal_5'
-  | 'optimal_10'
-  | 'optimal_20'
-  | 'ioc'
-  | 'fok'
-  | 'opponent_ioc'
-  | 'optimal_5_ioc'
-  | 'optimal_10_ioc'
-  | 'optimal_20_ioc'
-  | 'opponent_fok'
-  | 'optimal_5_fok'
-  | 'optimal_10_fok'
-  | 'optimal_20_fok';
 
 /** Req for POST /api/v1/contract_order. Place order. Delivery futures. One of contract_code or (symbol+contract_type). */
 export interface FuturesCmDeliverySubmitOrderReq {
@@ -1781,7 +1811,7 @@ export interface FuturesCmDeliverySubmitOrderReq {
   /** Symbol (e.g. BTC, ETH). Case-insensitive. Use with contract_type. */
   symbol?: string;
   /** this_week, next_week, quarter, next_quarter. Use with symbol. */
-  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  contract_type?: FuturesContractType;
   /** Client order ID [1, 9223372036854775807] */
   client_order_id?: number;
   /** Price. Required for limit, post_only, ioc, fok */
@@ -1789,9 +1819,9 @@ export interface FuturesCmDeliverySubmitOrderReq {
   /** Order quantity. Required */
   volume: number;
   /** buy or sell. Required */
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   /** open or close. Required */
-  offset: 'open' | 'close';
+  offset: FuturesOffset;
   /** Leverage rate. Required */
   lever_rate: number;
   /** Order price type. Required */
@@ -1828,11 +1858,7 @@ export interface FuturesCmDeliveryCancelOrderReq {
   client_order_id?: string;
 }
 
-/** Req for POST /api/v1/contract_switch_lever_rate */
-export interface FuturesCmDeliveryUpdateLeverageReq {
-  symbol: string;
-  lever_rate: number;
-}
+/** Req for POST /api/v1/contract_switch_lever_rate. Inlined in updateCmLeverage - params: { symbol, lever_rate } */
 
 /** Req for POST /api/v1/contract_order_info. One of order_id or client_order_id. Max 50 IDs. Symbol required. */
 export interface FuturesCmDeliveryGetOrderInfoReq {
@@ -1858,7 +1884,7 @@ export interface FuturesCmDeliveryGetOpenOrdersReq {
   symbol?: string;
   page_index?: number;
   page_size?: number;
-  sort_by?: 'created_at' | 'update_time';
+  sort_by?: FuturesSortBy;
   /** 0: all, 1: buy long, 2: sell short, 3: buy short, 4: sell long */
   trade_type?: 0 | 1 | 2 | 3 | 4;
 }
@@ -1876,7 +1902,7 @@ export interface FuturesCmDeliveryGetHistoryOrdersReq {
   order_type?: string;
   start_time?: number;
   end_time?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
   limit?: number;
 }
@@ -1894,7 +1920,7 @@ export interface FuturesCmDeliveryGetHistoryOrdersExactReq {
   order_type?: string;
   start_time?: number;
   end_time?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
 }
 
@@ -1907,7 +1933,7 @@ export interface FuturesCmDeliveryGetFillsReq {
   trade_type: number;
   start_time?: number;
   end_time?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
 }
 
@@ -1922,51 +1948,46 @@ export interface FuturesCmDeliveryGetFillsExactReq {
   from_id?: number;
   /** Default 20, max 50 */
   size?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
 }
 
 /** Req for POST /api/v1/lightning_close_position. One of contract_code or (symbol+contract_type). */
 export interface FuturesCmDeliverySubmitFlashCloseOrderReq {
   volume: number;
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   contract_code?: string;
   symbol?: string;
-  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  contract_type?: FuturesContractType;
   client_order_id?: number;
   /** lightning (default), lightning_fok, lightning_ioc */
-  order_price_type?: 'lightning' | 'lightning_fok' | 'lightning_ioc';
+  order_price_type?: FuturesLightningOrderPriceTypeCm;
 }
 
 /** Req for POST /api/v1/contract_trigger_order. One of contract_code or (symbol+contract_type). */
 export interface FuturesCmDeliverySubmitTriggerOrderReq {
-  trigger_type: 'ge' | 'le';
+  trigger_type: FuturesTriggerType;
   trigger_price: number | string;
   volume: number;
-  direction: 'buy' | 'sell';
-  offset: 'open' | 'close';
+  direction: FuturesDirection;
+  offset: FuturesOffset;
   lever_rate: number;
   contract_code?: string;
   symbol?: string;
-  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  contract_type?: FuturesContractType;
   order_price?: number | string;
   /** limit (default), optimal_5, optimal_10, optimal_20 */
-  order_price_type?: 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  order_price_type?: FuturesTriggerOrderPriceType;
 }
 
-/** Req for POST /api/v1/contract_trigger_cancel. Max 10 order_ids. */
-export interface FuturesCmDeliveryCancelTriggerOrderReq {
-  symbol: string;
-  /** Order IDs, comma-separated. Max 10 */
-  order_id: string;
-}
+/** Req for POST /api/v1/contract_trigger_cancel. Max 10 order_ids. Inlined in cancelCmTriggerOrder - params: { symbol, order_id } */
 
 /** Req for POST /api/v1/contract_trigger_cancelall. symbol required. */
 export interface FuturesCmDeliveryCancelAllTriggerOrdersReq {
   symbol: string;
   contract_code?: string;
-  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
-  direction?: 'buy' | 'sell';
-  offset?: 'open' | 'close';
+  contract_type?: FuturesContractType;
+  direction?: FuturesDirection;
+  offset?: FuturesOffset;
 }
 
 /** Req for POST /api/v1/contract_trigger_openorders. Symbol required. */
@@ -1991,22 +2012,17 @@ export interface FuturesCmDeliveryGetTriggerHistoryOrdersReq {
   contract_code?: string;
   page_index?: number;
   page_size?: number;
-  sort_by?: 'created_at' | 'update_time';
+  sort_by?: FuturesSortBy;
 }
 
-/** Req for POST /api/v1/contract_tpsl_cancel. Max 10 order_ids. */
-export interface FuturesCmDeliveryCancelTpslOrderReq {
-  symbol: string;
-  /** Order IDs, comma-separated. Max 10 */
-  order_id: string;
-}
+/** Req for POST /api/v1/contract_tpsl_cancel. Max 10 order_ids. Inlined in cancelCmTpslOrder - params: { symbol, order_id } */
 
 /** Req for POST /api/v1/contract_tpsl_cancelall. One of: symbol, contract_code, or (symbol+contract_type). */
 export interface FuturesCmDeliveryCancelAllTpslOrdersReq {
   symbol?: string;
   contract_code?: string;
-  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
-  direction?: 'buy' | 'sell';
+  contract_type?: FuturesContractType;
+  direction?: FuturesDirection;
 }
 
 /** Req for POST /api/v1/contract_tpsl_openorders. Symbol required. */
@@ -2029,29 +2045,20 @@ export interface FuturesCmDeliveryGetTpslHistoryOrdersReq {
   create_date: number;
   page_index?: number;
   page_size?: number;
-  sort_by?: 'created_at' | 'update_time';
+  sort_by?: FuturesSortBy;
 }
 
-/** Req for POST /api/v1/contract_relation_tpsl_order. TPSL orders related to position-opening order. */
-export interface FuturesCmDeliveryGetRelationTpslOrderReq {
-  symbol: string;
-  order_id: number | string;
-}
+/** Req for POST /api/v1/contract_relation_tpsl_order. TPSL orders related to position-opening order. Inlined in getCmRelationTpslOrder - params: { symbol, order_id } */
 
-/** Req for POST /api/v1/contract_track_cancel. Max 10 order_ids. */
-export interface FuturesCmDeliveryCancelTrailingOrderReq {
-  symbol: string;
-  /** Order IDs, comma-separated. Max 10 */
-  order_id: string;
-}
+/** Req for POST /api/v1/contract_track_cancel. Max 10 order_ids. Inlined in cancelCmTrailingOrder - params: { symbol, order_id } */
 
 /** Req for POST /api/v1/contract_track_cancelall. symbol required. */
 export interface FuturesCmDeliveryCancelAllTrailingOrdersReq {
   symbol: string;
   contract_code?: string;
-  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
-  direction?: 'buy' | 'sell';
-  offset?: 'open' | 'close';
+  contract_type?: FuturesContractType;
+  direction?: FuturesDirection;
+  offset?: FuturesOffset;
 }
 
 /** Req for POST /api/v1/contract_track_openorders. Symbol required. */
@@ -2076,37 +2083,37 @@ export interface FuturesCmDeliveryGetTrailingHistoryOrdersReq {
   contract_code?: string;
   page_index?: number;
   page_size?: number;
-  sort_by?: 'created_at' | 'update_time';
+  sort_by?: FuturesSortBy;
 }
 
 /** Req for POST /api/v1/contract_track_order. One of contract_code or (symbol+contract_type). lever_rate required when offset=open. */
 export interface FuturesCmDeliverySubmitTrailingOrderReq {
-  direction: 'buy' | 'sell';
-  offset: 'open' | 'close';
+  direction: FuturesDirection;
+  offset: FuturesOffset;
   volume: number;
   callback_rate: number;
   active_price: number | string;
   /** optimal_5, optimal_10, optimal_20, formula_price */
-  order_price_type: 'optimal_5' | 'optimal_10' | 'optimal_20' | 'formula_price';
+  order_price_type: FuturesTrailingOrderPriceType;
   contract_code?: string;
   symbol?: string;
-  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  contract_type?: FuturesContractType;
   lever_rate?: number;
 }
 
 /** Req for POST /api/v1/contract_tpsl_order. One of contract_code or (symbol+contract_type). At least one of tp or sl required. */
 export interface FuturesCmDeliverySubmitTpslOrderReq {
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   volume: number;
   contract_code?: string;
   symbol?: string;
-  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  contract_type?: FuturesContractType;
   tp_trigger_price?: number | string;
   tp_order_price?: number | string;
-  tp_order_price_type?: 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  tp_order_price_type?: FuturesTriggerOrderPriceType;
   sl_trigger_price?: number | string;
   sl_order_price?: number | string;
-  sl_order_price_type?: 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  sl_order_price_type?: FuturesTriggerOrderPriceType;
   price_protect?: boolean;
 }
 
@@ -2117,11 +2124,11 @@ export interface FuturesCmDeliveryCancelAllOrdersReq {
   /** Contract code (e.g. btc200925). Cancel orders for this contract. */
   contract_code?: string;
   /** this_week, next_week, quarter, next_quarter. Use with symbol. */
-  contract_type?: 'this_week' | 'next_week' | 'quarter' | 'next_quarter';
+  contract_type?: FuturesContractType;
   /** buy or sell. Omit for all */
-  direction?: 'buy' | 'sell';
+  direction?: FuturesDirection;
   /** open or close. Omit for all */
-  offset?: 'open' | 'close';
+  offset?: FuturesOffset;
 }
 
 /** Req for POST /api/v1/contract_master_sub_transfer_record */
@@ -2138,7 +2145,7 @@ export interface FuturesCmDeliveryMasterSubTransferReq {
   sub_uid: number;
   symbol: string;
   amount: number | string;
-  type: 'master_to_sub' | 'sub_to_master';
+  type: FuturesTransferType;
   client_order_id?: number;
 }
 
@@ -2152,31 +2159,23 @@ export interface FuturesCmDeliverySubAccountInfoListReq {
 /** Req for POST /api/v1/contract_sub_account_list. Sub-account assets. */
 export interface FuturesCmDeliverySubAccountListReq {
   symbol?: string;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
 }
 
 /** Req for GET /index/market/history/basis. Basis (contract - index) data. */
 export interface FuturesCmDeliveryBasisDataReq {
   symbol: string;
-  period:
-    | '1min'
-    | '5min'
-    | '15min'
-    | '30min'
-    | '60min'
-    | '4hour'
-    | '1day'
-    | '1mon';
+  period: FuturesKlinePeriod;
   size: number;
-  basis_price_type?: 'open' | 'close' | 'high' | 'low' | 'average';
+  basis_price_type?: FuturesBasisPriceType;
 }
 
 /** Req for GET /v1/insurance_fund_history (CMPerp). Historical risk reserves. */
 export interface FuturesCmPerpRiskReserveHistoryReq {
   start_time?: number;
   end_time?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
   limit?: number;
 }
@@ -2184,7 +2183,7 @@ export interface FuturesCmPerpRiskReserveHistoryReq {
 /** Req for POST /swap-api/v1/swap_sub_account_list */
 export interface FuturesCmPerpSubAccountsReq {
   contract_code?: string;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
 }
 
@@ -2201,38 +2200,13 @@ export interface FuturesCmPerpOrderLimitReq {
   order_price_type: string;
 }
 
-/** Req for POST /swap-api/v1/swap_cancel_after. Dead Man's Switch: auto-cancel pending orders if not refreshed. */
-export interface FuturesCmPerpCancelAfterReq {
-  /** 1: enable, 0: disable */
-  on_off: 0 | 1;
-  /** Countdown ms. Min 5000, default 5000. */
-  time_out?: number;
-}
-
-/** Order price type for swap_order and swap_batchorder (CMPerp) */
-export type FuturesCmPerpSubmitOrderPriceType =
-  | 'limit'
-  | 'opponent'
-  | 'post_only'
-  | 'optimal_5'
-  | 'optimal_10'
-  | 'optimal_20'
-  | 'ioc'
-  | 'fok'
-  | 'opponent_ioc'
-  | 'optimal_5_ioc'
-  | 'optimal_10_ioc'
-  | 'optimal_20_ioc'
-  | 'opponent_fok'
-  | 'optimal_5_fok'
-  | 'optimal_10_fok'
-  | 'optimal_20_fok';
+/** Req for POST /swap-api/v1/swap_cancel_after. Dead Man's Switch: auto-cancel pending orders if not refreshed. Inlined in setCmPerpCancelAfter - params: { on_off: 0|1, time_out? } */
 
 /** Req for POST /swap-api/v1/swap_order. Place order (CMPerp). */
 export interface FuturesCmPerpSubmitOrderReq {
   contract_code: string;
-  direction: 'buy' | 'sell';
-  offset: 'open' | 'close';
+  direction: FuturesDirection;
+  offset: FuturesOffset;
   volume: number;
   lever_rate: number;
   order_price_type: FuturesCmPerpSubmitOrderPriceType;
@@ -2263,15 +2237,11 @@ export interface FuturesCmPerpCancelOrderReq {
 /** Req for cancelCmPerpAllOrders. Optional direction/offset filter. */
 export interface FuturesCmPerpCancelAllOrdersReq {
   contract_code: string;
-  direction?: 'buy' | 'sell';
-  offset?: 'open' | 'close';
+  direction?: FuturesDirection;
+  offset?: FuturesOffset;
 }
 
-/** Req for updateCmPerpLeverage. Rate limit 1/3s. */
-export interface FuturesCmPerpUpdateLeverageReq {
-  contract_code: string;
-  lever_rate: number;
-}
+/** Req for updateCmPerpLeverage. Rate limit 1/3s. Inlined in updateCmPerpLeverage - params: { contract_code, lever_rate } */
 
 /** Req for getCmPerpOrderInfo. One of order_id or client_order_id required. Max 50. */
 export interface FuturesCmPerpOrderInfoReq {
@@ -2295,7 +2265,7 @@ export interface FuturesCmPerpOpenOrdersReq {
   contract_code?: string;
   page_index?: number;
   page_size?: number;
-  sort_by?: 'created_at' | 'update_time';
+  sort_by?: FuturesSortBy;
   trade_type?: 0 | 1 | 2 | 3 | 4;
 }
 
@@ -2310,7 +2280,7 @@ export interface FuturesCmPerpHistoryOrdersReq {
   status: string;
   start_time?: number;
   end_time?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
 }
 
@@ -2323,7 +2293,7 @@ export interface FuturesCmPerpHistoryOrdersExactReq {
   price_type?: string;
   start_time?: number;
   end_time?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
 }
 
@@ -2334,7 +2304,7 @@ export interface FuturesCmPerpFillsReq {
   trade_type: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   start_time?: number;
   end_time?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
 }
 
@@ -2345,35 +2315,31 @@ export type FuturesCmPerpFillsExactReq = FuturesCmPerpFillsReq;
 export interface FuturesCmPerpLightningCloseReq {
   contract_code: string;
   volume: number;
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   client_order_id?: number;
-  order_price_type?: 'lightning' | 'lightning_fok' | 'lightning_ioc';
+  order_price_type?: FuturesLightningOrderPriceTypeCm;
 }
 
 /** Req for submitCmPerpTriggerOrder. Rate limit 5/s. */
 export interface FuturesCmPerpTriggerOrderReq {
   contract_code: string;
-  trigger_type: 'ge' | 'le';
+  trigger_type: FuturesTriggerType;
   trigger_price: number | string;
   order_price?: number | string;
-  order_price_type?: 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  order_price_type?: FuturesTriggerOrderPriceType;
   volume: number;
-  direction: 'buy' | 'sell';
-  offset: 'open' | 'close';
+  direction: FuturesDirection;
+  offset: FuturesOffset;
   lever_rate?: number;
 }
 
-/** Req for cancelCmPerpTriggerOrder. Max 10 order_ids. Rate limit 5/s. */
-export interface FuturesCmPerpCancelTriggerOrderReq {
-  contract_code: string;
-  order_id: string;
-}
+/** Req for cancelCmPerpTriggerOrder. Max 10 order_ids. Rate limit 5/s. Inlined in cancelCmPerpTriggerOrder - params: { contract_code, order_id } */
 
 /** Req for cancelCmPerpAllTriggerOrders. Optional direction/offset filter. Rate limit 5/s. */
 export interface FuturesCmPerpCancelAllTriggerOrdersReq {
   contract_code: string;
-  direction?: 'buy' | 'sell';
-  offset?: 'open' | 'close';
+  direction?: FuturesDirection;
+  offset?: FuturesOffset;
 }
 
 /** Req for getCmPerpTriggerOpenOrders. */
@@ -2394,20 +2360,20 @@ export interface FuturesCmPerpTriggerHistoryOrdersReq {
   create_date: number;
   page_index?: number;
   page_size?: number;
-  sort_by?: 'created_at' | 'update_time';
+  sort_by?: FuturesSortBy;
 }
 
 /** Req for submitCmPerpTpslOrder. At least one of tp_trigger_price or sl_trigger_price required. Rate limit 5/s. */
 export interface FuturesCmPerpTpslOrderReq {
   contract_code: string;
-  direction: 'buy' | 'sell';
+  direction: FuturesDirection;
   volume: number | string;
   tp_trigger_price?: number | string;
   tp_order_price?: number | string;
-  tp_order_price_type?: 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  tp_order_price_type?: FuturesTriggerOrderPriceType;
   sl_trigger_price?: number | string;
   sl_order_price?: number | string;
-  sl_order_price_type?: 'limit' | 'optimal_5' | 'optimal_10' | 'optimal_20';
+  sl_order_price_type?: FuturesTriggerOrderPriceType;
   price_protect?: boolean;
 }
 
@@ -2420,7 +2386,7 @@ export interface FuturesCmPerpCancelTpslOrderReq {
 /** Req for cancelCmPerpAllTpslOrders. Optional direction filter. Rate limit 5/s. */
 export interface FuturesCmPerpCancelAllTpslOrdersReq {
   contract_code: string;
-  direction?: 'buy' | 'sell';
+  direction?: FuturesDirection;
 }
 
 /** Req for getCmPerpTpslOpenOrders. */
@@ -2439,7 +2405,7 @@ export interface FuturesCmPerpTpslHisOrdersReq {
   create_date: number;
   page_index?: number;
   page_size?: number;
-  sort_by?: 'created_at' | 'update_time';
+  sort_by?: FuturesSortBy;
 }
 
 /** Req for getCmPerpRelationTpslOrder. order_id = open order id. */
@@ -2451,12 +2417,12 @@ export interface FuturesCmPerpRelationTpslOrderReq {
 /** Req for submitCmPerpTrailingOrder. callback_rate min 0.001 (0.1%). Rate limit 5/s. */
 export interface FuturesCmPerpTrailingOrderReq {
   contract_code: string;
-  direction: 'buy' | 'sell';
-  offset: 'open' | 'close';
+  direction: FuturesDirection;
+  offset: FuturesOffset;
   volume: number | string;
   callback_rate: number | string;
   active_price: number | string;
-  order_price_type: 'optimal_5' | 'optimal_10' | 'optimal_20' | 'formula_price';
+  order_price_type: FuturesTrailingOrderPriceType;
   lever_rate?: number;
 }
 
@@ -2469,8 +2435,8 @@ export interface FuturesCmPerpCancelTrailingOrderReq {
 /** Req for cancelCmPerpAllTrailingOrders. Optional direction/offset filter. Rate limit 5/s. */
 export interface FuturesCmPerpCancelAllTrailingOrdersReq {
   contract_code: string;
-  direction?: 'buy' | 'sell';
-  offset?: 'open' | 'close';
+  direction?: FuturesDirection;
+  offset?: FuturesOffset;
 }
 
 /** Req for getCmPerpTrailingOpenOrders. */
@@ -2491,7 +2457,7 @@ export interface FuturesCmPerpTrailingHisOrdersReq {
   create_date: number;
   page_index?: number;
   page_size?: number;
-  sort_by?: 'create_date' | 'update_time';
+  sort_by?: FuturesSortByCmPerp;
 }
 
 /** Req for POST /swap-api/v1/swap_master_sub_transfer */
@@ -2499,7 +2465,7 @@ export interface FuturesCmPerpMasterSubTransferReq {
   sub_uid: number;
   contract_code: string;
   amount: number | string;
-  type: 'master_to_sub' | 'sub_to_master';
+  type: FuturesTransferType;
   client_order_id?: number;
 }
 
@@ -2518,7 +2484,7 @@ export interface FuturesCmPerpFinancialRecordReq {
   type?: string;
   start_time?: number;
   end_time?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
 }
 
@@ -2531,87 +2497,43 @@ export interface FuturesCmPerpSubPermissionsReq {
   sub_uid?: string;
   start_time?: number;
   end_time?: number;
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   from_id?: number;
 }
 
 /** Req for GET /index/market/history/swap_estimated_rate_kline */
 export interface FuturesCmPerpFundingRateKlinesReq {
   contract_code: string;
-  period:
-    | '1min'
-    | '5min'
-    | '15min'
-    | '30min'
-    | '60min'
-    | '4hour'
-    | '1day'
-    | '1week'
-    | '1mon';
+  period: FuturesKlinePeriod;
   size: number;
 }
 
 /** Req for GET /index/market/history/swap_basis */
 export interface FuturesCmPerpBasisDataReq {
   contract_code: string;
-  period:
-    | '1min'
-    | '5min'
-    | '15min'
-    | '30min'
-    | '60min'
-    | '4hour'
-    | '1day'
-    | '1mon';
+  period: FuturesKlinePeriod;
   size: number;
-  basis_price_type?: 'open' | 'close' | 'high' | 'low' | 'average';
+  basis_price_type?: FuturesBasisPriceType;
 }
 
 /** Req for GET /index/market/history/swap_premium_index_kline */
 export interface FuturesCmPerpPremiumIndexKlinesReq {
   contract_code: string;
-  period:
-    | '1min'
-    | '5min'
-    | '15min'
-    | '30min'
-    | '60min'
-    | '4hour'
-    | '1day'
-    | '1week'
-    | '1mon';
+  period: FuturesKlinePeriod;
   size: number;
 }
 
 /** Req for GET /index/market/history/swap_mark_price_kline */
 export interface FuturesCmPerpMarkPriceKlinesReq {
   contract_code: string;
-  period:
-    | '1min'
-    | '5min'
-    | '15min'
-    | '30min'
-    | '60min'
-    | '4hour'
-    | '1day'
-    | '1week'
-    | '1mon';
+  period: FuturesKlinePeriod;
   size: number;
 }
 
 /** Req for GET /swap-ex/market/history/kline. Either size or (from+to) required. */
 export interface FuturesCmPerpKlinesReq {
   contract_code: string;
-  period:
-    | '1min'
-    | '5min'
-    | '15min'
-    | '30min'
-    | '60min'
-    | '1hour'
-    | '4hour'
-    | '1day'
-    | '1mon';
+  period: FuturesKlinePeriod;
   size?: number;
   from?: number;
   to?: number;
@@ -2628,7 +2550,7 @@ export interface FuturesCmPerpHistoricalFundingRateReq {
 export interface FuturesCmPerpGetOpenInterestReq {
   contract_code: string;
   /** 60min, 4hour, 12hour, 1day */
-  period: '60min' | '4hour' | '12hour' | '1day';
+  period: FuturesOpenInterestPeriod;
   /** 1: cont, 2: cryptocurrency */
   amount_type: 1 | 2;
   /** Default 48, [1, 200] */
@@ -2646,7 +2568,7 @@ export interface FuturesCmPerpLiquidationOrdersReq {
   /** End time (ms). Default now. Within 90 days */
   end_time?: number;
   /** next=chronological, prev=reverse. Default prev */
-  direct?: 'next' | 'prev';
+  direct?: FuturesDirect;
   /** Pagination: min/max query_id from last result depending on direct */
   from_id?: number;
 }

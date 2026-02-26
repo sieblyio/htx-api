@@ -5,7 +5,6 @@ import type {
   FuturesCancelAllCrossTrailingOrdersReq,
   FuturesCancelAllCrossTriggerOrdersReq,
   FuturesCancelAllOrdersReq,
-  FuturesCancelAllTpslOrdersReq,
   FuturesCancelAllTrailingOrdersReq,
   FuturesCancelAllTriggerOrdersReq,
   FuturesCancelCrossAllOrdersReq,
@@ -14,17 +13,12 @@ import type {
   FuturesCancelCrossTrailingOrderReq,
   FuturesCancelCrossTriggerOrderReq,
   FuturesCancelOrderReq,
-  FuturesCancelTpslOrderReq,
-  FuturesCancelTrailingOrderReq,
   FuturesCmDeliveryBasisDataReq,
   FuturesCmDeliveryCancelAllOrdersReq,
   FuturesCmDeliveryCancelAllTpslOrdersReq,
   FuturesCmDeliveryCancelAllTrailingOrdersReq,
   FuturesCmDeliveryCancelAllTriggerOrdersReq,
   FuturesCmDeliveryCancelOrderReq,
-  FuturesCmDeliveryCancelTpslOrderReq,
-  FuturesCmDeliveryCancelTrailingOrderReq,
-  FuturesCmDeliveryCancelTriggerOrderReq,
   FuturesCmDeliveryContractInfoReq,
   FuturesCmDeliveryContractLimitReq,
   FuturesCmDeliveryContractOpenInterestReq,
@@ -37,7 +31,6 @@ import type {
   FuturesCmDeliveryGetOpenOrdersReq,
   FuturesCmDeliveryGetOrderDetailReq,
   FuturesCmDeliveryGetOrderInfoReq,
-  FuturesCmDeliveryGetRelationTpslOrderReq,
   FuturesCmDeliveryGetTpslHistoryOrdersReq,
   FuturesCmDeliveryGetTpslOpenOrdersReq,
   FuturesCmDeliveryGetTrailingHistoryOrdersReq,
@@ -63,10 +56,8 @@ import type {
   FuturesCmDeliverySubmitTrailingOrderReq,
   FuturesCmDeliverySubmitTriggerOrderReq,
   FuturesCmDeliverySubPermissionsReq,
-  FuturesCmDeliveryUpdateLeverageReq,
   FuturesCmDeliveryUserSettlementRecordsReq,
   FuturesCmPerpBasisDataReq,
-  FuturesCmPerpCancelAfterReq,
   FuturesCmPerpCancelAllOrdersReq,
   FuturesCmPerpCancelAllTpslOrdersReq,
   FuturesCmPerpCancelAllTrailingOrdersReq,
@@ -74,7 +65,6 @@ import type {
   FuturesCmPerpCancelOrderReq,
   FuturesCmPerpCancelTpslOrderReq,
   FuturesCmPerpCancelTrailingOrderReq,
-  FuturesCmPerpCancelTriggerOrderReq,
   FuturesCmPerpFillsExactReq,
   FuturesCmPerpFillsReq,
   FuturesCmPerpFinancialRecordExactReq,
@@ -112,7 +102,6 @@ import type {
   FuturesCmPerpTriggerHistoryOrdersReq,
   FuturesCmPerpTriggerOpenOrdersReq,
   FuturesCmPerpTriggerOrderReq,
-  FuturesCmPerpUpdateLeverageReq,
   FuturesCrossSubmitOrderReq,
   FuturesGetBasisDataReq,
   FuturesGetContractInfoReq,
@@ -174,7 +163,6 @@ import type {
   FuturesGetTriggerHistoryOrdersReq,
   FuturesGetTriggerOpenOrdersReq,
   FuturesGetUnifiedMarginAdjustmentsReq,
-  FuturesSetCancelAfterReq,
   FuturesSubmitBatchOrderReq,
   FuturesSubmitCrossBatchOrderReq,
   FuturesSubmitCrossLightningCloseOrderReq,
@@ -200,14 +188,11 @@ import type {
   FuturesV5LeverListReq,
   FuturesV5MarketRiskLimitReq,
   FuturesV5OpenOrdersReq,
-  FuturesV5OpenPositionsReq,
   FuturesV5OrderDetailsReq,
   FuturesV5OrderHistoryReq,
   FuturesV5OrderInfoReq,
   FuturesV5RiskLimitReq,
-  FuturesV5RiskLimitTierReq,
   FuturesV5SetLeverageReq,
-  FuturesV5SetPositionModeReq,
   FuturesV5SubmitOrderReq,
 } from './types/request/futures.types.js';
 import type {
@@ -1343,9 +1328,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Enable/disable auto-cancel of all pending orders after countdown. If not refreshed before timer ends, all pending orders are cancelled. Trade permission.
    */
-  setCancelAfter(
-    params: FuturesSetCancelAfterReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelAfter>> {
+  setCancelAfter(params: {
+    on_off: 0 | 1;
+    time_out?: number;
+  }): Promise<FuturesAPISuccessResponse<FuturesCancelAfter>> {
     return this.postPrivate('/linear-swap-api/v1/linear-cancel-after', {
       body: params,
     });
@@ -1957,9 +1943,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Isolated margin only. Trade permission. Rate limit: 5/s.
    */
-  cancelTpslOrder(
-    params: FuturesCancelTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+  cancelTpslOrder(params: {
+    contract_code: string;
+    order_id: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_tpsl_cancel', {
       body: params,
     });
@@ -1983,9 +1970,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Isolated margin only. Trade permission. Rate limit: 5/s.
    */
-  cancelAllTpslOrders(
-    params: FuturesCancelAllTpslOrdersReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+  cancelAllTpslOrders(params: {
+    contract_code: string;
+    direction?: 'buy' | 'sell';
+  }): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_tpsl_cancelall', {
       body: params,
     });
@@ -2117,9 +2105,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Isolated margin only. Trade permission. Rate limit: 5/s.
    */
-  cancelTrailingOrder(
-    params: FuturesCancelTrailingOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+  cancelTrailingOrder(params: {
+    contract_code: string;
+    order_id: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/linear-swap-api/v1/swap_track_cancel', {
       body: params,
     });
@@ -2535,9 +2524,9 @@ export class FuturesClient extends BaseRestClient {
    * Get information about your current positions.
    * Signature required. Read permission. Rate limit: 144/3s per UID.
    */
-  getMultiAssetPositions(
-    params?: FuturesV5OpenPositionsReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesV5Position[]>> {
+  getMultiAssetPositions(params?: {
+    contract_code?: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesV5Position[]>> {
     return this.getPrivate('/v5/trade/position/opens', params);
   }
 
@@ -2583,9 +2572,9 @@ export class FuturesClient extends BaseRestClient {
    * Switch between one-way (single_side) and hedge (dual_side) mode.
    * Signature required. Trade permission. Rate limit: 144/3s per UID.
    */
-  updateMultiAssetPositionMode(
-    params: FuturesV5SetPositionModeReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesV5PositionModeResp>> {
+  updateMultiAssetPositionMode(params: {
+    position_mode: 'single_side' | 'dual_side';
+  }): Promise<FuturesAPISuccessResponse<FuturesV5PositionModeResp>> {
     return this.postPrivate('/v5/position/mode', { body: params });
   }
 
@@ -2607,9 +2596,10 @@ export class FuturesClient extends BaseRestClient {
    * Get all risk limit tiers for a contract.
    * Signature required. Read permission. Rate limit: 144/3s per UID.
    */
-  getMultiAssetRiskLimitTiers(
-    params: FuturesV5RiskLimitTierReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesV5RiskLimitTierEntry[]>> {
+  getMultiAssetRiskLimitTiers(params: {
+    contract_code: string;
+    margin_mode?: 'cross' | 'isolated';
+  }): Promise<FuturesAPISuccessResponse<FuturesV5RiskLimitTierEntry[]>> {
     return this.getPrivate('/v5/position/risk/limit_tier', params);
   }
 
@@ -3285,9 +3275,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Dead Man's Switch for delivery futures. Enable/disable auto-cancel of all pending orders after countdown. If not refreshed before timer ends, all pending orders cancelled. Trade permission.
    */
-  setCmCancelAfter(
-    params: FuturesSetCancelAfterReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelAfter>> {
+  setCmCancelAfter(params: {
+    on_off: 0 | 1;
+    time_out?: number;
+  }): Promise<FuturesAPISuccessResponse<FuturesCancelAfter>> {
     return this.postPrivate('/api/v1/contract-cancel-after', {
       body: params,
     });
@@ -3350,9 +3341,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Set leverage for symbol. Trade permission. Rate limit: 36/3s per UID.
    */
-  updateCmLeverage(
-    params: FuturesCmDeliveryUpdateLeverageReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmDeliverySwitchLeverRate>> {
+  updateCmLeverage(params: {
+    symbol: string;
+    lever_rate: number;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmDeliverySwitchLeverRate>> {
     return this.postPrivate('/api/v1/contract_switch_lever_rate', {
       body: params,
     });
@@ -3486,9 +3478,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Cancel by order_id. Max 10 per request. Symbol required. Trade permission. Rate limit: 5/s.
    */
-  cancelCmTriggerOrder(
-    params: FuturesCmDeliveryCancelTriggerOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+  cancelCmTriggerOrder(params: {
+    symbol: string;
+    order_id: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/api/v1/contract_trigger_cancel', {
       body: params,
     });
@@ -3551,9 +3544,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Cancel TPSL by order_id. Max 10 per request. Symbol required. Trade permission. Rate limit: 5/s.
    */
-  cancelCmTpslOrder(
-    params: FuturesCmDeliveryCancelTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+  cancelCmTpslOrder(params: {
+    symbol: string;
+    order_id: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/api/v1/contract_tpsl_cancel', {
       body: params,
     });
@@ -3603,9 +3597,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Get TPSL orders linked to a limit order. symbol, order_id required. Read permission. Rate limit: 72/3s per UID.
    */
-  getCmRelationTpslOrder(
-    params: FuturesCmDeliveryGetRelationTpslOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesRelationTpslOrder>> {
+  getCmRelationTpslOrder(params: {
+    symbol: string;
+    order_id: number | string;
+  }): Promise<FuturesAPISuccessResponse<FuturesRelationTpslOrder>> {
     return this.postPrivate('/api/v1/contract_relation_tpsl_order', {
       body: params,
     });
@@ -3629,9 +3624,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Cancel by order_id. Max 10 per request. Symbol required. Trade permission. Rate limit: 5/s.
    */
-  cancelCmTrailingOrder(
-    params: FuturesCmDeliveryCancelTrailingOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+  cancelCmTrailingOrder(params: {
+    symbol: string;
+    order_id: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/api/v1/contract_track_cancel', {
       body: params,
     });
@@ -4315,9 +4311,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Dead Man's Switch: enable/disable auto-cancel of all pending orders after countdown. Refresh before timer ends to keep orders. Trade permission.
    */
-  setCmPerpCancelAfter(
-    params: FuturesCmPerpCancelAfterReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelAfter>> {
+  setCmPerpCancelAfter(params: {
+    on_off: 0 | 1;
+    time_out?: number;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpCancelAfter>> {
     return this.postPrivate('/swap-api/v1/swap-cancel-after', {
       body: params,
     });
@@ -4380,9 +4377,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Switch leverage for contract. Rate limit 1/3s. Trade permission.
    */
-  updateCmPerpLeverage(
-    params: FuturesCmPerpUpdateLeverageReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCmPerpUpdateLeverage>> {
+  updateCmPerpLeverage(params: {
+    contract_code: string;
+    lever_rate: number;
+  }): Promise<FuturesAPISuccessResponse<FuturesCmPerpUpdateLeverage>> {
     return this.postPrivate('/swap-api/v1/swap_switch_lever_rate', {
       body: params,
     });
@@ -4516,9 +4514,10 @@ export class FuturesClient extends BaseRestClient {
    *
    * Cancel by order_id. Max 10. Rate limit 5/s. Trade permission.
    */
-  cancelCmPerpTriggerOrder(
-    params: FuturesCmPerpCancelTriggerOrderReq,
-  ): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
+  cancelCmPerpTriggerOrder(params: {
+    contract_code: string;
+    order_id: string;
+  }): Promise<FuturesAPISuccessResponse<FuturesCancelOrder>> {
     return this.postPrivate('/swap-api/v1/swap_trigger_cancel', {
       body: params,
     });
