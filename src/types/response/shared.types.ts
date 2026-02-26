@@ -1,5 +1,8 @@
 import { RestClientOptions } from '../../lib/requestUtils.js';
 
+// TODO
+// OLD CODE, KRAKEN
+
 export type DerivativesAPISuccessResponse<TData> = {
   result: 'success';
   serverTime: string;
@@ -15,6 +18,17 @@ export type DerivativesAPIResponse<TData> =
   | DerivativesAPISuccessResponse<TData>
   | DerivativesAPIErrorResponse;
 
+export interface GenericAPIError<TBody = unknown> {
+  code: number;
+  message: string;
+  body: TBody;
+  headers: Record<string, string>;
+  requestOptions: RestClientOptions;
+  requestParams: Record<string, unknown>;
+}
+
+// HTX TYPES
+
 /** HTX spot API success response. TData is the payload. TPayloadKey defaults to "data" but can be overridden (e.g. "tick"). */
 export type SpotAPISuccessResponse<
   TData,
@@ -28,23 +42,11 @@ export type SpotAPISuccessResponse<
   ts?: number;
 } & Record<TPayloadKey, TData>;
 
+/** HTX spot API error response. */
 export interface SpotAPIErrorResponse {
   message?: string;
   'err-code'?: string;
   'err-msg'?: string;
-}
-
-export type SpotAPIResponse<TData> =
-  | SpotAPISuccessResponse<TData>
-  | SpotAPIErrorResponse;
-
-export interface GenericAPIError<TBody = any> {
-  code: number;
-  message: string;
-  body: TBody;
-  headers: Record<string, string>;
-  requestOptions: RestClientOptions;
-  requestParams: Record<string, any>;
 }
 
 /** HTX linear-swap (futures) API success response. TPayloadKey: data (default), tick, ticks. */
@@ -58,3 +60,7 @@ export type FuturesAPISuccessResponse<
   ch?: string;
   ts?: number;
 } & Record<TPayloadKey, TData>;
+
+export type SpotAPIResponse<TData> =
+  | SpotAPISuccessResponse<TData>
+  | SpotAPIErrorResponse;
