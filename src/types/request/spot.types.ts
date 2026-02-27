@@ -11,14 +11,6 @@ export interface SpotGetChainsReq {
   ts?: number;
 }
 
-/** Req for /v2/reference/currencies */
-export interface SpotGetReferenceCurrenciesReq {
-  /** Currency filter (btc, ltc, usdt, etc) */
-  currency?: string;
-  /** Authorized user. Default true. */
-  authorizedUser?: boolean;
-}
-
 /**
  * Market Data
  */
@@ -412,12 +404,6 @@ export interface SpotMarginTransferOutIsolatedReq {
   amount?: string;
 }
 
-/** Req for GET /v1/margin/loan-info (Get Loan Interest Rate and Quota, Isolated) */
-export interface SpotMarginLoanInfoReq {
-  /** Trading symbols comma-separated (e.g. btcusdt,ethusdt). Use "all" for all. */
-  symbols?: string;
-}
-
 /** Req for POST /v1/margin/orders (Request a Margin Loan, Isolated) */
 export interface SpotMarginLoanOrderReq {
   /** Trading symbol to borrow margin (e.g. btcusdt, ethusdt) */
@@ -468,18 +454,6 @@ export interface SpotCrossMarginLoanOrdersReq {
   'sub-uid'?: number;
 }
 
-/** Req for GET /v2/account/deposit/address. Query deposit address. */
-export interface SpotDepositAddressReq {
-  /** Crypto currency. Omit for all. */
-  currency?: string;
-}
-
-/** Req for GET /v2/account/withdraw/quota. Query withdraw quota. */
-export interface SpotWithdrawQuotaReq {
-  /** Crypto currency. Omit for all. */
-  currency?: string;
-}
-
 /** Req for POST /v1/dw/withdraw/api/create. Create withdraw request. */
 export interface SpotWithdrawCreateReq {
   /** Destination address. Or UID:1234567, PHONE:xxx, MAIL:xxx for internal. */
@@ -500,12 +474,6 @@ export interface SpotWithdrawCreateReq {
   'exchange-vasp'?: string;
   /** Recipient name for Korean/English: "SURNAME##FIRSTNAME" */
   'user-name-vasp'?: string;
-}
-
-/** Req for GET /v1/query/withdraw/client-order-id. Query withdraw by client order id. */
-export interface SpotWithdrawByClientOrderIdReq {
-  /** Client order id (max 32 char) */
-  clientOrderId: string;
 }
 
 /** Req for GET /v1/query/deposit-withdraw. Search deposit/withdraw records. */
@@ -534,20 +502,6 @@ export interface SpotWithdrawAddressReq {
   limit?: number;
   /** First record ID for next page. */
   fromId?: number;
-}
-
-/** Req for GET /broker/v1/user_rebate_status. Check user rebate eligibility. */
-export interface SpotBrokerUserRebateStatusReq {
-  /** User UID to check */
-  queryUid: string;
-}
-
-/** Req for GET /broker/v1/sub-user/fee_rate. Broker sub-account commission. */
-export interface SpotBrokerSubUserFeeRateReq {
-  /** Sub-account id (user_id, UID minus last digit) */
-  subUId: string;
-  /** 1 Spot, 2 U-standard linear, 3 Coin-Margined swap */
-  bizType: string;
 }
 
 /** Req for POST /broker/v1/sub-user/fee_rate/add. Set sub-user trading fee rate. */
@@ -678,14 +632,6 @@ export interface SpotSubUserApiKeyUpdateReq {
   permission?: string;
   /** IP addresses, comma-separated, max 20 */
   ipAddresses?: string;
-}
-
-/** Req for POST /v2/sub-user/creation. Create sub users. */
-export interface SpotSubUserCreationReq {
-  /** Sub users to create, max 50 */
-  userList: Array<{ userName: string; note?: string }>;
-  /** GENERAL (default), CONTACT, GRID, FIRE-BLOCK */
-  subAccountType?: string;
 }
 
 /** Req for GET /v2/account/ledger */

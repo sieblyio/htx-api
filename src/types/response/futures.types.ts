@@ -346,17 +346,17 @@ export interface FuturesContractElements {
   price_ticks?: FuturesContractElementsPrice[];
   instrument_values?: FuturesContractElementsPrice[];
   order_limits?: FuturesContractElementsOrderLimit[];
-  normal_limits?: Array<{
+  normal_limits?: {
     instrument_type: number;
     open: string;
     close: string;
-  }>;
-  open_limits?: Array<{ instrument_type: number; open: string; close: string }>;
-  trade_limits?: Array<{
+  }[];
+  open_limits?: { instrument_type: number; open: string; close: string }[];
+  trade_limits?: {
     instrument_type: number;
     open: string;
     close: string;
-  }>;
+  }[];
   contract_infos?: FuturesContractElementsContractInfo[];
 }
 

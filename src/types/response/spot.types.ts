@@ -11,32 +11,36 @@ export interface SpotSystemStatusPage {
     time_zone: string;
     updated_at: string;
   };
-  components: Array<{
+  components: {
     id: string;
     name: string;
     status: string;
     created_at: string;
     updated_at: string;
     [key: string]: unknown;
-  }>;
-  incidents: Array<{
-    id: string;
-    name: string;
-    status: string;
-    created_at: string;
-    updated_at: string;
-    [key: string]: unknown;
-  }> | null;
-  scheduled_maintenances: Array<{
-    id: string;
-    name: string;
-    status: string;
-    created_at: string;
-    updated_at: string;
-    scheduled_for: string;
-    scheduled_until: string;
-    [key: string]: unknown;
-  }> | null;
+  }[];
+  incidents:
+    | {
+        id: string;
+        name: string;
+        status: string;
+        created_at: string;
+        updated_at: string;
+        [key: string]: unknown;
+      }[]
+    | null;
+  scheduled_maintenances:
+    | {
+        id: string;
+        name: string;
+        status: string;
+        created_at: string;
+        updated_at: string;
+        scheduled_for: string;
+        scheduled_until: string;
+        [key: string]: unknown;
+      }[]
+    | null;
   status: {
     indicator: 'none' | 'minor' | 'major' | 'critical' | 'maintenance';
     description: string;
@@ -93,7 +97,7 @@ export interface SpotTradingSymbol {
   wr?: string | null;
   d?: number | null;
   elr?: string | null;
-  p?: Array<{ id?: number; name?: string; weight?: number }>;
+  p?: { id?: number; name?: string; weight?: number }[];
 }
 
 export interface SpotCurrency {
@@ -302,8 +306,8 @@ export interface SpotV2ChainReference {
   withdrawStatus?: string;
 }
 
-/** Fee rate item from GET /v2/reference/transact-fee-rate */
-export interface SpotV2TransactFeeRateItem {
+/** Fee rate from GET /v2/reference/transact-fee-rate */
+export interface SpotV2TransactFeeRate {
   symbol: string;
   makerFeeRate: string;
   takerFeeRate: string;
@@ -351,8 +355,8 @@ export interface SpotMergedTicker {
   ask: [number, number];
 }
 
-/** Ticker item from /market/tickers */
-export interface SpotTickerItem {
+/** Ticker from /market/tickers */
+export interface SpotTicker {
   symbol: string;
   open: number;
   high: number;
@@ -388,8 +392,8 @@ export interface SpotDetailTick {
   count: number;
 }
 
-/** Trade item (shared by /market/trade and /market/history/trade) */
-export interface SpotTradeItem {
+/** Trade (shared by /market/trade and /market/history/trade) */
+export interface SpotTrade {
   id: number;
   ts: number;
   'trade-id': number;
@@ -402,14 +406,14 @@ export interface SpotTradeItem {
 export interface SpotLastTrade {
   id: number;
   ts: number;
-  data: SpotTradeItem[];
+  data: SpotTrade[];
 }
 
 /** Timestamp group from /market/history/trade. Each element in data array. */
 export interface SpotTradeTimestampGroup {
   id: number;
   ts: number;
-  data: SpotTradeItem[];
+  data: SpotTrade[];
 }
 
 /**
@@ -424,8 +428,8 @@ export interface SpotAccount {
   state: string;
 }
 
-/** Balance item from /v1/account/accounts/{account-id}/balance list */
-export interface SpotAccountBalanceItem {
+/** Balance row from /v1/account/accounts/{account-id}/balance list */
+export interface SpotBalance {
   currency: string;
   type: string;
   balance: string;
@@ -439,7 +443,7 @@ export interface SpotAccountBalance {
   id: number;
   type: string;
   state: string;
-  list: SpotAccountBalanceItem[];
+  list: SpotBalance[];
 }
 
 /** Profit account balance item from /v2/account/valuation */
@@ -472,12 +476,12 @@ export interface SpotV2AssetValuation {
 }
 
 /** Transfer result from POST /v1/account/transfer */
-export interface SpotAccountTransferData {
+export interface SpotAccountTransferResult {
   'transact-id': number;
   'transact-time': number;
 }
 
-export interface SpotV2PointAccountGroupIdItem {
+export interface SpotV2PointAccountGroupId {
   groupId: number;
   expiryDate: number | null;
   remainAmt: string;
@@ -488,11 +492,11 @@ export interface SpotV2PointAccount {
   accountId: string;
   accountStatus: string;
   acctBalance: string;
-  groupIds: SpotV2PointAccountGroupIdItem[];
+  groupIds: SpotV2PointAccountGroupId[];
 }
 
 /** Point transfer result from POST /v2/point/transfer */
-export interface SpotV2PointTransferData {
+export interface SpotV2PointTransfer {
   transactId: string;
   transactTime: number;
 }
@@ -517,8 +521,8 @@ export interface SpotV1AccountOverviewInfo {
   currency: string;
 }
 
-/** Account history item from GET /v1/account/history */
-export interface SpotAccountHistoryItem {
+/** Account history row from GET /v1/account/history */
+export interface SpotAccountHistory {
   'account-id': number;
   currency: string;
   'record-id': number;
@@ -529,8 +533,8 @@ export interface SpotAccountHistoryItem {
   'transact-time': number;
 }
 
-/** Ledger item from GET /v2/account/ledger */
-export interface SpotV2AccountLedgerItem {
+/** Ledger row from GET /v2/account/ledger */
+export interface SpotV2AccountLedger {
   accountId: number;
   currency: string;
   transactAmt: number;
@@ -542,11 +546,8 @@ export interface SpotV2AccountLedgerItem {
   transferee: number;
 }
 
-/** Order id from POST /v1/order/orders/place. Response data is the order id. */
-export type SpotV1OrderPlaceData = string;
-
-/** Batch order result item. Success: order-id, client-order-id. Error: err-code, err-msg. */
-export interface SpotV1OrderBatchPlaceItem {
+/** Batch order placement result. Success: order-id, client-order-id. Error: err-code, err-msg. */
+export interface SpotV1OrderBatchPlaceResult {
   'order-id'?: number;
   'client-order-id'?: string;
   'err-code'?: string;
@@ -554,26 +555,26 @@ export interface SpotV1OrderBatchPlaceItem {
 }
 
 /** Margin order result from POST /v1/order/auto/place */
-export interface SpotV1OrderAutoPlaceData {
+export interface SpotV1OrderAutoPlaceResult {
   'order-id': number;
 }
 
 /** Canceled order id from POST /v1/order/orders/{order-id}/submitcancel */
-export type SpotV1OrderCancelData = string;
+export type SpotV1OrderCancelResult = string;
 
 /** Order status from POST /v1/order/orders/submitCancelClientOrder. 1:ready, 2:created, 3:submitted, 4:partial-filled, 5:partial-canceled, 6:filled, 7:canceled, 10:canceling */
-export type SpotV1OrderCancelByClientOrderIdData = number;
+export type SpotV1OrderCancelByClientOrderIdResult = number;
 
 /** Result from POST /v1/order/orders/batchCancelOpenOrders */
-export interface SpotV1OrderBatchCancelOpenOrdersData {
+export interface SpotV1OrderBatchCancelOpenOrdersResult {
   'success-count': number;
   'failed-count': number;
   /** Next order id to cancel, -1 = none */
   'next-id': number;
 }
 
-/** Failed cancel item from POST /v1/order/orders/batchcancel */
-export interface SpotV1OrderBatchCancelFailedItem {
+/** Failed cancel from POST /v1/order/orders/batchcancel */
+export interface SpotV1OrderBatchCancelFailed {
   'order-id'?: string;
   'client-order-id'?: string;
   'err-code'?: string;
@@ -582,7 +583,7 @@ export interface SpotV1OrderBatchCancelFailedItem {
 }
 
 /** Result from POST /v2/algo-orders/cancel-all-after (Dead man's switch) */
-export interface SpotV2AlgoOrdersCancelAllAfterData {
+export interface SpotV2AlgoOrdersCancelAllAfterResult {
   currentTime: number;
   triggerTime: number;
 }
@@ -591,13 +592,13 @@ export interface SpotV2AlgoOrdersCancelAllAfterData {
  * Conditional Order
  */
 
-/** Data from POST /v2/algo-orders (Place a conditional order) */
-export interface SpotV2AlgoOrdersPlaceResp {
+/** Result from POST /v2/algo-orders (Place a conditional order) */
+export interface SpotV2AlgoOrdersPlaceResult {
   clientOrderId: string;
 }
 
-/** Data from POST /v2/algo-orders/cancellation (Cancel conditional orders before triggering) */
-export interface SpotV2AlgoOrdersCancellationResp {
+/** Result from POST /v2/algo-orders/cancellation (Cancel conditional orders before triggering) */
+export interface SpotV2AlgoOrdersCancellationResult {
   accepted: string[];
   rejected: string[];
 }
@@ -633,8 +634,8 @@ export interface SpotV2AlgoOrder {
  * Margin Loan (Cross/Isolated)
  */
 
-/** Repayment item from POST /v2/account/repayment. Check transaction record to confirm status. */
-export interface SpotMarginRepaymentResp {
+/** Repayment result from POST /v2/account/repayment. Check transaction record to confirm status. */
+export interface SpotMarginRepaymentResult {
   repayId: string | number;
   repayTime: number;
 }
@@ -648,8 +649,8 @@ export interface SpotRepaymentRecordTransactId {
   paidPoint?: string;
 }
 
-/** Repayment record item from GET /v2/account/repayment (Repayment Record Reference) */
-export interface SpotRepaymentRecordItem {
+/** Repayment record from GET /v2/account/repayment (Repayment Record Reference) */
+export interface SpotRepaymentRecord {
   repayId: string | number;
   repayTime: number;
   accountId: string;
@@ -658,7 +659,7 @@ export interface SpotRepaymentRecordItem {
   transactIds?: SpotRepaymentRecordTransactId | SpotRepaymentRecordTransactId[];
 }
 
-/** Currency item from GET /v1/margin/loan-info */
+/** Currency from GET /v1/margin/loan-info */
 export interface SpotMarginLoanInfoCurrency {
   currency: string;
   'interest-rate': string;
@@ -668,8 +669,8 @@ export interface SpotMarginLoanInfoCurrency {
   'actual-rate': string;
 }
 
-/** Symbol item from GET /v1/margin/loan-info */
-export interface SpotMarginLoanInfoItem {
+/** Symbol from GET /v1/margin/loan-info */
+export interface SpotMarginLoanInfo {
   symbol: string;
   currencies: SpotMarginLoanInfoCurrency[];
 }
@@ -699,8 +700,8 @@ export interface SpotMarginLoanOrder {
   'day-interest-rate'?: string;
 }
 
-/** Balance list item from GET /v1/margin/accounts/balance */
-export interface SpotMarginAccountBalanceItem {
+/** Balance row from GET /v1/margin/accounts/balance */
+export interface SpotMarginBalance {
   currency: string;
   type: string;
   balance: string;
@@ -715,7 +716,7 @@ export interface SpotMarginAccountBalance {
   'risk-rate'?: string;
   'fl-type'?: string;
   'fl-price'?: string;
-  list: SpotMarginAccountBalanceItem[];
+  list: SpotMarginBalance[];
 }
 
 /** Account balance from GET /v1/cross-margin/accounts/balance. Single object (unlike isolated which returns array). */
@@ -726,7 +727,7 @@ export interface SpotCrossMarginAccountBalance {
   'risk-rate'?: string;
   'acct-balance-sum'?: string;
   'debt-balance-sum'?: string;
-  list: SpotMarginAccountBalanceItem[];
+  list: SpotMarginBalance[];
 }
 
 /** Loan order item from GET /v1/cross-margin/loan-orders */
@@ -746,18 +747,18 @@ export interface SpotCrossMarginLoanOrder {
   state: string;
 }
 
-/** Position limit item from GET /v2/margin/limit */
-export interface SpotMarginLimitItem {
+/** Position limit from GET /v2/margin/limit */
+export interface SpotMarginLimit {
   currency: string;
   'max-holdings': string;
 }
 
 /** Result from POST /v1/order/orders/batchcancel */
-export interface SpotV1OrderBatchCancelData {
+export interface SpotV1OrderBatchCancelResult {
   /** Successfully canceled order ids or client-order-ids */
   success: string[];
   /** Failed cancel requests */
-  failed: SpotV1OrderBatchCancelFailedItem[];
+  failed: SpotV1OrderBatchCancelFailed[];
 }
 
 /** Match result item from GET /v1/order/orders/{order-id}/matchresults */
@@ -781,7 +782,7 @@ export interface SpotV1OrderMatchResult {
 }
 
 /** Historical order from GET /v1/order/orders (search past orders) */
-export interface SpotV1OrderHistoryItem {
+export interface SpotV1OrderHistory {
   id: number;
   'client-order-id'?: string;
   'account-id'?: number;
@@ -809,7 +810,7 @@ export interface SpotV1OrderHistoryItem {
 }
 
 /** Historical order from GET /v1/order/history (48h). Includes next-time when more results exist. */
-export interface SpotV1OrderHistory48hItem extends SpotV1OrderHistoryItem {
+export interface SpotV1OrderHistory48h extends SpotV1OrderHistory {
   /** Next start-time or end-time for pagination. Only when results exceed size. */
   'next-time'?: number;
 }
@@ -966,8 +967,8 @@ export interface SpotSubUserCreationResult {
   errMessage?: string;
 }
 
-/** Sub user list item from GET /v2/sub-user/user-list */
-export interface SpotSubUserListItem {
+/** Sub user from GET /v2/sub-user/user-list */
+export interface SpotSubUserList {
   uid: number;
   userState: string;
   subUserName: string;
@@ -1011,8 +1012,8 @@ export interface SpotSubUserAccountId {
   accountStatus?: string;
 }
 
-/** Account list item from sub user account list */
-export interface SpotSubUserAccountListItem {
+/** Account from sub user account list */
+export interface SpotSubUserAccount {
   accountType: string;
   activation: string;
   transferrable?: boolean;
@@ -1023,7 +1024,7 @@ export interface SpotSubUserAccountListItem {
 export interface SpotSubUserAccountsResult {
   uid: number;
   deductMode: string;
-  list: SpotSubUserAccountListItem[];
+  list: SpotSubUserAccount[];
 }
 
 /** Result from createSubUserApiKey */
@@ -1056,8 +1057,8 @@ export interface SpotSubUserDepositHistoryRecord {
   updateTime: number;
 }
 
-/** Item from getSubUsersAggregatedBalance */
-export interface SpotSubUsersAggregatedBalanceItem {
+/** Balance from getSubUsersAggregatedBalance */
+export interface SpotSubUsersAggregatedBalance {
   currency: string;
   type: string;
   balance: string;
@@ -1068,12 +1069,12 @@ export interface SpotSubUserBalanceResult {
   id: number;
   type: string;
   state: string;
-  list: SpotAccountBalanceItem[];
+  list: SpotBalance[];
   symbol?: string;
 }
 
 /** Custody sub-account from GET /v2/sub-user/entrust-user-list */
-export interface SpotSubUserEntrustUserItem {
+export interface SpotSubUserEntrustUser {
   uid: number;
   subUserName: string;
 }
@@ -1116,8 +1117,8 @@ export interface SpotReferralRebateHistoryRecord {
   partner_total_commission_htx: string;
 }
 
-/** Referral rebate detail item from all_rebate/detail or batcher_rebate/detail */
-export interface SpotReferralRebateDetailItem {
+/** Referral rebate detail from all_rebate/detail or batcher_rebate/detail */
+export interface SpotReferralAllRebateDetail {
   invitee_uid: number;
   invitee_type: string;
   invitee_rebate_rate_spot_m2: string | null;
@@ -1135,7 +1136,7 @@ export interface SpotReferralRebateDetailItem {
 }
 
 /** P2P order from GET /v1/api/c2c/order/history */
-export interface SpotP2POrderHistoryItem {
+export interface SpotP2POrderHistory {
   orderNo: string;
   role: string;
   side: string;
@@ -1159,7 +1160,7 @@ export interface SpotEarnTieredRate {
 }
 
 /** Earn project from GET /v1/earn/project/queryEarnProjectList */
-export interface SpotEarnProjectItem {
+export interface SpotEarnProject {
   projectId: number;
   productId: number;
   calculationType: number;
@@ -1194,7 +1195,7 @@ export interface SpotEarnRedeemResult {
 }
 
 /** Earn user asset from GET /v1/earn/order/user/assets/list */
-export interface SpotEarnUserAssetItem {
+export interface SpotEarnUserAsset {
   projectId: number;
   orderId: number;
   projectType: number;
@@ -1207,7 +1208,7 @@ export interface SpotEarnUserAssetItem {
 }
 
 /** Referral invited user from GET /v2/invitee/rebate/referrals */
-export interface SpotReferralReferralItem {
+export interface SpotReferralReferral {
   id: number;
   invitee_uid: number;
   remark: string;

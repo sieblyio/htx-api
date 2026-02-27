@@ -4,8 +4,6 @@ import type {
   SpotAccountTransferReq,
   SpotBrokerAccountCapitalSnapshotReq,
   SpotBrokerSubUserFeeRateAddReq,
-  SpotBrokerSubUserFeeRateReq,
-  SpotBrokerUserRebateStatusReq,
   SpotCrossMarginLoanOrdersReq,
   SpotDepositWithdrawQueryReq,
   SpotEarnProjectListReq,
@@ -34,7 +32,6 @@ import type {
   SpotRepaymentRecordReq,
   SpotSubUserApiKeyCreationReq,
   SpotSubUserApiKeyUpdateReq,
-  SpotSubUserCreationReq,
   SpotSubUserDepositHistoryReq,
   SpotSubUserManagedTransferHistoryReq,
   SpotSubUserTradableMarketReq,
@@ -57,8 +54,8 @@ import { SpotAPISuccessResponse } from './types/response/shared.types.js';
 import {
   SpotAccount,
   SpotAccountBalance,
-  SpotAccountHistoryItem,
-  SpotAccountTransferData,
+  SpotAccountHistory,
+  SpotAccountTransferResult,
   SpotBrokerAccountCapitalSnapshot,
   SpotBrokerFeeRateAddResult,
   SpotBrokerSubUserFeeRate,
@@ -70,26 +67,26 @@ import {
   SpotDepositWithdrawRecord,
   SpotDepth,
   SpotDetailTick,
-  SpotEarnProjectItem,
+  SpotEarnProject,
   SpotEarnRedeemResult,
   SpotEarnSubscribeResult,
-  SpotEarnUserAssetItem,
+  SpotEarnUserAsset,
   SpotKline,
   SpotLastTrade,
   SpotMarginAccountBalance,
-  SpotMarginLimitItem,
+  SpotMarginLimit,
+  SpotMarginLoanInfo,
   SpotMarginLoanInfoCurrency,
-  SpotMarginLoanInfoItem,
   SpotMarginLoanOrder,
-  SpotMarginRepaymentResp,
+  SpotMarginRepaymentResult,
   SpotMarketStatusResponse,
   SpotMergedTicker,
-  SpotP2POrderHistoryItem,
+  SpotP2POrderHistory,
+  SpotReferralAllRebateDetail,
   SpotReferralRebateDetail,
-  SpotReferralRebateDetailItem,
   SpotReferralRebateHistoryRecord,
-  SpotReferralReferralItem,
-  SpotRepaymentRecordItem,
+  SpotReferralReferral,
+  SpotRepaymentRecord,
   SpotSubUserAccountsResult,
   SpotSubUserApiKey,
   SpotSubUserApiKeyCreationResult,
@@ -98,16 +95,16 @@ import {
   SpotSubUserCreationResult,
   SpotSubUserDeductModeResult,
   SpotSubUserDepositHistoryRecord,
-  SpotSubUserEntrustUserItem,
-  SpotSubUserListItem,
+  SpotSubUserEntrustUser,
+  SpotSubUserList,
   SpotSubUserLockStatusResult,
   SpotSubUserManagedTransferRecord,
-  SpotSubUsersAggregatedBalanceItem,
+  SpotSubUsersAggregatedBalance,
   SpotSubUserStatusResult,
   SpotSubUserTradableMarketResult,
   SpotSubUserTransferPermissionsResult,
   SpotSystemStatusPage,
-  SpotTickerItem,
+  SpotTicker,
   SpotTradeTimestampGroup,
   SpotTradingSymbol,
   SpotV1AccountOverviewInfo,
@@ -116,29 +113,28 @@ import {
   SpotV1CurrencySettings,
   SpotV1MarketSymbolSettings,
   SpotV1OpenOrder,
-  SpotV1OrderAutoPlaceData,
-  SpotV1OrderBatchCancelData,
-  SpotV1OrderBatchCancelOpenOrdersData,
-  SpotV1OrderBatchPlaceItem,
-  SpotV1OrderCancelByClientOrderIdData,
-  SpotV1OrderCancelData,
+  SpotV1OrderAutoPlaceResult,
+  SpotV1OrderBatchCancelOpenOrdersResult,
+  SpotV1OrderBatchCancelResult,
+  SpotV1OrderBatchPlaceResult,
+  SpotV1OrderCancelByClientOrderIdResult,
+  SpotV1OrderCancelResult,
   SpotV1OrderDetail,
-  SpotV1OrderHistory48hItem,
-  SpotV1OrderHistoryItem,
+  SpotV1OrderHistory,
+  SpotV1OrderHistory48h,
   SpotV1OrderMatchResult,
-  SpotV1OrderPlaceData,
   SpotV1SymbolSettings,
-  SpotV2AccountLedgerItem,
+  SpotV2AccountLedger,
   SpotV2AccountValuation,
   SpotV2AlgoOrder,
-  SpotV2AlgoOrdersCancelAllAfterData,
-  SpotV2AlgoOrdersCancellationResp,
-  SpotV2AlgoOrdersPlaceResp,
+  SpotV2AlgoOrdersCancelAllAfterResult,
+  SpotV2AlgoOrdersCancellationResult,
+  SpotV2AlgoOrdersPlaceResult,
   SpotV2AssetValuation,
   SpotV2CurrencyReference,
   SpotV2PointAccount,
-  SpotV2PointTransferData,
-  SpotV2TransactFeeRateItem,
+  SpotV2PointTransfer,
+  SpotV2TransactFeeRate,
   SpotVaspExchange,
   SpotWithdrawAddress,
   SpotWithdrawQuota,
@@ -318,7 +314,7 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns latest tickers for all supported pairs. No signature required.
    */
-  getTickers(): Promise<SpotAPISuccessResponse<SpotTickerItem[]>> {
+  getTickers(): Promise<SpotAPISuccessResponse<SpotTicker[]>> {
     return this.get('/market/tickers');
   }
 
@@ -434,7 +430,7 @@ export class SpotClient extends BaseRestClient {
    */
   submitTransfer(
     params: SpotAccountTransferReq,
-  ): Promise<SpotAPISuccessResponse<SpotAccountTransferData>> {
+  ): Promise<SpotAPISuccessResponse<SpotAccountTransferResult>> {
     return this.postPrivate('/v1/account/transfer', { body: params });
   }
 
@@ -446,7 +442,7 @@ export class SpotClient extends BaseRestClient {
   getAccountHistory(
     params: SpotGetAccountHistoryReq,
   ): Promise<
-    SpotAPISuccessResponse<SpotAccountHistoryItem[]> & { 'next-id'?: number }
+    SpotAPISuccessResponse<SpotAccountHistory[]> & { 'next-id'?: number }
   > {
     return this.getPrivate('/v1/account/history', params);
   }
@@ -459,7 +455,7 @@ export class SpotClient extends BaseRestClient {
   getAccountLedger(
     params?: SpotGetAccountLedgerReq,
   ): Promise<
-    SpotAPISuccessResponse<SpotV2AccountLedgerItem[]> & { nextId?: number }
+    SpotAPISuccessResponse<SpotV2AccountLedger[]> & { nextId?: number }
   > {
     return this.getPrivate('/v2/account/ledger', params);
   }
@@ -504,7 +500,7 @@ export class SpotClient extends BaseRestClient {
    */
   submitPointTransfer(
     params: SpotV2PointTransferReq,
-  ): Promise<SpotAPISuccessResponse<SpotV2PointTransferData>> {
+  ): Promise<SpotAPISuccessResponse<SpotV2PointTransfer>> {
     return this.postPrivate('/v2/point/transfer', { body: params });
   }
 
@@ -555,7 +551,7 @@ export class SpotClient extends BaseRestClient {
    */
   submitOrder(
     params: SpotV1OrderPlaceReq,
-  ): Promise<SpotAPISuccessResponse<SpotV1OrderPlaceData>> {
+  ): Promise<SpotAPISuccessResponse<string>> {
     return this.postPrivate('/v1/order/orders/place', { body: params });
   }
 
@@ -566,7 +562,7 @@ export class SpotClient extends BaseRestClient {
    */
   submitBatchOrders(
     params: SpotV1OrderBatchPlaceReq,
-  ): Promise<SpotAPISuccessResponse<SpotV1OrderBatchPlaceItem[]>> {
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderBatchPlaceResult[]>> {
     return this.postPrivate('/v1/order/batch-orders', { body: params });
   }
 
@@ -577,7 +573,7 @@ export class SpotClient extends BaseRestClient {
    */
   submitMarginOrder(
     params: SpotV1OrderAutoPlaceReq,
-  ): Promise<SpotAPISuccessResponse<SpotV1OrderAutoPlaceData>> {
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderAutoPlaceResult>> {
     return this.postPrivate('/v1/order/auto/place', { body: params });
   }
 
@@ -589,7 +585,7 @@ export class SpotClient extends BaseRestClient {
   cancelOrderById(params: {
     orderId: string;
     symbol?: string;
-  }): Promise<SpotAPISuccessResponse<SpotV1OrderCancelData>> {
+  }): Promise<SpotAPISuccessResponse<SpotV1OrderCancelResult>> {
     const { orderId, ...body } = params;
     return this.postPrivate(`/v1/order/orders/${orderId}/submitcancel`, {
       body: body,
@@ -603,7 +599,7 @@ export class SpotClient extends BaseRestClient {
    */
   cancelOrderByClientId(params: {
     'client-order-id': string;
-  }): Promise<SpotAPISuccessResponse<SpotV1OrderCancelByClientOrderIdData>> {
+  }): Promise<SpotAPISuccessResponse<SpotV1OrderCancelByClientOrderIdResult>> {
     return this.postPrivate('/v1/order/orders/submitCancelClientOrder', {
       body: params,
     });
@@ -638,7 +634,7 @@ export class SpotClient extends BaseRestClient {
    */
   batchCancelOpenOrders(
     params?: SpotV1OrderBatchCancelOpenOrdersReq,
-  ): Promise<SpotAPISuccessResponse<SpotV1OrderBatchCancelOpenOrdersData>> {
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderBatchCancelOpenOrdersResult>> {
     return this.postPrivate('/v1/order/orders/batchCancelOpenOrders', {
       body: params,
     });
@@ -652,7 +648,7 @@ export class SpotClient extends BaseRestClient {
   batchCancelOrders(params: {
     'order-ids'?: string[];
     'client-order-ids'?: string[];
-  }): Promise<SpotAPISuccessResponse<SpotV1OrderBatchCancelData>> {
+  }): Promise<SpotAPISuccessResponse<SpotV1OrderBatchCancelResult>> {
     return this.postPrivate('/v1/order/orders/batchcancel', { body: params });
   }
 
@@ -663,7 +659,7 @@ export class SpotClient extends BaseRestClient {
    */
   setCancelAllAfter(params: {
     timeout: number;
-  }): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancelAllAfterData>> {
+  }): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancelAllAfterResult>> {
     return this.postPrivate('/v2/algo-orders/cancel-all-after', {
       body: params,
     });
@@ -709,7 +705,7 @@ export class SpotClient extends BaseRestClient {
    */
   getOrderHistory(
     params: SpotGetOrderHistoryReq,
-  ): Promise<SpotAPISuccessResponse<SpotV1OrderHistoryItem[]>> {
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderHistory[]>> {
     return this.getPrivate('/v1/order/orders', params);
   }
 
@@ -720,7 +716,7 @@ export class SpotClient extends BaseRestClient {
    */
   getOrderHistory48h(
     params?: SpotGetOrderHistory48hReq,
-  ): Promise<SpotAPISuccessResponse<SpotV1OrderHistory48hItem[]>> {
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderHistory48h[]>> {
     return this.getPrivate('/v1/order/history', params);
   }
 
@@ -742,7 +738,7 @@ export class SpotClient extends BaseRestClient {
    */
   getFeeRate(params: {
     symbols: string;
-  }): Promise<SpotAPISuccessResponse<SpotV2TransactFeeRateItem[]>> {
+  }): Promise<SpotAPISuccessResponse<SpotV2TransactFeeRate[]>> {
     return this.getPrivate('/v2/reference/transact-fee-rate', params);
   }
 
@@ -759,7 +755,7 @@ export class SpotClient extends BaseRestClient {
    */
   placeConditionalOrder(
     params: SpotV2AlgoOrdersPlaceReq,
-  ): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersPlaceResp>> {
+  ): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersPlaceResult>> {
     return this.postPrivate('/v2/algo-orders', { body: params });
   }
 
@@ -770,7 +766,7 @@ export class SpotClient extends BaseRestClient {
    */
   cancelConditionalOrders(params: {
     clientOrderIds: string[];
-  }): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancellationResp>> {
+  }): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancellationResult>> {
     return this.postPrivate('/v2/algo-orders/cancellation', { body: params });
   }
 
@@ -821,7 +817,7 @@ export class SpotClient extends BaseRestClient {
   getRepaymentRecords(
     params?: SpotRepaymentRecordReq,
   ): Promise<
-    SpotAPISuccessResponse<SpotRepaymentRecordItem[]> & { nextId?: number }
+    SpotAPISuccessResponse<SpotRepaymentRecord[]> & { nextId?: number }
   > {
     return this.getPrivate('/v2/account/repayment', params);
   }
@@ -833,7 +829,7 @@ export class SpotClient extends BaseRestClient {
    */
   repayMarginLoan(
     params: SpotMarginRepaymentReq,
-  ): Promise<SpotAPISuccessResponse<SpotMarginRepaymentResp[]>> {
+  ): Promise<SpotAPISuccessResponse<SpotMarginRepaymentResult[]>> {
     return this.postPrivate('/v2/account/repayment', { body: params });
   }
 
@@ -866,7 +862,7 @@ export class SpotClient extends BaseRestClient {
    */
   getMarginLoanInfo(params?: {
     symbols?: string;
-  }): Promise<SpotAPISuccessResponse<SpotMarginLoanInfoItem[]>> {
+  }): Promise<SpotAPISuccessResponse<SpotMarginLoanInfo[]>> {
     return this.getPrivate('/v1/margin/loan-info', params);
   }
 
@@ -1010,7 +1006,7 @@ export class SpotClient extends BaseRestClient {
    */
   getCrossMarginLimit(params?: {
     currency?: string;
-  }): Promise<SpotAPISuccessResponse<SpotMarginLimitItem[]>> {
+  }): Promise<SpotAPISuccessResponse<SpotMarginLimit[]>> {
     return this.getPrivate('/v2/margin/limit', params);
   }
 
@@ -1119,9 +1115,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Check whether user meets rebate conditions. API brokers only. Signature required. Read permission. Rate: 20/2s.
    */
-  getBrokerUserRebateStatus(
-    params: SpotBrokerUserRebateStatusReq,
-  ): Promise<SpotAPISuccessResponse<SpotBrokerUserRebateStatus>> {
+  getBrokerUserRebateStatus(params: {
+    /** User UID to check */
+    queryUid: string;
+  }): Promise<SpotAPISuccessResponse<SpotBrokerUserRebateStatus>> {
     return this.getPrivate('/broker/v1/user_rebate_status', params);
   }
 
@@ -1130,9 +1127,12 @@ export class SpotClient extends BaseRestClient {
    *
    * Query sub-account commission/fee rate. Signature required. Read permission. Rate: 100/2s.
    */
-  getBrokerSubUserFeeRate(
-    params: SpotBrokerSubUserFeeRateReq,
-  ): Promise<SpotAPISuccessResponse<SpotBrokerSubUserFeeRate>> {
+  getBrokerSubUserFeeRate(params: {
+    /** Sub-account id (user_id, UID minus last digit) */
+    subUId: string;
+    /** 1 Spot, 2 U-standard linear, 3 Coin-Margined swap */
+    bizType: string;
+  }): Promise<SpotAPISuccessResponse<SpotBrokerSubUserFeeRate>> {
     return this.getPrivate('/broker/v1/sub-user/fee_rate', params);
   }
 
@@ -1206,9 +1206,12 @@ export class SpotClient extends BaseRestClient {
    *
    * Create sub users, max 50 at a time. Signature required. Trade permission.
    */
-  createSubUser(
-    params: SpotSubUserCreationReq,
-  ): Promise<SpotAPISuccessResponse<SpotSubUserCreationResult[]>> {
+  createSubUser(params: {
+    /** Sub users to create, max 50 */
+    userList: { userName: string; note?: string }[];
+    /** GENERAL (default), CONTACT, GRID, FIRE-BLOCK */
+    subAccountType?: string;
+  }): Promise<SpotAPISuccessResponse<SpotSubUserCreationResult[]>> {
     return this.postPrivate('/v2/sub-user/creation', { body: params });
   }
 
@@ -1219,9 +1222,7 @@ export class SpotClient extends BaseRestClient {
    */
   getSubUserList(params?: {
     fromId?: number;
-  }): Promise<
-    SpotAPISuccessResponse<SpotSubUserListItem[]> & { nextId?: number }
-  > {
+  }): Promise<SpotAPISuccessResponse<SpotSubUserList[]> & { nextId?: number }> {
     return this.getPrivate('/v2/sub-user/user-list', params);
   }
 
@@ -1363,7 +1364,7 @@ export class SpotClient extends BaseRestClient {
    * Returns aggregated balance from all sub-users. Signature required. Read permission. Rate: 2/2s.
    */
   getSubUsersAggregatedBalance(): Promise<
-    SpotAPISuccessResponse<SpotSubUsersAggregatedBalanceItem[]>
+    SpotAPISuccessResponse<SpotSubUsersAggregatedBalance[]>
   > {
     return this.getPrivate('/v1/subuser/aggregate-balance');
   }
@@ -1388,7 +1389,7 @@ export class SpotClient extends BaseRestClient {
     fromId?: number;
     limit?: number;
   }): Promise<
-    SpotAPISuccessResponse<{ list: SpotSubUserEntrustUserItem[] }> & {
+    SpotAPISuccessResponse<{ list: SpotSubUserEntrustUser[] }> & {
       nextId?: number;
     }
   > {
@@ -1439,7 +1440,7 @@ export class SpotClient extends BaseRestClient {
    * Query all rebate detail. Signature required. Read permission.
    */
   getReferralAllRebateDetail(params?: SpotReferralAllRebateDetailReq): Promise<
-    SpotAPISuccessResponse<SpotReferralRebateDetailItem[]> & {
+    SpotAPISuccessResponse<SpotReferralAllRebateDetail[]> & {
       nextId?: string;
     }
   > {
@@ -1453,7 +1454,7 @@ export class SpotClient extends BaseRestClient {
    */
   getReferralMultipleRebateDetail(params?: {
     inviteeUidList?: string;
-  }): Promise<SpotAPISuccessResponse<SpotReferralRebateDetailItem[]>> {
+  }): Promise<SpotAPISuccessResponse<SpotReferralAllRebateDetail[]>> {
     return this.getPrivate('/v2/invitee/rebate/batcher_rebate/detail', params);
   }
 
@@ -1465,7 +1466,7 @@ export class SpotClient extends BaseRestClient {
   getReferralInvitedUserList(
     params?: SpotReferralReferralsReq,
   ): Promise<
-    SpotAPISuccessResponse<SpotReferralReferralItem[]> & { nextId?: string }
+    SpotAPISuccessResponse<SpotReferralReferral[]> & { nextId?: string }
   > {
     return this.getPrivate('/v2/invitee/rebate/referrals', params);
   }
@@ -1484,7 +1485,7 @@ export class SpotClient extends BaseRestClient {
   getP2POrderHistory(params?: SpotP2POrderHistoryReq): Promise<
     SpotAPISuccessResponse<{
       ts: number;
-      openApiC2COrderInfoVOList: SpotP2POrderHistoryItem[];
+      openApiC2COrderInfoVOList: SpotP2POrderHistory[];
     }>
   > {
     return this.get('/v1/api/c2c/order/history', params);
@@ -1504,7 +1505,7 @@ export class SpotClient extends BaseRestClient {
   getEarnProjectList(
     params: SpotEarnProjectListReq,
   ): Promise<
-    SpotAPISuccessResponse<{ total: number; items: SpotEarnProjectItem[] }>
+    SpotAPISuccessResponse<{ total: number; items: SpotEarnProject[] }>
   > {
     return this.getPrivate('/v1/earn/project/queryEarnProjectList', params);
   }
@@ -1541,7 +1542,7 @@ export class SpotClient extends BaseRestClient {
   getEarnUserAssets(
     params: SpotEarnUserAssetsReq,
   ): Promise<
-    SpotAPISuccessResponse<{ total: number; items: SpotEarnUserAssetItem[] }>
+    SpotAPISuccessResponse<{ total: number; items: SpotEarnUserAsset[] }>
   > {
     return this.getPrivate('/v1/earn/order/user/assets/list', params);
   }
