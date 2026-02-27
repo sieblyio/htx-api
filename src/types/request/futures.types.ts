@@ -2583,3 +2583,111 @@ export interface FuturesCmPerpSettlementRecordsReq {
   page_index?: number;
   page_size?: number;
 }
+
+/**
+ * Copy Trading
+ */
+
+/** Req for GET /api/v6/copyTrading/trader/instruments. Product type PERP or omit for all. */
+export interface FuturesCopyTraderInstrumentsReq {
+  /** Product type. PERP = Perpetual Swap. Omit to return all. */
+  instType?: 'PERP';
+}
+
+/** Req for GET /api/v6/copyTrading/trader/statistics. Product type required. */
+export interface FuturesCopyTraderStatisticsReq {
+  /** Product type. PERP = Perpetual Swap */
+  instType: 'PERP';
+}
+
+/** Req for GET /api/v6/copyTrading/trader/profit-sharing-history. Historical profit sharing details. */
+export interface FuturesCopyTraderProfitSharingHistoryReq {
+  /** Product type. PERP = Perpetual Swap */
+  instType: 'PERP';
+  /** Product ID e.g. BTC-USDT-PERP */
+  instId?: string;
+  /** Filter start time (inclusive), Unix timestamp in microseconds */
+  begin?: string;
+  /** Filter end time (inclusive), Unix timestamp in microseconds */
+  end?: string;
+  /** Paginate content before (older data) this ID (exclusive) */
+  after?: string;
+  /** Paginate content after (newer data) this ID (exclusive) */
+  before?: string;
+  /** Number of results to return, max 100, default 100 */
+  limit?: string;
+}
+
+/** Req for GET /api/v6/copyTrading/trader/profit-sharing-history-summary. Historical profit sharing summary. */
+export interface FuturesCopyTraderProfitSharingHistorySummaryReq {
+  /** Product type. PERP = Perpetual Swap */
+  instType: 'PERP';
+}
+
+/** Req for GET /api/v6/copyTrading/trader/unrealized-profit-sharing-summary. Unrealized profit sharing summary. */
+export interface FuturesCopyTraderUnrealizedProfitSharingSummaryReq {
+  /** Product type. PERP = Perpetual Swap */
+  instType: 'PERP';
+  /** Profit sharing currency */
+  ccy?: string;
+}
+
+/** Req for GET /api/v6/copyTrading/trader/followers. Trader query followers. */
+export interface FuturesCopyTraderFollowersReq {
+  /** Product type. PERP = Perpetual Swap. Omit to return all. */
+  instType?: 'PERP';
+  /** Filter start time (inclusive), Unix timestamp in microseconds */
+  begin?: string;
+  /** Filter end time (inclusive), Unix timestamp in microseconds */
+  end?: string;
+  /** Paginate content before (older data) this ID (exclusive) */
+  after?: string;
+  /** Paginate content after (newer data) this ID (exclusive) */
+  before?: string;
+  /** Number of results to return, max 100, default 100 */
+  limit?: string;
+}
+
+/** Req for POST /api/v6/copyTrading/trader/follower. Trader remove follower. Max 10 followers at once. */
+export interface FuturesCopyTraderFollowerRemoveReq {
+  /** Follower user IDs */
+  followerUids: string[];
+  /** Product type. PERP = Perpetual Swap */
+  instType: 'PERP';
+}
+
+/** Req for POST /api/v6/copyTrading/trader/transfer. Trader account transfer. */
+export interface FuturesCopyTraderTransferReq {
+  /** Amount to transfer */
+  amt: string;
+  /** Source account: 1=Spot, 2=USDT-Margined Contract, 4=Contract Copy Trading */
+  from: string;
+  /** Destination account: 1=Spot, 2=USDT-Margined Contract, 4=Contract Copy Trading */
+  to: string;
+  /** Currency, default USDT */
+  ccy?: string;
+}
+
+/** Req for POST /api/v6/copyTrading/trader/follower-settings. Trader set lead trading config. */
+export interface FuturesCopyTraderFollowerSettingsReq {
+  /** Product type. PERP = Perpetual Swap */
+  instType: 'PERP';
+  /** Enable or disable copy trading */
+  enable: boolean;
+  /** Profit sharing ratio when enabling: 0.1|0.15|0.2|0.25 */
+  profitSharingRatio?: string;
+  /** Max followers when enabling: 100|200|500|1000 */
+  maxFollowers?: string;
+}
+
+/** Req for POST /api/v6/copyTrading/trader/config. Trader view lead trading config. */
+export interface FuturesCopyTraderConfigReq {
+  /** Product type. PERP = Perpetual Swap */
+  instType: 'PERP';
+}
+
+/** Req for POST /api/v6/copyTrading/trader/apikey. Trader create lead trading API key. */
+export interface FuturesCopyTraderApikeyReq {
+  /** Product type. PERP = Perpetual Swap */
+  instType: 'PERP';
+}

@@ -102,6 +102,17 @@ import type {
   FuturesCmPerpTriggerHistoryOrdersReq,
   FuturesCmPerpTriggerOpenOrdersReq,
   FuturesCmPerpTriggerOrderReq,
+  FuturesCopyTraderApikeyReq,
+  FuturesCopyTraderConfigReq,
+  FuturesCopyTraderFollowerRemoveReq,
+  FuturesCopyTraderFollowerSettingsReq,
+  FuturesCopyTraderFollowersReq,
+  FuturesCopyTraderInstrumentsReq,
+  FuturesCopyTraderProfitSharingHistoryReq,
+  FuturesCopyTraderProfitSharingHistorySummaryReq,
+  FuturesCopyTraderStatisticsReq,
+  FuturesCopyTraderTransferReq,
+  FuturesCopyTraderUnrealizedProfitSharingSummaryReq,
   FuturesCrossSubmitOrderReq,
   FuturesGetBasisDataReq,
   FuturesGetContractInfoReq,
@@ -281,6 +292,14 @@ import type {
   FuturesCmPerpUpdateSubPermissions,
   FuturesContractElements,
   FuturesContractInfo,
+  FuturesCopyTraderApikey,
+  FuturesCopyTraderConfig,
+  FuturesCopyTraderFollower,
+  FuturesCopyTraderFollowerRemoveResult,
+  FuturesCopyTraderInstrument,
+  FuturesCopyTraderProfitSharingHistory,
+  FuturesCopyTraderProfitSharingSummary,
+  FuturesCopyTraderStatistics,
   FuturesCrossAccountInfo,
   FuturesCrossAccountPosition,
   FuturesCrossAvailableLevelRate,
@@ -4701,6 +4720,160 @@ export class FuturesClient extends BaseRestClient {
     params: FuturesCmPerpTrailingHisOrdersReq,
   ): Promise<FuturesAPISuccessResponse<FuturesCmPerpTrailingHisOrders>> {
     return this.postPrivate('/swap-api/v1/swap_track_hisorders', {
+      body: params,
+    });
+  }
+
+  /**
+   * Futures Copy Trading
+   *
+   * Main Account ApiKey only. Trader-side endpoints for lead trading.
+   */
+
+  /**
+   * Trader Query Lead Trading Products
+   *
+   * Query which products are available for lead trading. Read permission. Rate limit: 5/s per UID.
+   */
+  getCopyTraderInstruments(
+    params?: FuturesCopyTraderInstrumentsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCopyTraderInstrument[]>> {
+    return this.getPrivate('/api/v6/copyTrading/trader/instruments', params);
+  }
+
+  /**
+   * Trader Query Lead Trading Metrics
+   *
+   * Query own lead trading metric statistics. Read permission. Rate limit: 5/s per UID.
+   */
+  getCopyTraderStatistics(
+    params: FuturesCopyTraderStatisticsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCopyTraderStatistics[]>> {
+    return this.getPrivate('/api/v6/copyTrading/trader/statistics', params);
+  }
+
+  /**
+   * Trader Historical Profit Sharing Details
+   *
+   * Query historical lead trading profit sharing details. Main Account ApiKey only. Read permission. Rate limit: 5/s per UID.
+   */
+  getCopyTraderProfitSharingHistory(
+    params: FuturesCopyTraderProfitSharingHistoryReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesCopyTraderProfitSharingHistory[]>
+  > {
+    return this.getPrivate(
+      '/api/v6/copyTrading/trader/profit-sharing-history',
+      params,
+    );
+  }
+
+  /**
+   * Trader Historical Profit Sharing Summary
+   *
+   * Query historical lead trading profit sharing summary. Main Account ApiKey only. Read permission. Rate limit: 5/s per UID.
+   */
+  getCopyTraderProfitSharingHistorySummary(
+    params: FuturesCopyTraderProfitSharingHistorySummaryReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesCopyTraderProfitSharingSummary[]>
+  > {
+    return this.getPrivate(
+      '/api/v6/copyTrading/trader/profit-sharing-history-summary',
+      params,
+    );
+  }
+
+  /**
+   * Trader Query Unrealized Profit Sharing Summary
+   *
+   * Query unrealized profit sharing information. Main Account ApiKey only. Read permission. Rate limit: 5/s per UID.
+   */
+  getCopyTraderUPNLSharingSummary(
+    params: FuturesCopyTraderUnrealizedProfitSharingSummaryReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesCopyTraderProfitSharingSummary[]>
+  > {
+    return this.getPrivate(
+      '/api/v6/copyTrading/trader/unrealized-profit-sharing-summary',
+      params,
+    );
+  }
+
+  /**
+   * Trader Query Followers
+   *
+   * Query follower information. Main Account ApiKey only. Read permission. Rate limit: 5/s per UID.
+   */
+  getCopyTraderFollowers(
+    params?: FuturesCopyTraderFollowersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCopyTraderFollower[]>> {
+    return this.getPrivate('/api/v6/copyTrading/trader/followers', params);
+  }
+
+  /**
+   * Trader Remove Follower
+   *
+   * Remove specific followers (max 10 at once). Main Account ApiKey only. Trade permission. Rate limit: 5/s per UID.
+   */
+  removeCopyTraderFollower(
+    params: FuturesCopyTraderFollowerRemoveReq,
+  ): Promise<
+    FuturesAPISuccessResponse<FuturesCopyTraderFollowerRemoveResult[]>
+  > {
+    return this.postPrivate('/api/v6/copyTrading/trader/follower', {
+      body: params,
+    });
+  }
+
+  /**
+   * Trader Account Transfer
+   *
+   * Transfer copy trading funds (USDT). Main Account ApiKey only. Read permission. Rate limit: 5/s per UID.
+   */
+  submitCopyTraderTransfer(
+    params: FuturesCopyTraderTransferReq,
+  ): Promise<FuturesAPISuccessResponse<[]>> {
+    return this.postPrivate('/api/v6/copyTrading/trader/transfer', {
+      body: params,
+    });
+  }
+
+  /**
+   * Trader Set Lead Trading Configuration
+   *
+   * Enable/disable copy trading, set profit sharing ratio and max followers. Main Account ApiKey only. Trade permission. Rate limit: 5/s per UID.
+   */
+  updateCopyTraderFollowerSettings(
+    params: FuturesCopyTraderFollowerSettingsReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCopyTraderConfig[]>> {
+    return this.postPrivate('/api/v6/copyTrading/trader/follower-settings', {
+      body: params,
+    });
+  }
+
+  /**
+   * Trader View Lead Trading Configuration
+   *
+   * View lead trading configuration. Main Account ApiKey only. Read permission. Rate limit: 5/s per UID.
+   */
+  getCopyTraderConfig(
+    params: FuturesCopyTraderConfigReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCopyTraderConfig[]>> {
+    return this.postPrivate('/api/v6/copyTrading/trader/config', {
+      body: params,
+    });
+  }
+
+  /**
+   * Trader Create Lead Trading API Key
+   *
+   * Create API key for lead trading (max 20). Main Account ApiKey only. Trade permission. Rate limit: 5/s per UID.
+   */
+  createCopyTraderApikey(
+    params: FuturesCopyTraderApikeyReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesCopyTraderApikey[]>> {
+    return this.postPrivate('/api/v6/copyTrading/trader/apikey', {
       body: params,
     });
   }

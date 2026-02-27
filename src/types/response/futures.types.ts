@@ -3738,3 +3738,89 @@ export interface FuturesCmDeliveryQueryElements {
   contract_infos?: FuturesCmDeliveryQueryElementsContractInfo[];
   order_limits?: FuturesCmDeliveryQueryElementsOrderLimit[];
 }
+
+/**
+ * Copy Trading
+ */
+
+/** Lead trading instrument from GET /api/v6/copyTrading/trader/instruments */
+export interface FuturesCopyTraderInstrument {
+  instId: string;
+  instType: string;
+}
+
+/** Profit detail item in trader statistics */
+export interface FuturesCopyTraderProfitDetail {
+  pnlRate: string;
+  pnl: string;
+  ts: string;
+}
+
+/** Trader lead trading metrics from GET /api/v6/copyTrading/trader/statistics */
+export interface FuturesCopyTraderStatistics {
+  instType: string;
+  totalFollowerNum: string;
+  curFollowerNum: string;
+  totalPnl: string;
+  followerTotalPnl: string;
+  winRate: string;
+  winNum: string;
+  lossNum: string;
+  profitDetails24h?: FuturesCopyTraderProfitDetail[];
+  profitDetails90d: FuturesCopyTraderProfitDetail[];
+}
+
+/** Profit sharing history item from GET /api/v6/copyTrading/trader/profit-sharing-history */
+export interface FuturesCopyTraderProfitSharingHistory {
+  id: string;
+  instType: string;
+  followerName: string;
+  ccy: string;
+  profitSharingAmt: string;
+  ts: string;
+}
+
+/** Profit sharing summary from GET /api/v6/copyTrading/trader/profit-sharing-history-summary or unrealized-profit-sharing-summary */
+export interface FuturesCopyTraderProfitSharingSummary {
+  instType: string;
+  ccy: string;
+  totalAmt: string;
+}
+
+/** Follower info from GET /api/v6/copyTrading/trader/followers */
+export interface FuturesCopyTraderFollower {
+  id: string;
+  instType: string;
+  followerAvatarLink: string;
+  followerName: string;
+  followerUid: string;
+  followTime: string;
+  followerAssetAmt: string;
+  followerProfitSharingAmt: string;
+  followerTradeAmt: string;
+  totalProfitSharingAmt: string;
+}
+
+/** Remove follower result item from POST /api/v6/copyTrading/trader/follower */
+export interface FuturesCopyTraderFollowerRemoveResult {
+  followerUid: string;
+  scode: string;
+  smsg: string;
+}
+
+/** Lead trading config from GET /api/v6/copyTrading/trader/config or POST follower-settings */
+export interface FuturesCopyTraderConfig {
+  instType: string;
+  enable: boolean;
+  profitSharingRatio: string;
+  maxFollowers: string;
+}
+
+/** Lead trading API key from POST /api/v6/copyTrading/trader/apikey */
+export interface FuturesCopyTraderApikey {
+  label: string;
+  accessKey: string;
+  secretKey: string;
+  perm: string[];
+  ts: string;
+}
