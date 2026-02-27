@@ -937,6 +937,157 @@ export interface SpotBrokerAccountCapitalSnapshot {
   dataList: unknown[];
 }
 
+/** Deduct mode result item from POST /v2/sub-user/deduct-mode */
+export interface SpotSubUserDeductModeResult {
+  subUid: string;
+  deductMode: string | null;
+  errCode?: string;
+  errMessage?: string;
+}
+
+/** API key from getSubUserApiKey */
+export interface SpotSubUserApiKey {
+  accessKey: string;
+  status: string;
+  note: string;
+  permission: string;
+  ipAddresses: string;
+  validDays: number;
+  createTime: number;
+  updateTime: number;
+}
+
+/** Sub user creation result item from POST /v2/sub-user/creation */
+export interface SpotSubUserCreationResult {
+  userName: string;
+  note?: string;
+  uid?: number;
+  errCode?: string;
+  errMessage?: string;
+}
+
+/** Sub user list item from GET /v2/sub-user/user-list */
+export interface SpotSubUserListItem {
+  uid: number;
+  userState: string;
+  subUserName: string;
+  note: string;
+}
+
+/** Result from updateSubUserLockStatus */
+export interface SpotSubUserLockStatusResult {
+  subUid: number;
+  userState: string;
+}
+
+/** Result from getSubUserStatus */
+export interface SpotSubUserStatusResult {
+  uid: number;
+  userState: string;
+}
+
+/** Tradable market result item from POST /v2/sub-user/tradable-market */
+export interface SpotSubUserTradableMarketResult {
+  subUid: string;
+  accountType: string;
+  activation: string;
+  errCode?: number;
+  errMessage?: string;
+}
+
+/** Result item from setSubUserTransferPermissions */
+export interface SpotSubUserTransferPermissionsResult {
+  subUid: number;
+  accountType: string;
+  transferrable: boolean;
+  errCode?: number;
+  errMessage?: string;
+}
+
+/** Account ID from sub user account list */
+export interface SpotSubUserAccountId {
+  accountId: number;
+  subType?: string;
+  accountStatus?: string;
+}
+
+/** Account list item from sub user account list */
+export interface SpotSubUserAccountListItem {
+  accountType: string;
+  activation: string;
+  transferrable?: boolean;
+  accountIds?: SpotSubUserAccountId[];
+}
+
+/** Result from getSubUserAccounts */
+export interface SpotSubUserAccountsResult {
+  uid: number;
+  deductMode: string;
+  list: SpotSubUserAccountListItem[];
+}
+
+/** Result from createSubUserApiKey */
+export interface SpotSubUserApiKeyCreationResult {
+  accessKey: string;
+  secretKey: string;
+  note: string;
+  permission: string;
+  ipAddresses: string;
+}
+
+/** Result from updateSubUserApiKey */
+export interface SpotSubUserApiKeyUpdateResult {
+  note: string;
+  permission: string;
+  ipAddresses: string;
+}
+
+/** Record from getSubUserDepositHistory */
+export interface SpotSubUserDepositHistoryRecord {
+  id: number;
+  currency: string;
+  txHash: string;
+  chain: string;
+  amount: number;
+  address: string;
+  addressTag: string;
+  state: string;
+  createTime: number;
+  updateTime: number;
+}
+
+/** Item from getSubUsersAggregatedBalance */
+export interface SpotSubUsersAggregatedBalanceItem {
+  currency: string;
+  type: string;
+  balance: string;
+}
+
+/** Result from getSubUserBalance */
+export interface SpotSubUserBalanceResult {
+  id: number;
+  type: string;
+  state: string;
+  list: SpotAccountBalanceItem[];
+  symbol?: string;
+}
+
+/** Custody sub-account from GET /v2/sub-user/entrust-user-list */
+export interface SpotSubUserEntrustUserItem {
+  uid: number;
+  subUserName: string;
+}
+
+/** Managed transfer record from GET /v2/sub-user/managed-transfer-history */
+export interface SpotSubUserManagedTransferRecord {
+  currency: string;
+  type: string;
+  amount: number;
+  uid: number;
+  subUserName: string;
+  query_id?: string;
+}
+
 /** Open order from GET /v1/order/openOrders */
 export interface SpotV1OpenOrder {
   id: number;

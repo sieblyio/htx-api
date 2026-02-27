@@ -24,6 +24,14 @@ import type {
   SpotMarginTransferInIsolatedReq,
   SpotMarginTransferOutIsolatedReq,
   SpotRepaymentRecordReq,
+  SpotSubUserApiKeyCreationReq,
+  SpotSubUserApiKeyUpdateReq,
+  SpotSubUserCreationReq,
+  SpotSubUserDepositHistoryReq,
+  SpotSubUserManagedTransferHistoryReq,
+  SpotSubUserTradableMarketReq,
+  SpotSubUserTransferPermissionsReq,
+  SpotSubUserTransferReq,
   SpotV1FuturesTransferReq,
   SpotV1OrderAutoPlaceReq,
   SpotV1OrderBatchCancelOpenOrdersReq,
@@ -65,6 +73,22 @@ import {
   SpotMarketStatusResponse,
   SpotMergedTicker,
   SpotRepaymentRecordItem,
+  SpotSubUserAccountsResult,
+  SpotSubUserApiKey,
+  SpotSubUserApiKeyCreationResult,
+  SpotSubUserApiKeyUpdateResult,
+  SpotSubUserBalanceResult,
+  SpotSubUserCreationResult,
+  SpotSubUserDeductModeResult,
+  SpotSubUserDepositHistoryRecord,
+  SpotSubUserEntrustUserItem,
+  SpotSubUserListItem,
+  SpotSubUserLockStatusResult,
+  SpotSubUserManagedTransferRecord,
+  SpotSubUsersAggregatedBalanceItem,
+  SpotSubUserStatusResult,
+  SpotSubUserTradableMarketResult,
+  SpotSubUserTransferPermissionsResult,
   SpotSystemStatusPage,
   SpotTickerItem,
   SpotTradeTimestampGroup,
@@ -1119,5 +1143,249 @@ export class SpotClient extends BaseRestClient {
     return this.postPrivate('/broker/v1/account_capital_snapshot_everyday', {
       body: params,
     });
+  }
+
+  /**
+   *
+   * SubAccount Management
+   *
+   */
+
+  /**
+   * Set Deduction Mode
+   *
+   * Set deduction fee (HT or point) for parent and sub user. Signature required. Trade permission.
+   */
+  updateSubUserDeductMode(params?: {
+    subUids?: string;
+    deductMode?: 'master' | 'sub';
+  }): Promise<SpotAPISuccessResponse<SpotSubUserDeductModeResult[]>> {
+    return this.postPrivate('/v2/sub-user/deduct-mode', { body: params });
+  }
+
+  /**
+   * Query API Key
+   *
+   * Query own or sub user's API key info. Signature required. Read permission.
+   */
+  getSubUserApiKey(params?: {
+    uid?: number;
+    accessKey?: string;
+  }): Promise<SpotAPISuccessResponse<SpotSubUserApiKey[]>> {
+    return this.getPrivate('/v2/user/api-key', params);
+  }
+
+  /**
+   * Get UID
+   *
+   * Get current user's UID. Signature required. Read permission.
+   */
+  getUserUid(): Promise<SpotAPISuccessResponse<number>> {
+    return this.getPrivate('/v2/user/uid');
+  }
+
+  /**
+   * Create Sub Users
+   *
+   * Create sub users, max 50 at a time. Signature required. Trade permission.
+   */
+  createSubUser(
+    params: SpotSubUserCreationReq,
+  ): Promise<SpotAPISuccessResponse<SpotSubUserCreationResult[]>> {
+    return this.postPrivate('/v2/sub-user/creation', { body: params });
+  }
+
+  /**
+   * Get Sub User List
+   *
+   * Query full list of sub users with UID and status. Signature required. Read permission.
+   */
+  getSubUserList(params?: {
+    fromId?: number;
+  }): Promise<
+    SpotAPISuccessResponse<SpotSubUserListItem[]> & { nextId?: number }
+  > {
+    return this.getPrivate('/v2/sub-user/user-list', params);
+  }
+
+  /**
+   * Lock/Unlock Sub User
+   *
+   * Lock or unlock a sub user. Signature required. Trade permission. Rate: 20/2s.
+   */
+  updateSubUserLockStatus(params: {
+    subUid: number;
+    action: 'lock' | 'unlock';
+  }): Promise<SpotAPISuccessResponse<SpotSubUserLockStatusResult>> {
+    return this.postPrivate('/v2/sub-user/management', { body: params });
+  }
+
+  /**
+   * Get Sub User Status
+   *
+   * Query sub user status by UID. Signature required. Read permission.
+   */
+  getSubUserStatus(
+    subUid: number,
+  ): Promise<SpotAPISuccessResponse<SpotSubUserStatusResult>> {
+    return this.getPrivate('/v2/sub-user/user-state', { subUid });
+  }
+
+  /**
+   * Set Tradable Market for Sub Users
+   *
+   * Set tradable market (isolated/cross margin) for sub users. Signature required. Trade permission.
+   */
+  setSubUserTradableMarket(
+    params: SpotSubUserTradableMarketReq,
+  ): Promise<SpotAPISuccessResponse<SpotSubUserTradableMarketResult[]>> {
+    return this.postPrivate('/v2/sub-user/tradable-market', { body: params });
+  }
+
+  /**
+   * Set Asset Transfer Permission for Sub Users
+   *
+   * Set asset transfer permission for sub users. Signature required. Trade permission.
+   */
+  setSubUserTransferPermissions(
+    params: SpotSubUserTransferPermissionsReq,
+  ): Promise<SpotAPISuccessResponse<SpotSubUserTransferPermissionsResult[]>> {
+    return this.postPrivate('/v2/sub-user/transferability', { body: params });
+  }
+
+  /**
+   * Get Sub User Account List
+   *
+   * Query account list of sub user by UID. Signature required. Read permission.
+   */
+  getSubUserAccounts(
+    subUid: number,
+  ): Promise<SpotAPISuccessResponse<SpotSubUserAccountsResult>> {
+    return this.getPrivate('/v2/sub-user/account-list', { subUid });
+  }
+
+  /**
+   * Create Sub User API Key
+   *
+   * Create API key for sub user. Signature required. Trade permission.
+   */
+  createSubUserApiKey(
+    params: SpotSubUserApiKeyCreationReq,
+  ): Promise<SpotAPISuccessResponse<SpotSubUserApiKeyCreationResult>> {
+    return this.postPrivate('/v2/sub-user/api-key-generation', {
+      body: params,
+    });
+  }
+
+  /**
+   * Modify Sub User API Key
+   *
+   * Modify sub user's API key. Signature required. Trade permission.
+   */
+  updateSubUserApiKey(
+    params: SpotSubUserApiKeyUpdateReq,
+  ): Promise<SpotAPISuccessResponse<SpotSubUserApiKeyUpdateResult>> {
+    return this.postPrivate('/v2/sub-user/api-key-modification', {
+      body: params,
+    });
+  }
+
+  /**
+   * Delete Sub User API Key
+   *
+   * Delete sub user's API key. Signature required. Trade permission.
+   */
+  deleteSubUserApiKey(params: {
+    subUid: number;
+    accessKey: string;
+  }): Promise<SpotAPISuccessResponse<null>> {
+    return this.postPrivate('/v2/sub-user/api-key-deletion', {
+      body: params,
+    });
+  }
+
+  /**
+   * Transfer Asset between Parent and Sub Account
+   *
+   * Transfer asset between parent and sub account. Signature required. Trade permission. Rate: 2/2s.
+   */
+  submitSubUserTransfer(
+    params: SpotSubUserTransferReq,
+  ): Promise<SpotAPISuccessResponse<number>> {
+    return this.postPrivate('/v1/subuser/transfer', { body: params });
+  }
+
+  /**
+   * Query Sub User Deposit Address
+   *
+   * Query sub user's deposit address per chain. Signature required. Read permission.
+   */
+  getSubUserDepositAddress(params: {
+    subUid: number;
+    currency?: string;
+  }): Promise<SpotAPISuccessResponse<SpotDepositAddress[]>> {
+    return this.getPrivate('/v2/sub-user/deposit-address', params);
+  }
+
+  /**
+   * Query Sub User Deposit History
+   *
+   * Query sub user's deposit history. Signature required. Read permission.
+   */
+  getSubUserDepositHistory(params: SpotSubUserDepositHistoryReq): Promise<
+    SpotAPISuccessResponse<SpotSubUserDepositHistoryRecord[]> & {
+      nextId?: number;
+    }
+  > {
+    return this.getPrivate('/v2/sub-user/query-deposit', params);
+  }
+
+  /**
+   * Get Aggregated Balance of All Sub Users
+   *
+   * Returns aggregated balance from all sub-users. Signature required. Read permission. Rate: 2/2s.
+   */
+  getSubUsersAggregatedBalance(): Promise<
+    SpotAPISuccessResponse<SpotSubUsersAggregatedBalanceItem[]>
+  > {
+    return this.getPrivate('/v1/subuser/aggregate-balance');
+  }
+
+  /**
+   * Get Account Balance of a Sub-User
+   *
+   * Returns balance of sub-user by sub-uid. Signature required. Read permission. Rate: 20/2s.
+   */
+  getSubUserBalance(
+    subUid: number,
+  ): Promise<SpotAPISuccessResponse<SpotSubUserBalanceResult[]>> {
+    return this.getPrivate(`/v1/account/accounts/${subUid}`);
+  }
+
+  /**
+   * Get Custody Trading Sub-Account List
+   *
+   * Query list of sub-accounts currently being managed. Read permission.
+   */
+  getSubUserEntrustUserList(params?: {
+    fromId?: number;
+    limit?: number;
+  }): Promise<
+    SpotAPISuccessResponse<{ list: SpotSubUserEntrustUserItem[] }> & {
+      nextId?: number;
+    }
+  > {
+    return this.getPrivate('/v2/sub-user/entrust-user-list', params);
+  }
+
+  /**
+   * Get Managed Sub-Account Transfer History
+   *
+   * Query transfer records of managed sub-accounts. Read permission.
+   */
+  getSubUserManagedTransferHistory(
+    params?: SpotSubUserManagedTransferHistoryReq,
+  ): Promise<SpotAPISuccessResponse<SpotSubUserManagedTransferRecord[]>> {
+    return this.getPrivate('/v2/sub-user/managed-transfer-history', params);
   }
 }

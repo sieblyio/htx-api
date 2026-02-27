@@ -576,6 +576,118 @@ export interface SpotBrokerAccountCapitalSnapshotReq {
   end_time?: number;
 }
 
+/** Req for POST /v2/sub-user/tradable-market. Set tradable market for sub users. */
+export interface SpotSubUserTradableMarketReq {
+  /** Sub user UIDs, comma-separated, max 50 */
+  subUids: string;
+  /** isolated-margin or cross-margin */
+  accountType: 'isolated-margin' | 'cross-margin';
+  /** activated or deactivated */
+  activation: 'activated' | 'deactivated';
+}
+
+/** Req for setSubUserTransferPermissions. Set asset transfer permission. */
+export interface SpotSubUserTransferPermissionsReq {
+  /** Sub user UIDs, comma-separated, max 50 */
+  subUids: string;
+  /** true or false */
+  transferrable: boolean;
+  /** Account type. Default spot. */
+  accountType?: 'spot';
+}
+
+/** Req for POST /v1/subuser/transfer. Transfer asset between parent and sub account. */
+export interface SpotSubUserTransferReq {
+  /** Sub account UID */
+  'sub-uid': number;
+  /** Currency e.g. btc, usdt */
+  currency: string;
+  /** Amount to transfer */
+  amount: string;
+  /** master-transfer-in, master-transfer-out, master-point-transfer-in, master-point-transfer-out */
+  type:
+    | 'master-transfer-in'
+    | 'master-transfer-out'
+    | 'master-point-transfer-in'
+    | 'master-point-transfer-out';
+  /** Client order id for idempotency */
+  'client-order-id'?: string;
+}
+
+/** Req for getSubUserDepositHistory. Query sub user deposit history. */
+export interface SpotSubUserDepositHistoryReq {
+  /** Sub user UID */
+  subUid: number;
+  /** Crypto currency. Omit for all. */
+  currency?: string;
+  /** Start time (ms). Default endTime - 30 days. */
+  startTime?: number;
+  /** End time (ms). Default now. */
+  endTime?: number;
+  /** asc or desc */
+  sort?: 'asc' | 'desc';
+  /** Items per page [1-500]. Default 100. */
+  limit?: number;
+  /** First record ID for next page. */
+  fromId?: number;
+}
+
+/** Req for GET /v2/sub-user/managed-transfer-history. Managed sub-account transfer history. */
+export interface SpotSubUserManagedTransferHistoryReq {
+  /** Sub user UID. Omit for all managed sub-accounts. */
+  uid?: number;
+  /** Currency filter */
+  currency?: string;
+  /** 0: master to sub, 1: sub to master */
+  type?: string;
+  /** Start time (ms). Max 48h window, within 120 days. */
+  startTime?: number;
+  /** End time (ms). */
+  endTime?: number;
+  /** Search id to begin with. */
+  from?: string;
+  /** next or prev. Default next. */
+  direct?: 'next' | 'prev';
+  /** Items to return [1-100]. Default 100. */
+  size?: string;
+}
+
+/** Req for createSubUserApiKey. Create sub user API key. */
+export interface SpotSubUserApiKeyCreationReq {
+  /** Sub user UID */
+  subUid: number;
+  /** Google OTP (6 digits) if parent has 2FA */
+  otpToken?: string;
+  /** API key note, max 255 chars */
+  note?: string;
+  /** readOnly, trade. readOnly required. Comma-separated. */
+  permission?: string;
+  /** IP addresses, comma-separated, max 20 */
+  ipAddresses?: string;
+}
+
+/** Req for updateSubUserApiKey. Modify sub user API key. */
+export interface SpotSubUserApiKeyUpdateReq {
+  /** Sub user UID */
+  subUid: number;
+  /** Access key to modify */
+  accessKey: string;
+  /** API key note, max 255 chars */
+  note?: string;
+  /** readOnly, trade. Comma-separated. */
+  permission?: string;
+  /** IP addresses, comma-separated, max 20 */
+  ipAddresses?: string;
+}
+
+/** Req for POST /v2/sub-user/creation. Create sub users. */
+export interface SpotSubUserCreationReq {
+  /** Sub users to create, max 50 */
+  userList: Array<{ userName: string; note?: string }>;
+  /** GENERAL (default), CONTACT, GRID, FIRE-BLOCK */
+  subAccountType?: string;
+}
+
 /** Req for GET /v2/account/ledger */
 export interface SpotGetAccountLedgerReq {
   /** Account ID */
