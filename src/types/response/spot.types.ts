@@ -1088,6 +1088,67 @@ export interface SpotSubUserManagedTransferRecord {
   query_id?: string;
 }
 
+/** Referral rebate detail from GET /v2/invitee/rebate/detail */
+export interface SpotReferralRebateDetail {
+  invitee_type: string;
+  invitee_rebate_rate_spot_m2: string;
+  invitee_rebate_rate_contract_m2: string;
+  invitee_rebate_rate_partner_spot?: string;
+  invitee_rebate_rate_partner_contract?: string;
+  join_time_m2: string;
+  join_time_partner?: string;
+  invitee_total_commission_usdt: string;
+  invitee_total_commission_trx: string;
+  invitee_total_commission_htx: string;
+  partner_total_commission_usdt: string;
+  partner_total_commission_trx: string;
+  partner_total_commission_htx: string;
+}
+
+/** Referral rebate history record from GET /v2/invitee/rebate/history */
+export interface SpotReferralRebateHistoryRecord {
+  date: number;
+  invitee_total_commission_usdt: string;
+  invitee_total_commission_trx: string;
+  invitee_total_commission_htx: string;
+  partner_total_commission_usdt: string;
+  partner_total_commission_trx: string;
+  partner_total_commission_htx: string;
+}
+
+/** Referral rebate detail item from all_rebate/detail or batcher_rebate/detail */
+export interface SpotReferralRebateDetailItem {
+  invitee_uid: number;
+  invitee_type: string;
+  invitee_rebate_rate_spot_m2: string | null;
+  invitee_rebate_rate_contract_m2: string | null;
+  invitee_rebate_rate_partner_spot?: string | null;
+  invitee_rebate_rate_partner_contract?: string | null;
+  join_time_m2: string;
+  join_time_partner?: string | null;
+  invitee_total_commission_usdt: string;
+  invitee_total_commission_trx: string;
+  invitee_total_commission_htx: string;
+  partner_total_commission_usdt: string;
+  partner_total_commission_trx: string;
+  partner_total_commission_htx: string;
+}
+
+/** Referral invited user from GET /v2/invitee/rebate/referrals */
+export interface SpotReferralReferralItem {
+  id: number;
+  invitee_uid: number;
+  remark: string;
+  referral_code: string;
+  invitee_type: string;
+  invitee_rebate_rate_spot_m2: string;
+  invitee_rebate_rate_contract_m2: string;
+  invitee_rebate_rate_partner_spot?: string | null;
+  invitee_rebate_rate_partner_contract?: string | null;
+  join_time_m2: number;
+  join_time_partner?: number | null;
+}
+
 /** Open order from GET /v1/order/openOrders */
 export interface SpotV1OpenOrder {
   id: number;

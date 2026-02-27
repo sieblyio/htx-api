@@ -23,6 +23,9 @@ import type {
   SpotMarginRepaymentReq,
   SpotMarginTransferInIsolatedReq,
   SpotMarginTransferOutIsolatedReq,
+  SpotReferralAllRebateDetailReq,
+  SpotReferralRebateHistoryReq,
+  SpotReferralReferralsReq,
   SpotRepaymentRecordReq,
   SpotSubUserApiKeyCreationReq,
   SpotSubUserApiKeyUpdateReq,
@@ -72,6 +75,10 @@ import {
   SpotMarginRepaymentResp,
   SpotMarketStatusResponse,
   SpotMergedTicker,
+  SpotReferralRebateDetail,
+  SpotReferralRebateDetailItem,
+  SpotReferralRebateHistoryRecord,
+  SpotReferralReferralItem,
   SpotRepaymentRecordItem,
   SpotSubUserAccountsResult,
   SpotSubUserApiKey,
@@ -1387,5 +1394,69 @@ export class SpotClient extends BaseRestClient {
     params?: SpotSubUserManagedTransferHistoryReq,
   ): Promise<SpotAPISuccessResponse<SpotSubUserManagedTransferRecord[]>> {
     return this.getPrivate('/v2/sub-user/managed-transfer-history', params);
+  }
+
+  /**
+   *
+   * Referral
+   *
+   */
+  /**
+   * Query Referral Rebate Detail
+   *
+   * Query rebate info of invitee. Signature required. Read permission.
+   */
+  getReferralRebateDetail(
+    inviteeUid: number,
+  ): Promise<SpotAPISuccessResponse<SpotReferralRebateDetail>> {
+    return this.getPrivate('/v2/invitee/rebate/detail', { inviteeUid });
+  }
+
+  /**
+   * Query Referral Rebate History
+   *
+   * Query historical rebate of invitee. Signature required. Read permission.
+   */
+  getReferralRebateHistory(
+    params: SpotReferralRebateHistoryReq,
+  ): Promise<SpotAPISuccessResponse<SpotReferralRebateHistoryRecord[]>> {
+    return this.getPrivate('/v2/invitee/rebate/history', params);
+  }
+
+  /**
+   * Query All Rebate Detail
+   *
+   * Query all rebate detail. Signature required. Read permission.
+   */
+  getReferralAllRebateDetail(params?: SpotReferralAllRebateDetailReq): Promise<
+    SpotAPISuccessResponse<SpotReferralRebateDetailItem[]> & {
+      nextId?: string;
+    }
+  > {
+    return this.getPrivate('/v2/invitee/rebate/all_rebate/detail', params);
+  }
+
+  /**
+   * Query Batcher Rebate Detail
+   *
+   * Query rebate detail for multiple invitees. Signature required. Read permission.
+   */
+  getReferralMultipleRebateDetail(params?: {
+    inviteeUidList?: string;
+  }): Promise<SpotAPISuccessResponse<SpotReferralRebateDetailItem[]>> {
+    return this.getPrivate('/v2/invitee/rebate/batcher_rebate/detail', params);
+  }
+
+  /**
+   * Query Invited User List
+   *
+   * KOL users: query invited user list. Signature required. Read permission. Rate: 1/s.
+   */
+  getReferralInvitedUserList(
+    params?: SpotReferralReferralsReq,
+  ): Promise<
+    SpotAPISuccessResponse<SpotReferralReferralItem[]> & { nextId?: string }
+  > {
+    return this.getPrivate('/v2/invitee/rebate/referrals', params);
   }
 }

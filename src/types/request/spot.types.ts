@@ -707,3 +707,47 @@ export interface SpotGetAccountLedgerReq {
   /** First record ID for pagination (next page) */
   fromId?: number;
 }
+
+/** Req for GET /v2/invitee/rebate/history. Referral rebate history. */
+export interface SpotReferralRebateHistoryReq {
+  /** Invitee UID */
+  inviteeUid: number;
+  /** Start date yyyy-MM-dd. Last 90 days. */
+  startTime?: string;
+  /** End date yyyy-MM-dd. Last 90 days. */
+  endTime?: string;
+  /** next or prev. Default prev. */
+  direct?: 'next' | 'prev';
+  /** Pagination cursor. Min query_id for prev, max for next. */
+  fromId?: string;
+  /** Items per page, max 100. Default 100. */
+  limit?: number;
+}
+
+/** Req for GET /v2/invitee/rebate/all_rebate/detail. All rebate detail. */
+export interface SpotReferralAllRebateDetailReq {
+  /** next or prev. Default prev. */
+  direct?: 'next' | 'prev';
+  /** Pagination cursor. */
+  fromId?: string;
+  /** Items per page, max 100. Default 100. */
+  limit?: number;
+}
+
+/** Req for GET /v2/invitee/rebate/referrals. Invited user list. */
+export interface SpotReferralReferralsReq {
+  /** Invitee UIDs, comma-separated, max 50. */
+  inviteeUidList?: string;
+  /** Referral code used at registration. */
+  referralCode?: string;
+  /** Start date yyyy-MM-dd. Last 14 days. */
+  startTime?: string;
+  /** End date yyyy-MM-dd. Last 14 days. */
+  endTime?: string;
+  /** prev or next. Default next. */
+  direct?: 'prev' | 'next';
+  /** Pagination cursor. */
+  fromId?: string;
+  /** Items per page, max 100. Default 30. */
+  limit?: number;
+}
