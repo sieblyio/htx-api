@@ -1,4 +1,4 @@
-import { DerivativesClient, SpotClient } from '../../src/index.js';
+import { FuturesClient, SpotClient } from '../../src/index.js';
 
 describe('REST PUBLIC', () => {
   describe('public endpoints - SpotClient', () => {
@@ -12,12 +12,12 @@ describe('REST PUBLIC', () => {
     });
   });
 
-  describe('public endpoints - DerivativesClient', () => {
-    const derivativesClient = new DerivativesClient();
+  describe('public endpoints - FuturesClient', () => {
+    const futuresClient = new FuturesClient();
 
     it('should succeed making a GET request to getTradeHistory', async () => {
-      const res = await derivativesClient.getTradeHistory({
-        symbol: 'PF_XBTUSD',
+      const res = await futuresClient.getTradeHistory({
+        contract_code: 'XBTUSD',
       });
 
       expect(res).toBeDefined();

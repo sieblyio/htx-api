@@ -7,6 +7,7 @@ import { neverGuard } from './misc-util.js';
 import {
   APIIDMain,
   APIIDMainKey,
+  GenericAPIResponse,
   getRestBaseUrl,
   isEmptyObject,
   REST_CLIENT_TYPE_ENUM,
@@ -296,7 +297,7 @@ export abstract class BaseRestClient {
     endpoint: string,
     params?: ParamsInQueryBodyOrHeader,
     isPublicApi?: boolean,
-  ): Promise<any> {
+  ): GenericAPIResponse {
     const isFullUrl =
       endpoint.startsWith('http://') || endpoint.startsWith('https://');
     const path = isFullUrl
