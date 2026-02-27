@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 // NOTE: https.Agent is Node.js-only and not available in browser environments
 // Browser builds (via webpack) exclude this module - see webpack.config.js fallback settings
@@ -28,7 +30,7 @@ const MISSING_API_KEYS_ERROR =
   'API Key & Secret are BOTH required to use the authenticated REST client';
 
 interface SignedRequest<
-  T extends object | undefined = {},
+  T extends object | undefined = object,
   TReqData = object,
   TReqQuery = object,
 > {
@@ -45,13 +47,13 @@ interface SignedRequest<
   recvWindow: number;
 }
 
-interface UnsignedRequest<T extends object | undefined = {}> {
+interface UnsignedRequest<T extends object | undefined = object> {
   originalParams: T;
   paramsWithSign: T;
   queryParamsWithSign: undefined;
 }
 
-type SignMethod = 'kraken';
+type SignMethod = 'htx';
 
 /**
  * Some requests require some params to be in the query string and some in the body. Some even support passing params via headers.
@@ -352,7 +354,7 @@ export abstract class BaseRestClient {
               }
               break;
             }
-            case REST_CLIENT_TYPE_ENUM.derivatives: {
+            case REST_CLIENT_TYPE_ENUM.futures: {
               // const res = {
               //   result: 'error',
               //   error: 'authenticationError',
@@ -446,7 +448,7 @@ export abstract class BaseRestClient {
    * @private sign request and set recv window
    */
   private async signRequest<
-    T extends ParamsInQueryBodyOrHeader | undefined = {},
+    T extends ParamsInQueryBodyOrHeader | undefined = object,
   >(
     data: T,
     endpoint: string,
@@ -519,7 +521,7 @@ export abstract class BaseRestClient {
     const strictParamValidation = this.options.strictParamValidation;
     const encodeQueryStringValues = true;
 
-    if (signMethod === 'kraken') {
+    if (signMethod === 'htx') {
       // Don't prefix with ? as part of sign. Prefix after sign
       const prefixWith = '';
       // Array values are repeated into key value pairs
@@ -625,7 +627,7 @@ export abstract class BaseRestClient {
 
           break;
         }
-        case REST_CLIENT_TYPE_ENUM.derivatives: {
+        case REST_CLIENT_TYPE_ENUM.futures: {
           const serialisedQueryParams = serializeParams(
             res.requestQuery,
             strictParamValidation,
@@ -767,41 +769,83 @@ export abstract class BaseRestClient {
     const signResult = await this.prepareSignParams(
       method,
       endpoint,
-      'kraken',
+      'htx',
       params,
       isPublicApi,
     );
 
     let signHeaders: Record<string, string> = {};
 
-    switch (this.getClientType()) {
-      case REST_CLIENT_TYPE_ENUM.spot: {
-        signHeaders = {
-          'API-Key': this.apiKey,
-          'API-Sign': signResult.sign,
+    const clientType = this.getClientType();
+    switch (clientType) {
+      case REST_CLIENT_TYPE_ENUM.spot:
+      case REST_CLIENT_TYPE_ENUM.futures:
+      case REST_CLIENT_TYPE_ENUM.spotAWS:
+      case REST_CLIENT_TYPE_ENUM.futuresAWS: {
+        // spot: https://www.htx.com/en-us/opend/newApiPages/?id=419
+        /**
+         * All params go in query string. E.g. these params:
+         * AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
+         * order-id=1234567890
+         * SignatureMethod=Ed25519
+         * SignatureVersion=2
+         * Timestamp=2017-05-11T15%3A19%3A30
+         *
+         * Become:
+         * https://api.huobi.pro/v1/order/orders?AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx&order-id=1234567890&SignatureMethod=Ed25519&SignatureVersion=2&Timestamp=2017-05-11T15%3A19%3A30&Signature=4F65x5A2bLyMWVQj3Aqp%2BB4w%2BivaA7n5Oi2SuYtCJ9o%3D
+         *
+         * Ed25519 or HmacSHA256
+         *
+         * - GET request: All parameters are included in URL, and do not carry body(content-length>0), in otherwise will return 403 error code.
+         * - POST request: All parameters are formatted as JSON and put int the request body
+         *
+         * Rate limit headers, TODO: It is suggested to read HTTP Header X-HB-RateLimit-Requests-Remain and X-HB-RateLimit-Requests-Expire to get the remaining count of request and the expire time for current rate limit time window, then you can adjust the API access rate dynamically.
+         * The new version rate limit is applied on UID basis, which means, the overall access rate, from all API keys under same UID, to single endpoint, shouldn’t exceed the rate limit applied on that endpoint.
+         */
+
+        const GETnoSign = {
+          // GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L36C9-L36C32
           'Content-Type': 'application/json',
+        };
+
+        const GETWithSign = {
+          // GET With signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L57
+          // "Content-Type": "application/x-www-form-urlencoded",
+        };
+
+        const POSTWithSign = {
+          // GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L44
+          'Content-Type': 'application/json',
+        };
+
+        signHeaders = {
+          // 'API-Key': this.apiKey,
+          // 'API-Sign': signResult.sign,
           Accept: 'application/json',
         };
         break;
       }
-      case REST_CLIENT_TYPE_ENUM.derivatives: {
-        // Support for Authorization header, if provided:
-        // https://github.com/tiagosiebler/kucoin-api/issues/2
-        // Use restClient.setAccessToken(newToken), if you need to store a new access token
-        // Not supported for Kraken at this time
-        if (this.apiAccessToken) {
-          signHeaders = {
-            Authorization: this.apiAccessToken,
-          };
-        } else {
-          signHeaders = {
-            Authent: signResult.sign,
-            APIKey: this.apiKey,
-            'Content-Type': 'application/x-www-form-urlencoded',
-          };
-        }
-        break;
+      default: {
+        neverGuard(clientType, `Unhandled client type: "${clientType}"`);
       }
+      // case REST_CLIENT_TYPE_ENUM.derivatives: {
+      //   // Support for Authorization header, if provided:
+      //   // https://github.com/tiagosiebler/kucoin-api/issues/2
+      //   // Use restClient.setAccessToken(newToken), if you need to store a new access token
+      //   // Not supported for Kraken at this time
+      //   if (this.apiAccessToken) {
+      //     signHeaders = {
+      //       Authorization: this.apiAccessToken,
+      //     };
+      //   } else {
+      //     signHeaders = {
+      //       Authent: signResult.sign,
+      //       APIKey: this.apiKey,
+      //       'Content-Type': 'application/x-www-form-urlencoded',
+      //     };
+      //   }
+      //   break;
+      // }
     }
 
     const queryParams = signResult.queryParamsWithSign

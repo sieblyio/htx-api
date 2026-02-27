@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { AxiosRequestConfig } from 'axios';
 
-import { DerivativesClient } from '../../DerivativesClient.js';
+import { FuturesClient } from '../../FuturesClient.js';
 import { SpotClient } from '../../SpotClient.js';
 import { RestClientOptions } from '../requestUtils.js';
 import { DefaultLogger } from './logger.js';
 
 interface RestClientStore {
   spot: SpotClient;
-  derivatives: DerivativesClient;
+  futures: FuturesClient;
 }
 
 interface WebSocketTokenCache {
@@ -43,8 +44,8 @@ export class RestClientCache {
   }
 
   public async fetchSpotWebSocketToken(
-    restOptions: RestClientOptions,
-    requestOptions?: AxiosRequestConfig,
+    _restOptions: RestClientOptions,
+    _requestOptions?: AxiosRequestConfig,
   ): Promise<{ token: string; expiresAtMs: number; timeLeftMs: number }> {
     if (this.wsTokenCache.spot) {
       const now = Date.now();
@@ -74,17 +75,17 @@ export class RestClientCache {
       delete this.wsTokenCache.spot;
     }
 
-    const client = this.getSpotRESTClient(restOptions, requestOptions);
-    const tokenResult = await client.getWebSocketsToken();
+    // const client = this.getSpotRESTClient(restOptions, requestOptions);
+    const tokenResult = ''; //await client.getWebSocketsToken();
 
-    const token = tokenResult?.result?.token;
+    const token = ''; //tokenResult?.result?.token;
     if (!token) {
       throw new Error(
         `Failed to fetch spot WebSocket token: ${JSON.stringify(tokenResult)}`,
       );
     }
 
-    const expiresInSec = tokenResult?.result?.expires || 900;
+    const expiresInSec = 0 || 900;
     const expiresInMs = expiresInSec * 1000;
     const expiresAtMs = Date.now() + expiresInMs;
 
@@ -96,13 +97,10 @@ export class RestClientCache {
   public getDerivativesRESTClient(
     restOptions: RestClientOptions,
     requestOptions?: AxiosRequestConfig,
-  ): DerivativesClient {
-    if (!this.restClients.derivatives) {
-      this.restClients.derivatives = new DerivativesClient(
-        restOptions,
-        requestOptions,
-      );
+  ): FuturesClient {
+    if (!this.restClients.futures) {
+      this.restClients.futures = new FuturesClient(restOptions, requestOptions);
     }
-    return this.restClients.derivatives;
+    return this.restClients.futures;
   }
 }
