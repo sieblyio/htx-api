@@ -468,6 +468,74 @@ export interface SpotCrossMarginLoanOrdersReq {
   'sub-uid'?: number;
 }
 
+/** Req for GET /v2/account/deposit/address. Query deposit address. */
+export interface SpotDepositAddressReq {
+  /** Crypto currency. Omit for all. */
+  currency?: string;
+}
+
+/** Req for GET /v2/account/withdraw/quota. Query withdraw quota. */
+export interface SpotWithdrawQuotaReq {
+  /** Crypto currency. Omit for all. */
+  currency?: string;
+}
+
+/** Req for POST /v1/dw/withdraw/api/create. Create withdraw request. */
+export interface SpotWithdrawCreateReq {
+  /** Destination address. Or UID:1234567, PHONE:xxx, MAIL:xxx for internal. */
+  address: string;
+  /** Crypto currency */
+  currency: string;
+  /** Amount to withdraw */
+  amount: string;
+  /** Fee. Use 0 for UID withdraw. */
+  fee?: number;
+  /** Chain. Required for UID. Required for multi-chain coins. */
+  chain?: string;
+  /** Address tag. For UID withdraw, use recipient UID. */
+  'addr-tag'?: string;
+  /** Client order id for idempotency (max 32 char) */
+  'client-order-id'?: string;
+  /** Exchange VASP id from /v1/query/vasp-list */
+  'exchange-vasp'?: string;
+  /** Recipient name for Korean/English: "SURNAME##FIRSTNAME" */
+  'user-name-vasp'?: string;
+}
+
+/** Req for GET /v1/query/withdraw/client-order-id. Query withdraw by client order id. */
+export interface SpotWithdrawByClientOrderIdReq {
+  /** Client order id (max 32 char) */
+  clientOrderId: string;
+}
+
+/** Req for GET /v1/query/deposit-withdraw. Search deposit/withdraw records. */
+export interface SpotDepositWithdrawQueryReq {
+  /** Crypto currency. Omit for all. */
+  currency?: string;
+  /** deposit or withdraw */
+  type: 'deposit' | 'withdraw';
+  /** Transfer id to begin search */
+  from?: string;
+  /** Items to return [1-50]. Default 50. */
+  size?: string;
+  /** prev (asc) or next (desc). Default next. */
+  direct?: 'prev' | 'next';
+}
+
+/** Req for GET /v2/account/withdraw/address. Query withdraw address. */
+export interface SpotWithdrawAddressReq {
+  /** Crypto currency. Use "t247117" for universal address. */
+  currency?: string;
+  /** Block chain name. Omit for all chains. */
+  chain?: string;
+  /** Note of withdraw address. Omit for all. */
+  note?: string;
+  /** Items to return [1-500]. Default 100. */
+  limit?: number;
+  /** First record ID for next page. */
+  fromId?: number;
+}
+
 /** Req for GET /v2/account/ledger */
 export interface SpotGetAccountLedgerReq {
   /** Account ID */

@@ -836,6 +836,70 @@ export interface SpotV1OrderDetail {
   operator?: string;
 }
 
+/** Deposit address item from GET /v2/account/deposit/address */
+export interface SpotDepositAddress {
+  userId: number;
+  currency: string;
+  address: string;
+  addressTag: string;
+  chain: string;
+}
+
+/** Withdraw quota chain from GET /v2/account/withdraw/quota */
+export interface SpotWithdrawQuotaChain {
+  chain: string;
+  maxWithdrawAmt: string;
+  withdrawQuotaPerDay: string;
+  remainWithdrawQuotaPerDay: string;
+  withdrawQuotaPerYear: string;
+  remainWithdrawQuotaPerYear: string;
+  withdrawQuotaTotal: string;
+  remainWithdrawQuotaTotal: string;
+}
+
+/** Withdraw quota from GET /v2/account/withdraw/quota */
+export interface SpotWithdrawQuota {
+  currency: string;
+  chains: SpotWithdrawQuotaChain[];
+}
+
+/** Withdraw address item from GET /v2/account/withdraw/address */
+export interface SpotWithdrawAddress {
+  currency: string;
+  chain: string;
+  note: string;
+  addressTag?: string;
+  address: string;
+  status: string;
+}
+
+/** Deposit/withdraw record from GET /v1/query/deposit-withdraw or GET /v1/query/withdraw/client-order-id */
+export interface SpotDepositWithdrawRecord {
+  id: number;
+  type: string;
+  'sub-type'?: string;
+  currency: string;
+  chain: string;
+  'tx-hash': string;
+  amount: number;
+  'from-addr-tag'?: string;
+  address: string;
+  'address-tag'?: string;
+  fee: number;
+  state: string;
+  'created-at': number;
+  'updated-at': number;
+  'error-code'?: string;
+  'error-msg'?: string;
+}
+
+/** VASP exchange from GET /v1/query/vasp-list */
+export interface SpotVaspExchange {
+  'vasp-id': string;
+  'vasp-name': string;
+  'legal-name': string;
+}
+
 /** Open order from GET /v1/order/openOrders */
 export interface SpotV1OpenOrder {
   id: number;

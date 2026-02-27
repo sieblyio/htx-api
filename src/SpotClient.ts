@@ -3,6 +3,7 @@ import { REST_CLIENT_TYPE_ENUM, RestClientType } from './lib/requestUtils.js';
 import type {
   SpotAccountTransferReq,
   SpotCrossMarginLoanOrdersReq,
+  SpotDepositWithdrawQueryReq,
   SpotGetAccountHistoryReq,
   SpotGetAccountLedgerReq,
   SpotGetAssetValuationReq,
@@ -29,6 +30,8 @@ import type {
   SpotV2AlgoOrdersOpeningReq,
   SpotV2AlgoOrdersPlaceReq,
   SpotV2PointTransferReq,
+  SpotWithdrawAddressReq,
+  SpotWithdrawCreateReq,
 } from './types/request/spot.types.js';
 import { SpotAPISuccessResponse } from './types/response/shared.types.js';
 import {
@@ -39,6 +42,8 @@ import {
   SpotCrossMarginAccountBalance,
   SpotCrossMarginLoanOrder,
   SpotCurrency,
+  SpotDepositAddress,
+  SpotDepositWithdrawRecord,
   SpotDepth,
   SpotDetailTick,
   SpotKline,
@@ -85,6 +90,9 @@ import {
   SpotV2PointAccount,
   SpotV2PointTransferData,
   SpotV2TransactFeeRateItem,
+  SpotVaspExchange,
+  SpotWithdrawAddress,
+  SpotWithdrawQuota,
 } from './types/response/spot.types.js';
 
 /**
@@ -955,5 +963,99 @@ export class SpotClient extends BaseRestClient {
     currency?: string;
   }): Promise<SpotAPISuccessResponse<SpotMarginLimitItem[]>> {
     return this.getPrivate('/v2/margin/limit', params);
+  }
+
+  /**
+   *
+   * Wallet (Deposit/Withdraw)
+   *
+   */
+
+  /**
+   * Query Deposit Address
+   *
+   * Query deposit address per chain for a currency. Signature required. Read permission. Rate: 20/2s.
+   */
+  getDepositAddress(params?: {
+    currency?: string;
+  }): Promise<SpotAPISuccessResponse<SpotDepositAddress[]>> {
+    return this.getPrivate('/v2/account/deposit/address', params);
+  }
+
+  /**
+   * Query Withdraw Quota
+   *
+   * Query withdrawing quota for currencies. Parent user only. Signature required. Read permission. Rate: 20/2s.
+   */
+  getWithdrawQuota(params?: {
+    currency?: string;
+  }): Promise<SpotAPISuccessResponse<SpotWithdrawQuota>> {
+    return this.getPrivate('/v2/account/withdraw/quota', params);
+  }
+
+  /**
+   * Query Withdraw Address
+   *
+   * Query withdraw addresses available for API key. Parent user only. Signature required. Read permission.
+   */
+  getWithdrawAddress(
+    params?: SpotWithdrawAddressReq,
+  ): Promise<
+    SpotAPISuccessResponse<SpotWithdrawAddress[]> & { 'next-id'?: number }
+  > {
+    return this.getPrivate('/v2/account/withdraw/address', params);
+  }
+
+  /**
+   * Create Withdraw Request
+   *
+   * Create withdraw to address in your withdraw list. Parent user only. Withdraw permission. Rate: 20/2s.
+   */
+  submitWithdraw(
+    params: SpotWithdrawCreateReq,
+  ): Promise<SpotAPISuccessResponse<number>> {
+    return this.postPrivate('/v1/dw/withdraw/api/create', { body: params });
+  }
+
+  /**
+   * Query Withdrawal by Client Order ID
+   *
+   * Query withdraw order submitted with client-order-id. Signature required. Read permission.
+   */
+  getWithdrawByClientId(
+    clientOrderId: string,
+  ): Promise<SpotAPISuccessResponse<SpotDepositWithdrawRecord | null>> {
+    return this.getPrivate('/v1/query/withdraw/client-order-id', {
+      clientOrderId,
+    });
+  }
+
+  /**
+   * Cancel Withdraw Request
+   *
+   * Cancel withdraw by transfer id. Parent user only. Withdraw permission. Rate: 20/2s.
+   */
+  cancelWithdraw(withdrawId: number): Promise<SpotAPISuccessResponse<number>> {
+    return this.postPrivate(`/v1/dw/withdraw-virtual/${withdrawId}/cancel`, {});
+  }
+
+  /**
+   * Search Deposit/Withdraw Records
+   *
+   * Search existed withdraws and deposits. Signature required. Read permission. Rate: 20/2s.
+   */
+  getDepositWithdrawHistory(
+    params: SpotDepositWithdrawQueryReq,
+  ): Promise<SpotAPISuccessResponse<SpotDepositWithdrawRecord[]>> {
+    return this.getPrivate('/v1/query/deposit-withdraw', params);
+  }
+
+  /**
+   * Get Exchange VASP List
+   *
+   * Exchange list for Korean users (withdraw flow). Public. No signature. Rate: 1/s.
+   */
+  getVaspList(): Promise<SpotAPISuccessResponse<SpotVaspExchange[]>> {
+    return this.get('/v1/query/vasp-list');
   }
 }

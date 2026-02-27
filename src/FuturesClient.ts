@@ -4877,4 +4877,10 @@ export class FuturesClient extends BaseRestClient {
       body: params,
     });
   }
+
+  /**
+   * Futures Copy Trading
+   *
+   * Main Account ApiKey only. Trader-side endpoints for lead trading.
+   */
 }
