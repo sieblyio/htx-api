@@ -2,6 +2,10 @@ import { BaseRestClient } from './lib/BaseRestClient.js';
 import { REST_CLIENT_TYPE_ENUM, RestClientType } from './lib/requestUtils.js';
 import type {
   SpotAccountTransferReq,
+  SpotBrokerAccountCapitalSnapshotReq,
+  SpotBrokerSubUserFeeRateAddReq,
+  SpotBrokerSubUserFeeRateReq,
+  SpotBrokerUserRebateStatusReq,
   SpotCrossMarginLoanOrdersReq,
   SpotDepositWithdrawQueryReq,
   SpotGetAccountHistoryReq,
@@ -39,6 +43,10 @@ import {
   SpotAccountBalance,
   SpotAccountHistoryItem,
   SpotAccountTransferData,
+  SpotBrokerAccountCapitalSnapshot,
+  SpotBrokerFeeRateAddResult,
+  SpotBrokerSubUserFeeRate,
+  SpotBrokerUserRebateStatus,
   SpotCrossMarginAccountBalance,
   SpotCrossMarginLoanOrder,
   SpotCurrency,
@@ -1057,5 +1065,59 @@ export class SpotClient extends BaseRestClient {
    */
   getVaspList(): Promise<SpotAPISuccessResponse<SpotVaspExchange[]>> {
     return this.get('/v1/query/vasp-list');
+  }
+
+  /**
+   *
+   * Broker API
+   *
+   */
+
+  /**
+   * Check User Rebate Eligibility
+   *
+   * Check whether user meets rebate conditions. API brokers only. Signature required. Read permission. Rate: 20/2s.
+   */
+  getBrokerUserRebateStatus(
+    params: SpotBrokerUserRebateStatusReq,
+  ): Promise<SpotAPISuccessResponse<SpotBrokerUserRebateStatus>> {
+    return this.getPrivate('/broker/v1/user_rebate_status', params);
+  }
+
+  /**
+   * Get Broker Sub-Account Fee Rate
+   *
+   * Query sub-account commission/fee rate. Signature required. Read permission. Rate: 100/2s.
+   */
+  getBrokerSubUserFeeRate(
+    params: SpotBrokerSubUserFeeRateReq,
+  ): Promise<SpotAPISuccessResponse<SpotBrokerSubUserFeeRate>> {
+    return this.getPrivate('/broker/v1/sub-user/fee_rate', params);
+  }
+
+  /**
+   * Set Broker Sub-User Fee Rate
+   *
+   * Set trading fee rate for sub-accounts. Signature required. Read permission. Rate: 100/2s.
+   */
+  setBrokerSubUserFeeRate(
+    params: SpotBrokerSubUserFeeRateAddReq,
+  ): Promise<SpotAPISuccessResponse<SpotBrokerFeeRateAddResult>> {
+    return this.postPrivate('/broker/v1/sub-user/fee_rate/add', {
+      body: params,
+    });
+  }
+
+  /**
+   * Get Account Capital Snapshot
+   *
+   * Request account asset snapshot. Signature required. Read permission. Rate: 100/2s.
+   */
+  getBrokerAccountCapitalSnapshot(
+    params: SpotBrokerAccountCapitalSnapshotReq,
+  ): Promise<SpotAPISuccessResponse<SpotBrokerAccountCapitalSnapshot[]>> {
+    return this.postPrivate('/broker/v1/account_capital_snapshot_everyday', {
+      body: params,
+    });
   }
 }

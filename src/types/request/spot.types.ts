@@ -536,6 +536,46 @@ export interface SpotWithdrawAddressReq {
   fromId?: number;
 }
 
+/** Req for GET /broker/v1/user_rebate_status. Check user rebate eligibility. */
+export interface SpotBrokerUserRebateStatusReq {
+  /** User UID to check */
+  queryUid: string;
+}
+
+/** Req for GET /broker/v1/sub-user/fee_rate. Broker sub-account commission. */
+export interface SpotBrokerSubUserFeeRateReq {
+  /** Sub-account id (user_id, UID minus last digit) */
+  subUId: string;
+  /** 1 Spot, 2 U-standard linear, 3 Coin-Margined swap */
+  bizType: string;
+}
+
+/** Req for POST /broker/v1/sub-user/fee_rate/add. Set sub-user trading fee rate. */
+export interface SpotBrokerSubUserFeeRateAddReq {
+  /** Sub-account ids, max 10 */
+  subUids: number[];
+  /** 0 all, 1 Spot, 2 U-standard linear, 3 Coin-Margined swap */
+  bizType: number;
+  /** Type: 1 fixed (0.001-0.5), 2 percent (1-1000) */
+  type: number;
+  /** Additional taker fee. Either taker or maker required. */
+  taker?: string;
+  /** Additional maker fee. Either taker or maker required. */
+  maker?: string;
+  /** YYYYMMDD effect date. Omit for T+1. */
+  effectAt?: string;
+}
+
+/** Req for POST /broker/v1/account_capital_snapshot_everyday. Account asset snapshot. */
+export interface SpotBrokerAccountCapitalSnapshotReq {
+  /** Account type: spot, margin-api, super-margin-api, delivery, swap, linear */
+  account_type: string;
+  /** Start time (ms). Omit with end_time for last 7 days. */
+  start_time?: number;
+  /** End time (ms). Max 30 days from start. */
+  end_time?: number;
+}
+
 /** Req for GET /v2/account/ledger */
 export interface SpotGetAccountLedgerReq {
   /** Account ID */

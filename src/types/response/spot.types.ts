@@ -900,6 +900,43 @@ export interface SpotVaspExchange {
   'legal-name': string;
 }
 
+/** User rebate status from GET /broker/v1/user_rebate_status */
+export interface SpotBrokerUserRebateStatus {
+  spotRebateStatus: boolean;
+  contractRebateStatus: boolean;
+  spotIsNewUser: boolean;
+  contractIsNewUser?: boolean;
+}
+
+/** Sub-user fee rate from GET /broker/v1/sub-user/fee_rate */
+export interface SpotBrokerSubUserFeeRate {
+  userId: number;
+  subUserId: number;
+  bizType: number;
+  taker: string;
+  maker: string;
+  type: number;
+  addTaker: string;
+  addMaker: string;
+  updatedAt: number;
+  effectAt: number;
+}
+
+/** Fee rate add result from POST /broker/v1/sub-user/fee_rate/add */
+export interface SpotBrokerFeeRateAddResult {
+  subUserIds: number[];
+  effectAt: string;
+}
+
+/** Account capital snapshot item from POST /broker/v1/account_capital_snapshot_everyday */
+export interface SpotBrokerAccountCapitalSnapshot {
+  accountId: number;
+  accountType: string;
+  snapshotTime: string;
+  convertBalance: string;
+  dataList: unknown[];
+}
+
 /** Open order from GET /v1/order/openOrders */
 export interface SpotV1OpenOrder {
   id: number;
