@@ -751,3 +751,61 @@ export interface SpotReferralReferralsReq {
   /** Items per page, max 100. Default 30. */
   limit?: number;
 }
+
+/** Req for GET /v1/api/c2c/order/history. P2P order history. */
+export interface SpotP2POrderHistoryReq {
+  /** 0: buy, 1: sell */
+  side?: string;
+  /** Start time (ms). Last 90 days. */
+  startTime?: number;
+  /** End time (ms). Last 90 days. */
+  endTime?: number;
+  /** next or prev. Default prev. */
+  direct?: 'next' | 'prev';
+  /** Pagination cursor. Min query_id for prev, max for next. */
+  fromId?: number;
+  /** Items per page, max 100. Default 100. */
+  limit?: number;
+}
+
+/** Req for GET /v1/earn/project/queryEarnProjectList. Earn product query. */
+export interface SpotEarnProjectListReq {
+  /** Crypto currency filter */
+  currency?: string;
+  /** Page number. Default 1. */
+  pageNum: number;
+  /** Items per page, max 100. Default 10. */
+  pageSize: number;
+}
+
+/** Req for POST /v1/earn/order/demand/add. Earn subscription. */
+export interface SpotEarnSubscribeReq {
+  /** Project ID */
+  id: number;
+  /** Subscription amount */
+  amount: string;
+  /** Idempotent ID (e.g. Snowflake). */
+  requestId: string;
+}
+
+/** Req for POST /v1/earn/order/demand/redeem-order. Earn redemption. */
+export interface SpotEarnRedeemReq {
+  /** Order ID */
+  orderId: number;
+  /** Redemption amount */
+  amount: string;
+  /** Idempotent ID (e.g. Snowflake). */
+  requestId?: string;
+}
+
+/** Req for GET /v1/earn/order/user/assets/list. Earn position query. */
+export interface SpotEarnUserAssetsReq {
+  /** Project type: 0 = Flexible */
+  projectType?: number;
+  /** Crypto currency filter */
+  currency?: string;
+  /** Page number. Default 1. */
+  pageNum: number;
+  /** Items per page, max 100. Default 10. */
+  pageSize: number;
+}

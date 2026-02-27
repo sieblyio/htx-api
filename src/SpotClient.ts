@@ -8,6 +8,10 @@ import type {
   SpotBrokerUserRebateStatusReq,
   SpotCrossMarginLoanOrdersReq,
   SpotDepositWithdrawQueryReq,
+  SpotEarnProjectListReq,
+  SpotEarnRedeemReq,
+  SpotEarnSubscribeReq,
+  SpotEarnUserAssetsReq,
   SpotGetAccountHistoryReq,
   SpotGetAccountLedgerReq,
   SpotGetAssetValuationReq,
@@ -23,6 +27,7 @@ import type {
   SpotMarginRepaymentReq,
   SpotMarginTransferInIsolatedReq,
   SpotMarginTransferOutIsolatedReq,
+  SpotP2POrderHistoryReq,
   SpotReferralAllRebateDetailReq,
   SpotReferralRebateHistoryReq,
   SpotReferralReferralsReq,
@@ -65,6 +70,10 @@ import {
   SpotDepositWithdrawRecord,
   SpotDepth,
   SpotDetailTick,
+  SpotEarnProjectItem,
+  SpotEarnRedeemResult,
+  SpotEarnSubscribeResult,
+  SpotEarnUserAssetItem,
   SpotKline,
   SpotLastTrade,
   SpotMarginAccountBalance,
@@ -75,6 +84,7 @@ import {
   SpotMarginRepaymentResp,
   SpotMarketStatusResponse,
   SpotMergedTicker,
+  SpotP2POrderHistoryItem,
   SpotReferralRebateDetail,
   SpotReferralRebateDetailItem,
   SpotReferralRebateHistoryRecord,
@@ -1458,5 +1468,81 @@ export class SpotClient extends BaseRestClient {
     SpotAPISuccessResponse<SpotReferralReferralItem[]> & { nextId?: string }
   > {
     return this.getPrivate('/v2/invitee/rebate/referrals', params);
+  }
+
+  /**
+   *
+   * P2P
+   *
+   */
+
+  /**
+   * Query P2P Order History
+   *
+   * Query C2C historical transaction records. No signature. Read permission. Rate: 20/2s.
+   */
+  getP2POrderHistory(params?: SpotP2POrderHistoryReq): Promise<
+    SpotAPISuccessResponse<{
+      ts: number;
+      openApiC2COrderInfoVOList: SpotP2POrderHistoryItem[];
+    }>
+  > {
+    return this.get('/v1/api/c2c/order/history', params);
+  }
+
+  /**
+   *
+   * Earn
+   *
+   */
+
+  /**
+   * Query Earn Product List
+   *
+   * Product query. Signature required. Read permission.
+   */
+  getEarnProjectList(
+    params: SpotEarnProjectListReq,
+  ): Promise<
+    SpotAPISuccessResponse<{ total: number; items: SpotEarnProjectItem[] }>
+  > {
+    return this.getPrivate('/v1/earn/project/queryEarnProjectList', params);
+  }
+
+  /**
+   * Earn Subscription
+   *
+   * Subscribe to Earn product. Signature required. Trade permission.
+   */
+  earnSubscribe(
+    params: SpotEarnSubscribeReq,
+  ): Promise<SpotAPISuccessResponse<SpotEarnSubscribeResult>> {
+    return this.postPrivate('/v1/earn/order/demand/add', { body: params });
+  }
+
+  /**
+   * Earn Redemption
+   *
+   * Redeem Earn product. Signature required. Trade permission. Arrival may be delayed.
+   */
+  earnRedeem(
+    params: SpotEarnRedeemReq,
+  ): Promise<SpotAPISuccessResponse<SpotEarnRedeemResult>> {
+    return this.postPrivate('/v1/earn/order/demand/redeem-order', {
+      body: params,
+    });
+  }
+
+  /**
+   * Query Earn User Assets
+   *
+   * Position query. Signature required. Read permission.
+   */
+  getEarnUserAssets(
+    params: SpotEarnUserAssetsReq,
+  ): Promise<
+    SpotAPISuccessResponse<{ total: number; items: SpotEarnUserAssetItem[] }>
+  > {
+    return this.getPrivate('/v1/earn/order/user/assets/list', params);
   }
 }

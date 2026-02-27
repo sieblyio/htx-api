@@ -1134,6 +1134,78 @@ export interface SpotReferralRebateDetailItem {
   partner_total_commission_htx: string;
 }
 
+/** P2P order from GET /v1/api/c2c/order/history */
+export interface SpotP2POrderHistoryItem {
+  orderNo: string;
+  role: string;
+  side: string;
+  counterpartNickName: string;
+  fiatCurrency: string;
+  asset: string;
+  amount: string;
+  unitPrice: string;
+  totalPrice: string;
+  fee: string;
+  orderStatus: string;
+  createTime: string;
+  queryId?: number;
+}
+
+/** Tiered rate from Earn project */
+export interface SpotEarnTieredRate {
+  amountStart: string;
+  amountEnd: string;
+  rate: string;
+}
+
+/** Earn project from GET /v1/earn/project/queryEarnProjectList */
+export interface SpotEarnProjectItem {
+  projectId: number;
+  productId: number;
+  calculationType: number;
+  type: number;
+  viewYearRate: string;
+  finishAmount: string;
+  projectStatus: number;
+  totalAmount: string;
+  currency: string;
+  startAmount: string;
+  apyType: number;
+  tieredRates?: SpotEarnTieredRate[];
+  marketPerkUpLimit?: string;
+  marketTimeApy?: string;
+  marketPerkApy?: string;
+}
+
+/** Result from POST /v1/earn/order/demand/add */
+export interface SpotEarnSubscribeResult {
+  currency: string;
+  amount: string;
+  orderId: number;
+  status: number;
+}
+
+/** Result from POST /v1/earn/order/demand/redeem-order */
+export interface SpotEarnRedeemResult {
+  currency: string;
+  amount: string;
+  orderId: number;
+  status: number;
+}
+
+/** Earn user asset from GET /v1/earn/order/user/assets/list */
+export interface SpotEarnUserAssetItem {
+  projectId: number;
+  orderId: number;
+  projectType: number;
+  currency: string;
+  yesterdayIncome: string;
+  totalIncomeAmount: string;
+  totalAmount: string;
+  miningYearRate: string;
+  apyType: number;
+}
+
 /** Referral invited user from GET /v2/invitee/rebate/referrals */
 export interface SpotReferralReferralItem {
   id: number;
