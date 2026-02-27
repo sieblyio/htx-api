@@ -80,6 +80,9 @@ export interface RestClientOptions {
   customSignMessageFn?: (message: string, secret: string) => Promise<string>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type GenericAPIResponse<T = any> = Promise<T>;
+
 export function serializeParams<T extends Record<string, any> | undefined = {}>(
   params: T,
   strict_validation: boolean | undefined,

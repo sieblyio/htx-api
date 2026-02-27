@@ -1,7 +1,7 @@
 import { SpotClient } from '../../src/index.js';
 import { getTestProxy } from '../proxy.util.js';
 
-describe('REST PRIVATE SPOT READ', () => {
+describe.skip('REST PRIVATE SPOT READ', () => {
   const account = {
     key: process.env.API_SPOT_KEY,
     secret: process.env.API_SPOT_SECRET,

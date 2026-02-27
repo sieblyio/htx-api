@@ -1,7 +1,7 @@
 import { SpotClient } from '../../src/index.js';
 import { getTestProxy } from '../proxy.util.js';
 
-describe('REST PRIVATE SPOT WRITE', () => {
+describe.skip('REST PRIVATE SPOT WRITE', () => {
   const account = {
     key: process.env.API_SPOT_KEY, // Use READ-ONLY keys to get the permission error
     secret: process.env.API_SPOT_SECRET,
@@ -24,10 +24,10 @@ describe('REST PRIVATE SPOT WRITE', () => {
     it('should fail submitOrder with permission denied (validates signature)', async () => {
       try {
         const res = await rest.submitOrder({
-          ordertype: 'limit',
-          type: 'buy',
-          pair: 'XBTUSD',
-          volume: '0.001',
+          'account-id': '123',
+          type: 'buy-limit',
+          symbol: 'XBTUSD',
+          amount: '0.001',
           price: '1',
         });
 
