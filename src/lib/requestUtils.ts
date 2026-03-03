@@ -56,6 +56,9 @@ export interface RestClientOptions {
    **/
   baseUrl?: string;
 
+  /** Use AWS region endpoint (api-aws.huobi.pro for spot, api.hbdm.vn for futures). Default false. */
+  useAWS?: boolean;
+
   /** Default: true. whether to try and post-process request exceptions (and throw them). */
   parseExceptions?: boolean;
 

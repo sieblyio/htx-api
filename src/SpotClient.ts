@@ -145,9 +145,9 @@ import {
  */
 export class SpotClient extends BaseRestClient {
   getClientType(): RestClientType {
-    // Points to api.huobi.pro
-    // TODO: Add AWS URL support
-    return REST_CLIENT_TYPE_ENUM.spot;
+    return this.getAWSOption()
+      ? REST_CLIENT_TYPE_ENUM.spotAWS
+      : REST_CLIENT_TYPE_ENUM.spot;
   }
 
   /**

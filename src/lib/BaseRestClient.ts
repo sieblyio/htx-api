@@ -144,6 +144,11 @@ export abstract class BaseRestClient {
   /** Defines the client type (affecting how requests & signatures behave) */
   abstract getClientType(): RestClientType;
 
+  /** Whether AWS region endpoint is requested. Subclasses use this for getClientType(). */
+  protected getAWSOption(): boolean {
+    return Boolean(this.options.useAWS);
+  }
+
   /**
    * Create an instance of the REST client. Pass API credentials in the object in the first parameter.
    * @param {RestClientOptions} [restClientOptions={}] options to configure REST API connectivity
@@ -348,13 +353,15 @@ export abstract class BaseRestClient {
           }
 
           switch (this.getClientType()) {
-            case REST_CLIENT_TYPE_ENUM.spot: {
+            case REST_CLIENT_TYPE_ENUM.spot:
+            case REST_CLIENT_TYPE_ENUM.spotAWS: {
               if (response.data?.error?.length) {
                 throw throable;
               }
               break;
             }
-            case REST_CLIENT_TYPE_ENUM.futures: {
+            case REST_CLIENT_TYPE_ENUM.futures:
+            case REST_CLIENT_TYPE_ENUM.futuresAWS: {
               // const res = {
               //   result: 'error',
               //   error: 'authenticationError',
@@ -531,7 +538,8 @@ export abstract class BaseRestClient {
       const clientType = this.getClientType();
 
       switch (clientType) {
-        case REST_CLIENT_TYPE_ENUM.spot: {
+        case REST_CLIENT_TYPE_ENUM.spot:
+        case REST_CLIENT_TYPE_ENUM.spotAWS: {
           // Set default nonce, if not set yet
           if (!Array.isArray(res.requestData)) {
             if (!(res.requestData as any)?.nonce) {
@@ -627,7 +635,8 @@ export abstract class BaseRestClient {
 
           break;
         }
-        case REST_CLIENT_TYPE_ENUM.futures: {
+        case REST_CLIENT_TYPE_ENUM.futures:
+        case REST_CLIENT_TYPE_ENUM.futuresAWS: {
           const serialisedQueryParams = serializeParams(
             res.requestQuery,
             strictParamValidation,
