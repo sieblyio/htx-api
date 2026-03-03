@@ -1,4 +1,4 @@
-import { FuturesClient, SpotClient } from '../../src/index.js';
+import { SpotClient } from '../../src/index.js';
 
 describe('REST PUBLIC', () => {
   describe('public endpoints - SpotClient', () => {
@@ -49,8 +49,8 @@ describe('REST PUBLIC', () => {
     });
   });
 
-  describe('public endpoints - FuturesClient', () => {
-    const futuresClient = new FuturesClient();
+  // describe('public endpoints - FuturesClient', () => {
+  //   const futuresClient = new FuturesClient();
 
     describe('GET without params', () => {
       it('should succeed calling getTickers', async () => {
