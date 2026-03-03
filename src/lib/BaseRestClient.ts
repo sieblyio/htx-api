@@ -352,7 +352,7 @@ export abstract class BaseRestClient {
               }
               break;
             }
-            case REST_CLIENT_TYPE_ENUM.derivatives: {
+            case REST_CLIENT_TYPE_ENUM.futures: {
               // const res = {
               //   result: 'error',
               //   error: 'authenticationError',
@@ -625,7 +625,7 @@ export abstract class BaseRestClient {
 
           break;
         }
-        case REST_CLIENT_TYPE_ENUM.derivatives: {
+        case REST_CLIENT_TYPE_ENUM.futures: {
           const serialisedQueryParams = serializeParams(
             res.requestQuery,
             strictParamValidation,
@@ -784,7 +784,7 @@ export abstract class BaseRestClient {
         };
         break;
       }
-      case REST_CLIENT_TYPE_ENUM.derivatives: {
+      case REST_CLIENT_TYPE_ENUM.futures: {
         // Support for Authorization header, if provided:
         // https://github.com/tiagosiebler/kucoin-api/issues/2
         // Use restClient.setAccessToken(newToken), if you need to store a new access token
