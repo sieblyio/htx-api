@@ -70,7 +70,7 @@ type ParamsInQueryBodyOrHeader = {
 const ENABLE_HTTP_TRACE =
   typeof process === 'object' &&
   typeof process.env === 'object' &&
-  process.env.KRAKENTRACE;
+  process.env.HTXTRACE;
 
 if (ENABLE_HTTP_TRACE) {
   axios.interceptors.request.use((request) => {
@@ -170,7 +170,7 @@ export abstract class BaseRestClient {
       /** inject custom request options based on axios specs - see axios docs for more guidance on AxiosRequestConfig: https://github.com/axios/axios#request-config */
       ...networkOptions,
       headers: {
-        UserAgent: '@siebly/kraken-api',
+        UserAgent: '@siebly/htx-api',
         locale: 'en-US',
       },
     };
@@ -618,7 +618,7 @@ export abstract class BaseRestClient {
                   'Failed to sign request: Invalid API credentials detected.\n\n' +
                     '⚠️  PLEASE CHECK YOUR API KEY AND SECRET:\n' +
                     '   - Ensure your API Secret is a valid base64-encoded string\n' +
-                    '   - Kraken provides API secrets in base64 format\n\n' +
+                    '   - HTX provides API secrets in base64 format\n\n' +
                     `Original error: ${error.message}\n` +
                     `Stack trace: ${error.stack}`,
                 );

@@ -44,7 +44,7 @@ import {
   WSTopic,
 } from './types/websockets/ws-subscriptions.js';
 
-const WS_LOGGER_CATEGORY_ID = 'kraken-ws';
+const WS_LOGGER_CATEGORY_ID = 'htx-ws';
 const WS_LOGGER_CATEGORY = {
   category: WS_LOGGER_CATEGORY_ID,
 };
@@ -192,10 +192,8 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey, any> {
     requestFlags?: WSAPIRequestFlags,
   ): Promise<TWSAPIResponse | any> {
     /**
-     * Base Info:
-     * - https://docs.kraken.com/api/docs/websocket-v2/add_order
+     * WebSocket API requests. Ref: TODO: ADD WS API URL
      *
-     * Currently only supported for Spot markets
      */
 
     this.logger.trace(`sendWSAPIRequest(): assert "${wsKey}" is connected`, {
@@ -302,13 +300,8 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey, any> {
 
     switch (wsKey) {
       /**
-       * https://docs.kraken.com/api/docs/guides/spot-ws-intro/
-       *
-       * Note: Kraken's v2 WebSockets clean up a number idiosyncrasies and ambiguities from v1 with the overall aim to enable easier integration with applications. It is intended that v1 will be maintained but future enhancements will be developed in v2.
-       *
-       * Given the above, we are only integrating with V2 for now.
-       *
-       * V2 SpotWebSocket Reference: https://docs.kraken.com/api/docs/websocket-v2/add_order/
+       * HTX WebSocket URLs. Ref: https://www.htx.com/en-us/opend/newApiPages/
+       * TODO: Verify and update URLs for HTX (api.huobi.pro/ws/v2, api-aws.huobi.pro/ws/v2).
        */
       case WS_KEY_MAP.spotPublicV2: {
         return 'wss://ws.kraken.com/v2';

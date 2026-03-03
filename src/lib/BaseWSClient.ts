@@ -949,7 +949,6 @@ export abstract class BaseWebsocketClient<
 
       try {
         this.tryWsSend(wsKey, JSON.stringify(wsMessage), true);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         throw e;
       }
@@ -989,7 +988,6 @@ export abstract class BaseWebsocketClient<
       this.logger.trace(`Sending batch via message: "${wsMessage}"`);
       try {
         this.tryWsSend(wsKey, JSON.stringify(wsMessage));
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         throw e;
       }

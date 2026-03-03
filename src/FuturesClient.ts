@@ -412,6 +412,7 @@ export class FuturesClient extends BaseRestClient {
 
   generateNewOrderID(): string {
     // Generate a short UUID format (32 hex characters without dashes)
+    // TODO: CHECK ID FOR HTX FUTURES
     const hexChars = '0123456789abcdef';
     let result = '';
     for (let i = 0; i < 32; i++) {
