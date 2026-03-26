@@ -10,6 +10,7 @@ import {
   APIIDMain,
   APIIDMainKey,
   GenericAPIResponse,
+  getBaseDomain,
   getRestBaseUrl,
   isEmptyObject,
   REST_CLIENT_TYPE_ENUM,
@@ -131,6 +132,8 @@ export abstract class BaseRestClient {
 
   private baseUrl: string;
 
+  private baseDomain: string;
+
   private globalRequestOptions: AxiosRequestConfig;
 
   private apiKey: string | undefined;
@@ -145,7 +148,10 @@ export abstract class BaseRestClient {
   /** Defines the client type (affecting how requests & signatures behave) */
   abstract getClientType(): RestClientType;
 
-  /** Whether AWS region endpoint is requested. Subclasses use this for getClientType(). */
+  /**
+   * Whether AWS region endpoint is requested. Subclasses use this for getClientType().
+   * TODO: htx specific, move out of base client
+   */
   protected getAWSOption(): boolean {
     return Boolean(this.options.useAWS);
   }
@@ -197,6 +203,7 @@ export abstract class BaseRestClient {
     }
 
     this.baseUrl = getRestBaseUrl(restClientOptions, this.getClientType());
+    this.baseDomain = getBaseDomain(this.baseUrl);
 
     this.apiKey = this.options.apiKey;
     this.apiSecret = this.options.apiSecret;
@@ -308,6 +315,7 @@ export abstract class BaseRestClient {
   ): GenericAPIResponse {
     const isFullUrl =
       endpoint.startsWith('http://') || endpoint.startsWith('https://');
+
     const path = isFullUrl
       ? endpoint
       : endpoint.startsWith('/')
@@ -321,6 +329,7 @@ export abstract class BaseRestClient {
     const options = await this.buildRequest(
       method,
       path,
+      this.baseDomain,
       requestUrl,
       params,
       isPublicApi,
@@ -458,6 +467,7 @@ export abstract class BaseRestClient {
   private async signRequest<
     T extends ParamsInQueryBodyOrHeader | undefined = object,
   >(
+    domain: string,
     data: T,
     endpoint: string,
     method: Method,
@@ -495,58 +505,47 @@ export abstract class BaseRestClient {
       switch (clientType) {
         case REST_CLIENT_TYPE_ENUM.spot:
         case REST_CLIENT_TYPE_ENUM.spotAWS: {
-          // Set default nonce, if not set yet
-          if (!Array.isArray(res.requestData)) {
-            if (!(res.requestData as any)?.nonce) {
-              res.requestData = {
-                nonce: this.getNextRequestNonce(),
-                ...res.requestData,
-              };
-            }
-          }
-
-          // Allow nonce override in reuqest
-          // Should never fallback to new nonce, since it's pre-set above with default val
-          const nonce =
-            (res.requestData as any)?.nonce || this.getNextRequestNonce();
-
-          const serialisedParams = serializeParams(
-            method === 'GET' ? res.requestQuery : res.requestData,
-            strictParamValidation,
-            encodeQueryStringValues,
-            prefixWith,
-            repeatArrayValuesAsKVPairs,
-          );
-
-          const serialisedQueryParams = serializeParams(
-            res.requestQuery,
-            strictParamValidation,
-            encodeQueryStringValues,
-            prefixWith,
-            repeatArrayValuesAsKVPairs,
-          );
-
-          // for spot, serialise GET params, use JSON for POST
-          const signRequestParams =
-            method === 'GET'
-              ? serialisedParams
-              : JSON.stringify(res.requestData);
-
           // The 'timestamp' should be formated as 'YYYY-MM-DDThh:mm:ss' // and URL encoded.
           const timestamp = new Date(this.getSignTimestampMs())
             .toISOString()
             .split('.')[0]; // Remove milliseconds from ISO string
 
-          const signEndpoint = endpoint;
-
           const signType = getSignKeyType(this.options.apiSecret!);
+
+          // HTX spot signs auth params plus GET query params. POST body stays unsigned.
+          const requestParamsToSign = method === 'GET' ? res.requestQuery : {};
 
           const baseParams = {
             AccessKeyId: this.options.apiKey!,
             SignatureMethod: signType === 'HMAC' ? 'HmacSHA256' : 'Ed25519',
             SignatureVersion: '2',
-            Timestamp: timestamp, // might need URL encoding before being query-string constructed
+            Timestamp: timestamp,
+            ...requestParamsToSign,
           };
+
+          const serialisedSignParams = serializeParams(
+            baseParams,
+            strictParamValidation,
+            encodeQueryStringValues,
+            prefixWith,
+            repeatArrayValuesAsKVPairs,
+          );
+
+          const signPrefix =
+            [method, domain.toLowerCase(), endpoint].join('\n') + '\n';
+          const signInput = signPrefix + serialisedSignParams;
+
+          const sign = await this.signMessage(
+            signInput,
+            this.apiSecret!,
+            'base64',
+            'SHA-256',
+          );
+
+          res.sign = sign;
+          res.queryParamsWithSign =
+            serialisedSignParams + '&Signature=' + encodeURIComponent(sign);
+
           /**
            * HmacSHA256 Signature Method
 The signature may be different if the request text is different, therefore the request should be normalized before signing. Below signing steps take the order query as an example:
@@ -559,63 +558,34 @@ AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
 &Timestamp=2017-05-11T15:19:30
 &order-id=1234567890
 
-1. The request Method (GET or POST, WebSocket use GET), append line break "\n"
-GET\n
-
-2. The host with lower case, append line break "\n"
-
-Example:api.huobi.pro\n
-
-3. The path, append line break "\n"
-
-For example, query orders:
-
-/v1/order/orders\n
-
-For example, WebSocket v2
-
-/ws/v2
-
-4. The parameters are URL encoded, and ordered based on ASCII
-
-For example below is the original parameters:
-
+1. The request Method (GET or POST, WebSocket use GET), append line break "\n": GET\n
+2. The host with lower case, append line break "\n": Example:api.huobi.pro\n
+3. The path, append line break "\n":
+For example, query orders: /v1/order/orders\n
+For example, WebSocket v2: /ws/v2
+4. The parameters are URL encoded, and ordered based on ASCII, For example below is the original parameters:
 AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
-
 order-id=1234567890
-
 SignatureMethod=HmacSHA256
-
 SignatureVersion=2
-
 Timestamp=2017-05-11T15%3A19%3A30
 
 Use UTF-8 encoding and URL encoded, the hex must be upper case. For example, The semicolon ':' should be encoded as '%3A', The space should be encoded as '%20'.The 'timestamp' should be formated as 'YYYY-MM-DDThh:mm:ss' and URL encoded. The value is valid within 5 minutes.
 
 Then above parameter should be ordered like below:
-
 AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
-
 SignatureMethod=HmacSHA256
-
 SignatureVersion=2
-
 Timestamp=2017-05-11T15%3A19%3A30
-
 order-id=1234567890
 
 5. Use char "&" to concatenate all parameters
-
 AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2017-05-11T15%3A19%3A30&order-id=1234567890
 
 6. Assemble the pre-signed text
-
 GET\n
-
 api.huobi.pro\n
-
 /v1/order/orders\n
-
 AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2017-05-11T15%3A19%3A30&order-id=1234567890
 
 7. Use the pre-signed text and your Secret Key to generate a signature
@@ -625,14 +595,11 @@ Encode the hash code with base-64 to generate the signature.
 4F65x5A2bLyMWVQj3Aqp+B4w+ivaA7n5Oi2SuYtCJ9o=
            */
 
-          const signInput = 'TODO'; //`${nonce}${signRequestParams}`;
-
           // Only sign when no access token is provided
           if (!this.hasAccessToken()) {
             try {
               const signMessageInput =
-                signEndpoint +
-                (await hashMessage(signInput, 'binary', 'SHA-256'));
+                endpoint + (await hashMessage(signInput, 'binary', 'SHA-256'));
 
               // node:crypto equivalent
               // const sign = createHmac(
@@ -676,9 +643,6 @@ Encode the hash code with base-64 to generate the signature.
               throw error;
             }
           }
-
-          // ONLY the query params. The rest goes in the body, if there is a body.
-          res.queryParamsWithSign = serialisedQueryParams;
 
           break;
         }
@@ -756,6 +720,7 @@ Encode the hash code with base-64 to generate the signature.
   }
 
   private async prepareSignParams<TParams extends object | undefined>(
+    domain: string,
     method: Method,
     endpoint: string,
     signMethod: SignMethod,
@@ -764,6 +729,7 @@ Encode the hash code with base-64 to generate the signature.
   ): Promise<UnsignedRequest<TParams>>;
 
   private async prepareSignParams<TParams extends object | undefined>(
+    domain: string,
     method: Method,
     endpoint: string,
     signMethod: SignMethod,
@@ -772,6 +738,7 @@ Encode the hash code with base-64 to generate the signature.
   ): Promise<SignedRequest<TParams>>;
 
   private async prepareSignParams<TParams extends object | undefined>(
+    domain: string,
     method: Method,
     endpoint: string,
     signMethod: SignMethod,
@@ -789,13 +756,14 @@ Encode the hash code with base-64 to generate the signature.
       throw new Error(MISSING_API_KEYS_ERROR);
     }
 
-    return this.signRequest(params, endpoint, method, signMethod);
+    return this.signRequest(domain, params, endpoint, method, signMethod);
   }
 
   /** Returns an axios request object. Handles signing process automatically if this is a private API call */
   private async buildRequest(
     method: Method,
     endpoint: string,
+    domain: string,
     url: string,
     params?: ParamsInQueryBodyOrHeader,
     isPublicApi?: boolean,
@@ -822,9 +790,16 @@ Encode the hash code with base-64 to generate the signature.
       };
     }
 
-    console.log('signResult->pre', { method, endpoint, params, isPublicApi });
+    // console.log('signResult->pre', {
+    //   url,
+    //   method,
+    //   endpoint,
+    //   params,
+    //   isPublicApi,
+    // });
 
     const signResult = await this.prepareSignParams(
+      domain,
       method,
       endpoint,
       'htx',
@@ -832,7 +807,7 @@ Encode the hash code with base-64 to generate the signature.
       isPublicApi,
     );
 
-    console.log('signResult', signResult);
+    // console.log('signResult', signResult);
 
     let signHeaders: Record<string, string> = {};
 
@@ -863,26 +838,29 @@ Encode the hash code with base-64 to generate the signature.
          * The new version rate limit is applied on UID basis, which means, the overall access rate, from all API keys under same UID, to single endpoint, shouldn’t exceed the rate limit applied on that endpoint.
          */
 
-        const GETnoSign = {
-          // GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L36C9-L36C32
-          'Content-Type': 'application/json',
-        };
-
-        const GETWithSign = {
-          // GET With signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L57
-          // "Content-Type": "application/x-www-form-urlencoded",
-        };
-
-        const POSTWithSign = {
-          // GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L44
-          'Content-Type': 'application/json',
-        };
-
         signHeaders = {
           // 'API-Key': this.apiKey,
           // 'API-Sign': signResult.sign,
           Accept: 'application/json',
         };
+
+        if (method === 'GET') {
+          signHeaders = {
+            ...signHeaders,
+            // GET With signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L57
+            'Content-Type': 'application/x-www-form-urlencoded',
+          };
+          // console.log('signParams for GET WITH SIGN: ', signResult);
+          break;
+        }
+
+        if (method === 'POST') {
+          signHeaders = {
+            ...signHeaders,
+            // GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L44
+            'Content-Type': 'application/json',
+          };
+        }
         break;
       }
       default: {

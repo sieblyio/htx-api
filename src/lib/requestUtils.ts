@@ -153,3 +153,20 @@ export function getRestBaseUrl(
   }
   return htxURLMap[restClientType];
 }
+
+/**
+ * Iterates to extract pure domain from URL.
+ * https://example.com/v1/endpoint -> example.com
+ */
+export function getBaseDomain(url: string): string {
+  if (url.startsWith('https://')) {
+    return getBaseDomain(url.replace('https://', ''));
+  }
+
+  if (url.indexOf('/') !== -1) {
+    const splitUrl = url.split('/');
+    return getBaseDomain(splitUrl[0]);
+  }
+
+  return url;
+}
