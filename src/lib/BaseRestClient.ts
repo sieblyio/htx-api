@@ -346,7 +346,7 @@ export abstract class BaseRestClient {
     // Dispatch request
     return axios(options)
       .then((response) => {
-        const throable = {
+        const throwable = {
           method,
           endpoint,
           params,
@@ -354,19 +354,31 @@ export abstract class BaseRestClient {
         };
 
         if (response.status == 200) {
-          // Throw if API returns an error (e.g. insufficient balance)
+          /**
+           * Throw if response contains error (SPOT), e.g:
+           * {
+           *    status: 'error',
+           *    'err-code': 'api-signature-not-valid',
+           *    'err-msg': 'Signature not valid: API key has no permission [API Key没有权限]',
+           *    data: null
+           * }
+           */
           if (
-            typeof response.data?.code === 'string' &&
-            response.data?.code !== '200000'
+            typeof response.data?.status === 'string' &&
+            response.data?.status === 'error'
           ) {
-            throw throable;
+            throw throwable;
+          }
+
+          if (response.data && response.data['err-code']) {
+            throw throwable;
           }
 
           switch (this.getClientType()) {
             case REST_CLIENT_TYPE_ENUM.spot:
             case REST_CLIENT_TYPE_ENUM.spotAWS: {
               if (response.data?.error?.length) {
-                throw throable;
+                throw throwable;
               }
               break;
             }
@@ -379,7 +391,7 @@ export abstract class BaseRestClient {
               // };
 
               if (response?.data?.result === 'error') {
-                throw throable;
+                throw throwable;
               }
 
               break;
@@ -389,7 +401,7 @@ export abstract class BaseRestClient {
           return response.data;
         }
 
-        throw throable;
+        throw throwable;
       })
       .catch((e) =>
         this.parseException(e, {
