@@ -19,6 +19,7 @@ import {
 } from './requestUtils.js';
 import {
   checkWebCryptoAPISupported,
+  getSignKeyType,
   hashMessage,
   SignAlgorithm,
   SignEncodeMethod,
@@ -70,7 +71,7 @@ type ParamsInQueryBodyOrHeader = {
 const ENABLE_HTTP_TRACE =
   typeof process === 'object' &&
   typeof process.env === 'object' &&
-  process.env.KRAKENTRACE;
+  process.env.HTXTRACE;
 
 if (ENABLE_HTTP_TRACE) {
   axios.interceptors.request.use((request) => {
@@ -472,52 +473,6 @@ export abstract class BaseRestClient {
       return res;
     }
 
-    // handle JSON preprocessing for requests, including embedded stringify
-    if (method === 'POST') {
-      // array
-      if (Array.isArray(res.requestData)) {
-        res.requestData.forEach((element) => {
-          element[APIIDMainKey] = APIIDMain;
-        });
-      } else if (
-        // not array in top, but has array orders
-        !Array.isArray(res.requestData) &&
-        Array.isArray(res.requestData.orders)
-      ) {
-        res.requestData.orders.forEach((order: any) => {
-          order[APIIDMainKey] = APIIDMain;
-        });
-      } else if (
-        // not array in top, but has array batchOrder
-        !Array.isArray(res.requestData) &&
-        res.requestData?.json &&
-        typeof res.requestData.json === 'object' &&
-        Array.isArray(res.requestData.json?.batchOrder)
-      ) {
-        // Unique to batch order placement, json must be pre-stringified in request
-        res.requestData.json = JSON.stringify({
-          ...res.requestData.json,
-          batchOrder: res.requestData.json.batchOrder.map((order: any) => ({
-            ...order,
-            [APIIDMainKey]: APIIDMain,
-          })),
-        });
-      } else if (
-        // not array in top, but has json object
-        !Array.isArray(res.requestData) &&
-        res.requestData?.json &&
-        typeof res.requestData.json === 'object'
-      ) {
-        // For the rare non-order requests that expected pre-stringified json
-        res.requestData.json = JSON.stringify({
-          ...res.requestData.json,
-        });
-      } else if (res.requestData) {
-        // simple object
-        res.requestData[APIIDMainKey] = APIIDMain;
-      }
-    }
-
     const strictParamValidation = this.options.strictParamValidation;
     const encodeQueryStringValues = true;
 
@@ -532,21 +487,6 @@ export abstract class BaseRestClient {
 
       switch (clientType) {
         case REST_CLIENT_TYPE_ENUM.spot: {
-          // Set default nonce, if not set yet
-          if (!Array.isArray(res.requestData)) {
-            if (!(res.requestData as any)?.nonce) {
-              res.requestData = {
-                nonce: this.getNextRequestNonce(),
-                ...res.requestData,
-              };
-            }
-          }
-
-          // Allow nonce override in reuqest
-          // Should never fallback to new nonce, since it's pre-set above with default val
-          const nonce =
-            (res.requestData as any)?.nonce || this.getNextRequestNonce();
-
           const serialisedParams = serializeParams(
             method === 'GET' ? res.requestQuery : res.requestData,
             strictParamValidation,
@@ -569,8 +509,100 @@ export abstract class BaseRestClient {
               ? serialisedParams
               : JSON.stringify(res.requestData);
 
+          // The 'timestamp' should be formated as 'YYYY-MM-DDThh:mm:ss' // and URL encoded.
+          const timestamp = new Date(this.getSignTimestampMs())
+            .toISOString()
+            .split('.')[0]; // Remove milliseconds from ISO string
+
           const signEndpoint = endpoint;
-          const signInput = `${nonce}${signRequestParams}`;
+
+          const signType = getSignKeyType(this.options.apiSecret!);
+
+          const baseParams = {
+            AccessKeyId: this.options.apiKey!,
+            SignatureMethod: signType === 'HMAC' ? 'HmacSHA256' : 'Ed25519',
+            SignatureVersion: '2',
+            Timestamp: timestamp, // might need URL encoding before being query-string constructed
+          };
+          /**
+           * HmacSHA256 Signature Method
+The signature may be different if the request text is different, therefore the request should be normalized before signing. Below signing steps take the order query as an example:
+
+This is a full URL to query one order:
+https://api.huobi.pro/v1/order/orders?
+AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
+&SignatureMethod=HmacSHA256
+&SignatureVersion=2
+&Timestamp=2017-05-11T15:19:30
+&order-id=1234567890
+
+1. The request Method (GET or POST, WebSocket use GET), append line break "\n"
+GET\n
+
+2. The host with lower case, append line break "\n"
+
+Example:api.huobi.pro\n
+
+3. The path, append line break "\n"
+
+For example, query orders:
+
+/v1/order/orders\n
+
+For example, WebSocket v2
+
+/ws/v2
+
+4. The parameters are URL encoded, and ordered based on ASCII
+
+For example below is the original parameters:
+
+AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
+
+order-id=1234567890
+
+SignatureMethod=HmacSHA256
+
+SignatureVersion=2
+
+Timestamp=2017-05-11T15%3A19%3A30
+
+Use UTF-8 encoding and URL encoded, the hex must be upper case. For example, The semicolon ':' should be encoded as '%3A', The space should be encoded as '%20'.The 'timestamp' should be formated as 'YYYY-MM-DDThh:mm:ss' and URL encoded. The value is valid within 5 minutes.
+
+Then above parameter should be ordered like below:
+
+AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
+
+SignatureMethod=HmacSHA256
+
+SignatureVersion=2
+
+Timestamp=2017-05-11T15%3A19%3A30
+
+order-id=1234567890
+
+5. Use char "&" to concatenate all parameters
+
+AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2017-05-11T15%3A19%3A30&order-id=1234567890
+
+6. Assemble the pre-signed text
+
+GET\n
+
+api.huobi.pro\n
+
+/v1/order/orders\n
+
+AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2017-05-11T15%3A19%3A30&order-id=1234567890
+
+7. Use the pre-signed text and your Secret Key to generate a signature
+
+Use the pre-signed text in step 6 and your API Secret Key to generate hash code by HmacSHA256 hash function.
+Encode the hash code with base-64 to generate the signature.
+4F65x5A2bLyMWVQj3Aqp+B4w+ivaA7n5Oi2SuYtCJ9o=
+           */
+
+          const signInput = 'TODO'; //`${nonce}${signRequestParams}`;
 
           // Only sign when no access token is provided
           if (!this.hasAccessToken()) {
@@ -766,6 +798,8 @@ export abstract class BaseRestClient {
       };
     }
 
+    console.log('signResult->pre', { method, endpoint, params, isPublicApi });
+
     const signResult = await this.prepareSignParams(
       method,
       endpoint,
@@ -773,6 +807,8 @@ export abstract class BaseRestClient {
       params,
       isPublicApi,
     );
+
+    console.log('signResult', signResult);
 
     let signHeaders: Record<string, string> = {};
 
