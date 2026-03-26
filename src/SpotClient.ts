@@ -145,9 +145,9 @@ import {
  */
 export class SpotClient extends BaseRestClient {
   getClientType(): RestClientType {
-    // Points to api.huobi.pro
-    // TODO: Add AWS URL support
-    return REST_CLIENT_TYPE_ENUM.spot;
+    return this.getAWSOption()
+      ? REST_CLIENT_TYPE_ENUM.spotAWS
+      : REST_CLIENT_TYPE_ENUM.spot;
   }
 
   /**
@@ -158,7 +158,8 @@ export class SpotClient extends BaseRestClient {
 
   generateNewOrderID(): string {
     // Generate a short UUID format (32 hex characters without dashes)
-    // Compatible with Kraken's cl_ord_id parameter
+    // Compatible with HTX client-order-id parameter
+    // TODO: CHECK ID FOR HTX SPOT
     const hexChars = '0123456789abcdef';
     let result = '';
     for (let i = 0; i < 32; i++) {

@@ -145,6 +145,11 @@ export abstract class BaseRestClient {
   /** Defines the client type (affecting how requests & signatures behave) */
   abstract getClientType(): RestClientType;
 
+  /** Whether AWS region endpoint is requested. Subclasses use this for getClientType(). */
+  protected getAWSOption(): boolean {
+    return Boolean(this.options.useAWS);
+  }
+
   /**
    * Create an instance of the REST client. Pass API credentials in the object in the first parameter.
    * @param {RestClientOptions} [restClientOptions={}] options to configure REST API connectivity
@@ -166,7 +171,7 @@ export abstract class BaseRestClient {
       /** inject custom request options based on axios specs - see axios docs for more guidance on AxiosRequestConfig: https://github.com/axios/axios#request-config */
       ...networkOptions,
       headers: {
-        UserAgent: '@siebly/kraken-api',
+        UserAgent: '@siebly/htx-api',
         locale: 'en-US',
       },
     };
@@ -349,13 +354,15 @@ export abstract class BaseRestClient {
           }
 
           switch (this.getClientType()) {
-            case REST_CLIENT_TYPE_ENUM.spot: {
+            case REST_CLIENT_TYPE_ENUM.spot:
+            case REST_CLIENT_TYPE_ENUM.spotAWS: {
               if (response.data?.error?.length) {
                 throw throable;
               }
               break;
             }
-            case REST_CLIENT_TYPE_ENUM.futures: {
+            case REST_CLIENT_TYPE_ENUM.futures:
+            case REST_CLIENT_TYPE_ENUM.futuresAWS: {
               // const res = {
               //   result: 'error',
               //   error: 'authenticationError',
@@ -486,7 +493,23 @@ export abstract class BaseRestClient {
       const clientType = this.getClientType();
 
       switch (clientType) {
-        case REST_CLIENT_TYPE_ENUM.spot: {
+        case REST_CLIENT_TYPE_ENUM.spot:
+        case REST_CLIENT_TYPE_ENUM.spotAWS: {
+          // Set default nonce, if not set yet
+          if (!Array.isArray(res.requestData)) {
+            if (!(res.requestData as any)?.nonce) {
+              res.requestData = {
+                nonce: this.getNextRequestNonce(),
+                ...res.requestData,
+              };
+            }
+          }
+
+          // Allow nonce override in reuqest
+          // Should never fallback to new nonce, since it's pre-set above with default val
+          const nonce =
+            (res.requestData as any)?.nonce || this.getNextRequestNonce();
+
           const serialisedParams = serializeParams(
             method === 'GET' ? res.requestQuery : res.requestData,
             strictParamValidation,
@@ -642,7 +665,7 @@ Encode the hash code with base-64 to generate the signature.
                   'Failed to sign request: Invalid API credentials detected.\n\n' +
                     '⚠️  PLEASE CHECK YOUR API KEY AND SECRET:\n' +
                     '   - Ensure your API Secret is a valid base64-encoded string\n' +
-                    '   - Kraken provides API secrets in base64 format\n\n' +
+                    '   - HTX provides API secrets in base64 format\n\n' +
                     `Original error: ${error.message}\n` +
                     `Stack trace: ${error.stack}`,
                 );
@@ -659,7 +682,8 @@ Encode the hash code with base-64 to generate the signature.
 
           break;
         }
-        case REST_CLIENT_TYPE_ENUM.futures: {
+        case REST_CLIENT_TYPE_ENUM.futures:
+        case REST_CLIENT_TYPE_ENUM.futuresAWS: {
           const serialisedQueryParams = serializeParams(
             res.requestQuery,
             strictParamValidation,

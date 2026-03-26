@@ -1,13 +1,13 @@
-import { SpotClient } from '../../src/index.js';
+import { FuturesClient } from '../../src/index.js';
 import { getTestProxy } from '../proxy.util.js';
 
-describe('REST PRIVATE SPOT READ', () => {
+describe('REST PRIVATE FUTURES READ', () => {
   const account = {
-    key: process.env.API_SPOT_KEY,
-    secret: process.env.API_SPOT_SECRET,
+    key: process.env.API_FUTURES_KEY,
+    secret: process.env.API_FUTURES_SECRET,
   };
 
-  const rest = new SpotClient(
+  const rest = new FuturesClient(
     {
       apiKey: account.key,
       apiSecret: account.secret,
@@ -21,13 +21,13 @@ describe('REST PRIVATE SPOT READ', () => {
   });
 
   describe('private GET without params', () => {
-    it('should succeed calling getAccounts', async () => {
+    it('should succeed calling getAccountType', async () => {
       try {
-        const res = await rest.getAccounts();
+        const res = await rest.getAccountType();
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
-        expect(Array.isArray(res.data)).toBe(true);
+        expect(res.data).toHaveProperty('account_type');
       } catch (e: unknown) {
         console.log(
           `err "${expect.getState().currentTestName}"`,
@@ -37,9 +37,9 @@ describe('REST PRIVATE SPOT READ', () => {
       }
     });
 
-    it('should succeed calling getAccountSwitchUserInfo', async () => {
+    it('should succeed calling getSubPermissions', async () => {
       try {
-        const res = await rest.getAccountSwitchUserInfo();
+        const res = await rest.getSubPermissions();
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
@@ -54,11 +54,9 @@ describe('REST PRIVATE SPOT READ', () => {
   });
 
   describe('private GET with params', () => {
-    it('should succeed calling getAccountValuation with params', async () => {
+    it('should succeed calling getSubPermissions with params', async () => {
       try {
-        const res = await rest.getAccountValuation({
-          valuationCurrency: 'BTC',
-        });
+        const res = await rest.getSubPermissions({ sub_uid: '1' });
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
@@ -71,9 +69,12 @@ describe('REST PRIVATE SPOT READ', () => {
       }
     });
 
-    it('should succeed calling getOpenOrders with params', async () => {
+    it('should succeed calling getCrossTradeState with params', async () => {
       try {
-        const res = await rest.getOpenOrders({ symbol: 'btcusdt' });
+        const res = await rest.getCrossTradeState({
+          contract_code: 'btc-usdt',
+          business_type: 'swap',
+        });
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
@@ -87,22 +88,15 @@ describe('REST PRIVATE SPOT READ', () => {
       }
     });
 
-    it('should succeed calling getAccountBalance with accountId', async () => {
+    it('should succeed calling getCrossTransferState with params', async () => {
       try {
-        const accountsRes = await rest.getAccounts();
-        const accountId = accountsRes.data?.[0]?.id;
-        if (!accountId) {
-          expect(accountsRes.data?.length).toBeGreaterThan(0);
-          return;
-        }
-
-        const res = await rest.getAccountBalance({
-          accountId: String(accountId),
+        const res = await rest.getCrossTransferState({
+          margin_account: 'btc-usdt',
         });
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
-        expect(res.data).toHaveProperty('list');
+        expect(Array.isArray(res.data)).toBe(true);
       } catch (e: unknown) {
         console.log(
           `err "${expect.getState().currentTestName}"`,

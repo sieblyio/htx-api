@@ -399,9 +399,9 @@ import { FuturesAPISuccessResponse } from './types/response/shared.types.js';
  */
 export class FuturesClient extends BaseRestClient {
   getClientType(): RestClientType {
-    // Points to api.hbdm.com
-    // TODO: Add AWS URL support
-    return REST_CLIENT_TYPE_ENUM.futures;
+    return this.getAWSOption()
+      ? REST_CLIENT_TYPE_ENUM.futuresAWS
+      : REST_CLIENT_TYPE_ENUM.futures;
   }
 
   /**
@@ -412,6 +412,7 @@ export class FuturesClient extends BaseRestClient {
 
   generateNewOrderID(): string {
     // Generate a short UUID format (32 hex characters without dashes)
+    // TODO: CHECK ID FOR HTX FUTURES
     const hexChars = '0123456789abcdef';
     let result = '';
     for (let i = 0; i < 32; i++) {

@@ -16,7 +16,7 @@ export const REST_CLIENT_TYPE_ENUM = {
 export type RestClientType =
   (typeof REST_CLIENT_TYPE_ENUM)[keyof typeof REST_CLIENT_TYPE_ENUM];
 
-const krakenURLMap = {
+const htxURLMap = {
   [REST_CLIENT_TYPE_ENUM.spot]: 'https://api.huobi.pro',
   [REST_CLIENT_TYPE_ENUM.spotAWS]: 'https://api-aws.huobi.pro',
   [REST_CLIENT_TYPE_ENUM.futures]: 'https://api.hbdm.com',
@@ -52,9 +52,12 @@ export interface RestClientOptions {
 
   /**
    * Optionally override API protocol + domain
-   * e.g baseUrl: 'https://api.kraken.com'
+   * e.g baseUrl: 'https://api.huobi.pro'
    **/
   baseUrl?: string;
+
+  /** Use AWS region endpoint (api-aws.huobi.pro for spot, api.hbdm.vn for futures). Default false. */
+  useAWS?: boolean;
 
   /** Default: true. whether to try and post-process request exceptions (and throw them). */
   parseExceptions?: boolean;
@@ -148,5 +151,5 @@ export function getRestBaseUrl(
   if (restClientOptions.baseUrl) {
     return restClientOptions.baseUrl;
   }
-  return krakenURLMap[restClientType];
+  return htxURLMap[restClientType];
 }

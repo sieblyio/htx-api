@@ -1,13 +1,13 @@
-import { SpotClient } from '../../src/index.js';
+import { FuturesClient } from '../../src/index.js';
 import { getTestProxy } from '../proxy.util.js';
 
-describe('REST PRIVATE SPOT WRITE', () => {
+describe('REST PRIVATE FUTURES WRITE', () => {
   const account = {
-    key: process.env.API_SPOT_KEY,
-    secret: process.env.API_SPOT_SECRET,
+    key: process.env.API_FUTURES_KEY,
+    secret: process.env.API_FUTURES_SECRET,
   };
 
-  const rest = new SpotClient(
+  const rest = new FuturesClient(
     {
       apiKey: account.key,
       apiSecret: account.secret,
@@ -21,15 +21,15 @@ describe('REST PRIVATE SPOT WRITE', () => {
   });
 
   describe('private POST without params', () => {
-    it('should succeed or fail batchCancelOpenOrders with empty body (validates signature)', async () => {
+    it('should succeed or fail getCrossOpenOrders with empty body (validates signature)', async () => {
       try {
-        const res = await rest.batchCancelOpenOrders({});
+        const res = await rest.getCrossOpenOrders({});
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
-        // Success: 0 orders cancelled with empty criteria
+        expect(res.data).toHaveProperty('orders');
       } catch (e: unknown) {
-        // Expected with read-only keys or other permission - validates signature is correct
+        // Expected with read-only keys or no cross margin - validates signature
         const err = e as { body?: unknown; message?: string };
         expect(e).toBeDefined();
         expect(err?.body ?? err?.message).toBeDefined();
@@ -41,55 +41,49 @@ describe('REST PRIVATE SPOT WRITE', () => {
     it('should fail submitOrder with invalid params (validates signature)', async () => {
       try {
         const res = await rest.submitOrder({
-          'account-id': '1',
-          symbol: 'btcusdt',
-          type: 'buy-limit',
-          amount: '0.00001',
-          price: '0.01',
+          contract_code: 'btc-usdt',
+          direction: 'buy',
+          volume: 0.001,
+          lever_rate: 10,
+          order_price_type: 'limit',
+          price: 0.01,
         });
 
-        // If it succeeds, account exists and order was placed (unlikely with 0.01 price)
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
       } catch (e: unknown) {
-        // Expected: invalid order (price too low, min amount, etc) - validates signature
+        // Expected: invalid order (price too low, etc) - validates signature
         const body = (e as { body?: Record<string, unknown> })?.body;
         expect(body).toBeDefined();
-        // HTX returns err-code/err-msg or code/message
         expect(
-          body?.['err-code'] ??
-            body?.code ??
-            body?.message ??
-            body?.['err-msg'],
+          body?.status ?? body?.code ?? body?.message ?? body?.err_msg,
         ).toBeDefined();
       }
     });
 
-    it('should fail cancelOrderById with non-existent order (validates signature)', async () => {
+    it('should fail cancelOrder with non-existent order (validates signature)', async () => {
       try {
-        const res = await rest.cancelOrderById({
-          orderId: '9999999999999999',
+        const res = await rest.cancelOrder({
+          order_id: '9999999999999999',
+          contract_code: 'btc-usdt',
         });
 
         expect(res).toBeDefined();
       } catch (e: unknown) {
         // Expected: order not found - validates signature
         const body = (e as { body?: Record<string, unknown> })?.body;
-
         expect(body).toBeDefined();
         expect(
-          body?.['err-code'] ??
-            body?.code ??
-            body?.message ??
-            body?.['err-msg'],
+          body?.status ?? body?.code ?? body?.message ?? body?.err_msg,
         ).toBeDefined();
       }
     });
 
-    it('should fail cancelOrderByClientId with non-existent client order id (validates signature)', async () => {
+    it('should fail cancelCrossOrder with non-existent order (validates signature)', async () => {
       try {
-        const res = await rest.cancelOrderByClientId({
-          'client-order-id': 'test-nonexistent-' + Date.now(),
+        const res = await rest.cancelCrossOrder({
+          order_id: '9999999999999999',
+          contract_code: 'btc-usdt',
         });
 
         expect(res).toBeDefined();
