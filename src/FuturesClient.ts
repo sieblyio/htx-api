@@ -399,9 +399,7 @@ import { FuturesAPISuccessResponse } from './types/response/shared.types.js';
  */
 export class FuturesClient extends BaseRestClient {
   getClientType(): RestClientType {
-    return this.getAWSOption()
-      ? REST_CLIENT_TYPE_ENUM.futuresAWS
-      : REST_CLIENT_TYPE_ENUM.futures;
+    return REST_CLIENT_TYPE_ENUM.futuresAWS;
   }
 
   /**

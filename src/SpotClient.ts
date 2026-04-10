@@ -145,9 +145,7 @@ import {
  */
 export class SpotClient extends BaseRestClient {
   getClientType(): RestClientType {
-    return this.getAWSOption()
-      ? REST_CLIENT_TYPE_ENUM.spotAWS
-      : REST_CLIENT_TYPE_ENUM.spot;
+    return REST_CLIENT_TYPE_ENUM.spot;
   }
 
   /**

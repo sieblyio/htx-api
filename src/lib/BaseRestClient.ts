@@ -149,14 +149,6 @@ export abstract class BaseRestClient {
   abstract getClientType(): RestClientType;
 
   /**
-   * Whether AWS region endpoint is requested. Subclasses use this for getClientType().
-   * TODO: htx specific, move out of base client
-   */
-  protected getAWSOption(): boolean {
-    return Boolean(this.options.useAWS);
-  }
-
-  /**
    * Create an instance of the REST client. Pass API credentials in the object in the first parameter.
    * @param {RestClientOptions} [restClientOptions={}] options to configure REST API connectivity
    * @param {AxiosRequestConfig} [networkOptions={}] HTTP networking options for axios
@@ -374,15 +366,12 @@ export abstract class BaseRestClient {
             throw throwable;
           }
 
-          switch (this.getClientType()) {
+          const clientType = this.getClientType();
+          switch (clientType) {
             case REST_CLIENT_TYPE_ENUM.spot:
-            case REST_CLIENT_TYPE_ENUM.spotAWS: {
-              if (response.data?.error?.length) {
-                throw throwable;
-              }
-              break;
-            }
+            case REST_CLIENT_TYPE_ENUM.spotAWS:
             case REST_CLIENT_TYPE_ENUM.futures:
+            case REST_CLIENT_TYPE_ENUM.futuresAlt1:
             case REST_CLIENT_TYPE_ENUM.futuresAWS: {
               // const res = {
               //   result: 'error',
@@ -394,7 +383,25 @@ export abstract class BaseRestClient {
                 throw throwable;
               }
 
+              // futures exceptions, e.g.
+              // data: {
+              //   code: 403,
+              //   msg: 'Incorrect signature method [错误的签名方法]',
+              //   data: null,
+              //   ts: 1775823398810
+              // }
+
+              if (response.data && response.data['code']) {
+                throw throwable;
+              }
               break;
+            }
+
+            default: {
+              neverGuard(
+                clientType,
+                `Unhandled client type in response parsing: ${this.getClientType()}`,
+              );
             }
           }
 
@@ -826,9 +833,7 @@ Encode the hash code with base-64 to generate the signature.
     const clientType = this.getClientType();
     switch (clientType) {
       case REST_CLIENT_TYPE_ENUM.spot:
-      case REST_CLIENT_TYPE_ENUM.futures:
-      case REST_CLIENT_TYPE_ENUM.spotAWS:
-      case REST_CLIENT_TYPE_ENUM.futuresAWS: {
+      case REST_CLIENT_TYPE_ENUM.spotAWS: {
         // spot: https://www.htx.com/en-us/opend/newApiPages/?id=419
         /**
          * All params go in query string. E.g. these params:
@@ -873,6 +878,56 @@ Encode the hash code with base-64 to generate the signature.
             'Content-Type': 'application/json',
           };
         }
+        break;
+      }
+
+      case REST_CLIENT_TYPE_ENUM.futures:
+      case REST_CLIENT_TYPE_ENUM.futuresAWS:
+      case REST_CLIENT_TYPE_ENUM.futuresAlt1: {
+        // spot: https://www.htx.com/en-us/opend/newApiPages/?id=419
+        /**
+         * All params go in query string. E.g. these params:
+         * AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
+         * order-id=1234567890
+         * SignatureMethod=Ed25519
+         * SignatureVersion=2
+         * Timestamp=2017-05-11T15%3A19%3A30
+         *
+         * Become:
+         * https://api.huobi.pro/v1/order/orders?AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx&order-id=1234567890&SignatureMethod=Ed25519&SignatureVersion=2&Timestamp=2017-05-11T15%3A19%3A30&Signature=4F65x5A2bLyMWVQj3Aqp%2BB4w%2BivaA7n5Oi2SuYtCJ9o%3D
+         *
+         * Ed25519 or HmacSHA256
+         *
+         * - GET request: All parameters are included in URL, and do not carry body(content-length>0), in otherwise will return 403 error code.
+         * - POST request: All parameters are formatted as JSON and put int the request body
+         *
+         * Rate limit headers, TODO: It is suggested to read HTTP Header X-HB-RateLimit-Requests-Remain and X-HB-RateLimit-Requests-Expire to get the remaining count of request and the expire time for current rate limit time window, then you can adjust the API access rate dynamically.
+         * The new version rate limit is applied on UID basis, which means, the overall access rate, from all API keys under same UID, to single endpoint, shouldn’t exceed the rate limit applied on that endpoint.
+         */
+
+        signHeaders = {
+          // 'API-Key': this.apiKey,
+          // 'API-Sign': signResult.sign,
+          Accept: 'application/json',
+        };
+
+        // if (method === 'GET') {
+        //   signHeaders = {
+        //     ...signHeaders,
+        //     // GET With signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L57
+        //     'Content-Type': 'application/x-www-form-urlencoded',
+        //   };
+        //   // console.log('signParams for GET WITH SIGN: ', signResult);
+        //   break;
+        // }
+
+        // if (method === 'POST') {
+        //   signHeaders = {
+        //     ...signHeaders,
+        //     // GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L44
+        //     'Content-Type': 'application/json',
+        //   };
+        // }
         break;
       }
       default: {

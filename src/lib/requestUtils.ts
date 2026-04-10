@@ -7,9 +7,19 @@ export const REST_CLIENT_TYPE_ENUM = {
   spot: 'spot',
   /** Spot AWS */
   spotAWS: 'spotAWS',
-  /** Futures */
+  /**
+   * Futures Cloudflare CDN (default for futures clients)
+   */
   futures: 'futures',
-  /** Futures AWS */
+  /**
+   * Futures
+   *
+   * If you can't connect "https://api.hbdm.com", please use "https://api.btcgateway.pro" for debug purpose. If your server is deployed in AWS, we recommend using "https://api.hbdm.vn".
+   */
+  futuresAlt1: 'futuresAlt1',
+  /**
+   * Futures AWS CDN
+   */
   futuresAWS: 'futuresAWS',
 } as const;
 
@@ -19,8 +29,10 @@ export type RestClientType =
 const htxURLMap = {
   [REST_CLIENT_TYPE_ENUM.spot]: 'https://api.huobi.pro',
   [REST_CLIENT_TYPE_ENUM.spotAWS]: 'https://api-aws.huobi.pro',
-  [REST_CLIENT_TYPE_ENUM.futures]: 'https://api.hbdm.com',
-  [REST_CLIENT_TYPE_ENUM.futuresAWS]: 'https://api.hbdm.vn',
+  [REST_CLIENT_TYPE_ENUM.futures]: 'https://api.hbdm.com', // Cloudflare's CDN
+  // If you can't connect "https://api.hbdm.com", please use "https://api.btcgateway.pro" for debug purpose. If your server is deployed in AWS, HTX recommend using "https://api.hbdm.vn".
+  [REST_CLIENT_TYPE_ENUM.futuresAlt1]: 'https://api.btcgateway.pro',
+  [REST_CLIENT_TYPE_ENUM.futuresAWS]: 'https://api.hbdm.vn', // AWS's CDN
 } as const;
 
 export interface RestClientOptions {
@@ -56,8 +68,12 @@ export interface RestClientOptions {
    **/
   baseUrl?: string;
 
-  /** Use AWS region endpoint (api-aws.huobi.pro for spot, api.hbdm.vn for futures). Default false. */
-  useAWS?: boolean;
+  /**
+   * Advanced: force a specific base URL.
+   * - For AWS deployments, use REST_CLIENT_TYPE_ENUM.spotAWS for spot or REST_CLIENT_TYPE_ENUM.futuresAWS for futures.
+   * - If you can't connect to the default futures endpoint (Cloudflare's CDN), you can use REST_CLIENT_TYPE_ENUM.futuresAlt1 to connect to the alternative endpoint (btcgateway.pro). https://www.htx.com/en-us/opend/newApiPages/?id=707
+   */
+  baseUrlKey?: RestClientType;
 
   /** Default: true. whether to try and post-process request exceptions (and throw them). */
   parseExceptions?: boolean;
@@ -151,6 +167,19 @@ export function getRestBaseUrl(
   if (restClientOptions.baseUrl) {
     return restClientOptions.baseUrl;
   }
+
+  if (restClientOptions.baseUrlKey) {
+    const baseUrl = htxURLMap[restClientOptions.baseUrlKey];
+    if (!baseUrl) {
+      throw new Error(
+        `Invalid baseUrlKey "${restClientOptions.baseUrlKey}". Valid options are: ${Object.keys(
+          htxURLMap,
+        ).join(', ')}`,
+      );
+    }
+    return baseUrl;
+  }
+
   return htxURLMap[restClientType];
 }
 
