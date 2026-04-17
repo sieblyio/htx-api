@@ -505,7 +505,7 @@ export abstract class BaseRestClient {
     };
 
     if (!this.hasValidCredentials()) {
-      return res;
+      throw new Error(MISSING_API_KEYS_ERROR);
     }
 
     const strictParamValidation = this.options.strictParamValidation;
@@ -721,11 +721,15 @@ export abstract class BaseRestClient {
     deleteUndefinedValues(params?.query);
     deleteUndefinedValues(params?.headers);
 
-    if (isPublicApi || !this.apiKey || !this.apiSecret) {
+    if (isPublicApi) {
       return {
         ...options,
         params: params?.query || params?.body || params,
       };
+    }
+
+    if (!this.hasValidCredentials()) {
+      throw new Error(MISSING_API_KEYS_ERROR);
     }
 
     // console.log('signResult->pre', {
