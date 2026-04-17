@@ -24,6 +24,7 @@ describe('REST PRIVATE SPOT READ', () => {
     it('should succeed calling getAccounts', async () => {
       try {
         const res = await rest.getAccounts();
+        // console.log(`res "${expect.getState().currentTestName}"`, res);
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();

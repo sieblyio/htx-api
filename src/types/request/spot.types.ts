@@ -92,7 +92,7 @@ export interface SpotAccountTransferReq {
 /** Req for GET /v1/account/history */
 export interface SpotGetAccountHistoryReq {
   /** Account ID from GET /v1/account/accounts */
-  'account-id': string;
+  'account-id': string | number;
   /** Currency filter */
   currency?: string;
   /** Amount change types, comma-separated. Default all. */
@@ -151,7 +151,7 @@ export type SpotOrderSource =
 /** Req for POST /v1/order/orders/place */
 export interface SpotV1OrderPlaceReq {
   /** Account ID from GET /v1/account/accounts. Required for trading. */
-  'account-id': string;
+  'account-id': string | number;
   /** Trading symbol (e.g. ethusdt) */
   symbol: string;
   /** Order type (e.g. buy-limit, sell-market) */
@@ -172,13 +172,10 @@ export interface SpotV1OrderPlaceReq {
   operator?: string;
 }
 
-/** Batch of orders for POST /v1/order/batch-orders. Max 10 orders. */
-export type SpotV1OrderBatchPlaceReq = SpotV1OrderPlaceReq[];
-
 /** Margin order with auto borrow/repay for POST /v1/order/auto/place. Sub-accounts not supported. */
 export interface SpotV1OrderAutoPlaceReq {
   symbol: string;
-  'account-id': string;
+  'account-id': string | number;
   type: SpotOrderType;
   /** 1: automatic loan, 2: automatic repayment */
   'trade-purpose': '1' | '2';
@@ -190,6 +187,8 @@ export interface SpotV1OrderAutoPlaceReq {
   /** Amount/quantity to borrow when trade-purpose=1. Max 3 decimal precision. */
   'borrow-amount'?: string;
   price?: string;
+  /** Client order ID. Max 64 chars. Valid 8h for open, 2h for completed. */
+  'client-order-id'?: string;
   'stop-price'?: string;
   operator?: string;
 }

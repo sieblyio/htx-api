@@ -10,6 +10,7 @@ import {
   APIIDMain,
   APIIDMainKey,
   GenericAPIResponse,
+  getBaseDomain,
   getRestBaseUrl,
   isEmptyObject,
   REST_CLIENT_TYPE_ENUM,
@@ -19,6 +20,7 @@ import {
 } from './requestUtils.js';
 import {
   checkWebCryptoAPISupported,
+  getSignKeyType,
   hashMessage,
   SignAlgorithm,
   SignEncodeMethod,
@@ -130,6 +132,8 @@ export abstract class BaseRestClient {
 
   private baseUrl: string;
 
+  private baseDomain: string;
+
   private globalRequestOptions: AxiosRequestConfig;
 
   private apiKey: string | undefined;
@@ -143,11 +147,6 @@ export abstract class BaseRestClient {
 
   /** Defines the client type (affecting how requests & signatures behave) */
   abstract getClientType(): RestClientType;
-
-  /** Whether AWS region endpoint is requested. Subclasses use this for getClientType(). */
-  protected getAWSOption(): boolean {
-    return Boolean(this.options.useAWS);
-  }
 
   /**
    * Create an instance of the REST client. Pass API credentials in the object in the first parameter.
@@ -196,6 +195,7 @@ export abstract class BaseRestClient {
     }
 
     this.baseUrl = getRestBaseUrl(restClientOptions, this.getClientType());
+    this.baseDomain = getBaseDomain(this.baseUrl);
 
     this.apiKey = this.options.apiKey;
     this.apiSecret = this.options.apiSecret;
@@ -307,6 +307,7 @@ export abstract class BaseRestClient {
   ): GenericAPIResponse {
     const isFullUrl =
       endpoint.startsWith('http://') || endpoint.startsWith('https://');
+
     const path = isFullUrl
       ? endpoint
       : endpoint.startsWith('/')
@@ -320,6 +321,7 @@ export abstract class BaseRestClient {
     const options = await this.buildRequest(
       method,
       path,
+      this.baseDomain,
       requestUrl,
       params,
       isPublicApi,
@@ -336,7 +338,7 @@ export abstract class BaseRestClient {
     // Dispatch request
     return axios(options)
       .then((response) => {
-        const throable = {
+        const throwable = {
           method,
           endpoint,
           params,
@@ -344,23 +346,32 @@ export abstract class BaseRestClient {
         };
 
         if (response.status == 200) {
-          // Throw if API returns an error (e.g. insufficient balance)
+          /**
+           * Throw if response contains error (SPOT), e.g:
+           * {
+           *    status: 'error',
+           *    'err-code': 'api-signature-not-valid',
+           *    'err-msg': 'Signature not valid: API key has no permission [API Key没有权限]',
+           *    data: null
+           * }
+           */
           if (
-            typeof response.data?.code === 'string' &&
-            response.data?.code !== '200000'
+            typeof response.data?.status === 'string' &&
+            response.data?.status === 'error'
           ) {
-            throw throable;
+            throw throwable;
           }
 
-          switch (this.getClientType()) {
+          if (response.data && response.data['err-code']) {
+            throw throwable;
+          }
+
+          const clientType = this.getClientType();
+          switch (clientType) {
             case REST_CLIENT_TYPE_ENUM.spot:
-            case REST_CLIENT_TYPE_ENUM.spotAWS: {
-              if (response.data?.error?.length) {
-                throw throable;
-              }
-              break;
-            }
+            case REST_CLIENT_TYPE_ENUM.spotAWS:
             case REST_CLIENT_TYPE_ENUM.futures:
+            case REST_CLIENT_TYPE_ENUM.futuresAlt1:
             case REST_CLIENT_TYPE_ENUM.futuresAWS: {
               // const res = {
               //   result: 'error',
@@ -369,17 +380,34 @@ export abstract class BaseRestClient {
               // };
 
               if (response?.data?.result === 'error') {
-                throw throable;
+                throw throwable;
               }
 
+              // futures exceptions, e.g.
+              // data: {
+              //   code: 403,
+              //   msg: 'Incorrect signature method [错误的签名方法]',
+              //   data: null,
+              //   ts: 1775823398810
+              // }
+              if (response.data && response.data['code'] === 403) {
+                throw throwable;
+              }
               break;
+            }
+
+            default: {
+              neverGuard(
+                clientType,
+                `Unhandled client type in response parsing: ${this.getClientType()}`,
+              );
             }
           }
 
           return response.data;
         }
 
-        throw throable;
+        throw throwable;
       })
       .catch((e) =>
         this.parseException(e, {
@@ -457,6 +485,7 @@ export abstract class BaseRestClient {
   private async signRequest<
     T extends ParamsInQueryBodyOrHeader | undefined = object,
   >(
+    domain: string,
     data: T,
     endpoint: string,
     method: Method,
@@ -476,53 +505,7 @@ export abstract class BaseRestClient {
     };
 
     if (!this.hasValidCredentials()) {
-      return res;
-    }
-
-    // handle JSON preprocessing for requests, including embedded stringify
-    if (method === 'POST') {
-      // array
-      if (Array.isArray(res.requestData)) {
-        res.requestData.forEach((element) => {
-          element[APIIDMainKey] = APIIDMain;
-        });
-      } else if (
-        // not array in top, but has array orders
-        !Array.isArray(res.requestData) &&
-        Array.isArray(res.requestData.orders)
-      ) {
-        res.requestData.orders.forEach((order: any) => {
-          order[APIIDMainKey] = APIIDMain;
-        });
-      } else if (
-        // not array in top, but has array batchOrder
-        !Array.isArray(res.requestData) &&
-        res.requestData?.json &&
-        typeof res.requestData.json === 'object' &&
-        Array.isArray(res.requestData.json?.batchOrder)
-      ) {
-        // Unique to batch order placement, json must be pre-stringified in request
-        res.requestData.json = JSON.stringify({
-          ...res.requestData.json,
-          batchOrder: res.requestData.json.batchOrder.map((order: any) => ({
-            ...order,
-            [APIIDMainKey]: APIIDMain,
-          })),
-        });
-      } else if (
-        // not array in top, but has json object
-        !Array.isArray(res.requestData) &&
-        res.requestData?.json &&
-        typeof res.requestData.json === 'object'
-      ) {
-        // For the rare non-order requests that expected pre-stringified json
-        res.requestData.json = JSON.stringify({
-          ...res.requestData.json,
-        });
-      } else if (res.requestData) {
-        // simple object
-        res.requestData[APIIDMainKey] = APIIDMain;
-      }
+      throw new Error(MISSING_API_KEYS_ERROR);
     }
 
     const strictParamValidation = this.options.strictParamValidation;
@@ -537,164 +520,130 @@ export abstract class BaseRestClient {
 
       const clientType = this.getClientType();
 
+      // const isFuturesRequest =
+      //   clientType === REST_CLIENT_TYPE_ENUM.futures ||
+      //   clientType === REST_CLIENT_TYPE_ENUM.futuresAWS ||
+      //   clientType === REST_CLIENT_TYPE_ENUM.futuresAlt1;
+
+      // const isSpotRequest =
+      //   clientType === REST_CLIENT_TYPE_ENUM.spot ||
+      //   clientType === REST_CLIENT_TYPE_ENUM.spotAWS;
+
       switch (clientType) {
         case REST_CLIENT_TYPE_ENUM.spot:
-        case REST_CLIENT_TYPE_ENUM.spotAWS: {
-          // Set default nonce, if not set yet
-          if (!Array.isArray(res.requestData)) {
-            if (!(res.requestData as any)?.nonce) {
-              res.requestData = {
-                nonce: this.getNextRequestNonce(),
-                ...res.requestData,
-              };
-            }
-          }
+        case REST_CLIENT_TYPE_ENUM.spotAWS:
+        case REST_CLIENT_TYPE_ENUM.futures:
+        case REST_CLIENT_TYPE_ENUM.futuresAWS:
+        case REST_CLIENT_TYPE_ENUM.futuresAlt1: {
+          // The 'timestamp' should be formated as 'YYYY-MM-DDThh:mm:ss' // and URL encoded.
+          const timestamp = new Date(this.getSignTimestampMs())
+            .toISOString()
+            .split('.')[0]; // Remove milliseconds from ISO string
 
-          // Allow nonce override in reuqest
-          // Should never fallback to new nonce, since it's pre-set above with default val
-          const nonce =
-            (res.requestData as any)?.nonce || this.getNextRequestNonce();
+          const signType = getSignKeyType(this.options.apiSecret!);
 
-          const serialisedParams = serializeParams(
-            method === 'GET' ? res.requestQuery : res.requestData,
-            strictParamValidation,
-            encodeQueryStringValues,
-            prefixWith,
-            repeatArrayValuesAsKVPairs,
-          );
+          // HTX spot signs auth params plus GET query params. POST body stays unsigned.
+          const requestParamsToSign = method === 'GET' ? res.requestQuery : {};
 
-          const serialisedQueryParams = serializeParams(
-            res.requestQuery,
-            strictParamValidation,
-            encodeQueryStringValues,
-            prefixWith,
-            repeatArrayValuesAsKVPairs,
-          );
-
-          // for spot, serialise GET params, use JSON for POST
-          const signRequestParams =
-            method === 'GET'
-              ? serialisedParams
-              : JSON.stringify(res.requestData);
-
-          const signEndpoint = endpoint;
-          const signInput = `${nonce}${signRequestParams}`;
-
-          // Only sign when no access token is provided
-          if (!this.hasAccessToken()) {
-            try {
-              const signMessageInput =
-                signEndpoint +
-                (await hashMessage(signInput, 'binary', 'SHA-256'));
-
-              // node:crypto equivalent
-              // const sign = createHmac(
-              //   'sha512',
-              //   Buffer.from(this.apiSecret!, 'base64'),
-              // )
-              //   .update(signMessage, 'binary')
-              //   .digest('base64');
-
-              const sign = await this.signMessage(
-                signMessageInput,
-                this.apiSecret!,
-                'base64',
-                'SHA-512',
-                {
-                  isSecretB64Encoded: true,
-                  isInputBinaryString: true,
-                },
-              );
-
-              res.sign = sign;
-            } catch (error) {
-              // Check if this is a base64 decoding error (invalid API credentials)
-              if (
-                error instanceof Error &&
-                (error.name === 'InvalidCharacterError' ||
-                  error.message?.includes('Invalid character'))
-              ) {
-                const credentialError = new Error(
-                  'Failed to sign request: Invalid API credentials detected.\n\n' +
-                    '⚠️  PLEASE CHECK YOUR API KEY AND SECRET:\n' +
-                    '   - Ensure your API Secret is a valid base64-encoded string\n' +
-                    '   - HTX provides API secrets in base64 format\n\n' +
-                    `Original error: ${error.message}\n` +
-                    `Stack trace: ${error.stack}`,
-                );
-                credentialError.name = 'InvalidCredentialsError';
-                throw credentialError;
+          if (method === 'POST' && !isEmptyObject(res.requestData, false)) {
+            if (Array.isArray(res.requestData)) {
+              for (const element of res.requestData) {
+                if (typeof element === 'object' && element !== null) {
+                  element[APIIDMainKey] = APIIDMain;
+                }
               }
-              // Re-throw other errors as-is
-              throw error;
+            } else {
+              res.requestData[APIIDMainKey] = APIIDMain;
             }
           }
 
-          // ONLY the query params. The rest goes in the body, if there is a body.
-          res.queryParamsWithSign = serialisedQueryParams;
+          const baseParams = {
+            AccessKeyId: this.options.apiKey!,
+            SignatureMethod: signType === 'HMAC' ? 'HmacSHA256' : 'Ed25519',
+            SignatureVersion: '2',
+            Timestamp: timestamp,
+            ...requestParamsToSign,
+          };
+
+          const serialisedSignParams = serializeParams(
+            baseParams,
+            strictParamValidation,
+            encodeQueryStringValues,
+            prefixWith,
+            repeatArrayValuesAsKVPairs,
+          );
+
+          const signPrefix =
+            [method, domain.toLowerCase(), endpoint].join('\n') + '\n';
+          const signInput = signPrefix + serialisedSignParams;
+
+          const sign = await this.signMessage(
+            signInput,
+            this.apiSecret!,
+            'base64',
+            'SHA-256',
+          );
+
+          res.sign = sign;
+          res.queryParamsWithSign =
+            serialisedSignParams + '&Signature=' + encodeURIComponent(sign);
+
+          // // Only sign when no access token is provided
+          // if (!this.hasAccessToken()) {
+          //   try {
+          //     const signMessageInput =
+          //       endpoint + (await hashMessage(signInput, 'binary', 'SHA-256'));
+
+          //     // node:crypto equivalent
+          //     // const sign = createHmac(
+          //     //   'sha512',
+          //     //   Buffer.from(this.apiSecret!, 'base64'),
+          //     // )
+          //     //   .update(signMessage, 'binary')
+          //     //   .digest('base64');
+
+          //     const sign = await this.signMessage(
+          //       signMessageInput,
+          //       this.apiSecret!,
+          //       'base64',
+          //       'SHA-512',
+          //       {
+          //         isSecretB64Encoded: true,
+          //         isInputBinaryString: true,
+          //       },
+          //     );
+
+          //     res.sign = sign;
+          //   } catch (error) {
+          //     // Check if this is a base64 decoding error (invalid API credentials)
+          //     if (
+          //       error instanceof Error &&
+          //       (error.name === 'InvalidCharacterError' ||
+          //         error.message?.includes('Invalid character'))
+          //     ) {
+          //       const credentialError = new Error(
+          //         'Failed to sign request: Invalid API credentials detected.\n\n' +
+          //           '⚠️  PLEASE CHECK YOUR API KEY AND SECRET:\n' +
+          //           '   - Ensure your API Secret is a valid base64-encoded string\n' +
+          //           '   - HTX provides API secrets in base64 format\n\n' +
+          //           `Original error: ${error.message}\n` +
+          //           `Stack trace: ${error.stack}`,
+          //       );
+          //       credentialError.name = 'InvalidCredentialsError';
+          //       throw credentialError;
+          //     }
+          //     // Re-throw other errors as-is
+          //     throw error;
+          //   }
+          // }
 
           break;
         }
-        case REST_CLIENT_TYPE_ENUM.futures:
-        case REST_CLIENT_TYPE_ENUM.futuresAWS: {
-          const serialisedQueryParams = serializeParams(
-            res.requestQuery,
-            strictParamValidation,
-            encodeQueryStringValues,
-            prefixWith,
-            repeatArrayValuesAsKVPairs,
+        default: {
+          neverGuard(
+            clientType,
+            `Unhandled client type in signRequest: ${this.getClientType()}`,
           );
-
-          const serialisedBodyParams = serializeParams(
-            res.requestData,
-            strictParamValidation,
-            encodeQueryStringValues,
-            prefixWith,
-            repeatArrayValuesAsKVPairs,
-          );
-
-          const signEndpoint = endpoint.replace('/derivatives', '');
-
-          const nonce = ''; //this.getNextRequestNonce();
-
-          const signInput = `${serialisedQueryParams}${serialisedBodyParams}${nonce}${signEndpoint}`;
-
-          // Only sign when no access token is provided
-          if (!this.hasAccessToken()) {
-            const signMessageInput = await hashMessage(
-              signInput,
-              'binary',
-              'SHA-256',
-            );
-
-            // node:crypto equivalent
-            // const sign = createHmac(
-            //   'sha512',
-            //   Buffer.from(this.apiSecret!, 'base64'),
-            // )
-            //   .update(signMessage, 'binary')
-            //   .digest('base64');
-
-            const sign = await this.signMessage(
-              signMessageInput,
-              this.apiSecret!,
-              'base64',
-              'SHA-512',
-              {
-                isSecretB64Encoded: true,
-                isInputBinaryString: true,
-              },
-            );
-
-            res.sign = sign;
-          }
-
-          res.queryParamsWithSign = serialisedQueryParams;
-
-          // Submitted as query string in form body
-          res.requestData = serialisedBodyParams;
-
-          break;
         }
       }
       return res;
@@ -709,6 +658,7 @@ export abstract class BaseRestClient {
   }
 
   private async prepareSignParams<TParams extends object | undefined>(
+    domain: string,
     method: Method,
     endpoint: string,
     signMethod: SignMethod,
@@ -717,6 +667,7 @@ export abstract class BaseRestClient {
   ): Promise<UnsignedRequest<TParams>>;
 
   private async prepareSignParams<TParams extends object | undefined>(
+    domain: string,
     method: Method,
     endpoint: string,
     signMethod: SignMethod,
@@ -725,6 +676,7 @@ export abstract class BaseRestClient {
   ): Promise<SignedRequest<TParams>>;
 
   private async prepareSignParams<TParams extends object | undefined>(
+    domain: string,
     method: Method,
     endpoint: string,
     signMethod: SignMethod,
@@ -742,13 +694,14 @@ export abstract class BaseRestClient {
       throw new Error(MISSING_API_KEYS_ERROR);
     }
 
-    return this.signRequest(params, endpoint, method, signMethod);
+    return this.signRequest(domain, params, endpoint, method, signMethod);
   }
 
   /** Returns an axios request object. Handles signing process automatically if this is a private API call */
   private async buildRequest(
     method: Method,
     endpoint: string,
+    domain: string,
     url: string,
     params?: ParamsInQueryBodyOrHeader,
     isPublicApi?: boolean,
@@ -768,14 +721,27 @@ export abstract class BaseRestClient {
     deleteUndefinedValues(params?.query);
     deleteUndefinedValues(params?.headers);
 
-    if (isPublicApi || !this.apiKey || !this.apiSecret) {
+    if (isPublicApi) {
       return {
         ...options,
         params: params?.query || params?.body || params,
       };
     }
 
+    if (!this.hasValidCredentials()) {
+      throw new Error(MISSING_API_KEYS_ERROR);
+    }
+
+    // console.log('signResult->pre', {
+    //   url,
+    //   method,
+    //   endpoint,
+    //   params,
+    //   isPublicApi,
+    // });
+
     const signResult = await this.prepareSignParams(
+      domain,
       method,
       endpoint,
       'htx',
@@ -783,14 +749,14 @@ export abstract class BaseRestClient {
       isPublicApi,
     );
 
+    // console.log('signResult', signResult);
+
     let signHeaders: Record<string, string> = {};
 
     const clientType = this.getClientType();
     switch (clientType) {
       case REST_CLIENT_TYPE_ENUM.spot:
-      case REST_CLIENT_TYPE_ENUM.futures:
-      case REST_CLIENT_TYPE_ENUM.spotAWS:
-      case REST_CLIENT_TYPE_ENUM.futuresAWS: {
+      case REST_CLIENT_TYPE_ENUM.spotAWS: {
         // spot: https://www.htx.com/en-us/opend/newApiPages/?id=419
         /**
          * All params go in query string. E.g. these params:
@@ -812,26 +778,81 @@ export abstract class BaseRestClient {
          * The new version rate limit is applied on UID basis, which means, the overall access rate, from all API keys under same UID, to single endpoint, shouldn’t exceed the rate limit applied on that endpoint.
          */
 
-        const GETnoSign = {
-          // GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L36C9-L36C32
+        signHeaders = {
+          // 'API-Key': this.apiKey,
+          // 'API-Sign': signResult.sign,
+          Accept: 'application/json',
           'Content-Type': 'application/json',
         };
 
-        const GETWithSign = {
-          // GET With signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L57
-          // "Content-Type": "application/x-www-form-urlencoded",
-        };
+        if (method === 'GET') {
+          signHeaders = {
+            ...signHeaders,
+            // GET With signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L57
+            'Content-Type': 'application/x-www-form-urlencoded',
+          };
+          // console.log('signParams for GET WITH SIGN: ', signResult);
+          break;
+        }
 
-        const POSTWithSign = {
-          // GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L44
-          'Content-Type': 'application/json',
-        };
+        if (method === 'POST') {
+          signHeaders = {
+            ...signHeaders,
+            // GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L44
+            'Content-Type': 'application/json',
+          };
+        }
+        break;
+      }
+
+      case REST_CLIENT_TYPE_ENUM.futures:
+      case REST_CLIENT_TYPE_ENUM.futuresAWS:
+      case REST_CLIENT_TYPE_ENUM.futuresAlt1: {
+        // spot: https://www.htx.com/en-us/opend/newApiPages/?id=419
+        /**
+         * All params go in query string. E.g. these params:
+         * AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
+         * order-id=1234567890
+         * SignatureMethod=Ed25519
+         * SignatureVersion=2
+         * Timestamp=2017-05-11T15%3A19%3A30
+         *
+         * Become:
+         * https://api.huobi.pro/v1/order/orders?AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx&order-id=1234567890&SignatureMethod=Ed25519&SignatureVersion=2&Timestamp=2017-05-11T15%3A19%3A30&Signature=4F65x5A2bLyMWVQj3Aqp%2BB4w%2BivaA7n5Oi2SuYtCJ9o%3D
+         *
+         * Ed25519 or HmacSHA256
+         *
+         * - GET request: All parameters are included in URL, and do not carry body(content-length>0), in otherwise will return 403 error code.
+         * - POST request: All parameters are formatted as JSON and put int the request body
+         *
+         * Rate limit headers, TODO: It is suggested to read HTTP Header X-HB-RateLimit-Requests-Remain and X-HB-RateLimit-Requests-Expire to get the remaining count of request and the expire time for current rate limit time window, then you can adjust the API access rate dynamically.
+         * The new version rate limit is applied on UID basis, which means, the overall access rate, from all API keys under same UID, to single endpoint, shouldn’t exceed the rate limit applied on that endpoint.
+         */
 
         signHeaders = {
           // 'API-Key': this.apiKey,
           // 'API-Sign': signResult.sign,
           Accept: 'application/json',
+          'Content-Type': 'application/json',
         };
+
+        // if (method === 'GET') {
+        //   signHeaders = {
+        //     ...signHeaders,
+        //     // GET With signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L57
+        //     'Content-Type': 'application/x-www-form-urlencoded',
+        //   };
+        //   // console.log('signParams for GET WITH SIGN: ', signResult);
+        //   break;
+        // }
+
+        // if (method === 'POST') {
+        //   signHeaders = {
+        //     ...signHeaders,
+        //     // GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L44
+        //     'Content-Type': 'application/json',
+        //   };
+        // }
         break;
       }
       default: {

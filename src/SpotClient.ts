@@ -1,5 +1,10 @@
 import { BaseRestClient } from './lib/BaseRestClient.js';
-import { REST_CLIENT_TYPE_ENUM, RestClientType } from './lib/requestUtils.js';
+import {
+  APIIDMain,
+  logInvalidOrderId,
+  REST_CLIENT_TYPE_ENUM,
+  RestClientType,
+} from './lib/requestUtils.js';
 import type {
   SpotAccountTransferReq,
   SpotBrokerAccountCapitalSnapshotReq,
@@ -40,7 +45,6 @@ import type {
   SpotV1FuturesTransferReq,
   SpotV1OrderAutoPlaceReq,
   SpotV1OrderBatchCancelOpenOrdersReq,
-  SpotV1OrderBatchPlaceReq,
   SpotV1OrderPlaceReq,
   SpotV2AccountTransferReq,
   SpotV2AlgoOrdersHistoryReq,
@@ -50,7 +54,10 @@ import type {
   SpotWithdrawAddressReq,
   SpotWithdrawCreateReq,
 } from './types/request/spot.types.js';
-import { SpotAPISuccessResponse } from './types/response/shared.types.js';
+import {
+  OrderIdProperty,
+  SpotAPISuccessResponse,
+} from './types/response/shared.types.js';
 import {
   SpotAccount,
   SpotAccountBalance,
@@ -145,9 +152,8 @@ import {
  */
 export class SpotClient extends BaseRestClient {
   getClientType(): RestClientType {
-    return this.getAWSOption()
-      ? REST_CLIENT_TYPE_ENUM.spotAWS
-      : REST_CLIENT_TYPE_ENUM.spot;
+    // Favour the spot AWS domain, as recommended by the API docs
+    return REST_CLIENT_TYPE_ENUM.spotAWS;
   }
 
   /**
@@ -157,12 +163,11 @@ export class SpotClient extends BaseRestClient {
    */
 
   generateNewOrderID(): string {
-    // Generate a short UUID format (32 hex characters without dashes)
+    // Generate a short UUID format (54 hex characters without dashes)
     // Compatible with HTX client-order-id parameter
-    // TODO: CHECK ID FOR HTX SPOT
     const hexChars = '0123456789abcdef';
-    let result = '';
-    for (let i = 0; i < 32; i++) {
+    let result = APIIDMain;
+    for (let i = 0; i < 54; i++) {
       result += hexChars[Math.floor(Math.random() * 16)];
     }
     return result;
@@ -396,7 +401,7 @@ export class SpotClient extends BaseRestClient {
    * Returns balance for account specified by account id. Signature required. OTC not supported.
    */
   getAccountBalance(params: {
-    accountId: string;
+    accountId: string | number;
   }): Promise<SpotAPISuccessResponse<SpotAccountBalance>> {
     return this.getPrivate(`/v1/account/accounts/${params.accountId}/balance`);
   }
@@ -553,6 +558,7 @@ export class SpotClient extends BaseRestClient {
   submitOrder(
     params: SpotV1OrderPlaceReq,
   ): Promise<SpotAPISuccessResponse<string>> {
+    this.validateOrderId(params, 'client-order-id');
     return this.postPrivate('/v1/order/orders/place', { body: params });
   }
 
@@ -562,8 +568,11 @@ export class SpotClient extends BaseRestClient {
    * Max 10 orders per batch. Each returns order-id or err-code/err-msg. Signature required. Trade permission. Rate: 50/2s.
    */
   submitBatchOrders(
-    params: SpotV1OrderBatchPlaceReq,
+    params: SpotV1OrderPlaceReq[],
   ): Promise<SpotAPISuccessResponse<SpotV1OrderBatchPlaceResult[]>> {
+    for (const order of params) {
+      this.validateOrderId(order, 'client-order-id');
+    }
     return this.postPrivate('/v1/order/batch-orders', { body: params });
   }
 
@@ -575,6 +584,7 @@ export class SpotClient extends BaseRestClient {
   submitMarginOrder(
     params: SpotV1OrderAutoPlaceReq,
   ): Promise<SpotAPISuccessResponse<SpotV1OrderAutoPlaceResult>> {
+    this.validateOrderId(params, 'client-order-id');
     return this.postPrivate('/v1/order/auto/place', { body: params });
   }
 
@@ -1546,5 +1556,23 @@ export class SpotClient extends BaseRestClient {
     SpotAPISuccessResponse<{ total: number; items: SpotEarnUserAsset[] }>
   > {
     return this.getPrivate('/v1/earn/order/user/assets/list', params);
+  }
+
+  /**
+   * Validate syntax meets requirements set by binance. Log warning if not.
+   */
+  private validateOrderId(
+    params: SpotV1OrderPlaceReq | SpotV1OrderAutoPlaceReq,
+    orderIdProperty: OrderIdProperty,
+  ): void {
+    if (!params[orderIdProperty]) {
+      params[orderIdProperty] = this.generateNewOrderID();
+      return;
+    }
+
+    const expectedOrderIdPrefix1 = `${APIIDMain}`;
+    if (!params[orderIdProperty].startsWith(expectedOrderIdPrefix1)) {
+      logInvalidOrderId(orderIdProperty, expectedOrderIdPrefix1, params);
+    }
   }
 }

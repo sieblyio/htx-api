@@ -1668,8 +1668,8 @@ export interface FuturesV5MarketRiskLimitReq {
  * Coin-M Delivery - Reference Data (FuturesCmDelivery)
  */
 
-/** Req for GET /api/v1/contract_adjustfactor. Tiered adjustment factor. Inlined in getCmAdjustFactor - params?: { symbol?: string } */
-/** Req for GET /api/v1/contract_ladder_margin. Tiered margin. Inlined in getCmTieredMargin - params?: { symbol?: string } */
+/** Req for GET /api/v1/contract_adjustfactor. Tiered adjustment factor. Inlined in getCoinMDeliveryAdjustFactor - params?: { symbol?: string } */
+/** Req for GET /api/v1/contract_ladder_margin. Tiered margin. Inlined in getCoinMDeliveryTieredMargin - params?: { symbol?: string } */
 
 /** Req for GET /api/v1/contract_his_open_interest. Historical open interest. */
 export interface FuturesCmDeliveryOpenInterestReq {
@@ -1680,8 +1680,8 @@ export interface FuturesCmDeliveryOpenInterestReq {
   size?: number;
 }
 
-/** Req for GET /api/v1/contract_elite_account_ratio. Top trader sentiment - account. Inlined in getCmAccountRatio - params: { symbol, period } */
-/** Req for GET /api/v1/contract_elite_position_ratio. Top trader sentiment - position. Inlined in getCmPositionRatio - params: { symbol, period } */
+/** Req for GET /api/v1/contract_elite_account_ratio. Top trader sentiment - account. Inlined in getCoinMDeliveryAccountRatio - params: { symbol, period } */
+/** Req for GET /api/v1/contract_elite_position_ratio. Top trader sentiment - position. Inlined in getCoinMDeliveryPositionRatio - params: { symbol, period } */
 
 /** Req for GET /api/v3/contract_liquidation_orders. Liquidation orders. */
 export interface FuturesCmDeliveryLiquidationOrdersReq {
@@ -1702,7 +1702,7 @@ export interface FuturesCmDeliverySettlementRecordsReq {
   page_size?: number;
 }
 
-/** Req for GET /v1/insurance_fund_history. Historical risk reserves. Aligned with getCmRiskReserveHistory. */
+/** Req for GET /v1/insurance_fund_history. Historical risk reserves. Aligned with getCoinMDeliveryRiskReserveHistory. */
 export interface FuturesCmDeliveryRiskReserveHistoryReq {
   start_time?: number;
   end_time?: number;
@@ -1711,7 +1711,7 @@ export interface FuturesCmDeliveryRiskReserveHistoryReq {
   limit?: number;
 }
 
-/** Req for GET /api/v1/contract_price_limit. Contract price limits. Aligned with getCmContractLimit. */
+/** Req for GET /api/v1/contract_price_limit. Contract price limits. Aligned with getCoinMDeliveryContractLimit. */
 export interface FuturesCmDeliveryContractLimitReq {
   symbol?: string;
   contract_type?: FuturesContractType;
@@ -1725,9 +1725,9 @@ export interface FuturesCmDeliveryContractOpenInterestReq {
   contract_code?: string;
 }
 
-/** Req for GET /api/v1/contract_delivery_price. Estimated delivery price. Inlined in getCmDeliveryPrice - params: { symbol: string } */
-/** Req for GET /api/v1/contract_estimated_settlement_price. Estimated settlement price. Inlined in getCmEstimatedSettlementPrice - params?: { symbol?: string } */
-/** Req for GET /api/v1/contract_api_state. System status. Inlined in getCmSystemStatus - params?: { symbol?: string } */
+/** Req for GET /api/v1/contract_delivery_price. Estimated delivery price. Inlined in getCoinMDeliveryDeliveryPrice - params: { symbol: string } */
+/** Req for GET /api/v1/contract_estimated_settlement_price. Estimated settlement price. Inlined in getCoinMDeliveryEstimatedSettlementPrice - params?: { symbol?: string } */
+/** Req for GET /api/v1/contract_api_state. System status. Inlined in getCoinMDeliverySystemStatus - params?: { symbol?: string } */
 
 /** Req for GET /api/v1/contract_contract_info. Contract info. */
 export interface FuturesCmDeliveryContractInfoReq {
@@ -1736,10 +1736,10 @@ export interface FuturesCmDeliveryContractInfoReq {
   contract_code?: string;
 }
 
-/** Req for GET /market/depth. Inlined in getCmMarketDepth - params: { symbol, type } (type: step0–15) */
-/** Req for GET /market/bbo. Inlined in getCmMarketBbo - params?: { symbol?: string } */
+/** Req for GET /market/depth. Inlined in getCoinMDeliveryMarketDepth - params: { symbol, type } (type: step0–15) */
+/** Req for GET /market/bbo. Inlined in getCoinMDeliveryMarketBbo - params?: { symbol?: string } */
 
-/** Req for GET /market/history/kline. Either size or (from+to) required. Aligned with getCmKlines. */
+/** Req for GET /market/history/kline. Either size or (from+to) required. Aligned with getCoinMDeliveryKlines. */
 export interface FuturesCmDeliveryKlinesReq {
   symbol: string;
   period: FuturesKlinePeriod;
@@ -1748,16 +1748,16 @@ export interface FuturesCmDeliveryKlinesReq {
   to?: number;
 }
 
-/** Req for GET /index/market/history/mark_price_kline. Aligned with getCmMarkKlines. */
+/** Req for GET /index/market/history/mark_price_kline. Aligned with getCoinMDeliveryMarkKlines. */
 export interface FuturesCmDeliveryMarkPriceKlinesReq {
   symbol: string;
   period: FuturesKlinePeriod;
   size: number;
 }
 
-/** Req for GET /api/v1/contract_index. Index price. Inlined in getCmIndexPrice - params?: { symbol?: string } */
-/** Req for GET /api/market/contract_constituents. Index constituents. Inlined in getCmIndexConstituents - params: { symbol: string } */
-/** Req for GET /api/v1/contract_query_elements. Contract elements. Inlined in getCmContractElements - params?: { contract_code?: string } */
+/** Req for GET /api/v1/contract_index. Index price. Inlined in getCoinMDeliveryIndexPrice - params?: { symbol?: string } */
+/** Req for GET /api/market/contract_constituents. Index constituents. Inlined in getCoinMDeliveryIndexConstituents - params: { symbol: string } */
+/** Req for GET /api/v1/contract_query_elements. Contract elements. Inlined in getCoinMDeliveryContractElements - params?: { contract_code?: string } */
 
 /** Req for GET /index/market/history/index. Index kline data. */
 export interface FuturesCmDeliveryIndexKlinesReq {
@@ -1766,7 +1766,7 @@ export interface FuturesCmDeliveryIndexKlinesReq {
   size: number;
 }
 
-/** Req for GET /api/v1/contract_sub_auth_list. getCmSubPermissions. */
+/** Req for GET /api/v1/contract_sub_auth_list. getCoinMDeliverySubPermissions. */
 export interface FuturesCmDeliverySubPermissionsReq {
   sub_uid?: string;
   start_time?: number;
@@ -1858,7 +1858,7 @@ export interface FuturesCmDeliveryCancelOrderReq {
   client_order_id?: string;
 }
 
-/** Req for POST /api/v1/contract_switch_lever_rate. Inlined in updateCmLeverage - params: { symbol, lever_rate } */
+/** Req for POST /api/v1/contract_switch_lever_rate. Inlined in updateCoinMDeliveryLeverage - params: { symbol, lever_rate } */
 
 /** Req for POST /api/v1/contract_order_info. One of order_id or client_order_id. Max 50 IDs. Symbol required. */
 export interface FuturesCmDeliveryGetOrderInfoReq {
@@ -1979,7 +1979,7 @@ export interface FuturesCmDeliverySubmitTriggerOrderReq {
   order_price_type?: FuturesTriggerOrderPriceType;
 }
 
-/** Req for POST /api/v1/contract_trigger_cancel. Max 10 order_ids. Inlined in cancelCmTriggerOrder - params: { symbol, order_id } */
+/** Req for POST /api/v1/contract_trigger_cancel. Max 10 order_ids. Inlined in cancelCoinMDeliveryTriggerOrder - params: { symbol, order_id } */
 
 /** Req for POST /api/v1/contract_trigger_cancelall. symbol required. */
 export interface FuturesCmDeliveryCancelAllTriggerOrdersReq {
@@ -2015,7 +2015,7 @@ export interface FuturesCmDeliveryGetTriggerHistoryOrdersReq {
   sort_by?: FuturesSortBy;
 }
 
-/** Req for POST /api/v1/contract_tpsl_cancel. Max 10 order_ids. Inlined in cancelCmTpslOrder - params: { symbol, order_id } */
+/** Req for POST /api/v1/contract_tpsl_cancel. Max 10 order_ids. Inlined in cancelCoinMDeliveryTpslOrder - params: { symbol, order_id } */
 
 /** Req for POST /api/v1/contract_tpsl_cancelall. One of: symbol, contract_code, or (symbol+contract_type). */
 export interface FuturesCmDeliveryCancelAllTpslOrdersReq {
@@ -2048,9 +2048,9 @@ export interface FuturesCmDeliveryGetTpslHistoryOrdersReq {
   sort_by?: FuturesSortBy;
 }
 
-/** Req for POST /api/v1/contract_relation_tpsl_order. TPSL orders related to position-opening order. Inlined in getCmRelationTpslOrder - params: { symbol, order_id } */
+/** Req for POST /api/v1/contract_relation_tpsl_order. TPSL orders related to position-opening order. Inlined in getCoinMDeliveryRelationTpslOrder - params: { symbol, order_id } */
 
-/** Req for POST /api/v1/contract_track_cancel. Max 10 order_ids. Inlined in cancelCmTrailingOrder - params: { symbol, order_id } */
+/** Req for POST /api/v1/contract_track_cancel. Max 10 order_ids. Inlined in cancelCoinMDeliveryTrailingOrder - params: { symbol, order_id } */
 
 /** Req for POST /api/v1/contract_track_cancelall. symbol required. */
 export interface FuturesCmDeliveryCancelAllTrailingOrdersReq {
@@ -2200,7 +2200,7 @@ export interface FuturesCmPerpOrderLimitReq {
   order_price_type: string;
 }
 
-/** Req for POST /swap-api/v1/swap_cancel_after. Dead Man's Switch: auto-cancel pending orders if not refreshed. Inlined in setCmPerpCancelAfter - params: { on_off: 0|1, time_out? } */
+/** Req for POST /swap-api/v1/swap_cancel_after. Dead Man's Switch: auto-cancel pending orders if not refreshed. Inlined in setCoinMPerpCancelAfter - params: { on_off: 0|1, time_out? } */
 
 /** Req for POST /swap-api/v1/swap_order. Place order (CMPerp). */
 export interface FuturesCmPerpSubmitOrderReq {
@@ -2227,30 +2227,30 @@ export interface FuturesCmPerpSubmitBatchOrderReq {
   orders_data: FuturesCmPerpSubmitOrderReq[];
 }
 
-/** Req for cancelCmPerpOrder. One of order_id or client_order_id required. Max 10. */
+/** Req for cancelCoinMPerpOrder. One of order_id or client_order_id required. Max 10. */
 export interface FuturesCmPerpCancelOrderReq {
   contract_code: string;
   order_id?: string;
   client_order_id?: string;
 }
 
-/** Req for cancelCmPerpAllOrders. Optional direction/offset filter. */
+/** Req for cancelCoinMPerpAllOrders. Optional direction/offset filter. */
 export interface FuturesCmPerpCancelAllOrdersReq {
   contract_code: string;
   direction?: FuturesDirection;
   offset?: FuturesOffset;
 }
 
-/** Req for updateCmPerpLeverage. Rate limit 1/3s. Inlined in updateCmPerpLeverage - params: { contract_code, lever_rate } */
+/** Req for updateCoinMPerpLeverage. Rate limit 1/3s. Inlined in updateCoinMPerpLeverage - params: { contract_code, lever_rate } */
 
-/** Req for getCmPerpOrderInfo. One of order_id or client_order_id required. Max 50. */
+/** Req for getCoinMPerpOrderInfo. One of order_id or client_order_id required. Max 50. */
 export interface FuturesCmPerpOrderInfoReq {
   contract_code: string;
   order_id?: string;
   client_order_id?: string;
 }
 
-/** Req for getCmPerpOrderDetail. created_at improves query performance, cannot be 0. */
+/** Req for getCoinMPerpOrderDetail. created_at improves query performance, cannot be 0. */
 export interface FuturesCmPerpOrderDetailReq {
   contract_code: string;
   order_id: number | string;
@@ -2260,7 +2260,7 @@ export interface FuturesCmPerpOrderDetailReq {
   page_size?: number;
 }
 
-/** Req for getCmPerpOpenOrders. Omit contract_code for all. */
+/** Req for getCoinMPerpOpenOrders. Omit contract_code for all. */
 export interface FuturesCmPerpOpenOrdersReq {
   contract_code?: string;
   page_index?: number;
@@ -2269,7 +2269,7 @@ export interface FuturesCmPerpOpenOrdersReq {
   trade_type?: 0 | 1 | 2 | 3 | 4;
 }
 
-/** Req for getCmPerpHistoryOrders. contract required. Window max 48h, within 90d. Cancel info: last 2h. */
+/** Req for getCoinMPerpHistoryOrders. contract required. Window max 48h, within 90d. Cancel info: last 2h. */
 export interface FuturesCmPerpHistoryOrdersReq {
   contract: string;
   /** 0:all, 1:buy long, 2:sell short, 3:buy short, 4:sell long, 5:sell liq, 6:buy liq, 7:Delivery long, 8:Delivery short, 11:reduce close long, 12:reduce close short */
@@ -2284,7 +2284,7 @@ export interface FuturesCmPerpHistoryOrdersReq {
   from_id?: number;
 }
 
-/** Req for getCmPerpHistoryOrdersExact. Same as HistoryOrdersReq + price_type filter. */
+/** Req for getCoinMPerpHistoryOrdersExact. Same as HistoryOrdersReq + price_type filter. */
 export interface FuturesCmPerpHistoryOrdersExactReq {
   contract: string;
   trade_type: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 11 | 12;
@@ -2297,7 +2297,7 @@ export interface FuturesCmPerpHistoryOrdersExactReq {
   from_id?: number;
 }
 
-/** Req for getCmPerpFills. Window max 48h, within 90d. */
+/** Req for getCoinMPerpFills. Window max 48h, within 90d. */
 export interface FuturesCmPerpFillsReq {
   contract: string;
   /** 0:All, 1:Open long, 2:Open short, 3:Close short, 4:Close long, 5:Liquidate long, 6:Liquidate short */
@@ -2308,10 +2308,10 @@ export interface FuturesCmPerpFillsReq {
   from_id?: number;
 }
 
-/** Req for getCmPerpFillsExact. Same params as FillsReq. */
+/** Req for getCoinMPerpFillsExact. Same params as FillsReq. */
 export type FuturesCmPerpFillsExactReq = FuturesCmPerpFillsReq;
 
-/** Req for submitCmPerpLightningClose. Lightning close = rival price + optimal 30 levels; unfilled becomes limit. */
+/** Req for submitCoinMPerpLightningClose. Lightning close = rival price + optimal 30 levels; unfilled becomes limit. */
 export interface FuturesCmPerpLightningCloseReq {
   contract_code: string;
   volume: number;
@@ -2320,7 +2320,7 @@ export interface FuturesCmPerpLightningCloseReq {
   order_price_type?: FuturesLightningOrderPriceTypeCm;
 }
 
-/** Req for submitCmPerpTriggerOrder. Rate limit 5/s. */
+/** Req for submitCoinMPerpTriggerOrder. Rate limit 5/s. */
 export interface FuturesCmPerpTriggerOrderReq {
   contract_code: string;
   trigger_type: FuturesTriggerType;
@@ -2333,16 +2333,16 @@ export interface FuturesCmPerpTriggerOrderReq {
   lever_rate?: number;
 }
 
-/** Req for cancelCmPerpTriggerOrder. Max 10 order_ids. Rate limit 5/s. Inlined in cancelCmPerpTriggerOrder - params: { contract_code, order_id } */
+/** Req for cancelCoinMPerpTriggerOrder. Max 10 order_ids. Rate limit 5/s. Inlined in cancelCoinMPerpTriggerOrder - params: { contract_code, order_id } */
 
-/** Req for cancelCmPerpAllTriggerOrders. Optional direction/offset filter. Rate limit 5/s. */
+/** Req for cancelCoinMPerpAllTriggerOrders. Optional direction/offset filter. Rate limit 5/s. */
 export interface FuturesCmPerpCancelAllTriggerOrdersReq {
   contract_code: string;
   direction?: FuturesDirection;
   offset?: FuturesOffset;
 }
 
-/** Req for getCmPerpTriggerOpenOrders. */
+/** Req for getCoinMPerpTriggerOpenOrders. */
 export interface FuturesCmPerpTriggerOpenOrdersReq {
   contract_code: string;
   page_index?: number;
@@ -2350,7 +2350,7 @@ export interface FuturesCmPerpTriggerOpenOrdersReq {
   trade_type?: 0 | 1 | 2 | 3 | 4;
 }
 
-/** Req for getCmPerpTriggerHistoryOrders. create_date: days, max 90. Default query completed (status 4,5,6). */
+/** Req for getCoinMPerpTriggerHistoryOrders. create_date: days, max 90. Default query completed (status 4,5,6). */
 export interface FuturesCmPerpTriggerHistoryOrdersReq {
   contract_code: string;
   /** 0:All, 1:Open Long, 2:Close Short, 3:Open Short, 4:Close Long */
@@ -2363,7 +2363,7 @@ export interface FuturesCmPerpTriggerHistoryOrdersReq {
   sort_by?: FuturesSortBy;
 }
 
-/** Req for submitCmPerpTpslOrder. At least one of tp_trigger_price or sl_trigger_price required. Rate limit 5/s. */
+/** Req for submitCoinMPerpTpslOrder. At least one of tp_trigger_price or sl_trigger_price required. Rate limit 5/s. */
 export interface FuturesCmPerpTpslOrderReq {
   contract_code: string;
   direction: FuturesDirection;
@@ -2377,19 +2377,19 @@ export interface FuturesCmPerpTpslOrderReq {
   price_protect?: boolean;
 }
 
-/** Req for cancelCmPerpTpslOrder. Max 10 order_ids. Rate limit 5/s. */
+/** Req for cancelCoinMPerpTpslOrder. Max 10 order_ids. Rate limit 5/s. */
 export interface FuturesCmPerpCancelTpslOrderReq {
   contract_code: string;
   order_id: string;
 }
 
-/** Req for cancelCmPerpAllTpslOrders. Optional direction filter. Rate limit 5/s. */
+/** Req for cancelCoinMPerpAllTpslOrders. Optional direction filter. Rate limit 5/s. */
 export interface FuturesCmPerpCancelAllTpslOrdersReq {
   contract_code: string;
   direction?: FuturesDirection;
 }
 
-/** Req for getCmPerpTpslOpenOrders. */
+/** Req for getCoinMPerpTpslOpenOrders. */
 export interface FuturesCmPerpTpslOpenOrdersReq {
   contract_code: string;
   page_index?: number;
@@ -2397,7 +2397,7 @@ export interface FuturesCmPerpTpslOpenOrdersReq {
   trade_type?: 0 | 3 | 4;
 }
 
-/** Req for getCmPerpTpslHisOrders. create_date: days, max 90. */
+/** Req for getCoinMPerpTpslHistoryOrders. create_date: days, max 90. */
 export interface FuturesCmPerpTpslHisOrdersReq {
   contract_code: string;
   /** 0:all, 4:submitted, 5:failed, 6:cancelled, 11:expired. Comma-separated allowed */
@@ -2408,13 +2408,13 @@ export interface FuturesCmPerpTpslHisOrdersReq {
   sort_by?: FuturesSortBy;
 }
 
-/** Req for getCmPerpRelationTpslOrder. order_id = open order id. */
+/** Req for getCoinMPerpRelationTpslOrder. order_id = open order id. */
 export interface FuturesCmPerpRelationTpslOrderReq {
   contract_code: string;
   order_id: number | string;
 }
 
-/** Req for submitCmPerpTrailingOrder. callback_rate min 0.001 (0.1%). Rate limit 5/s. */
+/** Req for submitCoinMPerpTrailingOrder. callback_rate min 0.001 (0.1%). Rate limit 5/s. */
 export interface FuturesCmPerpTrailingOrderReq {
   contract_code: string;
   direction: FuturesDirection;
@@ -2426,20 +2426,20 @@ export interface FuturesCmPerpTrailingOrderReq {
   lever_rate?: number;
 }
 
-/** Req for cancelCmPerpTrailingOrder. Max 10 order_ids. Rate limit 5/s. */
+/** Req for cancelCoinMPerpTrailingOrder. Max 10 order_ids. Rate limit 5/s. */
 export interface FuturesCmPerpCancelTrailingOrderReq {
   contract_code: string;
   order_id: string;
 }
 
-/** Req for cancelCmPerpAllTrailingOrders. Optional direction/offset filter. Rate limit 5/s. */
+/** Req for cancelCoinMPerpAllTrailingOrders. Optional direction/offset filter. Rate limit 5/s. */
 export interface FuturesCmPerpCancelAllTrailingOrdersReq {
   contract_code: string;
   direction?: FuturesDirection;
   offset?: FuturesOffset;
 }
 
-/** Req for getCmPerpTrailingOpenOrders. */
+/** Req for getCoinMPerpTrailingOpenOrders. */
 export interface FuturesCmPerpTrailingOpenOrdersReq {
   contract_code: string;
   trade_type?: 0 | 1 | 2 | 3 | 4;
@@ -2447,7 +2447,7 @@ export interface FuturesCmPerpTrailingOpenOrdersReq {
   page_size?: number;
 }
 
-/** Req for getCmPerpTrailingHisOrders. create_date: days, max 90. */
+/** Req for getCoinMPerpTrailingHistoryOrders. create_date: days, max 90. */
 export interface FuturesCmPerpTrailingHisOrdersReq {
   contract_code: string;
   /** 0:all, 4:success, 5:failed, 6:cancelled. Comma-separated allowed */
@@ -2469,7 +2469,7 @@ export interface FuturesCmPerpMasterSubTransferReq {
   client_order_id?: number;
 }
 
-/** Req for getCmPerpMasterSubTransfers */
+/** Req for getCoinMPerpMasterSubTransfers */
 export interface FuturesCmPerpMasterSubTransfersReq {
   contract_code: string;
   transfer_type?: string;

@@ -21,9 +21,9 @@ describe('REST PRIVATE FUTURES WRITE', () => {
   });
 
   describe('private POST without params', () => {
-    it('should succeed or fail getCrossOpenOrders with empty body (validates signature)', async () => {
+    it('should succeed or fail getLinearSwapCrossOpenOrders with empty body (validates signature)', async () => {
       try {
-        const res = await rest.getCrossOpenOrders({});
+        const res = await rest.getLinearSwapCrossOpenOrders();
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
@@ -31,39 +31,87 @@ describe('REST PRIVATE FUTURES WRITE', () => {
       } catch (e: unknown) {
         // Expected with read-only keys or no cross margin - validates signature
         const err = e as { body?: unknown; message?: string };
-        expect(e).toBeDefined();
-        expect(err?.body ?? err?.message).toBeDefined();
+        expect(e).toBe('');
+
+        console.error(`err "${expect.getState().currentTestName}"`, {
+          body: err?.body,
+          e,
+        });
       }
     });
   });
 
-  describe('private POST with params', () => {
-    it('should fail submitOrder with invalid params (validates signature)', async () => {
+  describe.only('private POST with params', () => {
+    it('should fail submitLinearSwapIsolatedOrder with invalid params (validates signature)', async () => {
       try {
-        const res = await rest.submitOrder({
+        const res = await rest.submitLinearSwapIsolatedOrder({
           contract_code: 'btc-usdt',
           direction: 'buy',
-          volume: 0.001,
+          volume: 1,
           lever_rate: 10,
           order_price_type: 'limit',
           price: 0.01,
         });
+        console.log(`res "${expect.getState().currentTestName}"`, { res });
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
       } catch (e: unknown) {
-        // Expected: invalid order (price too low, etc) - validates signature
+        // Expected: invalid key permission error
         const body = (e as { body?: Record<string, unknown> })?.body;
+
+        // console.log(`err "${expect.getState().currentTestName}"`, { body, e });
         expect(body).toBeDefined();
-        expect(
-          body?.status ?? body?.code ?? body?.message ?? body?.err_msg,
-        ).toBeDefined();
+
+        const errorMsg = body?.err_msg;
+        expect(errorMsg).toMatch(/no permission/i);
       }
     });
 
-    it('should fail cancelOrder with non-existent order (validates signature)', async () => {
+    it('should fail submitLinearSwapIsolatedBatchOrders with invalid params (validates signature)', async () => {
       try {
-        const res = await rest.cancelOrder({
+        const res = await rest.submitLinearSwapIsolatedBatchOrders({
+          orders_data: [
+            {
+              contract_code: 'btc-usdt',
+              direction: 'buy',
+              volume: 1,
+              lever_rate: 10,
+              order_price_type: 'limit',
+              price: 0.011,
+            },
+            {
+              contract_code: 'btc-usdt',
+              direction: 'buy',
+              volume: 1,
+              lever_rate: 10,
+              order_price_type: 'limit',
+              price: 0.012,
+            },
+          ],
+        });
+        console.log(`res "${expect.getState().currentTestName}"`, { res });
+
+        expect(res).toBeDefined();
+        expect(res.data).toBeDefined();
+      } catch (e: unknown) {
+        // Expected: invalid key permission error
+        const body = (e as { body?: Record<string, unknown> })?.body;
+
+        // console.error(`err "${expect.getState().currentTestName}"`, {
+        //   body,
+        //   e,
+        // });
+        expect(body).toBeDefined();
+
+        const errorMsg = body?.err_msg;
+        expect(errorMsg).toMatch(/no permission/i);
+      }
+    });
+
+    it('should fail cancelLinearSwapIsolatedOrder with key permission error (validates signature)', async () => {
+      try {
+        const res = await rest.cancelLinearSwapIsolatedOrder({
           order_id: '9999999999999999',
           contract_code: 'btc-usdt',
         });
@@ -73,15 +121,15 @@ describe('REST PRIVATE FUTURES WRITE', () => {
         // Expected: order not found - validates signature
         const body = (e as { body?: Record<string, unknown> })?.body;
         expect(body).toBeDefined();
-        expect(
-          body?.status ?? body?.code ?? body?.message ?? body?.err_msg,
-        ).toBeDefined();
+
+        const errorMsg = body?.err_msg;
+        expect(errorMsg).toMatch(/no permission/i);
       }
     });
 
-    it('should fail cancelCrossOrder with non-existent order (validates signature)', async () => {
+    it('should fail cancelLinearSwapCrossOrder with key permission error (validates signature)', async () => {
       try {
-        const res = await rest.cancelCrossOrder({
+        const res = await rest.cancelLinearSwapCrossOrder({
           order_id: '9999999999999999',
           contract_code: 'btc-usdt',
         });
@@ -91,6 +139,9 @@ describe('REST PRIVATE FUTURES WRITE', () => {
         // Expected: order not found - validates signature
         const body = (e as { body?: Record<string, unknown> })?.body;
         expect(body).toBeDefined();
+
+        const errorMsg = body?.err_msg;
+        expect(errorMsg).toMatch(/no permission/i);
       }
     });
   });

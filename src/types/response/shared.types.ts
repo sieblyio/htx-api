@@ -64,3 +64,5 @@ export type FuturesAPISuccessResponse<
 export type SpotAPIResponse<TData> =
   | SpotAPISuccessResponse<TData>
   | SpotAPIErrorResponse;
+
+export type OrderIdProperty = 'client-order-id';
