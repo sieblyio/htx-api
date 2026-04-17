@@ -1106,7 +1106,7 @@ export interface FuturesSwitchPositionMode {
   position_mode: string;
 }
 
-/** Order info item from getOrderInfo, getCmOrderInfo, getCmPerpOrderInfo. Product-specific fields optional. */
+/** Order info item from getOrderInfo, getCoinMDeliveryOrderInfo, getCoinMPerpOrderInfo. Product-specific fields optional. */
 export interface FuturesOrderInfo {
   symbol: string;
   contract_code: string;
@@ -1151,7 +1151,7 @@ export interface FuturesOrderInfo {
   self_match_prevent?: number;
 }
 
-/** Order detail trade item (trades array) from getOrderDetail, getCmOrderDetail, getCmPerpOrderDetail */
+/** Order detail trade item (trades array) from getOrderDetail, getCoinMDeliveryOrderDetail, getCoinMPerpOrderDetail */
 export interface FuturesOrderDetailTrade {
   id: string;
   trade_id: number | string;
@@ -1170,7 +1170,7 @@ export interface FuturesOrderDetailTrade {
   self_match_prevent?: string | number;
 }
 
-/** Order detail from getOrderDetail, getCmOrderDetail, getCmPerpOrderDetail. Product-specific fields optional. */
+/** Order detail from getOrderDetail, getCoinMDeliveryOrderDetail, getCoinMPerpOrderDetail. Product-specific fields optional. */
 export interface FuturesOrderDetail {
   symbol: string;
   contract_code: string;
@@ -1265,7 +1265,7 @@ export type FuturesOpenOrders = FuturesPaginatedOrders<FuturesOpenOrder> & {
   canceled_source?: string;
 };
 
-/** History order from getHistoryOrders, getCmHistoryOrders, getCmPerpHistoryOrders. Product-specific optional. */
+/** History order from getHistoryOrders, getCoinMDeliveryHistoryOrders, getCoinMPerpHistoryOrders. Product-specific optional. */
 export interface FuturesHistoryOrder {
   query_id: number;
   order_id: number | string;
@@ -1307,7 +1307,7 @@ export interface FuturesHistoryOrder {
   self_match_prevent?: number;
 }
 
-/** Fill / match result from getFills, getCmFills, getCmPerpFills. Product-specific optional. */
+/** Fill / match result from getFills, getCoinMDeliveryFills, getCoinMPerpFills. Product-specific optional. */
 export interface FuturesMatchResult {
   id: string;
   query_id: number;
@@ -1534,7 +1534,7 @@ export interface FuturesTpslHisOrder {
 /** TPSL history orders response from swap_tpsl_hisorders and swap_cross_tpsl_hisorders */
 export type FuturesTpslHisOrders = FuturesPaginatedOrders<FuturesTpslHisOrder>;
 
-/** TPSL order info item within relation_tpsl_order response. getRelationTpslOrder, getCmRelationTpslOrder, getCmPerpRelationTpslOrder. */
+/** TPSL order info item within relation_tpsl_order response. getRelationTpslOrder, getCoinMDeliveryRelationTpslOrder, getCoinMPerpRelationTpslOrder. */
 export interface FuturesRelationTpslOrderTpslInfo {
   volume: number;
   tpsl_order_type: string;
@@ -1556,7 +1556,7 @@ export interface FuturesRelationTpslOrderTpslInfo {
   triggered_price: number | string | null;
 }
 
-/** Relation TPSL order from getRelationTpslOrder, getCmRelationTpslOrder, getCmPerpRelationTpslOrder. Product-specific optional. */
+/** Relation TPSL order from getRelationTpslOrder, getCoinMDeliveryRelationTpslOrder, getCoinMPerpRelationTpslOrder. Product-specific optional. */
 export interface FuturesRelationTpslOrder {
   symbol: string;
   contract_code: string;
@@ -2448,7 +2448,7 @@ export interface FuturesCmPerpPositionInfo {
   trade_partition?: string;
 }
 
-/** Position item in getCmPerpAccountFull positions[] */
+/** Position item in getCoinMPerpAccountFull positions[] */
 export interface FuturesCmPerpAccountFullPosition {
   symbol: string;
   contract_code: string;
@@ -2467,8 +2467,8 @@ export interface FuturesCmPerpAccountFullPosition {
   adl_risk_percent?: string | number;
 }
 
-/** Account + positions from getCmPerpAccountFull */
-/** Account + positions from getCmPerpAccountFull */
+/** Account + positions from getCoinMPerpAccountFull */
+/** Account + positions from getCoinMPerpAccountFull */
 export interface FuturesCmPerpAccountFull {
   symbol: string;
   contract_code: string;
@@ -2496,7 +2496,7 @@ export interface FuturesCmPerpSubPermissionsError {
   err_msg: string;
 }
 
-/** Sub-auth response from updateCmPerpSubPermissions */
+/** Sub-auth response from updateCoinMPerpSubPermissions */
 export interface FuturesCmPerpUpdateSubPermissions {
   errors: FuturesCmPerpSubPermissionsError[];
   successes: string;
@@ -2509,13 +2509,13 @@ export interface FuturesCmPerpSubPermissionsSuccess {
   sub_auth: number | string;
 }
 
-/** Sub-auth list from getCmPerpSubPermissions */
+/** Sub-auth list from getCoinMPerpSubPermissions */
 export interface FuturesCmPerpSubPermissions {
   errors: FuturesCmPerpSubPermissionsError[];
   successes: FuturesCmPerpSubPermissionsSuccess[];
 }
 
-/** Sub-account list item from getCmPerpSubAccounts list[] */
+/** Sub-account list item from getCoinMPerpSubAccounts list[] */
 export interface FuturesCmPerpSubAccountsItem {
   symbol: string;
   contract_code: string;
@@ -2525,13 +2525,13 @@ export interface FuturesCmPerpSubAccountsItem {
   query_id?: number;
 }
 
-/** Sub-account entry from getCmPerpSubAccounts (data array element) */
+/** Sub-account entry from getCoinMPerpSubAccounts (data array element) */
 export interface FuturesCmPerpSubAccounts {
   sub_uid: number;
   list: FuturesCmPerpSubAccountsItem[];
 }
 
-/** Account info item from getCmPerpSubAccountsAssets account_info_list[] */
+/** Account info item from getCoinMPerpSubAccountsAssets account_info_list[] */
 export interface FuturesCmPerpSubAccountsAssetsAccount {
   symbol: string;
   contract_code: string;
@@ -2540,17 +2540,17 @@ export interface FuturesCmPerpSubAccountsAssetsAccount {
   risk_rate: number | null;
 }
 
-/** Sub-list item from getCmPerpSubAccountsAssets sub_list[] */
+/** Sub-list item from getCoinMPerpSubAccountsAssets sub_list[] */
 export interface FuturesCmPerpSubAccountsAssetsSub {
   sub_uid: number;
   account_info_list: FuturesCmPerpSubAccountsAssetsAccount[];
 }
 
-/** Response from getCmPerpSubAccounts */
+/** Response from getCoinMPerpSubAccounts */
 export type FuturesCmPerpSubAccountsAssets =
   FuturesPaginatedSubList<FuturesCmPerpSubAccountsAssetsSub>;
 
-/** Sub-account account info from getCmPerpSubAccountAssets (data array element) */
+/** Sub-account account info from getCoinMPerpSubAccountAssets (data array element) */
 export interface FuturesCmPerpSubAccountAssets {
   symbol: string;
   contract_code: string;
@@ -2570,7 +2570,7 @@ export interface FuturesCmPerpSubAccountAssets {
   trade_partition?: string;
 }
 
-/** Sub-account position from getCmPerpSubPositions (data array element) */
+/** Sub-account position from getCoinMPerpSubPositions (data array element) */
 export interface FuturesCmPerpSubPositions {
   symbol: string;
   contract_code: string;
@@ -2603,7 +2603,7 @@ export interface FuturesCmPerpFinancialRecord {
   amount: number | string;
 }
 
-/** Available leverage from getCmPerpAvailableLeverage */
+/** Available leverage from getCoinMPerpAvailableLeverage */
 export interface FuturesCmPerpAvailableLeverage {
   contract_code: string;
   available_level_rate: string;
@@ -2657,7 +2657,7 @@ export interface FuturesCmPerpPositionLimit {
   sell_limit: number;
 }
 
-/** API trading status COR from getCmPerpApiStatus */
+/** API trading status COR from getCoinMPerpApiStatus */
 export interface FuturesCmPerpApiStatusCor {
   orders_threshold: number;
   orders: number;
@@ -2668,7 +2668,7 @@ export interface FuturesCmPerpApiStatusCor {
   is_active: number;
 }
 
-/** API trading status TDN from getCmPerpApiStatus */
+/** API trading status TDN from getCoinMPerpApiStatus */
 export interface FuturesCmPerpApiStatusTdn {
   disables_threshold: number;
   disables: number;
@@ -2676,7 +2676,7 @@ export interface FuturesCmPerpApiStatusTdn {
   is_active: number;
 }
 
-/** API trading status from getCmPerpApiStatus */
+/** API trading status from getCoinMPerpApiStatus */
 export interface FuturesCmPerpApiStatus {
   is_disable: number;
   order_price_types: string;
@@ -2687,13 +2687,13 @@ export interface FuturesCmPerpApiStatus {
   TDN: FuturesCmPerpApiStatusTdn;
 }
 
-/** Cancel-after response from setCmPerpCancelAfter */
+/** Cancel-after response from setCoinMPerpCancelAfter */
 export interface FuturesCmPerpCancelAfter {
   current_time: number;
   trigger_time: number;
 }
 
-/** Trigger open order item from getCmPerpTriggerOpenOrders */
+/** Trigger open order item from getCoinMPerpTriggerOpenOrders */
 export interface FuturesCmPerpTriggerOpenOrder {
   symbol: string;
   contract_code: string;
@@ -2713,11 +2713,11 @@ export interface FuturesCmPerpTriggerOpenOrder {
   status: number;
 }
 
-/** Trigger open orders response from getCmPerpTriggerOpenOrders */
+/** Trigger open orders response from getCoinMPerpTriggerOpenOrders */
 export type FuturesCmPerpTriggerOpenOrders =
   FuturesPaginatedOrders<FuturesCmPerpTriggerOpenOrder>;
 
-/** Trigger history order item from getCmPerpTriggerHisOrders */
+/** Trigger history order item from getCoinMPerpTriggerHisOrders */
 export interface FuturesCmPerpTriggerHisOrder {
   symbol: string;
   contract_code: string;
@@ -2745,11 +2745,11 @@ export interface FuturesCmPerpTriggerHisOrder {
   fail_reason: string | null;
 }
 
-/** Trigger history orders response from getCmPerpTriggerHistoryOrders */
+/** Trigger history orders response from getCoinMPerpTriggerHistoryOrders */
 export type FuturesCmPerpTriggerHistoryOrders =
   FuturesPaginatedOrders<FuturesCmPerpTriggerHisOrder>;
 
-/** TPSL open order item from getCmPerpTpslOpenOrders */
+/** TPSL open order item from getCoinMPerpTpslOpenOrders */
 export interface FuturesCmPerpTpslOpenOrder {
   symbol: string;
   contract_code: string;
@@ -2771,11 +2771,11 @@ export interface FuturesCmPerpTpslOpenOrder {
   relation_tpsl_order_id: string;
 }
 
-/** TPSL open orders response from getCmPerpTpslOpenOrders */
+/** TPSL open orders response from getCoinMPerpTpslOpenOrders */
 export type FuturesCmPerpTpslOpenOrders =
   FuturesPaginatedOrders<FuturesCmPerpTpslOpenOrder>;
 
-/** TPSL history order item from getCmPerpTpslHisOrders */
+/** TPSL history order item from getCoinMPerpTpslHistoryOrders */
 export interface FuturesCmPerpTpslHisOrder {
   symbol: string;
   contract_code: string;
@@ -2803,11 +2803,11 @@ export interface FuturesCmPerpTpslHisOrder {
   update_time: number;
 }
 
-/** TPSL history orders response from getCmPerpTpslHisOrders */
+/** TPSL history orders response from getCoinMPerpTpslHistoryOrders */
 export type FuturesCmPerpTpslHisOrders =
   FuturesPaginatedOrders<FuturesCmPerpTpslHisOrder>;
 
-/** Trailing open order item from getCmPerpTrailingOpenOrders */
+/** Trailing open order item from getCoinMPerpTrailingOpenOrders */
 export interface FuturesCmPerpTrailingOpenOrder {
   symbol: string;
   contract_code: string;
@@ -2827,11 +2827,11 @@ export interface FuturesCmPerpTrailingOpenOrder {
   is_active: number;
 }
 
-/** Trailing open orders response from getCmPerpTrailingOpenOrders */
+/** Trailing open orders response from getCoinMPerpTrailingOpenOrders */
 export type FuturesCmPerpTrailingOpenOrders =
   FuturesPaginatedOrders<FuturesCmPerpTrailingOpenOrder>;
 
-/** Trailing history order item from getCmPerpTrailingHisOrders */
+/** Trailing history order item from getCoinMPerpTrailingHistoryOrders */
 export interface FuturesCmPerpTrailingHisOrder {
   symbol: string;
   contract_code: string;
@@ -2860,17 +2860,17 @@ export interface FuturesCmPerpTrailingHisOrder {
   relation_order_id: string;
 }
 
-/** Trailing history orders response from getCmPerpTrailingHisOrders */
+/** Trailing history orders response from getCoinMPerpTrailingHistoryOrders */
 export type FuturesCmPerpTrailingHisOrders =
   FuturesPaginatedOrders<FuturesCmPerpTrailingHisOrder>;
 
-/** Update leverage response from updateCmPerpLeverage */
+/** Update leverage response from updateCoinMPerpLeverage */
 export interface FuturesCmPerpUpdateLeverage {
   contract_code: string;
   lever_rate: number;
 }
 
-/** Open order item from getCmPerpOpenOrders */
+/** Open order item from getCoinMPerpOpenOrders */
 export interface FuturesCmPerpOpenOrder {
   symbol: string;
   contract_code: string;
@@ -2903,7 +2903,7 @@ export interface FuturesCmPerpOpenOrder {
   self_match_prevent?: number;
 }
 
-/** Open orders response from getCmPerpOpenOrders */
+/** Open orders response from getCoinMPerpOpenOrders */
 export type FuturesCmPerpOpenOrders =
   FuturesPaginatedOrders<FuturesCmPerpOpenOrder> & {
     canceled_source?: string;
@@ -2997,7 +2997,7 @@ export interface FuturesCmDeliveryMarkPriceKline {
   amount: string;
 }
 
-/** Ticker from GET /market/detail/merged. 24h summary + best bid/ask. Payload in "tick". Alias: getCmTicker/getCmTickers. */
+/** Ticker from GET /market/detail/merged. 24h summary + best bid/ask. Payload in "tick". Alias: getCoinMDeliveryTicker/getCoinMDeliveryTickers. */
 export interface FuturesCmDeliveryTicker {
   id: number;
   ts: number;
@@ -3039,14 +3039,14 @@ export interface FuturesCmDeliveryTradeHistoryItem {
   quantity?: string | number;
 }
 
-/** Trade history from GET /market/history/trade. Each group has trades by timestamp. Payload in "data". Alias: getCmTradeHistory. */
+/** Trade history from GET /market/history/trade. Each group has trades by timestamp. Payload in "data". Alias: getCoinMDeliveryTradeHistory. */
 export interface FuturesCmDeliveryTradeHistory {
   id: number;
   ts: number;
   data: FuturesCmDeliveryTradeHistoryItem[];
 }
 
-/** Index kline item from GET /index/market/history/index. vol/count/amount typically 0. Alias: getCmIndexKlines. */
+/** Index kline item from GET /index/market/history/index. vol/count/amount typically 0. Alias: getCoinMDeliveryIndexKlines. */
 export interface FuturesCmDeliveryIndexKline {
   id: number;
   vol: number;
@@ -3086,7 +3086,7 @@ export interface FuturesCmDeliverySubAccountListItem {
   query_id: number;
 }
 
-/** All sub-account from POST /api/v1/contract_sub_account_list. Alias: getCmAllSubAccounts. */
+/** All sub-account from POST /api/v1/contract_sub_account_list. Alias: getCoinMDeliveryAllSubAccounts. */
 export interface FuturesCmDeliveryAllSubAccount {
   sub_uid: number;
   list: FuturesCmDeliverySubAccountListItem[];
@@ -3106,11 +3106,11 @@ export interface FuturesCmDeliverySubAccountInfoListSub {
   account_info_list: FuturesCmDeliverySubAccountInfoListItem[];
 }
 
-/** Sub-accounts assets from POST /api/v1/contract_sub_account_info_list. Alias: getCmSubAccounts. */
+/** Sub-accounts assets from POST /api/v1/contract_sub_account_info_list. Alias: getCoinMDeliverySubAccounts. */
 export type FuturesCmDeliverySubAccountsAssets =
   FuturesPaginatedSubList<FuturesCmDeliverySubAccountInfoListSub>;
 
-/** Sub-account assets from POST /api/v1/contract_sub_account_info. Alias: getCmSubAccountAssets. */
+/** Sub-account assets from POST /api/v1/contract_sub_account_info. Alias: getCoinMDeliverySubAccountAssets. */
 export interface FuturesCmDeliverySubAccountAssets {
   symbol: string;
   margin_balance: number;
@@ -3557,7 +3557,7 @@ export interface FuturesCmDeliveryAssetPositionInfoPosition {
   adl_risk_percent?: string | number;
 }
 
-/** Asset + positions from POST /api/v1/contract_account_position_info. Alias: getCmAssetPositionInfo. */
+/** Asset + positions from POST /api/v1/contract_account_position_info. Alias: getCoinMDeliveryAssetPositionInfo. */
 export interface FuturesCmDeliveryAssetPositionInfo {
   symbol: string;
   margin_balance: number;
@@ -3607,7 +3607,7 @@ export interface FuturesCmDeliveryApiTradingStatus {
   TDN: FuturesCmDeliveryApiTradingStatusTdn;
 }
 
-/** Leverage rate from POST /api/v1/contract_available_level_rate. Alias: getCmLeverageRate. */
+/** Leverage rate from POST /api/v1/contract_available_level_rate. Alias: getCoinMDeliveryLeverageRate. */
 export interface FuturesCmDeliveryLeverageRate {
   symbol: string;
   available_level_rate: string;

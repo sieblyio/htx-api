@@ -21,9 +21,11 @@ describe('REST PRIVATE FUTURES READ', () => {
   });
 
   describe('private GET without params', () => {
-    it('should succeed calling getAccountType', async () => {
+    it('should succeed calling getLinearSwapAccountType', async () => {
       try {
-        const res = await rest.getAccountType();
+        const res = await rest.getLinearSwapAccountType();
+
+        // console.log(`res "${expect.getState().currentTestName}"`, res);
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
@@ -37,9 +39,9 @@ describe('REST PRIVATE FUTURES READ', () => {
       }
     });
 
-    it('should succeed calling getSubPermissions', async () => {
+    it('should succeed calling getLinearSwapSubPermissions', async () => {
       try {
-        const res = await rest.getSubPermissions();
+        const res = await rest.getLinearSwapSubPermissions();
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
@@ -54,9 +56,9 @@ describe('REST PRIVATE FUTURES READ', () => {
   });
 
   describe('private GET with params', () => {
-    it('should succeed calling getSubPermissions with params', async () => {
+    it('should succeed calling getLinearSwapSubPermissions with params', async () => {
       try {
-        const res = await rest.getSubPermissions({ sub_uid: '1' });
+        const res = await rest.getLinearSwapSubPermissions({ sub_uid: '1' });
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
@@ -69,9 +71,9 @@ describe('REST PRIVATE FUTURES READ', () => {
       }
     });
 
-    it('should succeed calling getCrossTradeState with params', async () => {
+    it('should succeed calling getLinearSwapCrossTradeState with params', async () => {
       try {
-        const res = await rest.getCrossTradeState({
+        const res = await rest.getLinearSwapCrossTradeState({
           contract_code: 'btc-usdt',
           business_type: 'swap',
         });
@@ -88,10 +90,10 @@ describe('REST PRIVATE FUTURES READ', () => {
       }
     });
 
-    it('should succeed calling getCrossTransferState with params', async () => {
+    it('should succeed calling getLinearSwapCrossTransferState with params', async () => {
       try {
-        const res = await rest.getCrossTransferState({
-          margin_account: 'btc-usdt',
+        const res = await rest.getLinearSwapCrossTransferState({
+          margin_account: 'USDT',
         });
 
         expect(res).toBeDefined();

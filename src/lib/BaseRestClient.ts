@@ -390,8 +390,7 @@ export abstract class BaseRestClient {
               //   data: null,
               //   ts: 1775823398810
               // }
-
-              if (response.data && response.data['code']) {
+              if (response.data && response.data['code'] === 403) {
                 throw throwable;
               }
               break;
@@ -521,9 +520,21 @@ export abstract class BaseRestClient {
 
       const clientType = this.getClientType();
 
+      // const isFuturesRequest =
+      //   clientType === REST_CLIENT_TYPE_ENUM.futures ||
+      //   clientType === REST_CLIENT_TYPE_ENUM.futuresAWS ||
+      //   clientType === REST_CLIENT_TYPE_ENUM.futuresAlt1;
+
+      // const isSpotRequest =
+      //   clientType === REST_CLIENT_TYPE_ENUM.spot ||
+      //   clientType === REST_CLIENT_TYPE_ENUM.spotAWS;
+
       switch (clientType) {
         case REST_CLIENT_TYPE_ENUM.spot:
-        case REST_CLIENT_TYPE_ENUM.spotAWS: {
+        case REST_CLIENT_TYPE_ENUM.spotAWS:
+        case REST_CLIENT_TYPE_ENUM.futures:
+        case REST_CLIENT_TYPE_ENUM.futuresAWS:
+        case REST_CLIENT_TYPE_ENUM.futuresAlt1: {
           // The 'timestamp' should be formated as 'YYYY-MM-DDThh:mm:ss' // and URL encoded.
           const timestamp = new Date(this.getSignTimestampMs())
             .toISOString()
@@ -533,6 +544,18 @@ export abstract class BaseRestClient {
 
           // HTX spot signs auth params plus GET query params. POST body stays unsigned.
           const requestParamsToSign = method === 'GET' ? res.requestQuery : {};
+
+          if (method === 'POST' && !isEmptyObject(res.requestData, false)) {
+            if (Array.isArray(res.requestData)) {
+              for (const element of res.requestData) {
+                if (typeof element === 'object' && element !== null) {
+                  element[APIIDMainKey] = APIIDMain;
+                }
+              }
+            } else {
+              res.requestData[APIIDMainKey] = APIIDMain;
+            }
+          }
 
           const baseParams = {
             AccessKeyId: this.options.apiKey!,
@@ -565,166 +588,62 @@ export abstract class BaseRestClient {
           res.queryParamsWithSign =
             serialisedSignParams + '&Signature=' + encodeURIComponent(sign);
 
-          /**
-           * HmacSHA256 Signature Method
-The signature may be different if the request text is different, therefore the request should be normalized before signing. Below signing steps take the order query as an example:
+          // // Only sign when no access token is provided
+          // if (!this.hasAccessToken()) {
+          //   try {
+          //     const signMessageInput =
+          //       endpoint + (await hashMessage(signInput, 'binary', 'SHA-256'));
 
-This is a full URL to query one order:
-https://api.huobi.pro/v1/order/orders?
-AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
-&SignatureMethod=HmacSHA256
-&SignatureVersion=2
-&Timestamp=2017-05-11T15:19:30
-&order-id=1234567890
+          //     // node:crypto equivalent
+          //     // const sign = createHmac(
+          //     //   'sha512',
+          //     //   Buffer.from(this.apiSecret!, 'base64'),
+          //     // )
+          //     //   .update(signMessage, 'binary')
+          //     //   .digest('base64');
 
-1. The request Method (GET or POST, WebSocket use GET), append line break "\n": GET\n
-2. The host with lower case, append line break "\n": Example:api.huobi.pro\n
-3. The path, append line break "\n":
-For example, query orders: /v1/order/orders\n
-For example, WebSocket v2: /ws/v2
-4. The parameters are URL encoded, and ordered based on ASCII, For example below is the original parameters:
-AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
-order-id=1234567890
-SignatureMethod=HmacSHA256
-SignatureVersion=2
-Timestamp=2017-05-11T15%3A19%3A30
+          //     const sign = await this.signMessage(
+          //       signMessageInput,
+          //       this.apiSecret!,
+          //       'base64',
+          //       'SHA-512',
+          //       {
+          //         isSecretB64Encoded: true,
+          //         isInputBinaryString: true,
+          //       },
+          //     );
 
-Use UTF-8 encoding and URL encoded, the hex must be upper case. For example, The semicolon ':' should be encoded as '%3A', The space should be encoded as '%20'.The 'timestamp' should be formated as 'YYYY-MM-DDThh:mm:ss' and URL encoded. The value is valid within 5 minutes.
-
-Then above parameter should be ordered like below:
-AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
-SignatureMethod=HmacSHA256
-SignatureVersion=2
-Timestamp=2017-05-11T15%3A19%3A30
-order-id=1234567890
-
-5. Use char "&" to concatenate all parameters
-AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2017-05-11T15%3A19%3A30&order-id=1234567890
-
-6. Assemble the pre-signed text
-GET\n
-api.huobi.pro\n
-/v1/order/orders\n
-AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2017-05-11T15%3A19%3A30&order-id=1234567890
-
-7. Use the pre-signed text and your Secret Key to generate a signature
-
-Use the pre-signed text in step 6 and your API Secret Key to generate hash code by HmacSHA256 hash function.
-Encode the hash code with base-64 to generate the signature.
-4F65x5A2bLyMWVQj3Aqp+B4w+ivaA7n5Oi2SuYtCJ9o=
-           */
-
-          // Only sign when no access token is provided
-          if (!this.hasAccessToken()) {
-            try {
-              const signMessageInput =
-                endpoint + (await hashMessage(signInput, 'binary', 'SHA-256'));
-
-              // node:crypto equivalent
-              // const sign = createHmac(
-              //   'sha512',
-              //   Buffer.from(this.apiSecret!, 'base64'),
-              // )
-              //   .update(signMessage, 'binary')
-              //   .digest('base64');
-
-              const sign = await this.signMessage(
-                signMessageInput,
-                this.apiSecret!,
-                'base64',
-                'SHA-512',
-                {
-                  isSecretB64Encoded: true,
-                  isInputBinaryString: true,
-                },
-              );
-
-              res.sign = sign;
-            } catch (error) {
-              // Check if this is a base64 decoding error (invalid API credentials)
-              if (
-                error instanceof Error &&
-                (error.name === 'InvalidCharacterError' ||
-                  error.message?.includes('Invalid character'))
-              ) {
-                const credentialError = new Error(
-                  'Failed to sign request: Invalid API credentials detected.\n\n' +
-                    '⚠️  PLEASE CHECK YOUR API KEY AND SECRET:\n' +
-                    '   - Ensure your API Secret is a valid base64-encoded string\n' +
-                    '   - HTX provides API secrets in base64 format\n\n' +
-                    `Original error: ${error.message}\n` +
-                    `Stack trace: ${error.stack}`,
-                );
-                credentialError.name = 'InvalidCredentialsError';
-                throw credentialError;
-              }
-              // Re-throw other errors as-is
-              throw error;
-            }
-          }
+          //     res.sign = sign;
+          //   } catch (error) {
+          //     // Check if this is a base64 decoding error (invalid API credentials)
+          //     if (
+          //       error instanceof Error &&
+          //       (error.name === 'InvalidCharacterError' ||
+          //         error.message?.includes('Invalid character'))
+          //     ) {
+          //       const credentialError = new Error(
+          //         'Failed to sign request: Invalid API credentials detected.\n\n' +
+          //           '⚠️  PLEASE CHECK YOUR API KEY AND SECRET:\n' +
+          //           '   - Ensure your API Secret is a valid base64-encoded string\n' +
+          //           '   - HTX provides API secrets in base64 format\n\n' +
+          //           `Original error: ${error.message}\n` +
+          //           `Stack trace: ${error.stack}`,
+          //       );
+          //       credentialError.name = 'InvalidCredentialsError';
+          //       throw credentialError;
+          //     }
+          //     // Re-throw other errors as-is
+          //     throw error;
+          //   }
+          // }
 
           break;
         }
-        case REST_CLIENT_TYPE_ENUM.futures:
-        case REST_CLIENT_TYPE_ENUM.futuresAWS: {
-          const serialisedQueryParams = serializeParams(
-            res.requestQuery,
-            strictParamValidation,
-            encodeQueryStringValues,
-            prefixWith,
-            repeatArrayValuesAsKVPairs,
+        default: {
+          neverGuard(
+            clientType,
+            `Unhandled client type in signRequest: ${this.getClientType()}`,
           );
-
-          const serialisedBodyParams = serializeParams(
-            res.requestData,
-            strictParamValidation,
-            encodeQueryStringValues,
-            prefixWith,
-            repeatArrayValuesAsKVPairs,
-          );
-
-          const signEndpoint = endpoint.replace('/derivatives', '');
-
-          const nonce = ''; //this.getNextRequestNonce();
-
-          const signInput = `${serialisedQueryParams}${serialisedBodyParams}${nonce}${signEndpoint}`;
-
-          // Only sign when no access token is provided
-          if (!this.hasAccessToken()) {
-            const signMessageInput = await hashMessage(
-              signInput,
-              'binary',
-              'SHA-256',
-            );
-
-            // node:crypto equivalent
-            // const sign = createHmac(
-            //   'sha512',
-            //   Buffer.from(this.apiSecret!, 'base64'),
-            // )
-            //   .update(signMessage, 'binary')
-            //   .digest('base64');
-
-            const sign = await this.signMessage(
-              signMessageInput,
-              this.apiSecret!,
-              'base64',
-              'SHA-512',
-              {
-                isSecretB64Encoded: true,
-                isInputBinaryString: true,
-              },
-            );
-
-            res.sign = sign;
-          }
-
-          res.queryParamsWithSign = serialisedQueryParams;
-
-          // Submitted as query string in form body
-          res.requestData = serialisedBodyParams;
-
-          break;
         }
       }
       return res;
@@ -859,6 +778,7 @@ Encode the hash code with base-64 to generate the signature.
           // 'API-Key': this.apiKey,
           // 'API-Sign': signResult.sign,
           Accept: 'application/json',
+          'Content-Type': 'application/json',
         };
 
         if (method === 'GET') {
@@ -909,6 +829,7 @@ Encode the hash code with base-64 to generate the signature.
           // 'API-Key': this.apiKey,
           // 'API-Sign': signResult.sign,
           Accept: 'application/json',
+          'Content-Type': 'application/json',
         };
 
         // if (method === 'GET') {

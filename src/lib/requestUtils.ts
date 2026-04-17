@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { OrderIdProperty } from '../types/response/shared.types';
+
 /**
  * Used to switch how authentication/requests work under the hood
  */
@@ -144,8 +147,20 @@ export function serializeParams<
   return queryString ? prefixWith + queryString : queryString;
 }
 
-export const APIIDMainKey = 'broker';
-export const APIIDMain = 'AA56 N84G TOOP ELJQ';
+export function logInvalidOrderId(
+  orderIdProperty: OrderIdProperty,
+  expectedOrderIdPrefix: string,
+  params: object,
+) {
+  console.warn(
+    `WARNING: '${orderIdProperty}' invalid - it should be prefixed with ${expectedOrderIdPrefix}. Use the 'client.generateNewOrderID()' REST client utility method to generate a fresh order ID on demand. Original request: ${JSON.stringify(
+      params,
+    )}`,
+  );
+}
+
+export const APIIDMainKey = 'channel_code';
+export const APIIDMain = 'AA8568bd0c';
 
 export function isEmptyObject(obj: any, acceptStringIfNotEmpty: boolean) {
   if (obj && acceptStringIfNotEmpty && typeof obj === 'string') {

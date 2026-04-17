@@ -1,4 +1,4 @@
-import { SpotClient } from '../../src/index.js';
+import { FuturesClient, SpotClient } from '../../src/index.js';
 
 describe('REST PUBLIC', () => {
   describe('public endpoints - SpotClient', () => {
@@ -49,12 +49,12 @@ describe('REST PUBLIC', () => {
     });
   });
 
-  // describe('public endpoints - FuturesClient', () => {
-  //   const futuresClient = new FuturesClient();
+  describe('public endpoints - FuturesClient', () => {
+    const futuresClient = new FuturesClient();
 
     describe('GET without params', () => {
-      it('should succeed calling getTickers', async () => {
-        const res = await futuresClient.getTickers();
+      it('should succeed calling getLinearSwapTickers', async () => {
+        const res = await futuresClient.getLinearSwapTickers();
 
         expect(res).toBeDefined();
         expect(res.ticks).toBeDefined();
@@ -71,8 +71,8 @@ describe('REST PUBLIC', () => {
     });
 
     describe('GET with params', () => {
-      it('should succeed calling getTradeHistory with params', async () => {
-        const res = await futuresClient.getTradeHistory({
+      it('should succeed calling getLinearSwapTradeHistory with params', async () => {
+        const res = await futuresClient.getLinearSwapTradeHistory({
           contract_code: 'btc-usdt',
           size: 10,
         });
@@ -82,8 +82,8 @@ describe('REST PUBLIC', () => {
         expect(Array.isArray(res.data)).toBe(true);
       });
 
-      it('should succeed calling getTicker with contract_code', async () => {
-        const res = await futuresClient.getTicker({
+      it('should succeed calling getLinearSwapTicker with contract_code', async () => {
+        const res = await futuresClient.getLinearSwapTicker({
           contract_code: 'btc-usdt',
         });
 
