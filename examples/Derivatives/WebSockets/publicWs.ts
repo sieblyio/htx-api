@@ -4,26 +4,73 @@ import {
   LogParams,
   WebsocketClient,
   WS_KEY_MAP,
-  WSTopicRequest,
 } from '../../../src/index.js';
-import { WSDerivativesTopic } from '../../../src/types/websockets/ws-subscriptions.js';
-// normally you should install this module via npm: `npm install @siebly/kraken-api` and import the module:
-// import { LogParams, WebsocketClient, WsTopicRequest } from '@siebly/kraken-api';
+
+// Install from npm in your own project:
+// import { WebsocketClient, WS_KEY_MAP } from '@siebly/htx-api';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isMutedTrace(params: LogParams): boolean {
+  const [message, details] = params;
+
+  if (message === 'Received PING event') {
+    return false;
+    // return true;
+  }
+
+  if (message === 'onWsMessage().emit(message)') {
+    return true;
+  }
+
+  if (
+    typeof message === 'string' &&
+    message.startsWith('getFinalEmittable()->pre()')
+  ) {
+    return true;
+  }
+
+  if (
+    message === 'Sending upstream ws message: ' &&
+    isRecord(details) &&
+    typeof details.wsMessage === 'string'
+  ) {
+    return false;
+    // return details.wsMessage.includes('"pong"');
+  }
+
+  return false;
+}
 
 const customLogger: DefaultLogger = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   trace: (...params: LogParams): void => {
-    // console.log(new Date(), '--> trace', ...params);
+    // if (isMutedTrace(params)) {
+    //   return;
+    // }
+    // console.log('trace', params);
   },
   info: (...params: LogParams): void => {
-    console.log(new Date(), '--> info', ...params);
+    console.log('info', ...params);
   },
   error: (...params: LogParams): void => {
-    console.error(new Date(), '--> error', ...params);
+    console.error('error', ...params);
   },
 };
 
 async function start() {
+  const client = new WebsocketClient({}, customLogger);
+
+  client
+    .on('open', (data) => console.log('open:', data.wsKey))
+    .on('message', (data) => console.info('message:', JSON.stringify(data)))
+    .on('response', (data) => console.info('response:', JSON.stringify(data)))
+    .on('reconnecting', (data) => console.log('reconnecting:', data.wsKey))
+    .on('reconnected', (data) => console.log('reconnected:', data.wsKey))
+    .on('close', (data) => console.log('close:', data.wsKey))
+    .on('exception', (data) => console.error('exception:', data));
+
   /**
    * The WebsocketClient is the core class to manage WebSocket subscriptions. Give it the topics you want to subscribe to, and it will handle the rest:
    * - Connection management (connect, disconnect, reconnect)
@@ -38,100 +85,68 @@ async function start() {
    * In terms of product groups such as Spot, Derivatives, etc., the WebsocketClient understand the product group from the WsKey you provide when subscribing. For example, using `WS_KEY_MAP.spotPrivateV2` indicates that the subscription is for Spot private topics, as shown below.
    *
    * Refer to WS_KEY_MAP in the source code for all available WsKey options.
+   * USDT-margined linear swap public websocket:
+   * wss://api.hbdm.vn/linear-swap-ws by default.
    */
-  const client = new WebsocketClient(
-    {
-      // apiKey: key,
-      // apiSecret: secret,
-    },
-    customLogger,
+  client.subscribe(
+    [
+      'market.BTC-USDT.kline.1min',
+      'market.BTC-USDT.detail',
+      'market.BTC-USDT.trade.detail',
+      'market.BTC-USDT.bbo',
+    ],
+    WS_KEY_MAP.linearSwapPublic,
   );
 
-  client.on('open', (data) => {
-    console.log(new Date(), 'connected ', data?.wsKey);
-  });
-
-  // Data received
-  client.on('message', (data) => {
-    console.info(new Date(), 'data received: ', JSON.stringify(data));
-  });
-
-  // Something happened, attempting to reconnect
-  client.on('reconnecting', (data) => {
-    console.log(new Date(), 'reconnect: ', data?.wsKey);
-  });
-
-  // Reconnect successful
-  client.on('reconnected', (data) => {
-    console.log(new Date(), 'reconnected: ', data?.wsKey);
-  });
-
-  // Connection closed. If unexpected, expect reconnect -> reconnected.
-  client.on('close', (data) => {
-    console.error(new Date(), 'close: ', data);
-  });
-
-  // Reply to a request, e.g. "subscribe"/"unsubscribe"/"authenticate"
-  client.on('response', (data) => {
-    console.info(new Date(), 'server reply: ', JSON.stringify(data), '\n');
-  });
-
-  client.on('exception', (data) => {
-    console.error(new Date(), 'exception: ', data);
-  });
-
-  client.on('authenticated', (data) => {
-    console.error(new Date(), 'authenticated: ', data);
-  });
+  /**
+   * Coin-margined delivery futures public websocket:
+   * wss://api.hbdm.vn/ws by default.
+   */
+  client.subscribe(
+    [
+      'market.BTC_CW.kline.1min',
+      'market.BTC_CW.detail',
+      'market.BTC_CW.trade.detail',
+    ],
+    WS_KEY_MAP.coinDeliveryPublic,
+  );
 
   /**
-   * The below examples demonstrate how you can subscribe to public topics.
-   *
-   * Do note that all of these include the "derivativesPublicV1" WsKey reference. This tells the WebsocketClient to use the private "wss://futures.kraken.com/ws/v1" endpoint for these private subscription requests. It will also automatically authenticate the connection when it is established.
+   * Coin-margined perpetual swap public websocket:
+   * wss://api.hbdm.vn/swap-ws by default.
    */
+  client.subscribe(
+    [
+      'market.BTC-USD.kline.1min',
+      'market.BTC-USD.detail',
+      'market.BTC-USD.trade.detail',
+    ],
+    WS_KEY_MAP.coinSwapPublic,
+  );
 
-  try {
-    // Ticker: https://docs.kraken.com/api/docs/futures-api/websocket/ticker
-    const publicTickerTopicRequest: WSTopicRequest<WSDerivativesTopic> = {
-      topic: 'ticker',
-      payload: {
-        product_ids: ['PI_XBTUSD', 'PI_ETHUSD'],
-      },
-    };
-    // client.subscribe(publicTickerTopicRequest, WS_KEY_MAP.derivativesPublicV1);
+  /**
+   * Derivatives index/mark/premium index websocket:
+   * wss://api.hbdm.vn/ws_index by default.
+   *
+   * https://www.htx.com/en-us/opend/newApiPages/?id=8cb7cc15-77b5-11ed-9966-0242ac110003
+   */
+  client.subscribe(
+    [
+      'market.BTC-USDT.index.1min',
+      'market.BTC-USDT.mark_price.1min',
+      'market.BTC-USDT.premium_index.1min',
+    ],
+    WS_KEY_MAP.derivativesIndex,
+  );
 
-    // Ticker Lite: https://docs.kraken.com/api/docs/futures-api/websocket/ticker
-    const publicTickerLiteTopicRequest: WSTopicRequest<WSDerivativesTopic> = {
-      topic: 'ticker_lite',
-      payload: {
-        product_ids: ['PI_XBTUSD', 'PI_ETHUSD'],
-      },
-    };
-    // client.subscribe(
-    //   publicTickerLiteTopicRequest,
-    //   WS_KEY_MAP.derivativesPublicV1,
-    // );
-
-    // Book: https://docs.kraken.com/api/docs/futures-api/websocket/ticker
-    const publicBookTopicRequest: WSTopicRequest<WSDerivativesTopic> = {
-      topic: 'book',
-      payload: {
-        product_ids: ['PI_XBTUSD', 'PI_ETHUSD'],
-      },
-    };
-    // client.subscribe(publicBookTopicRequest, WS_KEY_MAP.derivativesPublicV1);
-
-    // Trade: https://docs.kraken.com/api/docs/futures-api/websocket/ticker
-    const publicTradeTopicRequest: WSTopicRequest<WSDerivativesTopic> = {
-      topic: 'trade',
-      payload: {
-        product_ids: ['PI_XBTUSD', 'PI_ETHUSD'],
-      },
-    };
-    client.subscribe(publicTradeTopicRequest, WS_KEY_MAP.derivativesPublicV1);
-  } catch (e) {
-    console.error('Req error: ', e);
-  }
+  /**
+   * Derivatives system/status websocket:
+   * wss://api.hbdm.vn/center-notification by default.
+   */
+  client.subscribe(
+    'public.linear-swap.heartbeat',
+    WS_KEY_MAP.derivativesSystem,
+  );
 }
 
 start();

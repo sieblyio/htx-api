@@ -10,9 +10,9 @@ export enum WsConnectionStateEnum {
   ERROR = 5,
 }
 
-export interface DeferredPromise<TSuccess = any, TError = any> {
-  resolve?: (value: TSuccess) => TSuccess;
-  reject?: (value: TError) => TError;
+export interface DeferredPromise<TSuccess = unknown, TError = unknown> {
+  resolve?: (value: TSuccess | PromiseLike<TSuccess>) => void;
+  reject?: (value?: TError) => void;
   promise?: Promise<TSuccess>;
 }
 

@@ -46,17 +46,6 @@ export interface RestClientOptions {
   apiSecret?: string;
 
   /**
-   * Set to `true` to connect to testnet (Kraken's demo environment). The live environment is used by default.
-   *
-   * Note: as of November 2025, only the DerivativesClient supports testnet connections. Kraken refer to this as the "Demo" environment, but it is effectively a testnet.
-   * This is a place to test your API integration. It is not a good place to test strategy performance, as the liquidity and orderbook dynamics are very different to the live environment.
-   *
-   * Refer to the following for more information:
-   * https://github.com/tiagosiebler/awesome-crypto-examples/wiki/CEX-Testnets
-   */
-  testnet?: boolean;
-
-  /**
    * Use access token instead of sign, if this is provided.
    * For guidance refer to: https://github.com/tiagosiebler/kucoin-api/issues/2
    */

@@ -54,13 +54,11 @@ examples/
       account.ts
       orderManagement.ts
       submitOrder.ts
-      testnet.ts
     Public/
       marketData.ts
     WebSockets/
       privateWs.ts
       publicWs.ts
-      testnetWs.ts
   Spot/
     Private/
       account.ts
@@ -5191,92 +5189,6 @@ File: tsconfig.linting.json
 }
 
 ================
-File: examples/Derivatives/WebSockets/testnetWs.ts
-================
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import {
-  DefaultLogger,
-  LogParams,
-  WebsocketClient,
-  WS_KEY_MAP,
-  WSTopicRequest,
-} from '../../../src/index.js';
-import { WSDerivativesTopic } from '../../../src/types/websockets/ws-subscriptions.js';
-// normally you should install this module via npm: `npm install @siebly/kraken-api` and import the module:
-// import { LogParams, WebsocketClient, WsTopicRequest } from '@siebly/kraken-api';
-⋮----
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-⋮----
-// console.log(new Date(), '--> trace', ...params);
-⋮----
-async function start()
-⋮----
-// https://demo-futures.kraken.com to create demo account
-⋮----
-/**
-   * Kraken Derivatives has a demo environment (testnet) that you can connect to via WebSocket. All you need to do is set the `testnet` option to `true` when creating the WebsocketClient instance, as shown below.
-   * Everything else behaves exactly the same way.
-   *
-   * Note: as of November 2025, only the DerivativesClient supports testnet connections. Kraken refer to this as the "Demo" environment, but it is effectively a testnet.
-   * This is a place to test your API integration. It is not a good place to test strategy performance, as the liquidity and orderbook dynamics are very different to the live environment.
-   *
-   * Refer to the following for more information:
-   * https://github.com/tiagosiebler/awesome-crypto-examples/wiki/CEX-Testnets
-   */
-⋮----
-// Data received
-⋮----
-// Something happened, attempting to reconnect
-⋮----
-// Reconnect successful
-⋮----
-// Connection closed. If unexpected, expect reconnect -> reconnected.
-⋮----
-// Reply to a request, e.g. "subscribe"/"unsubscribe"/"authenticate"
-⋮----
-/**
-   * The below examples demonstrate how you can subscribe to private topics.
-   *
-   * Note: while the documentation specifies "api_key", "original_challenge" and "signed_challenge" as required parameters, but don't worry about that. The SDK will automatically:
-   * - Fetch the challenge using your API key,
-   * - Cache the challenge
-   * - Include the key, original challenge and signed challenge parameters for you when subscribing to private topics on the derivativesPrivateV1 WebSocket connection.
-   *
-   * You do NOT need to manually fetch or provide the "original_challenge" and "signed_challenge" tokens when subscribing to private topics.
-   *
-   * Do note that all of these include the "derivativesPrivateV1" WsKey reference. This tells the WebsocketClient to use the private "wss://futures.kraken.com/ws/v1" endpoint for these private subscription requests. It will also automatically authenticate the connection when it is established.
-   */
-⋮----
-/**
-     * All of the following parameters require API keys for Derivatives APIs.
-     *
-     * Note: your "WsTopicRequest" does not need to include "api_key", "original_challenge" and "signed_challenge". See above for details, or below for examples.
-     */
-⋮----
-// Open orders: https://docs.kraken.com/api/docs/futures-api/websocket/open_orders
-⋮----
-// Note: if there are no parameters needed, you can also just request the topic by name
-// This is the same as openOrdersTopicRequest, since openOrdersTopicRequest contains no parameters
-// client.subscribe('open_orders', WS_KEY_MAP.derivativesPrivateV1);
-⋮----
-// Open orders (verbose): https://docs.kraken.com/api/docs/futures-api/websocket/open_orders
-⋮----
-// Fills: https://docs.kraken.com/api/docs/futures-api/websocket/fills
-⋮----
-// Optionally, the product_ids field can be used to subscribe only to specific product.
-// payload: {
-//   product_ids: ['PF_XBTUSD'],
-// },
-⋮----
-// Balances: https://docs.kraken.com/api/docs/futures-api/websocket/balances
-⋮----
-// Open Position: https://docs.kraken.com/api/docs/futures-api/websocket/open_position
-⋮----
-// Account Log: https://docs.kraken.com/api/docs/futures-api/websocket/account_log
-⋮----
-// Notification: https://docs.kraken.com/api/docs/futures-api/websocket/notifications
-
-================
 File: examples/Spot/Private/account.ts
 ================
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -6544,147 +6456,6 @@ async function batchOrderManagement()
 // cancelAllOrders();
 // cancelAllOrdersBySymbol();
 // batchOrderManagement();
-
-================
-File: examples/Derivatives/Private/testnet.ts
-================
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { DerivativesClient } from '../../../src/index.js';
-⋮----
-// This example shows how to call Kraken API testnet (demo) endpoints with either node.js,
-// javascript (js) or typescript (ts) with the npm module "@siebly/kraken-api" for Kraken exchange
-⋮----
-/**
- * import { DerivativesClient } from '@siebly/kraken-api';
- */
-⋮----
-/**
- * Kraken Derivatives has a demo environment (testnet) that you can connect to via WebSocket. All you need to do is set the `testnet` option to `true` when creating the WebsocketClient instance, as shown below.
- * Everything else behaves exactly the same way.
- *
- * Note: as of November 2025, only the DerivativesClient supports testnet connections. Kraken refer to this as the "Demo" environment, but it is effectively a testnet.
- * This is a place to test your API integration. It is not a good place to test strategy performance, as the liquidity and orderbook dynamics are very different to the live environment.
- *
- * Refer to the following for more information:
- * https://github.com/tiagosiebler/awesome-crypto-examples/wiki/CEX-Testnets
- */
-⋮----
-// https://demo-futures.kraken.com to create demo account
-⋮----
-async function getWallets()
-⋮----
-// Get all wallets (cash and margin accounts)
-⋮----
-// Response includes:
-// - cash: Cash account with balances
-// - flex: Multi-collateral wallet with margin info
-// - Available margin, portfolio value, PnL
-// - Initial/maintenance margin requirements
-// For each margin account:
-//   - balances, auxiliary (pv, pnl, af, funding)
-//   - marginRequirements (im, mm, lt, tt)
-//   - triggerEstimates
-⋮----
-async function getOpenPositions()
-⋮----
-// Get all open Futures positions
-⋮----
-// Response includes for each position:
-// - symbol: Futures symbol
-// - side: long or short
-// - size: Position size
-// - price: Average entry price
-// - fillTime: When position was opened
-// - unrealizedFunding: Unrealized funding
-⋮----
-async function getFills()
-⋮----
-// Get filled orders history (last 100)
-⋮----
-// Response includes for each fill:
-// - fill_id: Unique fill identifier
-// - order_id: Associated order ID
-// - symbol: Futures symbol
-// - side: buy or sell
-// - size: Fill size
-// - price: Fill price
-// - fillTime: Execution time
-// - fillType: maker, taker, liquidation, etc.
-⋮----
-async function getFillsBeforeTime()
-⋮----
-// Get fills before specific time
-⋮----
-lastFillTime: new Date(Date.now() - 86400000).toISOString(), // 24h ago
-⋮----
-// Returns 100 fills before specified time
-⋮----
-async function initiateWalletTransfer()
-⋮----
-// Transfer between margin accounts or to/from cash account
-⋮----
-fromAccount: 'cash', // or margin account name
-toAccount: 'flex', // or other margin account
-⋮----
-// Transfers funds between accounts instantly
-⋮----
-async function initiateWithdrawalToSpot()
-⋮----
-// Withdraw from Futures to Spot wallet
-⋮----
-sourceWallet: 'cash', // Default is cash wallet
-⋮----
-// Response includes:
-// - uid: Withdrawal reference ID
-⋮----
-async function getOrderEvents()
-⋮----
-// Get order history events
-⋮----
-sort: 'desc', // desc = newest first
-opened: true, // Include opened orders
-closed: true, // Include closed orders
-⋮----
-// Response includes:
-// - elements: Array of order events
-// - Order placed, cancelled, rejected, executed events
-// - continuationToken: For pagination
-⋮----
-async function getOrderEventsBySymbol()
-⋮----
-// Filter order events by symbol
-⋮----
-async function getExecutionEvents()
-⋮----
-// Get execution/trade history
-⋮----
-// Response includes for each execution:
-// - execution: Fill details (price, quantity, timestamp)
-// - order: Associated order details
-// - fee: Fee paid
-// - positionSize: Position size after execution
-⋮----
-async function getExecutionEventsBySymbol()
-⋮----
-// Filter executions by symbol
-⋮----
-async function getAccountLog()
-⋮----
-// Get account log (all account activities)
-⋮----
-// Log includes:
-// - futures trade, liquidation, funding rate change
-// - conversions, transfers, settlements
-// - interest payments, fees
-⋮----
-async function getAccountLogFiltered()
-⋮----
-// Filter account log by info types
-⋮----
-// Uncomment the function you want to test:
-⋮----
-// initiateWalletTransfer();
-// initiateWithdrawalToSpot();
 
 ================
 File: examples/Derivatives/WebSockets/privateWs.ts
@@ -8672,17 +8443,6 @@ export interface RestClientOptions {
   apiSecret?: string;
 
   /**
-   * Set to `true` to connect to testnet (Kraken's demo environment). The live environment is used by default.
-   *
-   * Note: as of November 2025, only the DerivativesClient supports testnet connections. Kraken refer to this as the "Demo" environment, but it is effectively a testnet.
-   * This is a place to test your API integration. It is not a good place to test strategy performance, as the liquidity and orderbook dynamics are very different to the live environment.
-   *
-   * Refer to the following for more information:
-   * https://github.com/tiagosiebler/awesome-crypto-examples/wiki/CEX-Testnets
-   */
-  testnet?: boolean;
-
-  /**
    * Use access token instead of sign, if this is provided.
    * For guidance refer to: https://github.com/tiagosiebler/kucoin-api/issues/2
    */
@@ -8725,16 +8485,6 @@ export interface RestClientOptions {
 /** Your API key */
 ⋮----
 /** Your API secret */
-⋮----
-/**
-   * Set to `true` to connect to testnet (Kraken's demo environment). The live environment is used by default.
-   *
-   * Note: as of November 2025, only the DerivativesClient supports testnet connections. Kraken refer to this as the "Demo" environment, but it is effectively a testnet.
-   * This is a place to test your API integration. It is not a good place to test strategy performance, as the liquidity and orderbook dynamics are very different to the live environment.
-   *
-   * Refer to the following for more information:
-   * https://github.com/tiagosiebler/awesome-crypto-examples/wiki/CEX-Testnets
-   */
 ⋮----
 /**
    * Use access token instead of sign, if this is provided.
@@ -9001,17 +8751,6 @@ export interface WSClientConfigurableOptions {
   /** Your API secret */
   apiSecret?: string;
 
-  /**
-   * Set to `true` to connect to testnet (Kraken's demo environment). The live environment is used by default.
-   *
-   * Note: as of November 2025, only the derivatives environment supports testnet connections. Kraken refer to this as the "Demo" environment, but it is effectively a testnet.
-   * This is a place to test your API integration. It is not a good place to test strategy performance, as the liquidity and orderbook dynamics are very different to the live environment.
-   *
-   * Refer to the following for more information:
-   * https://github.com/tiagosiebler/awesome-crypto-examples/wiki/CEX-Testnets
-   */
-  testnet?: boolean;
-
   /** Define a recv window when preparing a private websocket signature. This is in milliseconds, so 5000 == 5 seconds */
   recvWindow?: number;
 
@@ -9050,16 +8789,6 @@ export interface WSClientConfigurableOptions {
 /** Your API key */
 ⋮----
 /** Your API secret */
-⋮----
-/**
-   * Set to `true` to connect to testnet (Kraken's demo environment). The live environment is used by default.
-   *
-   * Note: as of November 2025, only the derivatives environment supports testnet connections. Kraken refer to this as the "Demo" environment, but it is effectively a testnet.
-   * This is a place to test your API integration. It is not a good place to test strategy performance, as the liquidity and orderbook dynamics are very different to the live environment.
-   *
-   * Refer to the following for more information:
-   * https://github.com/tiagosiebler/awesome-crypto-examples/wiki/CEX-Testnets
-   */
 ⋮----
 /** Define a recv window when preparing a private websocket signature. This is in milliseconds, so 5000 == 5 seconds */
 ⋮----
