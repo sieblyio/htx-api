@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   DefaultLogger,
   LogParams,
@@ -8,54 +9,54 @@ import {
 // Install from npm in your own project:
 // import { WebsocketClient, WS_KEY_MAP } from '@siebly/htx-api';
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
+// function isRecord(value: unknown): value is Record<string, unknown> {
+//   return typeof value === 'object' && value !== null;
+// }
 
-function isMutedTrace(params: LogParams): boolean {
-  const [message, details] = params;
+// function isMutedTrace(params: LogParams): boolean {
+//   const [message, details] = params;
 
-  if (message === 'Received PING event') {
-    return true;
-  }
+//   if (message === 'Received PING event') {
+//     return true;
+//   }
 
-  if (message === 'onWsMessage().emit(message)') {
-    return true;
-  }
+//   if (message === 'onWsMessage().emit(message)') {
+//     return true;
+//   }
 
-  if (
-    typeof message === 'string' &&
-    message.startsWith('getFinalEmittable()->pre()')
-  ) {
-    return true;
-  }
+//   if (
+//     typeof message === 'string' &&
+//     message.startsWith('getFinalEmittable()->pre()')
+//   ) {
+//     return true;
+//   }
 
-  if (
-    message === 'Sending upstream ws message: ' &&
-    isRecord(details) &&
-    typeof details.wsMessage === 'string'
-  ) {
-    // return false;
-    return !details.wsMessage.includes('"pong"');
-  }
+//   if (
+//     message === 'Sending upstream ws message: ' &&
+//     isRecord(details) &&
+//     typeof details.wsMessage === 'string'
+//   ) {
+//     // return false;
+//     return !details.wsMessage.includes('"pong"');
+//   }
 
-  return false;
-}
+//   return false;
+// }
 
-const customLogger: DefaultLogger = {
-  trace: (...params: LogParams): void => {
-    // if (isMutedTrace(params)) {
-    //   return;
-    // }
-    // console.log('trace', params);
-  },
-  info: (...params: LogParams): void => {
-    console.log('info', ...params);
-  },
-  error: (...params: LogParams): void => {
-    console.error('error', ...params);
-  },
-};
+// const customLogger: DefaultLogger = {
+//   trace: (...params: LogParams): void => {
+//     if (isMutedTrace(params)) {
+//       return;
+//     }
+//     console.log('trace', params);
+//   },
+//   info: (...params: LogParams): void => {
+//     console.log('info', ...params);
+//   },
+//   error: (...params: LogParams): void => {
+//     console.error('error', ...params);
+//   },
+// };
 
 async function start() {
   const account = {
@@ -83,7 +84,7 @@ async function start() {
       apiKey: account.key,
       apiSecret: account.secret,
     },
-    customLogger,
+    // customLogger,// optional: inject custom logger to control logging behavior (e.g. filter out verbose logs, log to file instead of console, etc.)
   );
 
   client
@@ -115,21 +116,21 @@ async function start() {
   );
 
   /**
-   * Coin-margined delivery futures private websocket:
-   * wss://api.hbdm.vn/notification by default.
-   */
-  client.subscribe(
-    ['orders.btc-usd', 'accounts.btc-usd', 'positions.btc-usd'],
-    WS_KEY_MAP.coinDeliveryPrivate,
-  );
-
-  /**
    * Coin-margined perpetual swap private websocket:
    * wss://api.hbdm.vn/swap-notification by default.
    */
   client.subscribe(
     ['orders.btc-usd', 'accounts.btc-usd', 'positions.btc-usd'],
     WS_KEY_MAP.coinSwapPrivate,
+  );
+
+  /**
+   * Coin-margined delivery futures private websocket:
+   * wss://api.hbdm.vn/notification by default.
+   */
+  client.subscribe(
+    ['orders.btc-usd', 'accounts.btc-usd', 'positions.btc-usd'],
+    WS_KEY_MAP.coinDeliveryPrivate,
   );
 }
 

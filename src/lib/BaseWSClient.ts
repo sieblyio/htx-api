@@ -11,9 +11,12 @@ import {
   WsEventInternalSrc,
 } from '../types/websockets/ws-general.js';
 import { WSTopic } from '../types/websockets/ws-subscriptions.js';
+import { isObjectLike } from './misc-util.js';
 import { checkWebCryptoAPISupported } from './webCryptoAPI.js';
 import { DefaultLogger } from './websocket/logger.js';
 import {
+  decompressMessageEvent,
+  isBufferMessageEvent,
   safeTerminateWs,
   WSOperation,
   WSTopicRequest,
@@ -26,38 +29,45 @@ import {
 } from './websocket/WsStore.types.js';
 
 type UseTheExceptionEventInstead = never;
+type WSClientEventPayload<WsKey extends string> = Record<string, unknown> & {
+  wsKey: WsKey;
+};
+
+type WSClientEventPayloadOrArray<WsKey extends string> =
+  | WSClientEventPayload<WsKey>
+  | WSClientEventPayload<WsKey>[];
 
 interface WSClientEventMap<WsKey extends string> {
   /** Connection opened. If this connection was previously opened and reconnected, expect the reconnected event instead */
   open: (evt: {
     wsKey: WsKey;
-    event: any;
+    event: unknown;
     wsUrl: string;
     ws: WebSocket;
   }) => void;
 
   /** Reconnecting a dropped connection */
-  reconnecting: (evt: { wsKey: WsKey; event: any }) => void;
+  reconnecting: (evt: { wsKey: WsKey; event: unknown }) => void;
 
   /** Successfully reconnected a connection that dropped */
   reconnected: (evt: {
     wsKey: WsKey;
-    event: any;
+    event: unknown;
     wsUrl: string;
     ws: WebSocket;
   }) => void;
 
   /** Connection closed */
-  close: (evt: { wsKey: WsKey; event: any }) => void;
+  close: (evt: { wsKey: WsKey; event: unknown }) => void;
 
   /** Received reply to websocket command (e.g. after subscribing to topics) */
-  response: (response: any & { wsKey: WsKey }) => void;
+  response: (response: WSClientEventPayloadOrArray<WsKey>) => void;
 
   /** Received data for topic */
-  message: (response: any & { wsKey: WsKey }) => void;
+  message: (response: WSClientEventPayloadOrArray<WsKey>) => void;
 
   /** Exception from ws client OR custom listeners (e.g. if you throw inside your event handler) */
-  exception: (response: any & { wsKey: WsKey }) => void;
+  exception: (response: WSClientEventPayloadOrArray<WsKey>) => void;
 
   /**
    * See for more information: https://github.com/tiagosiebler/bybit-api/issues/413
@@ -66,7 +76,7 @@ interface WSClientEventMap<WsKey extends string> {
   error: UseTheExceptionEventInstead;
 
   /** Confirmation that a connection successfully authenticated */
-  authenticated: (event: { wsKey: WsKey; event: any }) => void;
+  authenticated: (event: WSClientEventPayload<WsKey>) => void;
 }
 
 export interface EmittableEvent<
@@ -87,6 +97,9 @@ export interface BaseWebsocketClient<
   TWSKey extends string,
   TWSRequestEvent extends object,
 > {
+  /** @internal preserves the request-event generic on the merged class type. */
+  readonly __requestEventType?: TWSRequestEvent;
+
   on<U extends keyof WSClientEventMap<TWSKey>>(
     event: U,
     listener: WSClientEventMap<TWSKey>[U],
@@ -113,11 +126,21 @@ export interface MidflightWsRequestEvent<TEvent = object> {
  * Appends wsKey and isWSAPIResponse to all events.
  * Some events are arrays, this handles that nested scenario too.
  */
-function getFinalEmittable(
-  emittable: EmittableEvent | EmittableEvent[],
-  wsKey: any,
+function getFinalEmittable<TWSKey extends string>(
+  emittable: EmittableEvent,
+  wsKey: TWSKey,
   isWSAPIResponse?: boolean,
-): any {
+): WSClientEventPayload<TWSKey>;
+function getFinalEmittable<TWSKey extends string>(
+  emittable: EmittableEvent[],
+  wsKey: TWSKey,
+  isWSAPIResponse?: boolean,
+): WSClientEventPayload<TWSKey>[];
+function getFinalEmittable<TWSKey extends string>(
+  emittable: EmittableEvent | EmittableEvent[],
+  wsKey: TWSKey,
+  isWSAPIResponse?: boolean,
+): WSClientEventPayload<TWSKey> | WSClientEventPayload<TWSKey>[] {
   if (Array.isArray(emittable)) {
     return emittable.map((subEvent) =>
       getFinalEmittable(subEvent, wsKey, isWSAPIResponse),
@@ -128,8 +151,12 @@ function getFinalEmittable(
     // Some topics just emit an array.
     // This is consistent with how it was before the WS API upgrade:
     return emittable.event.map((subEvent) =>
-      getFinalEmittable(subEvent, wsKey, isWSAPIResponse),
-    );
+      getFinalEmittable(
+        { event: subEvent, eventType: emittable.eventType },
+        wsKey,
+        isWSAPIResponse,
+      ),
+    ) as WSClientEventPayload<TWSKey>[];
 
     // const { event, ...others } = emittable;
     // return {
@@ -140,7 +167,7 @@ function getFinalEmittable(
     // };
   }
 
-  if (emittable.event) {
+  if (isObjectLike(emittable.event)) {
     return {
       ...emittable.event,
       wsKey: wsKey,
@@ -149,7 +176,8 @@ function getFinalEmittable(
   }
 
   return {
-    ...emittable,
+    event: emittable.event,
+    eventType: emittable.eventType,
     wsKey: wsKey,
     isWSAPIResponse: !!isWSAPIResponse,
   };
@@ -256,11 +284,15 @@ export abstract class BaseWebsocketClient<
 
   protected abstract sendPingEvent(wsKey: TWSKey, ws: WebSocket): void;
 
-  protected abstract sendPongEvent(wsKey: TWSKey, ws: WebSocket): void;
+  protected abstract sendPongEvent(
+    wsKey: TWSKey,
+    ws: WebSocket,
+    event?: unknown,
+  ): void;
 
-  protected abstract isWsPing(data: any): boolean;
+  protected abstract isWsPing(data: unknown): boolean;
 
-  protected abstract isWsPong(data: any): boolean;
+  protected abstract isWsPong(data: unknown): boolean;
 
   protected abstract authPrivateConnectionsOnConnect(_wsKey: TWSKey): boolean;
 
@@ -278,15 +310,6 @@ export abstract class BaseWebsocketClient<
     request: WSTopicRequest<WSTopic>,
     wsKey: TWSKey,
   ): boolean;
-
-  /**
-   * Returns a list of string events that can be individually sent upstream to complete subscribing/unsubscribing/etc to these topics
-   */
-  // protected abstract getWsOperationEventsForTopics(
-  //   topics: WsTopicRequest<WSTopic>[],
-  //   wsKey: TWSKey,
-  //   operation: WsOperation,
-  // ): Promise<string[]>;
 
   protected abstract getPrivateWSKeys(): TWSKey[];
 
@@ -330,13 +353,13 @@ export abstract class BaseWebsocketClient<
   protected abstract sendWSAPIRequest(
     wsKey: TWSKey,
     operation: string,
-    params?: any,
+    params?: unknown,
   ): Promise<unknown>;
 
   protected abstract sendWSAPIRequest(
     wsKey: TWSKey,
     channel: string,
-    params: any,
+    params: unknown,
   ): Promise<unknown>;
 
   public getTimeOffsetMs() {
@@ -599,18 +622,20 @@ export abstract class BaseWebsocketClient<
       wsOptions,
     );
 
-    ws.onopen = (event: any) => this.onWsOpen(event, wsKey, url, ws);
-    ws.onmessage = (event: any) => this.onWsMessage(event, wsKey, ws);
-    ws.onerror = (event: any) =>
+    ws.onopen = (event: WebSocket.Event) =>
+      this.onWsOpen(event, wsKey, url, ws);
+    ws.onmessage = (event: WebSocket.MessageEvent) =>
+      this.onWsMessage(event, wsKey, ws);
+    ws.onerror = (event: WebSocket.ErrorEvent) =>
       this.parseWsError('WebSocket onWsError', event, wsKey);
-    ws.onclose = (event: any) => this.onWsClose(event, wsKey);
+    ws.onclose = (event: WebSocket.CloseEvent) => this.onWsClose(event, wsKey);
 
-    //
-    if (this.options.useNativeHeartbeats) {
-      if (typeof ws.on === 'function') {
-        ws.on('ping', (event: any) => this.onWsPing(event, wsKey, ws, 'frame'));
-        ws.on('pong', (event: any) => this.onWsPong(event, wsKey, 'frame'));
-      }
+    // Event handlers for native heartbeats / ping/pong frames
+    if (typeof ws.on === 'function') {
+      ws.on('ping', (event: unknown) =>
+        this.onWsPing(event, wsKey, ws, 'frame'),
+      );
+      ws.on('pong', (event: unknown) => this.onWsPong(event, wsKey, 'frame'));
     }
 
     ws.wsKey = wsKey;
@@ -618,22 +643,42 @@ export abstract class BaseWebsocketClient<
     return ws;
   }
 
-  private parseWsError(context: string, error: any, wsKey: TWSKey): boolean {
+  private parseWsError(
+    context: string,
+    error: unknown,
+    wsKey: TWSKey,
+  ): boolean {
     if (this.wsStore.isConnectionAttemptInProgress(wsKey)) {
       this.setWsState(wsKey, WsConnectionStateEnum.ERROR);
     }
 
     // Allow retry by default (in some places that call this). Prevent deadloop in hard failure (401)
     let canRetry = true;
+    const message =
+      error instanceof Error
+        ? error.message
+        : isObjectLike(error) && typeof error.message === 'string'
+          ? error.message
+          : undefined;
 
-    if (!error.message) {
+    if (!message) {
       this.logger.error(`${context} due to unexpected error: `, error);
-      this.emit('response', { ...error, wsKey });
-      this.emit('exception', { ...error, wsKey });
+      const payload = isObjectLike(error) ? error : { error };
+      this.emit('response', { ...payload, wsKey });
+      this.emit('exception', { ...payload, wsKey });
       return canRetry;
     }
 
-    switch (error.message) {
+    const errorRecord = isObjectLike(error) ? error : undefined;
+    const errorCode = errorRecord?.code;
+    const errorText =
+      typeof errorRecord?.msg === 'string'
+        ? errorRecord.msg
+        : typeof errorRecord?.message === 'string'
+          ? errorRecord.message
+          : message;
+
+    switch (message) {
       case 'Unexpected server response: 401':
         this.logger.error(`${context} due to 401 authorization failure.`, {
           ...this.WS_LOGGER_CATEGORY,
@@ -643,11 +688,9 @@ export abstract class BaseWebsocketClient<
         break;
 
       default:
-        if (error?.code === 'ENOTFOUND') {
+        if (errorCode === 'ENOTFOUND') {
           this.logger.error(
-            `${context} due to lookup exception: "${
-              error?.msg || error?.message || error
-            }"`,
+            `${context} due to lookup exception: "${errorText}"`,
             {
               ...this.WS_LOGGER_CATEGORY,
               wsKey,
@@ -659,7 +702,7 @@ export abstract class BaseWebsocketClient<
           break;
         }
 
-        if (error?.code === 401) {
+        if (errorCode === 401) {
           this.logger.error(`${context} due to 401 authorization failure.`, {
             ...this.WS_LOGGER_CATEGORY,
             wsKey,
@@ -673,9 +716,7 @@ export abstract class BaseWebsocketClient<
           WsConnectionStateEnum.CLOSING
         ) {
           this.logger.error(
-            `${context} due to unexpected response error: "${
-              error?.msg || error?.message || error
-            }"`,
+            `${context} due to unexpected response error: "${errorText}"`,
             { ...this.WS_LOGGER_CATEGORY, wsKey, error },
           );
 
@@ -688,8 +729,10 @@ export abstract class BaseWebsocketClient<
         break;
     }
 
-    this.emit('response', { ...error, wsKey });
-    this.emit('exception', { ...error, wsKey });
+    const payload = errorRecord ?? { error: errorText };
+
+    this.emit('response', { ...payload, wsKey });
+    this.emit('exception', { ...payload, wsKey });
 
     return canRetry;
   }
@@ -1076,15 +1119,23 @@ export abstract class BaseWebsocketClient<
 
     this.setWsState(wsKey, WsConnectionStateEnum.CONNECTED);
 
-    this.logger.trace('Enabled ping timer', {
-      ...this.WS_LOGGER_CATEGORY,
-      wsKey,
-    });
+    const shouldSendClientPing = true;
+    if (shouldSendClientPing) {
+      this.logger.trace('Enabled ping timer', {
+        ...this.WS_LOGGER_CATEGORY,
+        wsKey,
+      });
 
-    this.wsStore.get(wsKey, true)!.activePingTimer = setInterval(
-      () => this.ping(wsKey),
-      this.options.pingInterval,
-    );
+      this.wsStore.get(wsKey, true)!.activePingTimer = setInterval(
+        () => this.ping(wsKey),
+        this.options.pingInterval,
+      );
+    } else {
+      this.logger.trace('Disabled client-to-server ping timer', {
+        ...this.WS_LOGGER_CATEGORY,
+        wsKey,
+      });
+    }
 
     if (!this.options.requireConnectionReadyConfirmation) {
       return await this.onWsReadyForEvents(wsKey);
@@ -1110,6 +1161,7 @@ export abstract class BaseWebsocketClient<
     } catch (e) {
       this.logger.error(
         'Exception trying to resolve "connectionInProgress" promise',
+        e,
       );
     }
   }
@@ -1166,12 +1218,11 @@ export abstract class BaseWebsocketClient<
    *
    * Only used for exchanges that require auth before sending private topic subscription requests
    */
-  private onWsAuthenticated(
-    wsKey: TWSKey,
-    event: { isWSAPI?: boolean; WSAPIAuthChannel?: string },
-  ) {
+  private onWsAuthenticated(wsKey: TWSKey, event: unknown) {
     const wsState = this.wsStore.get(wsKey, true);
     wsState.isAuthenticated = true;
+
+    const authEvent = isObjectLike(event) ? event : {};
 
     // Resolve & cleanup deferred "auth attempt in progress" promise
     try {
@@ -1206,35 +1257,41 @@ export abstract class BaseWebsocketClient<
       }
     }
 
-    if (event?.isWSAPI) {
+    if (authEvent.isWSAPI === true) {
       wsState.didAuthWSAPI = true;
 
-      if (event?.WSAPIAuthChannel) {
-        wsState.WSAPIAuthChannel = event.WSAPIAuthChannel;
+      if (typeof authEvent.WSAPIAuthChannel === 'string') {
+        wsState.WSAPIAuthChannel = authEvent.WSAPIAuthChannel;
       }
     }
   }
 
   private onWsPing(
-    event: any,
+    event: unknown,
     wsKey: TWSKey,
     ws: WebSocket,
     source: WsEventInternalSrc,
   ) {
+    const typedEvent = isObjectLike(event) ? event : undefined;
+
     this.logger.trace(`Received PING ${source}`, {
       ...this.WS_LOGGER_CATEGORY,
       wsKey,
-      event,
+      eventType: typedEvent?.type,
+      eventData: typedEvent?.data,
       source,
     });
-    this.sendPongEvent(wsKey, ws);
+
+    this.sendPongEvent(wsKey, ws, event);
   }
 
-  private onWsPong(event: any, wsKey: TWSKey, source: WsEventInternalSrc) {
+  private onWsPong(event: unknown, wsKey: TWSKey, source: WsEventInternalSrc) {
+    const typedEvent = isObjectLike(event) ? event : undefined;
     this.logger.trace(`Received PONG ${source}`, {
       ...this.WS_LOGGER_CATEGORY,
       wsKey,
-      event: (event as any)?.data,
+      eventType: typedEvent?.type,
+      eventData: typedEvent?.data,
       source,
     });
     // Necessary when native heartbeats are used
@@ -1242,7 +1299,12 @@ export abstract class BaseWebsocketClient<
     return;
   }
 
-  private onWsMessage(event: unknown, wsKey: TWSKey, ws: WebSocket) {
+  private async onWsMessage(
+    event: unknown,
+    wsKey: TWSKey,
+    ws: WebSocket,
+    didDecompress = false,
+  ): Promise<unknown> {
     try {
       // console.log('onMessageRaw: ', (event as any).data);
       // any message can clear the pong timer - wouldn't get a message if the ws wasn't working
@@ -1318,7 +1380,6 @@ export abstract class BaseWebsocketClient<
             continue;
           }
 
-          // Not used for kraken. At least for spot, auth is included per req during subscribe
           if (emittable.eventType === 'connectionReadyForAuth') {
             this.logger.trace(
               'Ready for auth - requesting auth submission...',
@@ -1331,7 +1392,6 @@ export abstract class BaseWebsocketClient<
             continue;
           }
 
-          // Not used for kraken. At least for spot, auth is included per req during subscribe
           if (emittable.eventType === 'authenticated') {
             this.logger.trace('Successfully authenticated', {
               ...this.WS_LOGGER_CATEGORY,
@@ -1366,12 +1426,35 @@ export abstract class BaseWebsocketClient<
         return;
       }
 
+      if (isBufferMessageEvent(event) && !didDecompress) {
+        try {
+          const decompressed = await decompressMessageEvent(event, 'gzip');
+          // this.logger.trace('Decompressed message event from buffer', {
+          //   ...this.WS_LOGGER_CATEGORY,
+          //   wsKey,
+          //   decompressed,
+          // });
+
+          return this.onWsMessage(decompressed, wsKey, ws, true);
+        } catch (e) {
+          this.logger.error('Failed to decompress ws message event', {
+            ...this.WS_LOGGER_CATEGORY,
+            wsKey,
+            exception: e,
+            message: event || 'no message',
+            event,
+          });
+          return;
+        }
+      }
+
       this.logger.error(
         'Unhandled/unrecognised ws event message - unexpected message format',
         {
           ...this.WS_LOGGER_CATEGORY,
           message: event || 'no message',
           event,
+          didDecompress,
           wsKey,
         },
       );

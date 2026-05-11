@@ -1,33 +1,49 @@
+import WebSocket from 'isomorphic-ws';
+
 import {
   BaseWebsocketClient,
   EmittableEvent,
   MidflightWsRequestEvent,
 } from './lib/BaseWSClient.js';
-import { neverGuard } from './lib/misc-util.js';
-import { RestClientOptions } from './lib/requestUtils.js';
 import {
-  hashMessage,
+  getStringOrUndefined,
+  isRecord,
+  omitKeys,
+  removeInternalParamFields,
+} from './lib/misc-util.js';
+import { REST_CLIENT_TYPE_ENUM, serializeParams } from './lib/requestUtils.js';
+import {
+  getSignKeyType,
   SignAlgorithm,
   SignEncodeMethod,
-  signMessage,
-  SignMessageOptions,
+  signMessage as signRawMessage,
 } from './lib/webCryptoAPI.js';
 import { DefaultLogger } from './lib/websocket/logger.js';
-import { RestClientCache } from './lib/websocket/rest-client-cache.js';
 import {
   getPromiseRefForWSAPIRequest,
+  getPromiseRefPrefixForWSAPIRequest,
+  getWsUrl as getHtxWsUrl,
+  HTXDerivativesWSAPIRawRequest,
+  HTXDerivativesWSRequest,
+  HTXSpotPrivateWSRequest,
+  HTXSpotWSAPIRawRequest,
+  HTXWSAPIRawRequest,
+  HtxWSNetwork,
+  HTXWSRequest,
+  isPrivateWsKey,
+  PRIVATE_WS_KEYS,
+  TRADE_WS_KEYS,
   WS_KEY_MAP,
+  WS_KEY_PATH_MAP,
   WsKey,
   WSOperation,
-  WSRequestOperationKraken,
   WSTopicRequest,
 } from './lib/websocket/websocket-util.js';
 import { WSConnectedResult } from './lib/websocket/WsStore.types.js';
 import {
   Exact,
   WS_API_Operations,
-  WSAPIAuthenticationRequestFromServer,
-  WSAPIRequestOperationKrakenSpot,
+  WSAPIOperation,
   WSAPITopicRequestParamMap,
   WSAPITopicResponseMap,
   WSAPIWsKey,
@@ -35,12 +51,13 @@ import {
 } from './types/websockets/ws-api.js';
 import { MessageEventLike } from './types/websockets/ws-events.js';
 import {
+  ParsedWsMessage,
   WSClientConfigurableOptions,
-  WsMarket,
+  WsDerivativesAuthParams,
+  WsSpotAuthParams,
 } from './types/websockets/ws-general.js';
 import {
-  WS_DERIVATIVES_PRIVATE_TOPICS,
-  WS_SPOT_PRIVATE_TOPICS,
+  isPrivateTopic,
   WSTopic,
 } from './types/websockets/ws-subscriptions.js';
 
@@ -50,90 +67,100 @@ const WS_LOGGER_CATEGORY = {
 };
 
 export interface WSAPIRequestFlags {
-  /** If true, will skip auth requirement for WS API connection */
+  /** If true, will skip auth requirement for this WS API request. */
   authIsOptional?: boolean | undefined;
+  /** Optional caller-supplied correlation id. Generated automatically when omitted. */
+  cid?: string;
 }
 
-export class WebsocketClient extends BaseWebsocketClient<WsKey, any> {
-  private restClientCache: RestClientCache = new RestClientCache();
+interface WsEndpointParts {
+  url: string;
+  host: string;
+  path: string;
+}
 
-  private wsChallengeCache: Map<WsKey, string> = new Map();
+interface WSAPIInflightRequestRef {
+  wsKey: WSAPIWsKey;
+  operation: WSAPIOperation;
+  cid: string;
+}
+
+export class WebsocketClient extends BaseWebsocketClient<
+  WsKey,
+  HTXWSRequest | HTXWSAPIRawRequest
+> {
+  private wsApiInflightRequestRefs: Map<string, WSAPIInflightRequestRef> =
+    new Map();
 
   constructor(options?: WSClientConfigurableOptions, logger?: DefaultLogger) {
-    super({ ...options, wsLoggerCategory: WS_LOGGER_CATEGORY_ID }, logger);
-
-    this.restClientCache.setLogger(this.logger, WS_LOGGER_CATEGORY);
+    super(
+      {
+        ...options,
+        // For most connections, heartbeats are messages for HTX, not WS-level frames
+        useNativeHeartbeats: false,
+        wsLoggerCategory: WS_LOGGER_CATEGORY_ID,
+      },
+      logger,
+    );
   }
 
   /**
-   * Request connection of all dependent (public & private) websockets, instead of waiting for automatic connection by library.
-   *
-   * Returns array of promises that individually resolve when each connection is successfully opened.
+   * Request connection of all market/private sockets that are useful for subscriptions.
+   * Trade-command sockets are intentionally opened lazily by sendWSAPIRequest().
    */
   public connectAll(): Promise<WSConnectedResult | undefined>[] {
-    return [this.connect(WS_KEY_MAP.spotPrivateV2)];
+    return [
+      this.connect(WS_KEY_MAP.spotPublic),
+      this.connect(WS_KEY_MAP.spotFeed),
+      this.connect(WS_KEY_MAP.spotPrivateV2),
+      this.connect(WS_KEY_MAP.linearSwapPublic),
+      this.connect(WS_KEY_MAP.linearSwapPrivate),
+      this.connect(WS_KEY_MAP.coinDeliveryPublic),
+      this.connect(WS_KEY_MAP.coinDeliveryPrivate),
+      this.connect(WS_KEY_MAP.coinSwapPublic),
+      this.connect(WS_KEY_MAP.coinSwapPrivate),
+      this.connect(WS_KEY_MAP.derivativesIndex),
+      this.connect(WS_KEY_MAP.derivativesSystem),
+    ];
   }
 
   /**
-   * Ensures the WS API connection is active and ready.
-   *
-   * You do not need to call this, but if you call this before making any WS API requests,
-   * it can accelerate the first request (by preparing the connection in advance).
+   * Ensures a WS API connection is active and, unless skipped, authenticated.
    */
-  public connectWSAPI(wsKey: WSAPIWsKey, skipAuth?: boolean): Promise<unknown> {
+  public connectWSAPI(
+    wsKey: WSAPIWsKey = WS_KEY_MAP.spotTrade,
+    skipAuth?: boolean,
+  ): Promise<unknown> {
     if (skipAuth) {
       return this.assertIsConnected(wsKey);
     }
 
-    /** This call automatically ensures the connection is active AND authenticated before resolving */
     return this.assertIsAuthenticated(wsKey);
   }
 
-  /**
-   * Request subscription to one or more topics. Pass topics as either an array of strings, or array of objects (if the topic has parameters).
-   * Objects should be formatted as {topic: string, params: object}.
-   *
-   * - Subscriptions are automatically routed to the correct websocket connection.
-   * - Authentication/connection is automatic.
-   * - Resubscribe after network issues is automatic.
-   *
-   * Call `unsubscribe(topics)` to remove topics
-   */
   public subscribe(
     requests:
       | (WSTopicRequest<WSTopic> | WSTopic)
       | (WSTopicRequest<WSTopic> | WSTopic)[],
     wsKey: WsKey,
   ) {
-    if (!Array.isArray(requests)) {
-      this.subscribeTopicsForWsKey([requests], wsKey);
-      return;
-    }
+    const normalisedRequests = Array.isArray(requests) ? requests : [requests];
 
-    if (requests.length) {
-      this.subscribeTopicsForWsKey(requests, wsKey);
+    if (normalisedRequests.length) {
+      this.subscribeTopicsForWsKey(normalisedRequests, wsKey);
     }
   }
 
-  /**
-   * Unsubscribe from one or more topics. Similar to subscribe() but in reverse.
-   *
-   * - Requests are automatically routed to the correct websocket connection.
-   * - These topics will be removed from the topic cache, so they won't be subscribed to again.
-   */
   public unsubscribe(
     requests:
       | (WSTopicRequest<WSTopic> | WSTopic)
       | (WSTopicRequest<WSTopic> | WSTopic)[],
     wsKey: WsKey,
   ) {
-    if (!Array.isArray(requests)) {
-      this.unsubscribeTopicsForWsKey([requests], wsKey);
-      return;
-    }
+    const normalisedRequests = Array.isArray(requests) ? requests : [requests];
 
-    if (requests.length) {
-      this.unsubscribeTopicsForWsKey(requests, wsKey);
+    if (normalisedRequests.length) {
+      this.unsubscribeTopicsForWsKey(normalisedRequests, wsKey);
     }
   }
 
@@ -156,16 +183,15 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey, any> {
    *
    * You can turn off the automatic re-auth WS API logic using `reauthWSAPIOnReconnect: false` in the WSClient config.
    *
-   * @param wsKey - The connection this event is for (e.g. "spotV4" | "perpFuturesUSDTV4" | "perpFuturesBTCV4" | "deliveryFuturesUSDTV4" | "deliveryFuturesBTCV4" | "optionsV4")
+   * @param wsKey - The connection this event is for.
    * @param channel - The channel this event is for (e.g. "spot.login" to authenticate)
    * @param params - Any request parameters for the payload (contents of req_param in the docs). Signature generation is automatic, only send parameters such as order ID as per the docs.
    * @returns Promise - tries to resolve with async WS API response. Rejects if disconnected or exception is seen in async WS API response
    */
-
-  // This overload allows the caller to omit the 3rd param, if it isn't required (e.g. for the login call)
   async sendWSAPIRequest<
     TWSKey extends keyof WSAPIWsKeyTopicMap,
-    TWSOperation extends WSAPIWsKeyTopicMap[TWSKey],
+    TWSOperation extends keyof WSAPITopicRequestParamMap &
+      WSAPIWsKeyTopicMap[TWSKey],
     TWSParams extends Exact<WSAPITopicRequestParamMap[TWSOperation]>,
     TWSAPIResponse extends
       | WSAPITopicResponseMap[TWSOperation]
@@ -173,14 +199,14 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey, any> {
   >(
     wsKey: TWSKey,
     operation: TWSOperation,
-    params?: TWSParams extends void | never ? undefined : TWSParams,
+    params?: TWSParams,
     requestFlags?: WSAPIRequestFlags,
   ): Promise<TWSAPIResponse>;
 
   async sendWSAPIRequest<
     TWSKey extends keyof WSAPIWsKeyTopicMap,
-    TWSOperation extends WSAPIWsKeyTopicMap[TWSKey],
-    // if this throws a type error, probably forgot to add a new operation to WsAPITopicRequestParamMap
+    TWSOperation extends keyof WSAPITopicRequestParamMap &
+      WSAPIWsKeyTopicMap[TWSKey],
     TWSParams extends Exact<WSAPITopicRequestParamMap[TWSOperation]>,
     TWSAPIResponse extends
       | WSAPITopicResponseMap[TWSOperation]
@@ -190,19 +216,14 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey, any> {
     operation: TWSOperation,
     params: TWSParams & { signRequest?: boolean },
     requestFlags?: WSAPIRequestFlags,
-  ): Promise<TWSAPIResponse | any> {
-    /**
-     * WebSocket API requests. Ref: TODO: ADD WS API URL
-     *
-     */
-
+  ): Promise<TWSAPIResponse> {
     this.logger.trace(`sendWSAPIRequest(): assert "${wsKey}" is connected`, {
       ...WS_LOGGER_CATEGORY,
     });
 
     await this.assertIsConnected(wsKey);
 
-    // Some commands don't require authentication.
+    // Used by other exchanges for commands that don't require authentication.
     if (requestFlags?.authIsOptional !== true) {
       this.logger.trace(
         'sendWSAPIRequest(): assertIsAuthenticated(${wsKey})...',
@@ -213,78 +234,68 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey, any> {
       );
     }
 
-    const requestEvent: WSAPIRequestOperationKrakenSpot = {
-      method: operation,
-      params: params,
-      req_id: this.getNewRequestId(),
-    };
+    const cid = requestFlags?.cid || `${this.getNewRequestId()}`;
+    const requestEvent = this.getWsApiRequestEvent(
+      wsKey,
+      operation,
+      params,
+      cid,
+    );
 
-    // Sign request
-    const signedEvent = await this.signWSAPIRequest(requestEvent);
-
-    // Store deferred promise
     const promiseRef = getPromiseRefForWSAPIRequest(wsKey, requestEvent);
+    this.trackWSAPIRequestRef(promiseRef, wsKey, operation, cid);
 
     const deferredPromise = this.getWsStore().createDeferredPromise<
-      TWSAPIResponse & { request: any }
+      TWSAPIResponse & { request: unknown }
     >(wsKey, promiseRef, false);
 
-    // Enrich returned promise with request context for easier debugging
     deferredPromise.promise
       ?.then((res) => {
         if (!Array.isArray(res)) {
           res.request = {
-            wsKey: wsKey,
-            ...signedEvent,
+            wsKey,
+            ...requestEvent,
           };
         }
 
         return res;
       })
-      .catch((e) => {
-        if (typeof e === 'string') {
-          this.logger.error('unexpcted string', { e });
+      .catch((e: unknown) => {
+        if (typeof e !== 'object' || !e) {
+          this.logger.error('Unexpected non-object thrown by WS API request', {
+            e,
+            wsKey,
+            requestEvent,
+          });
           return e;
         }
-        e.request = {
-          wsKey: wsKey,
-          operation,
-          payload: signedEvent.params,
-        };
+
+        Object.assign(e, {
+          request: {
+            wsKey,
+            operation,
+            params,
+          },
+        });
+
         return e;
       });
 
-    // Send event
-    const throwExceptions = true;
-    this.tryWsSend(wsKey, JSON.stringify(signedEvent), throwExceptions);
+    deferredPromise.promise?.then(
+      () => this.wsApiInflightRequestRefs.delete(promiseRef),
+      () => this.wsApiInflightRequestRefs.delete(promiseRef),
+    );
+
+    this.tryWsSend(wsKey, JSON.stringify(requestEvent), true);
 
     this.logger.trace(
       `sendWSAPIRequest(): sent "${operation}" event with promiseRef(${promiseRef})`,
-      signedEvent,
+      { ...WS_LOGGER_CATEGORY, requestEvent },
     );
 
-    // Return deferred promise, so caller can await this call
     return deferredPromise.promise!;
   }
 
-  /**
-   *
-   * Internal methods - not intended for public use
-   *
-   */
-
-  private getRestClientOptions(): RestClientOptions {
-    return {
-      ...this.options,
-      ...this.options.restOptions,
-      apiKey: this.options.apiKey,
-      apiSecret: this.options.apiSecret,
-    };
-  }
-
-  /**
-   * Note: implementing this method will wipe the WsStore state for this WsKey, once this method returns
-   */
   protected isCustomReconnectionNeeded(): boolean {
     return false;
   }
@@ -298,119 +309,142 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey, any> {
       return this.options.wsUrl;
     }
 
-    switch (wsKey) {
-      /**
-       * HTX WebSocket URLs. Ref: https://www.htx.com/en-us/opend/newApiPages/
-       * TODO: Verify and update URLs for HTX (api.huobi.pro/ws/v2, api-aws.huobi.pro/ws/v2).
-       */
-      case WS_KEY_MAP.spotPublicV2: {
-        return 'wss://ws.kraken.com/v2';
-      }
-      case WS_KEY_MAP.spotPrivateV2: {
-        return 'wss://ws-auth.kraken.com/v2';
-      }
-      case WS_KEY_MAP.spotL3V2: {
-        return 'wss://ws-l3.kraken.com/v2';
-      }
-      case WS_KEY_MAP.spotBetaPublicV2: {
-        return 'wss://beta-ws.kraken.com/v2';
-      }
-      case WS_KEY_MAP.spotBetaPrivateV2: {
-        return 'wss://beta-ws-auth.kraken.com/v2';
-      }
-      // Uses the same URL, but we maintain separate connections for easier management
-      case WS_KEY_MAP.derivativesPublicV1:
-      case WS_KEY_MAP.derivativesPrivateV1: {
-        if (this.options.testnet) {
-          return 'wss://demo-futures.kraken.com/ws/v1';
-        }
-        return 'wss://futures.kraken.com/ws/v1';
-      }
-      default: {
-        throw neverGuard(wsKey, `Unhandled WsKey "${wsKey}"`);
-      }
-    }
+    return getHtxWsUrl(wsKey, this.getWsNetwork());
   }
 
-  protected sendPingEvent(wsKey: WsKey) {
-    // let pingChannel: WsRequestPing['channel'];
+  protected sendPingEvent(wsKey: WsKey, ws: WebSocket) {
+    const ts = Date.now() + this.getTimeOffsetMs();
 
-    switch (wsKey) {
-      case WS_KEY_MAP.derivativesPublicV1:
-      case WS_KEY_MAP.derivativesPrivateV1: {
-        const ws = this.getWsStore().get(wsKey)?.ws;
-        if (ws) {
-          ws.ping();
+    // These WS Keys use native ping frames, since the JSON ping is not supported for these websocket endpoints (confirmed by HTX)
+    const isNativeClientPingWsKey =
+      wsKey === WS_KEY_MAP.derivativesIndex ||
+      wsKey === WS_KEY_MAP.derivativesSystem ||
+      wsKey === WS_KEY_MAP.spotPrivateV2;
+
+    if (isNativeClientPingWsKey) {
+      try {
+        if (typeof ws.ping !== 'function') {
+          this.logger.trace(
+            'Unable to send WS ping frame. Not available in this environment.',
+            { ...WS_LOGGER_CATEGORY, wsKey },
+          );
+          return;
         }
-        break;
-      }
-      case WS_KEY_MAP.spotPublicV2:
-      case WS_KEY_MAP.spotPrivateV2:
-      case WS_KEY_MAP.spotL3V2:
-      case WS_KEY_MAP.spotBetaPublicV2:
-      case WS_KEY_MAP.spotBetaPrivateV2: {
-        // Spot: https://docs.kraken.com/api/docs/websocket-v2/ping
-        return this.tryWsSend(
+
+        if (ws.readyState !== WebSocket.OPEN) {
+          this.logger.trace(
+            'WS ready state not open - refusing to send WS ping frame',
+            { ...WS_LOGGER_CATEGORY, wsKey, readyState: ws.readyState },
+          );
+          return;
+        }
+
+        ws.ping();
+      } catch (e) {
+        this.logger.error('Failed to send WS ping frame', {
+          ...WS_LOGGER_CATEGORY,
           wsKey,
-          `{ "method": "ping", "req_id": ${this.getNewRequestId()} }`,
-        );
+          exception: e,
+        });
       }
 
-      default: {
-        throw neverGuard(wsKey, `Unhandled WsKey "${wsKey}"`);
-      }
+      return;
     }
-  }
 
-  protected sendPongEvent(wsKey: WsKey) {
-    try {
-      this.logger.trace('Sending upstream ws PONGFRAME: ', {
-        ...WS_LOGGER_CATEGORY,
-        wsMessage: 'PONGFRAME',
+    if (this.isSpotPrivateProtocolWsKey(wsKey)) {
+      this.tryWsSend(
         wsKey,
-      });
-      if (!wsKey) {
-        throw new Error('Cannot send PONGFRAME, no wsKey provided');
-      }
-      const wsState = this.getWsStore().get(wsKey);
-      if (!wsState || !wsState?.ws) {
-        throw new Error(
-          `Cannot send PONGFRAME, ${wsKey} socket not connected yet`,
-        );
-      }
+        JSON.stringify({
+          action: 'ping',
+          data: {
+            ts,
+          },
+        }),
+      );
+      return;
+    }
 
-      // Send a protocol layer pong
-      wsState.ws.pong();
-    } catch (e) {
-      this.logger.error('Failed to send WS PONG', {
-        ...WS_LOGGER_CATEGORY,
-        wsMessage: 'PONGFRAME',
+    if (this.isDerivativesOperationProtocolWsKey(wsKey)) {
+      this.tryWsSend(
         wsKey,
-        exception: e,
-      });
-    }
-  }
-
-  // NOT IN USE for kraken
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected isWsPing(_msg: any): boolean {
-    return false;
-  }
-
-  protected isWsPong(msg: any): boolean {
-    // Pre-parsed in resolveEmittableEvents into "pong" eventType:
-    if (msg?.eventType) {
-      if (msg?.eventType === 'pong') {
-        return true;
-      }
+        JSON.stringify({
+          op: 'ping',
+          ts,
+        }),
+      );
+      return;
     }
 
-    return false;
+    this.tryWsSend(
+      wsKey,
+      JSON.stringify({
+        ping: ts,
+      }),
+    );
   }
 
-  /**
-   * Parse incoming events into categories, before emitting to the user
-   */
+  protected sendPongEvent(wsKey: WsKey, _ws: WebSocket, event?: unknown) {
+    const parsed = this.parseWsMessage(event);
+    const ts = this.getHeartbeatTimestamp(parsed) || Date.now();
+
+    if (this.isSpotPrivateProtocolWsKey(wsKey)) {
+      this.tryWsSend(
+        wsKey,
+        JSON.stringify({
+          action: 'pong',
+          data: {
+            ts,
+          },
+        }),
+      );
+      return;
+    }
+
+    if (this.isDerivativesOperationProtocolWsKey(wsKey)) {
+      this.tryWsSend(
+        wsKey,
+        JSON.stringify({
+          op: 'pong',
+          ts,
+        }),
+      );
+      return;
+    }
+
+    this.tryWsSend(
+      wsKey,
+      JSON.stringify({
+        pong: ts,
+      }),
+    );
+  }
+
+  protected isWsPing(event: unknown): boolean {
+    const parsed = this.parseWsMessage(event);
+    if (!parsed) {
+      return false;
+    }
+
+    return (
+      Object.prototype.hasOwnProperty.call(parsed, 'ping') ||
+      parsed.action === 'ping' ||
+      parsed.op === 'ping'
+    );
+  }
+
+  protected isWsPong(event: unknown): boolean {
+    const parsed = this.parseWsMessage(event);
+    if (!parsed) {
+      return isRecord(event) && event.eventType === 'pong';
+    }
+
+    return (
+      Object.prototype.hasOwnProperty.call(parsed, 'pong') ||
+      parsed.action === 'pong' ||
+      parsed.op === 'pong'
+    );
+  }
+
   protected resolveEmittableEvents(
     wsKey: WsKey,
     event: MessageEventLike,
@@ -418,457 +452,389 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey, any> {
     const results: EmittableEvent[] = [];
 
     try {
-      const parsed = JSON.parse(event.data);
+      const parsed = JSON.parse(event.data) as ParsedWsMessage;
+      const emittableEvent = {
+        ...parsed,
+        wsKey,
+      };
 
-      // derivatives sends 'challenge' on successful auth-init (used for sign during subscribe)
-      const responseEvents = [
-        // spot confirmation for subscription success
-        'subscribe',
-        'unsubscribe',
-        'info',
-        // derivatives confirmation for subscription success
-        'subscribed',
-        'unsubscribed',
-      ];
-      const authenticatedEvents = ['challenge'];
+      if (this.isWsPong(parsed)) {
+        results.push({
+          eventType: 'pong',
+          event: emittableEvent,
+        });
+        return results;
+      }
 
-      const derivativesEventAction = parsed.event || parsed.feed;
-      const spotEventAction =
-        parsed.method ||
-        parsed.type ||
-        parsed.event ||
-        parsed?.header?.data ||
-        parsed.channel;
-      const eventAction = spotEventAction || derivativesEventAction;
+      if (this.isAuthResponse(parsed)) {
+        const isError = this.isErrorEvent(parsed);
 
-      const promiseRef = [wsKey, eventAction, parsed?.req_id].join('_');
-
-      // WS API
-      if (WS_API_Operations.includes(eventAction)) {
-        const isError = parsed.success !== true;
-
-        // WS API Exception
         if (isError) {
-          try {
-            this.getWsStore().rejectDeferredPromise(
-              wsKey,
-              promiseRef,
-              {
-                wsKey,
-                ...parsed,
-              },
-              true,
-            );
-          } catch (e) {
-            this.logger.error('Exception trying to reject WSAPI promise', {
-              wsKey,
-              promiseRef,
-              parsedEvent: parsed,
-              error: e,
-            });
-          }
-
           results.push({
             eventType: 'exception',
-            event: parsed,
-            isWSAPIResponse: true,
+            event: emittableEvent,
           });
           return results;
-        }
-
-        // WS API Success
-        try {
-          this.getWsStore().resolveDeferredPromise(
-            wsKey,
-            promiseRef,
-            {
-              wsKey,
-              ...parsed,
-            },
-            true,
-          );
-        } catch (e) {
-          this.logger.error('Exception trying to resolve WSAPI promise', {
-            wsKey,
-            promiseRef,
-            parsedEvent: parsed,
-            error: e,
-          });
         }
 
         results.push({
           eventType: 'response',
-          event: parsed,
-          isWSAPIResponse: true,
+          event: emittableEvent,
+        });
+
+        results.push({
+          eventType: 'authenticated',
+          event: emittableEvent,
         });
         return results;
-      } // end of WS API response processing
+      }
 
-      if (typeof eventAction === 'string') {
-        if (parsed.success === false) {
-          results.push({
-            eventType: 'exception',
-            event: parsed,
-          });
-          return results;
-        }
+      if (this.isWSAPIResponse(wsKey, parsed)) {
+        return this.resolveWSAPIResponse(wsKey, parsed);
+      }
 
-        // exceptions with derivatives v1 WS. E.g. { event: 'alert', message: 'Bad websocket message' }
-        if (eventAction === 'alert') {
-          results.push({
-            eventType: 'exception',
-            event: parsed,
-          });
-          return results;
-        }
+      if (this.isErrorEvent(parsed)) {
+        results.push({
+          eventType: 'exception',
+          event: emittableEvent,
+        });
+        return results;
+      }
 
-        // Most events use event: "update" or "snapshot" for topic updates
-        if (['update', 'snapshot'].includes(eventAction)) {
-          results.push({
-            eventType: 'message',
-            event: parsed,
-          });
-          return results;
-        }
+      if (this.isSubscriptionResponse(parsed)) {
+        results.push({
+          eventType: 'response',
+          event: emittableEvent,
+        });
+        return results;
+      }
 
-        // These are request/reply pattern events (e.g. after subscribing to topics or authenticating)
-        // e.g. "method":"subscribe"
-        if (responseEvents.includes(eventAction)) {
-          results.push({
-            eventType: 'response',
-            event: parsed,
-          });
-          return results;
-        }
-
-        // derivatives events include the "feed" property to identify the channel name
-        if (typeof parsed.feed === 'string') {
-          results.push({
-            eventType: 'message',
-            event: parsed,
-          });
-          return results;
-        }
-
-        // Request/reply pattern for authentication success
-        if (authenticatedEvents.includes(eventAction)) {
-          if (wsKey === WS_KEY_MAP.derivativesPrivateV1) {
-            const challenge = parsed.message;
-            if (challenge) {
-              this.logger.trace(
-                `Stored challenge for derivatives auth on wsKey "${wsKey}": "${challenge}"`,
-              );
-              this.wsChallengeCache.set(wsKey, challenge);
-            }
-          }
-
-          results.push({
-            eventType: 'authenticated',
-            event: parsed,
-          });
-          return results;
-        }
-
-        if (eventAction === 'heartbeat' || eventAction === 'pong') {
-          results.push({
-            eventType: 'pong',
-            event: parsed,
-          });
-          return results;
-        }
-
-        this.logger.error(
-          `!! Unhandled string "eventAction" "${eventAction}". Defaulting to "message" channel... Parsed:`,
-          parsed,
-        );
-      } else {
-        this.logger.error(
-          `!! Unhandled non-string "eventAction" "${eventAction}". Defaulting to "message" channel... Parsed:`,
-          parsed,
-        );
+      if (this.isRequestResponse(parsed)) {
+        results.push({
+          eventType: 'response',
+          event: emittableEvent,
+        });
+        return results;
       }
 
       results.push({
         eventType: 'message',
-        event: parsed,
+        event: emittableEvent,
       });
+      return results;
     } catch (e) {
-      results.push({
-        event: {
-          message: 'Failed to parse event data due to exception',
-          exception: e,
-          eventData: event.data,
-        },
-        eventType: 'exception',
-      });
-
-      this.logger.error('Failed to parse event data due to exception: ', {
-        exception: e,
-        eventData: event.data,
+      this.logger.error('Failed to parse ws event message', {
+        ...WS_LOGGER_CATEGORY,
+        error: e,
+        event,
+        wsKey,
       });
     }
 
     return results;
   }
 
-  /**
-   * Determines if a topic is for a private channel, using a hardcoded list of strings
-   */
-  protected isPrivateTopicRequest(request: WSTopicRequest<any>): boolean {
-    const topicName = request?.topic?.toLowerCase();
-    if (!topicName) {
+  protected isPrivateTopicRequest(
+    request: WSTopicRequest<WSTopic>,
+    wsKey: WsKey,
+  ): boolean {
+    const topic = request.topic;
+    if (!topic) {
       return false;
     }
 
-    if (WS_SPOT_PRIVATE_TOPICS.includes(topicName)) {
-      return true;
+    if (topic.startsWith('public.')) {
+      return false;
     }
 
-    if (WS_DERIVATIVES_PRIVATE_TOPICS.includes(topicName)) {
-      return true;
-    }
-
-    return false;
+    return isPrivateTopic(topic) || isPrivateWsKey(wsKey);
   }
 
-  /**
-   * Not in use for Kraken
-   */
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getWsMarketForWsKey(_wsKey: WsKey): WsMarket {
-    return 'futures';
-  }
-
-  /**
-   * Whether key represents a private connection. Feeds into automatic auth on connect.
-   */
   protected getPrivateWSKeys(): WsKey[] {
-    return [
-      WS_KEY_MAP.spotPrivateV2,
-      WS_KEY_MAP.spotL3V2,
-      WS_KEY_MAP.spotBetaPrivateV2,
-      WS_KEY_MAP.derivativesPrivateV1,
-    ];
-  }
-
-  protected isAuthOnConnectWsKey(wsKey: WsKey): boolean {
-    return this.getPrivateWSKeys().includes(wsKey);
-  }
-
-  /** Force subscription requests to be sent in smaller batches, if a number is returned */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getMaxTopicsPerSubscribeEvent(_wsKey: WsKey): number | null {
-    return 1;
+    return PRIVATE_WS_KEYS;
   }
 
   protected authPrivateConnectionsOnConnect(wsKey: WsKey): boolean {
-    // derivatives require you to send a challenge on connect
-    if (wsKey === WS_KEY_MAP.derivativesPrivateV1) {
-      return true;
-    }
-
-    return this.options.authPrivateConnectionsOnConnect;
+    return this.isAuthOnConnectWsKey(wsKey);
   }
 
-  /**
-   * @returns one or more correctly structured request events for performing a operations over WS. This can vary per exchange spec.
-   */
+  protected isAuthOnConnectWsKey(wsKey: WsKey): boolean {
+    return PRIVATE_WS_KEYS.includes(wsKey);
+  }
+
+  protected getMaxTopicsPerSubscribeEvent(): number | null {
+    return 1;
+  }
+
   protected async getWsRequestEvents(
     wsKey: WsKey,
     operation: WSOperation,
     requests: WSTopicRequest<WSTopic>[],
-  ): Promise<MidflightWsRequestEvent<WSRequestOperationKraken<string>>[]> {
-    const wsRequestEvents: MidflightWsRequestEvent<
-      WSRequestOperationKraken<WSTopic>
-    >[] = [];
-    const wsRequestBuildingErrors: unknown[] = [];
-
-    // Previously used to track topics in a request. Keeping this for subscribe/unsubscribe requests, no need for incremental values
+  ): Promise<MidflightWsRequestEvent<HTXWSRequest>[]> {
+    const requestEvents: MidflightWsRequestEvent<HTXWSRequest>[] = [];
 
     for (const topicRequest of requests) {
-      const req_id = this.getNewRequestId();
+      const payload = this.getPayloadRecord(topicRequest.payload);
 
-      switch (wsKey) {
-        case WS_KEY_MAP.spotPublicV2:
-        case WS_KEY_MAP.spotPrivateV2:
-        case WS_KEY_MAP.spotL3V2:
-        case WS_KEY_MAP.spotBetaPublicV2:
-        case WS_KEY_MAP.spotBetaPrivateV2: {
-          const wsEvent: WSRequestOperationKraken<WSTopic> = {
-            method: operation,
-            params: {
-              channel: topicRequest.topic,
-              ...topicRequest.payload,
-            },
-            req_id: req_id,
-          };
+      if (this.isMarketProtocolWsKey(wsKey)) {
+        const id =
+          this.getPayloadStringOrNumber(payload, 'id') ||
+          `${this.getNewRequestId()}`;
+        const requestEvent: HTXWSRequest = {
+          [operation === 'subscribe' ? 'sub' : 'unsub']: topicRequest.topic,
+          id,
+          ...omitKeys(payload, ['id']),
+        };
 
-          if (
-            this.options.authPrivateRequests &&
-            (wsKey === WS_KEY_MAP.spotPrivateV2 ||
-              wsKey === WS_KEY_MAP.spotL3V2 ||
-              wsKey === WS_KEY_MAP.spotBetaPrivateV2)
-          ) {
-            // Get token from REST client cache
-            const tokenResult =
-              await this.restClientCache.fetchSpotWebSocketToken(
-                this.getRestClientOptions(),
-                this.options.requestOptions,
-              );
-
-            if (!tokenResult?.token) {
-              wsRequestBuildingErrors.push(
-                new Error(
-                  `No WS auth token could be retrieved for private spot WS request for topic "${topicRequest.topic}"`,
-                ),
-              );
-              continue;
-            }
-
-            wsEvent.params.token = tokenResult.token;
-          }
-
-          // Cache midflight subs on the req ID
-          // Enrich response with subs for that req ID
-          const midflightWsEvent: MidflightWsRequestEvent<
-            WSRequestOperationKraken<WSTopic>
-          > = {
-            requestKey: wsEvent.req_id,
-            requestEvent: wsEvent,
-          };
-
-          wsRequestEvents.push({
-            ...midflightWsEvent,
-          });
-
-          break;
-        }
-        // No auth needed, it's public topics only here
-        case WS_KEY_MAP.derivativesPublicV1: {
-          const wsEvent: WSRequestOperationKraken<WSTopic> = {
-            event: operation,
-            feed: topicRequest.topic,
-            ...topicRequest.payload,
-            req_id: req_id,
-          };
-
-          // Cache midflight subs on the req ID
-          // Enrich response with subs for that req ID
-          const midflightWsEvent: MidflightWsRequestEvent<
-            WSRequestOperationKraken<WSTopic>
-          > = {
-            requestKey: wsEvent.req_id,
-            requestEvent: wsEvent,
-          };
-
-          wsRequestEvents.push({
-            ...midflightWsEvent,
-          });
-
-          break;
-        }
-
-        case WS_KEY_MAP.derivativesPrivateV1: {
-          const wsEvent: WSRequestOperationKraken<WSTopic> = {
-            event: operation,
-            feed: topicRequest.topic,
-            ...topicRequest.payload,
-            req_id: req_id,
-          };
-
-          // https://docs.kraken.com/api/docs/guides/futures-websockets
-          // Authenticated requests must include both the original challenge message (original_challenge) and the signed (signed_challenge) in JSON format.
-
-          if (!this.wsChallengeCache.has(wsKey)) {
-            this.logger.trace(
-              `No challenge key cached for wsKey ${wsKey}, asserting authentication...`,
-              { ...WS_LOGGER_CATEGORY, wsKey },
-            );
-
-            await this.assertIsAuthenticated(wsKey);
-          }
-
-          const challengeKey = this.wsChallengeCache.get(wsKey);
-          if (!challengeKey) {
-            this.logger.error(
-              `Auth-check passed but no challenge key could be retrieved from cache for wsKey ${wsKey}`,
-              { ...WS_LOGGER_CATEGORY, wsKey },
-            );
-            throw new Error(
-              'No challenge key cached, cannot send authenticated request',
-            );
-          }
-
-          wsEvent.original_challenge = challengeKey;
-          wsEvent.api_key = this.options.apiKey;
-
-          const hashedChallenge = await hashMessage(
-            challengeKey,
-            'binary',
-            'SHA-256',
-          );
-
-          if (!this.options.apiSecret) {
-            throw new Error(
-              'API Secret missing, cannot sign challenge for authenticated WS request',
-            );
-          }
-
-          const challengeSign = await this.signMessage(
-            hashedChallenge,
-            this.options.apiSecret,
-            'base64',
-            'SHA-512',
-            {
-              isSecretB64Encoded: true,
-              isInputBinaryString: true,
-            },
-          );
-
-          wsEvent.signed_challenge = challengeSign;
-
-          // Cache midflight subs on the req ID
-          // Enrich response with subs for that req ID
-          const midflightWsEvent: MidflightWsRequestEvent<
-            WSRequestOperationKraken<WSTopic>
-          > = {
-            requestKey: wsEvent.req_id,
-            requestEvent: wsEvent,
-          };
-
-          wsRequestEvents.push({
-            ...midflightWsEvent,
-          });
-
-          break;
-        }
-
-        default: {
-          throw neverGuard(wsKey, `Unhandled WsKey "${wsKey}"`);
-        }
+        requestEvents.push({
+          requestKey: id,
+          requestEvent,
+        });
+        continue;
       }
+
+      if (wsKey === WS_KEY_MAP.spotPrivateV2) {
+        const requestEvent: HTXSpotPrivateWSRequest = {
+          action: operation === 'subscribe' ? 'sub' : 'unsub',
+          ch: topicRequest.topic,
+          ...omitKeys(payload, ['id', 'cid']),
+        };
+
+        requestEvents.push({
+          requestKey: topicRequest.topic,
+          requestEvent,
+        });
+        continue;
+      }
+
+      if (this.isDerivativesTopicProtocolWsKey(wsKey)) {
+        const cid =
+          this.getPayloadStringOrNumber(payload, 'cid') ||
+          `${this.getNewRequestId()}`;
+        const requestEvent: HTXDerivativesWSRequest = {
+          op: operation === 'subscribe' ? 'sub' : 'unsub',
+          cid: `${cid}`,
+          topic: topicRequest.topic,
+          ...omitKeys(payload, ['id', 'cid']),
+        };
+
+        requestEvents.push({
+          requestKey: cid,
+          requestEvent,
+        });
+        continue;
+      }
+
+      if (TRADE_WS_KEYS.includes(wsKey)) {
+        throw new Error(
+          `WS API trade key "${wsKey}" does not support topic subscriptions. Use sendWSAPIRequest() instead.`,
+        );
+      }
+
+      throw new Error(`Unhandled wsKey "${wsKey}"`);
     }
 
-    if (wsRequestBuildingErrors.length) {
-      const label =
-        wsRequestBuildingErrors.length === requests.length ? 'all' : 'some';
+    return requestEvents;
+  }
 
-      this.logger.error(
-        `Failed to build/send ${wsRequestBuildingErrors.length} event(s) for ${label} WS requests due to exceptions`,
+  protected async getWsAuthRequestEvent(
+    wsKey: WsKey,
+  ): Promise<object | string | void> {
+    if (!this.options.apiKey || !this.options.apiSecret) {
+      throw new Error('Cannot auth - missing api key or secret in config');
+    }
+
+    if (this.isSpotPrivateProtocolWsKey(wsKey)) {
+      const authParams = await this.getSpotAuthParams(wsKey);
+      return {
+        action: 'req',
+        ch: 'auth',
+        params: authParams,
+      };
+    }
+
+    if (this.isDerivativesOperationProtocolWsKey(wsKey)) {
+      return this.getDerivativesAuthParams(wsKey);
+    }
+
+    return;
+  }
+
+  private getWsApiRequestEvent<
+    TWSKey extends keyof WSAPIWsKeyTopicMap,
+    TWSOperation extends keyof WSAPITopicRequestParamMap &
+      WSAPIWsKeyTopicMap[TWSKey],
+    TWSParams extends Exact<WSAPITopicRequestParamMap[TWSOperation]>,
+  >(
+    wsKey: TWSKey,
+    operation: TWSOperation,
+    params: TWSParams | undefined,
+    cid: string,
+  ): HTXWSAPIRawRequest {
+    if (wsKey === WS_KEY_MAP.spotTrade) {
+      const request: HTXSpotWSAPIRawRequest<string, unknown> = {
+        cid,
+        ch: operation,
+      };
+
+      if (typeof params !== 'undefined') {
+        request.params = removeInternalParamFields(params);
+      }
+
+      return request;
+    }
+
+    const request: HTXDerivativesWSAPIRawRequest<string, unknown> = {
+      cid,
+      op: operation,
+    };
+
+    if (typeof params !== 'undefined') {
+      request.data = removeInternalParamFields(params);
+    }
+
+    return request;
+  }
+
+  private resolveWSAPIResponse(
+    wsKey: WsKey,
+    parsed: ParsedWsMessage,
+  ): EmittableEvent[] {
+    const promiseRef = this.getPromiseRefForWSAPIResponse(wsKey, parsed);
+    const operation =
+      this.getEventOperation(parsed) ||
+      (promiseRef
+        ? this.wsApiInflightRequestRefs.get(promiseRef)?.operation
+        : undefined);
+    const cid = getStringOrUndefined(parsed.cid);
+    const isError = this.isErrorEvent(parsed);
+    const event = {
+      ...parsed,
+      wsKey,
+    };
+
+    if (!promiseRef) {
+      this.logger.error('WS API response could not be correlated to request', {
+        ...WS_LOGGER_CATEGORY,
+        wsKey,
+        operation,
+        cid,
+        parsed,
+      });
+      return [
         {
-          ...WS_LOGGER_CATEGORY,
-          wsRequestBuildingErrors,
-          wsRequestBuildingErrorsStringified: JSON.stringify(
-            wsRequestBuildingErrors,
-            null,
-            2,
-          ),
+          eventType: isError ? 'exception' : 'response',
+          event,
+          isWSAPIResponse: true,
         },
-      );
+      ];
     }
 
-    return wsRequestEvents;
+    try {
+      if (isError) {
+        this.getWsStore().rejectDeferredPromise(wsKey, promiseRef, event, true);
+      } else {
+        this.getWsStore().resolveDeferredPromise(
+          wsKey,
+          promiseRef,
+          event,
+          true,
+        );
+      }
+      this.wsApiInflightRequestRefs.delete(promiseRef);
+    } catch (e) {
+      this.logger.error('Exception trying to settle WS API promise', {
+        ...WS_LOGGER_CATEGORY,
+        wsKey,
+        promiseRef,
+        parsed,
+        error: e,
+      });
+    }
+
+    return [
+      {
+        eventType: isError ? 'exception' : 'response',
+        event,
+        isWSAPIResponse: true,
+      },
+    ];
+  }
+
+  private async getSpotAuthParams(wsKey: WsKey): Promise<WsSpotAuthParams> {
+    const endpoint = await this.getWsEndpointParts(wsKey);
+    const timestamp = this.getTimestampForSignature();
+    const signatureMethod = this.getSignatureMethod();
+    const paramsToSign = {
+      accessKey: this.options.apiKey!,
+      signatureMethod,
+      signatureVersion: '2.1',
+      timestamp,
+    } as const;
+
+    const signature = await this.signHtxParams(
+      endpoint.host,
+      endpoint.path,
+      paramsToSign,
+    );
+
+    return {
+      authType: 'api',
+      ...paramsToSign,
+      signature,
+    };
+  }
+
+  private async getDerivativesAuthParams(
+    wsKey: WsKey,
+  ): Promise<WsDerivativesAuthParams> {
+    const endpoint = await this.getWsEndpointParts(wsKey);
+    const Timestamp = this.getTimestampForSignature();
+    const SignatureMethod = this.getSignatureMethod();
+    const paramsToSign = {
+      AccessKeyId: this.options.apiKey!,
+      SignatureMethod,
+      SignatureVersion: '2',
+      Timestamp,
+    } as const;
+
+    const Signature = await this.signHtxParams(
+      endpoint.host,
+      endpoint.path,
+      paramsToSign,
+    );
+
+    return {
+      op: 'auth',
+      type: 'api',
+      ...paramsToSign,
+      Signature,
+    };
+  }
+
+  private async signHtxParams(
+    host: string,
+    path: string,
+    params: Record<string, string>,
+  ): Promise<string> {
+    const serializedParams = serializeParams(
+      params,
+      this.options.restOptions?.strictParamValidation,
+      true,
+      '',
+      false,
+    );
+
+    const signInput = ['GET', host.toLowerCase(), path, serializedParams].join(
+      '\n',
+    );
+
+    return this.signMessage(
+      signInput,
+      this.options.apiSecret!,
+      'base64',
+      'SHA-256',
+    );
   }
 
   private async signMessage(
@@ -876,119 +842,289 @@ export class WebsocketClient extends BaseWebsocketClient<WsKey, any> {
     secret: string,
     method: SignEncodeMethod,
     algorithm: SignAlgorithm,
-    options?: SignMessageOptions,
   ): Promise<string> {
     if (typeof this.options.customSignMessageFn === 'function') {
       return this.options.customSignMessageFn(paramsStr, secret);
     }
-    return await signMessage(paramsStr, secret, method, algorithm, options);
+
+    return signRawMessage(paramsStr, secret, method, algorithm);
   }
 
-  protected async getWsAuthRequestEvent(
-    wsKey: WsKey,
-    eventToAuth?: WSAPIAuthenticationRequestFromServer,
-  ): Promise<object | string | 'waitForEvent' | void> {
-    try {
-      switch (wsKey) {
-        case WS_KEY_MAP.spotPrivateV2:
-        case WS_KEY_MAP.spotL3V2:
-        case WS_KEY_MAP.spotBetaPrivateV2: {
-          // Not needed here, handled automatically with request during subscribe
-          this.logger.trace(
-            `getWsAuthRequestEvent(${wsKey}): no auth request required for private WS...`,
-          );
-
-          return;
-        }
-
-        case WS_KEY_MAP.spotPublicV2:
-        case WS_KEY_MAP.spotBetaPublicV2:
-        case WS_KEY_MAP.derivativesPublicV1: {
-          // Public WS - no auth
-          this.logger.trace(
-            `getWsAuthRequestEvent(${wsKey}): no auth required for public WS...`,
-          );
-          return;
-        }
-
-        case WS_KEY_MAP.derivativesPrivateV1: {
-          // cleanup old challenge key (in case we were reconnected)
-          this.wsChallengeCache.delete(wsKey);
-
-          // https://docs.kraken.com/api/docs/futures-api/websocket/challenge/
-
-          this.logger.trace(
-            `getWsAuthRequestEvent(${wsKey}): preparing auth challenge request...`,
-            { ...WS_LOGGER_CATEGORY, wsKey },
-          );
-          const challengeRequest = {
-            event: 'challenge',
-            api_key: this.options.apiKey,
-          };
-
-          return challengeRequest;
-        }
-
-        default: {
-          throw neverGuard(wsKey, `Unhandled WsKey "${wsKey}"`);
-        }
-      }
-    } catch (e: any) {
-      this.logger.error(
-        `getWsAuthRequestEvent(${wsKey}): Exception preparing auth request: `,
-        {
-          wsKey,
-          eventToAuth,
-          exception: e,
-          exceptionBody: e?.body,
-          stack: e?.stack,
-        },
-      );
-
-      throw e;
-    }
+  private getSignatureMethod(): 'HmacSHA256' | 'Ed25519' {
+    return getSignKeyType(this.options.apiSecret!) === 'HMAC'
+      ? 'HmacSHA256'
+      : 'Ed25519';
   }
 
-  /**
-   *
-   * @param requestEvent
-   * @returns A signed updated WS API request object, ready to be sent
-   */
-  private async signWSAPIRequest(
-    requestEvent: WSAPIRequestOperationKrakenSpot,
-  ): Promise<WSAPIRequestOperationKrakenSpot> {
-    if (!this.options.apiSecret) {
-      throw new Error('API Secret missing');
-    }
+  private getTimestampForSignature(): string {
+    return new Date(Date.now() + this.getTimeOffsetMs())
+      .toISOString()
+      .split('.')[0];
+  }
 
-    // Get token from REST client cache
-    const tokenResult = await this.restClientCache.fetchSpotWebSocketToken(
-      this.getRestClientOptions(),
-      this.options.requestOptions,
-    );
-
-    if (!tokenResult?.token) {
-      const error = new Error(
-        `No WS auth token could be retrieved for private spot WS request for topic "${requestEvent.method}"`,
-      );
-      error.cause = tokenResult;
-      throw error;
-    }
-
-    const authParams: Record<string, any> = {};
-    if (tokenResult.token) {
-      authParams.token = tokenResult.token;
-    }
-    if (requestEvent.method === 'add_order') {
-      // authParams.broker = APIIDMain;
-    }
+  private async getWsEndpointParts(wsKey: WsKey): Promise<WsEndpointParts> {
+    const url = await this.getWsUrl(wsKey);
+    const parsedUrl = new URL(url);
 
     return {
-      ...requestEvent,
-      params: {
-        ...requestEvent.params,
-        ...authParams,
-      },
+      url,
+      host: parsedUrl.host,
+      path: parsedUrl.pathname || WS_KEY_PATH_MAP[wsKey],
     };
+  }
+
+  private getWsNetwork(): HtxWSNetwork {
+    if (this.options.wsEnvironment) {
+      return this.options.wsEnvironment;
+    }
+
+    const baseUrlKey = this.options.restOptions?.baseUrlKey;
+
+    if (
+      baseUrlKey === REST_CLIENT_TYPE_ENUM.spot ||
+      baseUrlKey === REST_CLIENT_TYPE_ENUM.futures ||
+      baseUrlKey === REST_CLIENT_TYPE_ENUM.futuresAlt1
+    ) {
+      return 'standard';
+    }
+
+    return 'aws';
+  }
+
+  private isMarketProtocolWsKey(wsKey: WsKey): boolean {
+    return (
+      wsKey === WS_KEY_MAP.spotPublic ||
+      wsKey === WS_KEY_MAP.spotFeed ||
+      wsKey === WS_KEY_MAP.linearSwapPublic ||
+      wsKey === WS_KEY_MAP.coinDeliveryPublic ||
+      wsKey === WS_KEY_MAP.coinSwapPublic ||
+      wsKey === WS_KEY_MAP.derivativesIndex
+    );
+  }
+
+  private isSpotPrivateProtocolWsKey(wsKey: WsKey): boolean {
+    return wsKey === WS_KEY_MAP.spotPrivateV2 || wsKey === WS_KEY_MAP.spotTrade;
+  }
+
+  private isDerivativesTopicProtocolWsKey(wsKey: WsKey): boolean {
+    return (
+      wsKey === WS_KEY_MAP.linearSwapPrivate ||
+      wsKey === WS_KEY_MAP.coinDeliveryPrivate ||
+      wsKey === WS_KEY_MAP.coinSwapPrivate ||
+      wsKey === WS_KEY_MAP.derivativesSystem
+    );
+  }
+
+  private isDerivativesOperationProtocolWsKey(wsKey: WsKey): boolean {
+    return (
+      this.isDerivativesTopicProtocolWsKey(wsKey) ||
+      wsKey === WS_KEY_MAP.linearSwapTrade ||
+      wsKey === WS_KEY_MAP.coinDeliveryTrade ||
+      wsKey === WS_KEY_MAP.coinSwapTrade
+    );
+  }
+
+  private parseWsMessage(event: unknown): ParsedWsMessage | undefined {
+    if (isRecord(event) && event.type === 'message') {
+      return this.parseWsMessage(event.data);
+    }
+
+    if (typeof event === 'string') {
+      try {
+        return JSON.parse(event) as ParsedWsMessage;
+      } catch {
+        return undefined;
+      }
+    }
+
+    if (isRecord(event)) {
+      return event;
+    }
+
+    return undefined;
+  }
+
+  private getHeartbeatTimestamp(parsed?: ParsedWsMessage): string | number {
+    if (!parsed) {
+      return Date.now();
+    }
+
+    if (typeof parsed.ping === 'number' || typeof parsed.ping === 'string') {
+      return parsed.ping;
+    }
+
+    const data = isRecord(parsed.data) ? parsed.data : undefined;
+    if (typeof data?.ts === 'number' || typeof data?.ts === 'string') {
+      return data.ts;
+    }
+
+    if (typeof parsed.ts === 'number' || typeof parsed.ts === 'string') {
+      return parsed.ts;
+    }
+
+    return Date.now();
+  }
+
+  private getPayloadRecord(payload: unknown): Record<string, unknown> {
+    return isRecord(payload) ? payload : {};
+  }
+
+  private getPayloadStringOrNumber(
+    payload: Record<string, unknown>,
+    key: string,
+  ): string | number | undefined {
+    const value = payload[key];
+    if (typeof value === 'string' || typeof value === 'number') {
+      return value;
+    }
+
+    return undefined;
+  }
+
+  private isAuthResponse(parsed: ParsedWsMessage): boolean {
+    return (
+      (parsed.action === 'req' && parsed.ch === 'auth') || parsed.op === 'auth'
+    );
+  }
+
+  private isWSAPIResponse(wsKey: WsKey, parsed: ParsedWsMessage): boolean {
+    if (!TRADE_WS_KEYS.includes(wsKey)) {
+      return false;
+    }
+
+    if (this.isAuthResponse(parsed) || this.isWsPing(parsed)) {
+      return false;
+    }
+
+    if (getStringOrUndefined(parsed.cid)) {
+      return true;
+    }
+
+    const operation = this.getEventOperation(parsed);
+    if (operation) {
+      return WS_API_Operations.includes(operation as WSAPIOperation);
+    }
+
+    return (
+      parsed.status === 'ok' ||
+      parsed.status === 'error' ||
+      typeof parsed.code === 'number' ||
+      typeof parsed.success === 'boolean'
+    );
+  }
+
+  private isSubscriptionResponse(parsed: ParsedWsMessage): boolean {
+    if (
+      typeof parsed.status === 'string' &&
+      (parsed.subbed || parsed.unsubbed)
+    ) {
+      return true;
+    }
+
+    if (
+      typeof parsed.action === 'string' &&
+      ['sub', 'unsub', 'req'].includes(parsed.action)
+    ) {
+      return true;
+    }
+
+    if (typeof parsed.op === 'string' && ['sub', 'unsub'].includes(parsed.op)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private isRequestResponse(parsed: ParsedWsMessage): boolean {
+    return Boolean(parsed.rep || parsed.id);
+  }
+
+  private isErrorEvent(parsed: ParsedWsMessage): boolean {
+    if (parsed.status === 'error') {
+      return true;
+    }
+
+    if (typeof parsed.code === 'number' && parsed.code !== 200) {
+      return true;
+    }
+
+    if (typeof parsed['err-code'] === 'number' && parsed['err-code'] !== 0) {
+      return true;
+    }
+
+    if (typeof parsed.success === 'boolean' && parsed.success !== true) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private getEventOperation(parsed: ParsedWsMessage): string | undefined {
+    return getStringOrUndefined(parsed.ch) || getStringOrUndefined(parsed.op);
+  }
+
+  private trackWSAPIRequestRef(
+    promiseRef: string,
+    wsKey: WSAPIWsKey,
+    operation: WSAPIOperation,
+    cid: string,
+  ): void {
+    this.wsApiInflightRequestRefs.set(promiseRef, {
+      wsKey,
+      operation,
+      cid,
+    });
+  }
+
+  private getPromiseRefForWSAPIResponse(
+    wsKey: WsKey,
+    parsed: ParsedWsMessage,
+  ): string | undefined {
+    const cid = getStringOrUndefined(parsed.cid);
+    if (cid) {
+      return `${getPromiseRefPrefixForWSAPIRequest(wsKey)}${cid}`;
+    }
+
+    const operation = this.getEventOperation(parsed);
+    const matchingRefs = [...this.wsApiInflightRequestRefs.entries()]
+      .filter(([, ref]) => {
+        if (ref.wsKey !== wsKey) {
+          return false;
+        }
+
+        if (operation) {
+          return ref.operation === operation;
+        }
+
+        return true;
+      })
+      .map(([promiseRef]) => promiseRef);
+
+    if (matchingRefs.length === 1) {
+      return matchingRefs[0];
+    }
+
+    if (matchingRefs.length > 1) {
+      const reason =
+        'HTX WS API response did not include cid/op and multiple requests are pending; send these requests sequentially.';
+      this.logger.error(reason, {
+        ...WS_LOGGER_CATEGORY,
+        wsKey,
+        parsed,
+        matchingRefs,
+      });
+
+      for (const promiseRef of matchingRefs) {
+        this.getWsStore().rejectDeferredPromise(
+          wsKey,
+          promiseRef,
+          new Error(reason),
+          true,
+        );
+        this.wsApiInflightRequestRefs.delete(promiseRef);
+      }
+    }
+
+    return undefined;
   }
 }

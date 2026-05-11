@@ -87,3 +87,25 @@ export interface WebsocketClientOptions extends WSClientConfigurableOptions {
 export type WsMarket = 'spot' | 'futures';
 
 export type WsEventInternalSrc = 'event' | 'function' | 'frame';
+
+export interface WsSpotAuthParams {
+  authType: 'api';
+  accessKey: string;
+  signatureMethod: 'HmacSHA256' | 'Ed25519';
+  signatureVersion: '2.1';
+  timestamp: string;
+  signature: string;
+}
+
+export interface WsDerivativesAuthParams {
+  op: 'auth';
+  type: 'api';
+  AccessKeyId: string;
+  SignatureMethod: 'HmacSHA256' | 'Ed25519';
+  SignatureVersion: '2';
+  Timestamp: string;
+  Signature: string;
+}
+
+/** Vague structure for JSON-parsed incoming msg */
+export type ParsedWsMessage = Record<string, unknown>;
