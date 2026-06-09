@@ -8,12 +8,20 @@ import {
   WsStoredState,
 } from './WsStore.types.js';
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 /**
  * Simple comparison of two objects, recursive for nested objects. Adoped from OKX SDK.
  */
-export function isDeepObjectMatch(object1: any, object2: any): boolean {
+export function isDeepObjectMatch(object1: unknown, object2: unknown): boolean {
   if (typeof object2 !== typeof object1) {
     return false;
+  }
+
+  if (!isRecord(object1) || !isRecord(object2)) {
+    return Object.is(object1, object2);
   }
 
   const keys1 = Object.keys(object1).sort();
@@ -155,7 +163,7 @@ export class WsStore<
    * deferred promises
    */
 
-  getDeferredPromise<TSuccessResult = any>(
+  getDeferredPromise<TSuccessResult = unknown>(
     wsKey: WsKey,
     promiseRef: string | DeferredPromiseRef,
   ): DeferredPromise<TSuccessResult> | undefined {
@@ -165,10 +173,12 @@ export class WsStore<
     }
 
     const deferredPromiseStore = storeForKey.deferredPromiseStore;
-    return deferredPromiseStore[promiseRef];
+    return deferredPromiseStore[promiseRef] as
+      | DeferredPromise<TSuccessResult>
+      | undefined;
   }
 
-  createDeferredPromise<TSuccessResult = any>(
+  createDeferredPromise<TSuccessResult = unknown>(
     wsKey: WsKey,
     promiseRef: string | DeferredPromiseRef,
     throwIfExists: boolean,
@@ -191,7 +201,7 @@ export class WsStore<
     const storeForKey = this.get(wsKey, createIfMissing);
 
     // TODO: Once stable, use Promise.withResolvers in future
-    const deferredPromise: DeferredPromise = {};
+    const deferredPromise: DeferredPromise<TSuccessResult> = {};
 
     deferredPromise.promise = new Promise((resolve, reject) => {
       deferredPromise.resolve = resolve;
@@ -200,7 +210,8 @@ export class WsStore<
 
     const deferredPromiseStore = storeForKey.deferredPromiseStore;
 
-    deferredPromiseStore[promiseRef] = deferredPromise;
+    deferredPromiseStore[promiseRef] =
+      deferredPromise as unknown as DeferredPromise;
 
     return deferredPromise;
   }
@@ -307,7 +318,7 @@ export class WsStore<
 
   getAuthenticationInProgressPromise(
     wsKey: WsKey,
-  ): DeferredPromise<WSConnectedResult & { event: any }> | undefined {
+  ): DeferredPromise<WSConnectedResult & { event: unknown }> | undefined {
     return this.getDeferredPromise(
       wsKey,
       DEFERRED_PROMISE_REF.AUTHENTICATION_IN_PROGRESS,
@@ -333,7 +344,7 @@ export class WsStore<
   createAuthenticationInProgressPromise(
     wsKey: WsKey,
     throwIfExists: boolean,
-  ): DeferredPromise<WSConnectedResult & { event: any }> {
+  ): DeferredPromise<WSConnectedResult & { event: unknown }> {
     return this.createDeferredPromise(
       wsKey,
       DEFERRED_PROMISE_REF.AUTHENTICATION_IN_PROGRESS,

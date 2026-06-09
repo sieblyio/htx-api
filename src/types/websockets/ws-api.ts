@@ -1,127 +1,204 @@
-import { WS_KEY_MAP, WSOperation } from '../../lib/websocket/websocket-util.js';
+import { WS_KEY_MAP } from '../../lib/websocket/websocket-util.js';
 import {
-  WSAPIAddSpotOrderParams,
-  WSAPIAmendSpotOrderParams,
-  WSAPIBatchAddSpotOrdersParams,
-  WSAPIBatchCancelSpotOrdersParams,
-  WSAPICancelAllSpotOrdersAfterParams,
-  WSAPICancelSpotOrderParams,
-  WSAPIEditSpotOrderParams,
+  WSAPIDerivativesBatchOrderParams,
+  WSAPIDerivativesBatchPlaceOrderParams,
+  WSAPIDerivativesCancelAllOrdersParams,
+  WSAPIDerivativesCancelOrderParams,
+  WSAPIDerivativesOrderParams,
+  WSAPIDerivativesPlaceOrderParams,
+  WSAPIDerivativesV5CancelAllOrdersParams,
+  WSAPIDerivativesV5CancelOrderParams,
+  WSAPISpotBatchOrderParams,
+  WSAPISpotCancelAllOrdersParams,
+  WSAPISpotCancelOrdersParams,
+  WSAPISpotMarginOrderParams,
+  WSAPISpotOrderParams,
 } from '../request/wsapi.types.js';
 import {
-  WSAPIAddSpotOrderResult,
-  WSAPIAmendSpotOrderResult,
-  WSAPIBatchAddSpotOrdersResult,
-  WSAPIBatchCancelSpotOrdersResult,
-  WSAPICancelAllSpotOrdersAfterResult,
-  WSAPICancelAllSpotOrdersResult,
-  WSAPICancelSpotOrderResult,
-  WSAPIEditSpotOrderResult,
+  WSAPIBaseResponse,
+  WSAPIDerivativesOrderResult,
+  WSAPIDerivativesV5OrderResult,
+  WSAPISpotCancelAllOrdersResult,
+  WSAPISpotCancelOrdersResult,
+  WSAPISpotOrderResult,
 } from '../response/wsapi.types.js';
 
-export type Exact<T> = {
-  // This part says: if there's any key that's not in T, it's an error
-  // This conflicts sometimes for some reason...
-  // [K: string]: never;
-} & {
-  [K in keyof T]: T[K];
-};
+export type Exact<T> = T extends object ? T & Record<never, never> : T;
 
-export interface WsRequestOperation<TWSTopic extends string> {
-  id: number;
-  type: WSOperation;
-  topic: TWSTopic;
-  privateChannel: boolean;
-  response: boolean;
-}
-
-export interface WSAPIAuthenticationRequestFromServer {
-  timestamp: number;
-  sessionId: string;
+export interface WsRequestOperation<TWSTopic extends string = string> {
+  op?: string;
+  action?: string;
+  topic?: TWSTopic;
+  ch?: TWSTopic;
+  id?: string | number;
+  cid?: string;
 }
 
 export interface WSAPIAuthenticationConfirmedFromServer {
-  pingInterval: number;
-  sessionId: string;
-  pingTimeout: number;
-  data: 'welcome';
+  action?: 'req';
+  op?: 'auth';
+  code?: number;
+  ch?: 'auth';
+  'err-code'?: number;
+  data?: Record<string, unknown>;
 }
 
-/**
- * WS API commands (for sending requests via WS)
- */
 export const WS_API_Operations = [
-  'add_order',
-  'amend_order',
+  'create-order',
+  'create-batchorder',
+  'create-margin-order',
+  'cancelall',
+  'cancel',
+  'create_order',
+  'create_cross_order',
+  'create_batchorder',
+  'create_cross_batchorder',
+  'cross_cancel',
+  'cross_cancelall',
+  'place_order',
+  'place_batch_orders',
   'cancel_order',
-  'cancel_all',
-  'cancel_all_orders_after',
-  'batch_add',
-  'batch_cancel',
-  'edit_order',
+  'cancel_batch_orders',
+  'cancel_all_orders',
 ] as const;
 
 export type WSAPIOperation = (typeof WS_API_Operations)[number];
 
-export interface WSAPIRequestOperationKrakenSpot<
-  TWSOperation extends WSAPIOperation = WSAPIOperation,
-  TWSParams extends object = any,
-> {
-  method: TWSOperation;
-  params?: TWSParams;
-  req_id: number;
-}
+export type WSAPISpotOperation =
+  | 'create-order'
+  | 'create-batchorder'
+  | 'create-margin-order'
+  | 'cancelall'
+  | 'cancel';
+
+export type WSAPILegacyDerivativesOperation =
+  | 'create_order'
+  | 'create_cross_order'
+  | 'create_batchorder'
+  | 'create_cross_batchorder'
+  | 'cancel'
+  | 'cross_cancel'
+  | 'cancelall'
+  | 'cross_cancelall';
+
+export type WSAPIDerivativesV5Operation =
+  | 'place_order'
+  | 'place_batch_orders'
+  | 'cancel_order'
+  | 'cancel_batch_orders'
+  | 'cancel_all_orders';
+
+export type WSAPIDerivativesOperation =
+  | WSAPILegacyDerivativesOperation
+  | WSAPIDerivativesV5Operation;
 
 export interface WSAPIWsKeyTopicMap {
-  [WS_KEY_MAP.spotPrivateV2]: WSAPIOperation;
-  [WS_KEY_MAP.spotBetaPrivateV2]: WSAPIOperation;
+  [WS_KEY_MAP.spotTrade]: WSAPISpotOperation;
+  [WS_KEY_MAP.linearSwapTrade]: WSAPIDerivativesOperation;
+  [WS_KEY_MAP.coinDeliveryTrade]: WSAPILegacyDerivativesOperation;
+  [WS_KEY_MAP.coinSwapTrade]: WSAPILegacyDerivativesOperation;
 }
 
 export type WSAPIWsKey = keyof WSAPIWsKeyTopicMap;
 
-export interface WSAPISpotResponse<
-  TResponseData extends object = object,
-  TWSAPIOperation = WSAPIOperation,
+export interface HTXSpotWSAPIRequest<
+  TOperation extends WSAPISpotOperation = WSAPISpotOperation,
+  TParams = unknown,
 > {
-  wsKey: WSAPIWsKey;
-  error?: string;
-  method: TWSAPIOperation;
-  req_id: number;
-  success: boolean;
-  time_in: string;
-  time_out: string;
-  result: TResponseData;
-  request: any;
+  cid: string;
+  ch: TOperation;
+  params?: TParams;
 }
 
-export interface WSAPITopicRequestParamMap {
-  [key: string]: unknown;
+export interface HTXDerivativesWSAPIRequest<
+  TOperation extends WSAPIDerivativesOperation = WSAPIDerivativesOperation,
+  TParams = unknown,
+> {
+  op: TOperation;
+  cid: string;
+  data?: TParams;
+}
 
-  add_order: WSAPIAddSpotOrderParams;
-  amend_order: WSAPIAmendSpotOrderParams;
-  cancel_order: WSAPICancelSpotOrderParams;
-  cancel_all: never;
-  cancel_all_orders_after: WSAPICancelAllSpotOrdersAfterParams;
-  batch_add: WSAPIBatchAddSpotOrdersParams;
-  batch_cancel: WSAPIBatchCancelSpotOrdersParams;
-  edit_order: WSAPIEditSpotOrderParams;
+export type HTXWSAPIRequest = HTXSpotWSAPIRequest | HTXDerivativesWSAPIRequest;
+
+export type WSAPIResponse<
+  TData = unknown,
+  TOperation extends string = string,
+> = WSAPIBaseResponse<TData, TOperation>;
+
+export interface WSAPITopicRequestParamMap {
+  'create-order': WSAPISpotOrderParams;
+  'create-batchorder': WSAPISpotBatchOrderParams;
+  'create-margin-order': WSAPISpotMarginOrderParams;
+  cancelall:
+    | WSAPISpotCancelAllOrdersParams
+    | WSAPIDerivativesCancelAllOrdersParams;
+  cancel: WSAPISpotCancelOrdersParams | WSAPIDerivativesCancelOrderParams;
+
+  create_order: WSAPIDerivativesOrderParams;
+  create_cross_order: WSAPIDerivativesOrderParams;
+  create_batchorder: WSAPIDerivativesBatchOrderParams;
+  create_cross_batchorder: WSAPIDerivativesBatchOrderParams;
+  cross_cancel: WSAPIDerivativesCancelOrderParams;
+  cross_cancelall: WSAPIDerivativesCancelAllOrdersParams;
+
+  place_order: WSAPIDerivativesPlaceOrderParams;
+  place_batch_orders: WSAPIDerivativesBatchPlaceOrderParams;
+  cancel_order: WSAPIDerivativesV5CancelOrderParams;
+  cancel_batch_orders: WSAPIDerivativesV5CancelOrderParams[];
+  cancel_all_orders: WSAPIDerivativesV5CancelAllOrdersParams;
 }
 
 export interface WSAPITopicResponseMap {
-  [k: string]: unknown;
+  'create-order': WSAPIResponse<string | WSAPISpotOrderResult, 'create-order'>;
+  'create-batchorder': WSAPIResponse<
+    WSAPISpotOrderResult[],
+    'create-batchorder'
+  >;
+  'create-margin-order': WSAPIResponse<
+    WSAPISpotOrderResult,
+    'create-margin-order'
+  >;
+  cancelall: WSAPIResponse<
+    WSAPISpotCancelAllOrdersResult | WSAPIDerivativesOrderResult,
+    'cancelall'
+  >;
+  cancel: WSAPIResponse<
+    WSAPISpotCancelOrdersResult | WSAPIDerivativesOrderResult,
+    'cancel'
+  >;
 
-  add_order: WSAPISpotResponse<WSAPIAddSpotOrderResult, 'add_order'>;
-  amend_order: WSAPISpotResponse<WSAPIAmendSpotOrderResult, 'amend_order'>;
-  cancel_order: WSAPISpotResponse<WSAPICancelSpotOrderResult, 'cancel_order'>;
-  cancel_all: WSAPISpotResponse<WSAPICancelAllSpotOrdersResult, 'cancel_all'>;
-  cancel_all_orders_after: WSAPISpotResponse<
-    WSAPICancelAllSpotOrdersAfterResult,
-    'cancel_all_orders_after'
+  create_order: WSAPIResponse<WSAPIDerivativesOrderResult, 'create_order'>;
+  create_cross_order: WSAPIResponse<
+    WSAPIDerivativesOrderResult,
+    'create_cross_order'
   >;
-  batch_add: WSAPISpotResponse<WSAPIBatchAddSpotOrdersResult[], 'batch_add'>;
-  batch_cancel: WSAPISpotResponse<
-    WSAPIBatchCancelSpotOrdersResult,
-    'batch_cancel'
+  create_batchorder: WSAPIResponse<
+    WSAPIDerivativesOrderResult[],
+    'create_batchorder'
   >;
-  edit_order: WSAPISpotResponse<WSAPIEditSpotOrderResult, 'edit_order'>;
+  create_cross_batchorder: WSAPIResponse<
+    WSAPIDerivativesOrderResult[],
+    'create_cross_batchorder'
+  >;
+  cross_cancel: WSAPIResponse<WSAPIDerivativesOrderResult, 'cross_cancel'>;
+  cross_cancelall: WSAPIResponse<
+    WSAPIDerivativesOrderResult,
+    'cross_cancelall'
+  >;
+
+  place_order: WSAPIResponse<WSAPIDerivativesV5OrderResult, 'place_order'>;
+  place_batch_orders: WSAPIResponse<
+    WSAPIDerivativesV5OrderResult[],
+    'place_batch_orders'
+  >;
+  cancel_order: WSAPIResponse<WSAPIDerivativesV5OrderResult, 'cancel_order'>;
+  cancel_batch_orders: WSAPIResponse<
+    WSAPIDerivativesV5OrderResult[],
+    'cancel_batch_orders'
+  >;
+  cancel_all_orders: WSAPIResponse<
+    WSAPIDerivativesV5OrderResult,
+    'cancel_all_orders'
+  >;
 }

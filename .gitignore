@@ -27,4 +27,8 @@ localtest.sh
 repomix.sh
 doc
 .cursor/
+<<<<<<< HEAD
 futuresOrder2.ts
+=======
+WSWIP.md
+>>>>>>> 7b55f1a2914d7f668074c53aa8d8024084f1f4d4

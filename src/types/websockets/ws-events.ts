@@ -1,16 +1,16 @@
-export interface WsDataEvent<TData = any, TWSKey = string> {
+export interface WsDataEvent<TData = unknown, TWSKey = string> {
   data: TData;
   table: string;
   wsKey: TWSKey;
 }
 
-export interface MessageEventLike {
+export interface MessageEventLike<TData = string> {
   target: WebSocket;
   type: 'message';
-  data: string;
+  data: TData;
 }
 
-export function isMessageEvent(msg: unknown): msg is MessageEventLike {
+export function isMessageEvent(msg: unknown): msg is MessageEventLike<string> {
   if (typeof msg !== 'object' || !msg) {
     return false;
   }

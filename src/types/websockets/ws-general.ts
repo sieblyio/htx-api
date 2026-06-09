@@ -3,6 +3,7 @@ import type { ClientRequestArgs } from 'http';
 import WebSocket from 'isomorphic-ws';
 
 import { RestClientOptions } from '../../lib/requestUtils.js';
+import { HtxWSNetwork } from '../../lib/websocket/websocket-util.js';
 
 /** General configuration for the WebsocketClient */
 export interface WSClientConfigurableOptions {
@@ -12,18 +13,7 @@ export interface WSClientConfigurableOptions {
   /** Your API secret */
   apiSecret?: string;
 
-  /**
-   * Set to `true` to connect to testnet (Kraken's demo environment). The live environment is used by default.
-   *
-   * Note: as of November 2025, only the derivatives environment supports testnet connections. Kraken refer to this as the "Demo" environment, but it is effectively a testnet.
-   * This is a place to test your API integration. It is not a good place to test strategy performance, as the liquidity and orderbook dynamics are very different to the live environment.
-   *
-   * Refer to the following for more information:
-   * https://github.com/tiagosiebler/awesome-crypto-examples/wiki/CEX-Testnets
-   */
-  testnet?: boolean;
-
-  /** Define a recv window when preparing a private websocket signature. This is in milliseconds, so 5000 == 5 seconds */
+  /** Define a recv window when preparing a private websocket signature. This is in milliseconds, so 5000 == 5 seconds. */
   recvWindow?: number;
 
   /** How often to check if the connection is alive */
@@ -40,10 +30,17 @@ export interface WSClientConfigurableOptions {
 
   wsOptions?: {
     protocols?: string[];
-    agent?: any;
+    agent?: ClientRequestArgs['agent'];
   } & Partial<WebSocket.ClientOptions | ClientRequestArgs>;
 
   wsUrl?: string;
+
+  /**
+   * Switch between the AWS and Standard WebSocket domains. The AWS domain has better connectivity from certain regions. If you have trouble maintaining a stable connection, try switching the domain.
+   *
+   * AWS is used by default. If this field isn't set, but you're setting the baseUrlKey in the embedded restOptions, the WS domain will automatically switch to match the REST domain.
+   */
+  wsEnvironment?: HtxWSNetwork;
 
   /**
    * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
@@ -56,6 +53,11 @@ export interface WSClientConfigurableOptions {
    * If you authenticated the WS API before, automatically try to re-authenticate the WS API if you're disconnected/reconnected for any reason.
    */
   reauthWSAPIOnReconnect?: boolean;
+
+  /**
+   * Whether to use native WebSocket ping/pong frames for heartbeats.
+   */
+  useNativeHeartbeats?: boolean;
 }
 
 /**
@@ -85,3 +87,25 @@ export interface WebsocketClientOptions extends WSClientConfigurableOptions {
 export type WsMarket = 'spot' | 'futures';
 
 export type WsEventInternalSrc = 'event' | 'function' | 'frame';
+
+export interface WsSpotAuthParams {
+  authType: 'api';
+  accessKey: string;
+  signatureMethod: 'HmacSHA256' | 'Ed25519';
+  signatureVersion: '2.1';
+  timestamp: string;
+  signature: string;
+}
+
+export interface WsDerivativesAuthParams {
+  op: 'auth';
+  type: 'api';
+  AccessKeyId: string;
+  SignatureMethod: 'HmacSHA256' | 'Ed25519';
+  SignatureVersion: '2';
+  Timestamp: string;
+  Signature: string;
+}
+
+/** Vague structure for JSON-parsed incoming msg */
+export type ParsedWsMessage = Record<string, unknown>;

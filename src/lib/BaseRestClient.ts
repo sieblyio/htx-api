@@ -390,9 +390,22 @@ export abstract class BaseRestClient {
               //   data: null,
               //   ts: 1775823398810
               // }
-              if (response.data && response.data['code'] === 403) {
+              // 6001, The Single-Asset Collateral mode is temporarily unavailable.
+              if (response.data && response.data['code'] >= 403) {
                 throw throwable;
               }
+
+              // TODO: catch this error:
+              // submitLinearSwapIsolatedBatchOrders
+              // submitLinearSwapCrossBatchOrders
+              // submitCoinMDeliveryBatchOrders
+              // submitCoinMPerpBatchOrders; tracking volume 22 undefined
+              // res submitCoinMPerpBatchOrders {
+              //   status: 'ok',
+              //   data: { errors: [ [Object] ], success: [] },
+              //   ts: 1776594235749
+              // }
+
               break;
             }
 
