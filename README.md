@@ -1,29 +1,29 @@
-# Node.js & JavaScript SDK for Kraken REST APIs & WebSockets
+# Node.js & JavaScript SDK for HTX REST APIs & WebSockets
 
-[![Build & Test](https://github.com/sieblyio/kraken-api/actions/workflows/e2etest.yml/badge.svg?branch=main)](https://github.com/sieblyio/kraken-api/actions/workflows/e2etest.yml)
-[![npm version](https://img.shields.io/npm/v/@siebly/kraken-api)][1]
-[![npm size](https://img.shields.io/bundlephobia/min/@siebly/kraken-api/latest)][1]
-[![npm downloads](https://img.shields.io/npm/dt/@siebly/kraken-api)][1]
-[![last commit](https://img.shields.io/github/last-commit/sieblyio/kraken-api)][1]
+[![Build & Test](https://github.com/sieblyio/htx-api/actions/workflows/e2etest.yml/badge.svg?branch=main)](https://github.com/sieblyio/htx-api/actions/workflows/e2etest.yml)
+[![npm version](https://img.shields.io/npm/v/@siebly/htx-api)][1]
+[![npm size](https://img.shields.io/bundlephobia/min/@siebly/htx-api/latest)][1]
+[![npm downloads](https://img.shields.io/npm/dt/@siebly/htx-api)][1]
+[![last commit](https://img.shields.io/github/last-commit/sieblyio/htx-api)][1]
 [![Telegram](https://img.shields.io/badge/chat-on%20telegram-blue.svg)](https://t.me/nodetraders)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sieblyio/htx-api)
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@siebly/kraken-api">
+  <a href="https://www.npmjs.com/package/@siebly/htx-api">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/sieblyio/kraken-api/blob/main/docs/images/logoDarkMode2.svg?raw=true#gh-dark-mode-only">
-      <img alt="SDK Logo" src="https://github.com/sieblyio/kraken-api/blob/main/docs/images/logoBrightMode2.svg?raw=true#gh-light-mode-only">
+      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/sieblyio/htx-api/blob/main/docs/images/logoDarkMode2.svg?raw=true#gh-dark-mode-only">
+      <img alt="SDK Logo" src="https://github.com/sieblyio/htx-api/blob/main/docs/images/logoBrightMode2.svg?raw=true#gh-light-mode-only">
     </picture>
   </a>
 </p>
 
-[1]: https://www.npmjs.com/package/@siebly/kraken-api
+[1]: https://www.npmjs.com/package/@siebly/htx-api
 
-Complete & robust JavaScript & Node.js SDK for the Kraken REST APIs and WebSockets:
+Complete & robust JavaScript & Node.js SDK for the HTX REST APIs and WebSockets:
 
-- Professional, robust & performant Kraken SDK with extensive production use in live trading environments.
-- Complete integration with all Kraken REST APIs and WebSockets.
-  - Dedicated REST clients for Spot, Derivatives (Futures), Institutional, and Partner operations
+- Professional, robust & performant HTX SDK with extensive production use in live trading environments.
+- Complete integration with HTX REST APIs and WebSockets.
+  - Dedicated REST clients for Spot and Derivatives (linear swap, coin swap, delivery futures)
   - Unified WebSocket client for all markets
 - Complete TypeScript support (with type declarations for most API requests & responses).
   - Strongly typed requests and responses.
@@ -65,19 +65,18 @@ Complete & robust JavaScript & Node.js SDK for the Kraken REST APIs and WebSocke
 
 ## Installation
 
-`npm install --save @siebly/kraken-api`
+`npm install --save @siebly/htx-api`
 
 ## Examples
 
 Refer to the [examples](./examples) folder for implementation demos, including:
 
-- **Spot Trading Examples**: market data, account management, order placement
-- **Derivatives Trading Examples**: futures market data, account management, order placement
-- **WebSocket Examples**: public market data streams, private account data
+- **Spot WebSocket Examples**: public and private market/account streams
+- **Derivatives WebSocket Examples**: linear swap, coin swap, delivery futures, and index streams
 
 ## Issues & Discussion
 
-- Issues? Check the [issues tab](https://github.com/sieblyio/kraken-api/issues).
+- Issues? Check the [issues tab](https://github.com/sieblyio/htx-api/issues).
 - Discuss & collaborate with other node devs? Join our [Node.js Algo Traders](https://t.me/nodetraders) engineering community on telegram.
 - Follow our announcement channel for real-time updates on [X/Twitter](https://x.com/sieblyio)
 
@@ -107,13 +106,14 @@ Check out our JavaScript/TypeScript/Node.js SDKs & Projects:
 
 ## Documentation
 
-Most methods accept JS objects. These can be populated using parameters specified by Kraken's API documentation, or check the type definition in each class within this repository.
+Most methods accept JS objects. These can be populated using parameters specified by HTX's API documentation, or check the type definition in each class within this repository.
 
 ### API Documentation Links
 
-- [Kraken API Documentation](https://docs.kraken.com/api/)
-  - [Spot Trading API](https://docs.kraken.com/api/docs/rest-api/get-server-time)
-  - [Futures Trading API](https://docs.futures.kraken.com/)
+- [HTX API Documentation](https://www.htx.com/en-us/opend/newApiPages/)
+  - [Spot Trading API](https://www.htx.com/en-us/opend/newApiPages/)
+  - [Derivatives Trading API](https://www.htx.com/en-us/opend/newApiPages/)
+- [REST Endpoint Function List](./docs/endpointFunctionList.md)
 
 ## Structure
 
@@ -126,28 +126,27 @@ This project uses typescript. Resources are stored in 2 key structures:
 
 # Usage
 
-Create API credentials on Kraken's website:
+Create API credentials on HTX's website:
 
-- [Kraken API Key Management](https://www.kraken.com/u/security/api)
-- [Kraken Futures API Key Management](https://futures.kraken.com/settings/api)
+- [HTX API Key Management](https://www.htx.com/apikey/)
 
 ## REST API
 
 The SDK provides dedicated REST clients for different trading products:
 
-- **SpotClient** - for spot trading, staking, and account operations
-- **DerivativesClient** - for futures trading operations
-- **InstitutionalClient** - for institutional trading and custody
-- **PartnerClient** - for partner and affiliate operations
+- **SpotClient** - for spot trading, margin, earn, sub-accounts, and account operations
+- **FuturesClient** - for linear swap, coin swap, delivery futures, and copy trading operations
+
+Both clients default to HTX's AWS CDN domains for better connectivity. You can override this via `baseUrlKey` in the client options if needed.
 
 ### Spot Trading
 
-To use Kraken's Spot APIs, import (or require) the `SpotClient`:
+To use HTX's Spot APIs, import (or require) the `SpotClient`:
 
 ```javascript
-import { SpotClient } from '@siebly/kraken-api';
+import { SpotClient } from '@siebly/htx-api';
 // or if you prefer require:
-// const { SpotClient } = require('@siebly/kraken-api');
+// const { SpotClient } = require('@siebly/htx-api');
 
 // For public endpoints, API credentials are optional
 const publicClient = new SpotClient();
@@ -155,37 +154,37 @@ const publicClient = new SpotClient();
 // For private endpoints, provide API credentials
 const client = new SpotClient({
   apiKey: 'your-api-key',
-  apiSecret: 'your-base64-encoded-private-key',
+  apiSecret: 'your-api-secret',
 });
 
 // Public API Examples
 
 // Get ticker information
 const ticker = await publicClient.getTicker({
-  pair: 'XBTUSD',
+  symbol: 'btcusdt',
 });
 console.log('Ticker: ', ticker);
 
 // Get order book
-const orderBook = await publicClient.getOrderBook({
-  pair: 'XBTUSD',
-  count: 10,
+const orderBook = await publicClient.getMarketDepth({
+  symbol: 'btcusdt',
+  depth: 10,
 });
 console.log('Order Book: ', orderBook);
 
 // Private API Examples (requires authentication)
 
-// Submit a market order
+// Get accounts and balances
 client
-  .submitOrder({
-    ordertype: 'market',
-    type: 'buy',
-    volume: '0.01',
-    pair: 'XBTUSD',
-    cl_ord_id: client.generateNewOrderID(),
-  })
-  .then((result) => {
-    console.log('Market Order Result: ', result);
+  .getAccounts()
+  .then(async (accounts) => {
+    console.log('Accounts: ', accounts);
+
+    const accountId = accounts.data?.[0]?.id;
+    if (accountId) {
+      const balance = await client.getAccountBalance({ accountId });
+      console.log('Account Balance: ', balance);
+    }
   })
   .catch((err) => {
     console.error('Error: ', err);
@@ -194,12 +193,12 @@ client
 // Submit a limit order
 client
   .submitOrder({
-    ordertype: 'limit',
-    type: 'buy',
-    volume: '0.0001',
-    pair: 'XBTUSD',
+    'account-id': 'your-account-id',
+    symbol: 'btcusdt',
+    type: 'buy-limit',
+    amount: '0.0001',
     price: '10000',
-    cl_ord_id: client.generateNewOrderID(),
+    'client-order-id': client.generateNewOrderID(),
   })
   .then((result) => {
     console.log('Limit Order Result: ', result);
@@ -208,110 +207,90 @@ client
     console.error('Error: ', err);
   });
 
-// Submit batch of orders (minimum 2, maximum 15)
+// Submit batch of orders (max 10 per batch)
 client
-  .submitBatchOrders({
-    pair: 'XBTUSD',
-    orders: [
-      {
-        ordertype: 'limit',
-        type: 'buy',
-        volume: '0.0001',
-        price: '10000.00',
-        timeinforce: 'GTC',
-        cl_ord_id: client.generateNewOrderID(),
-      },
-      {
-        ordertype: 'limit',
-        type: 'buy',
-        volume: '0.0001',
-        price: '11111.00',
-        timeinforce: 'GTC',
-        cl_ord_id: client.generateNewOrderID(),
-      },
-      {
-        ordertype: 'limit',
-        type: 'sell',
-        volume: '0.0001',
-        price: '13000.00',
-        timeinforce: 'GTC',
-        cl_ord_id: client.generateNewOrderID(),
-      },
-    ],
-  })
+  .submitBatchOrders([
+    {
+      'account-id': 'your-account-id',
+      symbol: 'btcusdt',
+      type: 'buy-limit',
+      amount: '0.0001',
+      price: '10000.00',
+      'client-order-id': client.generateNewOrderID(),
+    },
+    {
+      'account-id': 'your-account-id',
+      symbol: 'btcusdt',
+      type: 'sell-limit',
+      amount: '0.0001',
+      price: '13000.00',
+      'client-order-id': client.generateNewOrderID(),
+    },
+  ])
   .then((result) => {
     console.log('Batch Order Result: ', JSON.stringify(result, null, 2));
   })
   .catch((err) => {
     console.error('Error: ', err);
   });
-
-// Get account balances
-client
-  .getAccountBalance()
-  .then((balance) => {
-    console.log('Account Balance: ', balance);
-  })
-  .catch((err) => {
-    console.error('Error: ', err);
-  });
 ```
 
-See [SpotClient](./src/SpotClient.ts) for further information, or the [examples](./examples/) for lots of usage examples.
+See [SpotClient](./src/SpotClient.ts) for further information.
 
 ### Derivatives (Futures) Trading
 
-Use the `DerivativesClient` for futures trading operations:
+Use the `FuturesClient` for futures and swap trading operations:
 
 ```javascript
-import { DerivativesClient } from '@siebly/kraken-api';
+import { FuturesClient } from '@siebly/htx-api';
 // or if you prefer require:
-// const { DerivativesClient } = require('@siebly/kraken-api');
+// const { FuturesClient } = require('@siebly/htx-api');
 
 // For public endpoints, API credentials are optional
-const publicClient = new DerivativesClient();
+const publicClient = new FuturesClient();
 
 // For private endpoints, provide API credentials
-const client = new DerivativesClient({
+const client = new FuturesClient({
   apiKey: 'your-api-key',
   apiSecret: 'your-api-secret',
 });
 
 // Public API Examples
 
-// Get order book for a specific instrument
-const orderBook = await publicClient.getOrderBook({
-  symbol: 'PF_XBTUSD',
+// Get order book for a specific contract
+const orderBook = await publicClient.getLinearSwapMarketDepth({
+  contract_code: 'BTC-USDT',
+  type: 'step0',
 });
 console.log('Futures Order Book: ', orderBook);
 
 // Get ticker information
-const ticker = await publicClient.getTickers({
-  symbol: 'PF_XBTUSD',
+const ticker = await publicClient.getLinearSwapTicker({
+  contract_code: 'BTC-USDT',
 });
 console.log('Futures Ticker: ', ticker);
 
 // Private API Examples (requires authentication)
 
-// Get account balances
+// Get cross margin account info
 client
-  .getAccountsDetails()
+  .getLinearSwapCrossAccountInfo()
   .then((accounts) => {
-    console.log('Accounts Details: ', accounts);
+    console.log('Cross Account Info: ', accounts);
   })
   .catch((err) => {
     console.error('Error: ', err);
   });
 
-// Submit a limit order
+// Submit a cross margin limit order
 client
-  .submitOrder({
-    orderType: 'lmt',
-    symbol: 'PF_ETHUSD', // Perpetual ETH/USD
-    side: 'buy',
-    size: 0.01, // Contract size
-    limitPrice: 1000,
-    cliOrdId: client.generateNewOrderID(),
+  .submitLinearSwapCrossOrder({
+    contract_code: 'BTC-USDT',
+    direction: 'buy',
+    volume: 1,
+    lever_rate: 5,
+    order_price_type: 'limit',
+    price: 10000,
   })
   .then((result) => {
     console.log('Limit Order Result: ', JSON.stringify(result, null, 2));
@@ -321,18 +300,18 @@ client
   });
 ```
 
-See [DerivativesClient](./src/DerivativesClient.ts) for further information.
+See [FuturesClient](./src/FuturesClient.ts) for further information.
 
 ## WebSockets
 
-Kraken supports two types of WebSocket connections:
+HTX supports two types of WebSocket connections:
 
 1. **WebSocket Subscriptions** - Real-time market data and account updates via the `WebsocketClient`
-2. **WebSocket API** - REST-like request/response trading via the `WebsocketAPIClient`
+2. **WebSocket API** - REST-like request/response trading via `sendWSAPIRequest()` (TODO: dedicated `WebsocketAPIClient` wrapper)
 
 ### WebSocket Subscriptions (WebsocketClient)
 
-The unified `WebsocketClient` handles all Kraken WebSocket streams with automatic connection management and reconnection.
+The unified `WebsocketClient` handles all HTX WebSocket streams with automatic connection management and reconnection.
 
 Key WebSocket features:
 
@@ -340,17 +319,20 @@ Key WebSocket features:
 - Smart WebSocket persistence with automatic reconnection
 - Heartbeat mechanisms to detect disconnections
 - Automatic resubscription after reconnection
-- Support for both Spot and Futures markets
+- Support for Spot and Derivatives markets (linear swap, coin swap, delivery)
 - Support for both public and private WebSocket streams
+
+Each connection is tracked using a `WsKey` (see [WS_KEY_MAP](./src/lib/websocket/websocket-util.ts)). Pass the appropriate `WsKey` when subscribing so the client routes your request to the correct endpoint.
 
 ### Public WebSocket Streams
 
 For public market data, API credentials are not required:
 
 ```javascript
-import { WebsocketClient } from '@siebly/kraken-api';
+import { WebsocketClient, WS_KEY_MAP } from '@siebly/htx-api';
 // or if you prefer require:
-// const { WebsocketClient } = require('@siebly/kraken-api');
+// const { WebsocketClient, WS_KEY_MAP } = require('@siebly/htx-api');
+
 // Create WebSocket client for public streams
 const wsClient = new WebsocketClient();
 
@@ -373,45 +355,36 @@ wsClient.on('exception', (data) => {
 
 // Spot - Subscribe to public data streams
 wsClient.subscribe(
-  {
-    topic: 'ticker',
-    payload: {
-      symbol: ['BTC/USD', 'ETH/USD'],
-    },
-  },
-  'spotPublicV2',
+  [
+    'market.btcusdt.kline.1min',
+    'market.btcusdt.ticker',
+    'market.btcusdt.depth.step0',
+    'market.btcusdt.trade.detail',
+  ],
+  WS_KEY_MAP.spotPublic,
 );
 
+// Spot feed - high-frequency topics such as BBO and MBP
 wsClient.subscribe(
-  {
-    topic: 'book',
-    payload: {
-      symbol: ['BTC/USD'],
-      depth: 10,
-    },
-  },
-  'spotPublicV2',
+  ['market.btcusdt.mbp.5', 'market.btcusdt.trade.detail'],
+  WS_KEY_MAP.spotFeed,
 );
 
-// Derivatives - Subscribe to public data streams
+// Linear swap (USDT-margined) public streams
 wsClient.subscribe(
-  {
-    topic: 'ticker',
-    payload: {
-      product_ids: ['PI_XBTUSD', 'PI_ETHUSD'],
-    },
-  },
-  'derivativesPublicV1',
+  [
+    'market.BTC-USDT.kline.1min',
+    'market.BTC-USDT.detail',
+    'market.BTC-USDT.trade.detail',
+    'market.BTC-USDT.bbo',
+  ],
+  WS_KEY_MAP.linearSwapPublic,
 );
 
+// Derivatives index/mark price streams
 wsClient.subscribe(
-  {
-    topic: 'book',
-    payload: {
-      product_ids: ['PI_XBTUSD'],
-    },
-  },
-  'derivativesPublicV1',
+  ['market.BTC-USDT.index.1min', 'market.BTC-USDT.mark_price.1min'],
+  WS_KEY_MAP.derivativesIndex,
 );
 ```
 
@@ -420,7 +393,7 @@ wsClient.subscribe(
 For private account data streams, API credentials are required:
 
 ```javascript
-import { WebsocketClient } from '@siebly/kraken-api';
+import { WebsocketClient, WS_KEY_MAP } from '@siebly/htx-api';
 
 // Create WebSocket client with API credentials for private streams
 const wsClient = new WebsocketClient({
@@ -450,111 +423,26 @@ wsClient.on('exception', (data) => {
 });
 
 // Spot - Subscribe to private data streams
+// Note: SDK automatically handles authentication before subscribing
 wsClient.subscribe(
-  {
-    topic: 'executions',
-    payload: {
-      snap_trades: true,
-      snap_orders: true,
-      order_status: true,
-    },
-  },
-  'spotPrivateV2',
+  ['accounts.update#1', 'orders#btcusdt', 'trade.clearing#btcusdt#0'],
+  WS_KEY_MAP.spotPrivateV2,
 );
 
+// Linear swap private streams
 wsClient.subscribe(
-  {
-    topic: 'balances',
-    payload: {
-      snapshot: true,
-    },
-  },
-  'spotPrivateV2',
+  ['orders.BTC-USDT', 'accounts.BTC-USDT', 'positions.BTC-USDT'],
+  WS_KEY_MAP.linearSwapPrivate,
 );
-
-// Derivatives - Subscribe to private data streams
-// Note: SDK automatically handles authentication and challenge tokens
-wsClient.subscribe('open_orders', 'derivativesPrivateV1');
-
-wsClient.subscribe(
-  {
-    topic: 'fills',
-    payload: {
-      product_ids: ['PF_XBTUSD'],
-    },
-  },
-  'derivativesPrivateV1',
-);
-
-wsClient.subscribe('balances', 'derivativesPrivateV1');
-
-wsClient.subscribe('open_positions', 'derivativesPrivateV1');
 ```
 
-For more comprehensive examples, including custom logging and error handling, check the [examples](./examples/WebSockets) folder.
+For more comprehensive examples, including custom logging and error handling, check the [examples](./examples/Spot/WebSockets) and [examples](./examples/Derivatives/WebSockets) folders.
 
 ### WebSocket API (WebsocketAPIClient)
 
-The `WebsocketAPIClient` provides a REST-like interface for trading operations over WebSocket, offering lower latency than REST APIs. Currently, only Spot trading is supported.
+> **TODO:** WebSocket API documentation and a dedicated `WebsocketAPIClient` wrapper are still in progress. Low-level WS API support is available today via `WebsocketClient.sendWSAPIRequest()`, but README examples for trading over WebSockets will be added once the WS API integration is complete.
 
-```javascript
-import { WebsocketAPIClient } from '@siebly/kraken-api';
-
-// Create WebSocket API client with credentials
-const wsApiClient = new WebsocketAPIClient({
-  apiKey: 'your-api-key',
-  apiSecret: 'your-api-secret',
-});
-
-// The client handles event listeners automatically, but you can customize them
-wsApiClient
-  .getWSClient()
-  .on('open', (data) => {
-    console.log('WebSocket API connected:', data.wsKey);
-  })
-  .on('response', (data) => {
-    console.log('Response:', data);
-  })
-  .on('exception', (data) => {
-    console.error('Error:', data);
-  });
-
-// Trading operations return promises
-
-// Submit a spot order
-const orderResponse = await wsApiClient.submitSpotOrder({
-  order_type: 'limit',
-  side: 'buy',
-  limit_price: 26500.4,
-  order_qty: 1.2,
-  symbol: 'BTC/USD',
-});
-console.log('Order placed:', orderResponse);
-
-// Amend an existing order
-const amendResponse = await wsApiClient.amendSpotOrder({
-  order_id: 'OAIYAU-LGI3M-PFM5VW',
-  order_qty: 1.5,
-  limit_price: 27000,
-});
-
-// Cancel specific orders
-const cancelResponse = await wsApiClient.cancelSpotOrder({
-  order_id: ['OM5CRX-N2HAL-GFGWE9', 'OLUMT4-UTEGU-ZYM7E9'],
-});
-
-// Cancel all open orders
-const cancelAllResponse = await wsApiClient.cancelAllSpotOrders();
-```
-
-The WebSocket API provides several advantages:
-
-- **Lower Latency** - Faster than REST API for high-frequency trading
-- **Connection Reuse** - Single persistent connection for multiple requests
-- **Better Performance** - Batch operations for submitting/canceling multiple orders
-- **Type Safety** - Full TypeScript support with typed requests and responses
-
-See the [WebSocket API examples](./examples/WebSockets/Spot/wsAPI.ts) for more detailed usage.
+The underlying `sendWSAPIRequest(wsKey, operation, params)` method is already available on [WebsocketClient](./src/WebsocketClient.ts) for spot and derivatives trade sockets (`WS_KEY_MAP.spotTrade`, `WS_KEY_MAP.linearSwapTrade`, etc.).
 
 ---
 
@@ -563,18 +451,18 @@ See the [WebSocket API examples](./examples/WebSockets/Spot/wsAPI.ts) for more d
 Pass a custom logger which supports the log methods `trace`, `info` and `error`, or override methods from the default logger as desired.
 
 ```javascript
-import { WebsocketClient, DefaultLogger } from '@siebly/kraken-api';
+import { WebsocketClient, DefaultLogger } from '@siebly/htx-api';
 
 // E.g. customise logging for only the trace level:
-const customLogger: DefaultLogger = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  trace: (...params: LogParams): void => {
+const customLogger = {
+  ...DefaultLogger,
+  trace: (...params) => {
     // console.log('trace', ...params);
   },
-  info: (...params: LogParams): void => {
+  info: (...params) => {
     console.log('info', ...params);
   },
-  error: (...params: LogParams): void => {
+  error: (...params) => {
     console.error('error', ...params);
   },
 };
@@ -587,6 +475,8 @@ const ws = new WebsocketClient(
   customLogger,
 );
 ```
+
+In rare situations, you may want to see the raw HTTP requests being built as well as the API response. These can be enabled by setting the `HTXTRACE` env var to `true`.
 
 ## Browser/Frontend Usage
 
@@ -610,7 +500,7 @@ This file contains AI optimised structure of all the functions in this package, 
 
 ## Used By
 
-[![Repository Users Preview Image](https://dependents.info/sieblyio/kraken-api/image)](https://github.com/sieblyio/kraken-api/network/dependents)
+[![Repository Users Preview Image](https://dependents.info/sieblyio/htx-api/image)](https://github.com/sieblyio/htx-api/network/dependents)
 
 ---
 
