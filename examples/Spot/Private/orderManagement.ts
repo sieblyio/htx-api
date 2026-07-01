@@ -6,7 +6,6 @@ import { SpotClient } from '../../../src/index.js';
 /**
  * import { SpotClient } from '@siebly/htx-api';
  */
-
 const client = new SpotClient({
   apiKey: process.env.API_SPOT_KEY || 'insertApiKeyHere',
   apiSecret: process.env.API_SPOT_SECRET || 'insertApiSecretHere',
@@ -72,7 +71,7 @@ async function getMatchResults() {
 async function cancelOrderById() {
   try {
     const cancelResult = await client.cancelOrderById({
-      orderId: '1234567890123456',
+      orderId: '1620028655831163',
       symbol: 'btcusdt',
     });
     console.log('Cancel Order Result: ', JSON.stringify(cancelResult, null, 2));
@@ -125,7 +124,7 @@ async function setCancelAllAfter() {
 // getOpenOrdersByClientId();
 // getOrderHistory();
 // getOrderHistory48h();
-// getMatchResults();
+// etMatchResults();
 // cancelOrderById();
 // cancelOrderByClientId();
 // cancelAllOrders();

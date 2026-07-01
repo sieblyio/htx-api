@@ -556,13 +556,13 @@ export class SpotClient extends BaseRestClient {
    *
    * Max 10 orders per batch. Each returns order-id or err-code/err-msg. Signature required. Trade permission. Rate: 50/2s.
    */
-  submitBatchOrders(params: {
-    orders: SpotV1OrderPlaceReq[];
-  }): Promise<SpotAPISuccessResponse<SpotV1OrderBatchPlaceResult[]>> {
-    for (const order of params.orders) {
+  submitBatchOrders(
+    params: SpotV1OrderPlaceReq[],
+  ): Promise<SpotAPISuccessResponse<SpotV1OrderBatchPlaceResult[]>> {
+    for (const order of params) {
       this.validateOrderId(order, 'client-order-id');
     }
-    return this.postPrivate('/v1/order/batch-orders', { body: params.orders });
+    return this.postPrivate('/v1/order/batch-orders', { body: params });
   }
 
   /**
