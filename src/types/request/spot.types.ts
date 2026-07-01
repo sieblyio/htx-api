@@ -636,7 +636,7 @@ export interface SpotSubUserApiKeyUpdateReq {
 /** Req for GET /v2/account/ledger */
 export interface SpotGetAccountLedgerReq {
   /** Account ID */
-  accountId?: string;
+  accountId: string;
   /** Currency. Default all. */
   currency?: string;
   /** Transaction types, comma-separated. Phase 1: transfer only. */

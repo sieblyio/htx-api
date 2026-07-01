@@ -19,6 +19,7 @@ import { SpotClient } from '../../../src/index.js';
  * API Key Permissions Required:
  * - Read access for account and balance queries
  */
+
 const client = new SpotClient({
   apiKey: process.env.API_SPOT_KEY || 'insertApiKeyHere',
   apiSecret: process.env.API_SPOT_SECRET || 'insertApiSecretHere',
@@ -60,10 +61,7 @@ async function getAccountBalance() {
 
 async function getAccountValuation() {
   try {
-    const valuation = await client.getAccountValuation({
-      accountType: 'spot',
-      valuationCurrency: 'USD',
-    });
+    const valuation = await client.getAccountValuation({});
     console.log('Account Valuation: ', JSON.stringify(valuation, null, 2));
   } catch (e) {
     console.error('Get account valuation error: ', e);
@@ -85,6 +83,7 @@ async function getAssetValuation() {
 async function getAccountLedger() {
   try {
     const ledger = await client.getAccountLedger({
+      accountId: '1234567890',
       limit: 50,
     });
     console.log('Account Ledger: ', JSON.stringify(ledger, null, 2));
