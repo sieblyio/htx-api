@@ -8,8 +8,8 @@ import { FuturesClient } from '../../../src/index.js';
  */
 
 const client = new FuturesClient({
-  apiKey: process.env.API_FUTURES_KEY || 'insertApiKeyHere',
-  apiSecret: process.env.API_FUTURES_SECRET || 'insertApiSecretHere',
+  apiKey: process.env.API_FUTURES_KEY || '',
+  apiSecret: process.env.API_FUTURES_SECRET || '',
 });
 
 const contractCode = 'BTC-USDT';
@@ -126,11 +126,11 @@ async function getMultiAssetOpenOrders() {
 
 // Uncomment the function you want to test:
 
-// getCrossOpenOrders();
+//getCrossOpenOrders();
 // getCrossOrderInfo();
 // getCrossHistoryOrders();
 // cancelCrossOrder();
 // cancelAllCrossOrders();
 // setCancelAllAfter();
-// cancelMultiAssetOrder();
+cancelMultiAssetOrder();
 // getMultiAssetOpenOrders();
