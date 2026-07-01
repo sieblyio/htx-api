@@ -2407,10 +2407,10 @@ export class FuturesClient extends BaseRestClient {
    * Place bulk orders in futures trading.
    * Signature required. Trade permission. Rate limit: 144/3s per UID.
    */
-  submitMultiAssetBatchOrders(
-    orders: FuturesV5SubmitOrderReq[],
-  ): Promise<FuturesAPISuccessResponse<FuturesV5PlaceBatchOrderRespItem[]>> {
-    return this.postPrivate('/v5/trade/batch_orders', { body: orders });
+  submitMultiAssetBatchOrders(params: {
+    orders: FuturesV5SubmitOrderReq[];
+  }): Promise<FuturesAPISuccessResponse<FuturesV5PlaceBatchOrderRespItem[]>> {
+    return this.postPrivate('/v5/trade/batch_orders', { body: params.orders });
   }
 
   /**

@@ -80,7 +80,7 @@ async function getDepositWithdrawHistory() {
 
 async function cancelWithdraw() {
   try {
-    const cancelResult = await client.cancelWithdraw(123456789);
+    const cancelResult = await client.cancelWithdraw({ withdrawId: 123456789 });
     console.log(
       'Cancel Withdraw Result: ',
       JSON.stringify(cancelResult, null, 2),
@@ -122,7 +122,7 @@ async function transferToSubUser() {
 
 // Uncomment the function you want to test:
 
-// getDepositAddress();
+getDepositAddress();
 // getWithdrawQuota();
 // getWithdrawAddress();
 // submitWithdraw();

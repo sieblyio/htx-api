@@ -556,13 +556,13 @@ export class SpotClient extends BaseRestClient {
    *
    * Max 10 orders per batch. Each returns order-id or err-code/err-msg. Signature required. Trade permission. Rate: 50/2s.
    */
-  submitBatchOrders(
-    params: SpotV1OrderPlaceReq[],
-  ): Promise<SpotAPISuccessResponse<SpotV1OrderBatchPlaceResult[]>> {
-    for (const order of params) {
+  submitBatchOrders(params: {
+    orders: SpotV1OrderPlaceReq[];
+  }): Promise<SpotAPISuccessResponse<SpotV1OrderBatchPlaceResult[]>> {
+    for (const order of params.orders) {
       this.validateOrderId(order, 'client-order-id');
     }
-    return this.postPrivate('/v1/order/batch-orders', { body: params });
+    return this.postPrivate('/v1/order/batch-orders', { body: params.orders });
   }
 
   /**
@@ -1067,12 +1067,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Query withdraw order submitted with client-order-id. Signature required. Read permission.
    */
-  getWithdrawByClientId(
-    clientOrderId: string,
-  ): Promise<SpotAPISuccessResponse<SpotDepositWithdrawRecord | null>> {
-    return this.getPrivate('/v1/query/withdraw/client-order-id', {
-      clientOrderId,
-    });
+  getWithdrawByClientId(params: {
+    clientOrderId: string;
+  }): Promise<SpotAPISuccessResponse<SpotDepositWithdrawRecord | null>> {
+    return this.getPrivate('/v1/query/withdraw/client-order-id', params);
   }
 
   /**
@@ -1080,8 +1078,13 @@ export class SpotClient extends BaseRestClient {
    *
    * Cancel withdraw by transfer id. Parent user only. Withdraw permission. Rate: 20/2s.
    */
-  cancelWithdraw(withdrawId: number): Promise<SpotAPISuccessResponse<number>> {
-    return this.postPrivate(`/v1/dw/withdraw-virtual/${withdrawId}/cancel`, {});
+  cancelWithdraw(params: {
+    withdrawId: number;
+  }): Promise<SpotAPISuccessResponse<number>> {
+    return this.postPrivate(
+      `/v1/dw/withdraw-virtual/${params.withdrawId}/cancel`,
+      {},
+    );
   }
 
   /**
@@ -1243,10 +1246,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Query sub user status by UID. Signature required. Read permission.
    */
-  getSubUserStatus(
-    subUid: number,
-  ): Promise<SpotAPISuccessResponse<SpotSubUserStatusResult>> {
-    return this.getPrivate('/v2/sub-user/user-state', { subUid });
+  getSubUserStatus(params: {
+    subUid: number;
+  }): Promise<SpotAPISuccessResponse<SpotSubUserStatusResult>> {
+    return this.getPrivate('/v2/sub-user/user-state', params);
   }
 
   /**
@@ -1276,10 +1279,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Query account list of sub user by UID. Signature required. Read permission.
    */
-  getSubUserAccounts(
-    subUid: number,
-  ): Promise<SpotAPISuccessResponse<SpotSubUserAccountsResult>> {
-    return this.getPrivate('/v2/sub-user/account-list', { subUid });
+  getSubUserAccounts(params: {
+    subUid: number;
+  }): Promise<SpotAPISuccessResponse<SpotSubUserAccountsResult>> {
+    return this.getPrivate('/v2/sub-user/account-list', params);
   }
 
   /**
@@ -1374,10 +1377,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Returns balance of sub-user by sub-uid. Signature required. Read permission. Rate: 20/2s.
    */
-  getSubUserBalance(
-    subUid: number,
-  ): Promise<SpotAPISuccessResponse<SpotSubUserBalanceResult[]>> {
-    return this.getPrivate(`/v1/account/accounts/${subUid}`);
+  getSubUserBalance(params: {
+    subUid: number;
+  }): Promise<SpotAPISuccessResponse<SpotSubUserBalanceResult[]>> {
+    return this.getPrivate(`/v1/account/accounts/${params.subUid}`);
   }
 
   /**
@@ -1417,10 +1420,10 @@ export class SpotClient extends BaseRestClient {
    *
    * Query rebate info of invitee. Signature required. Read permission.
    */
-  getReferralRebateDetail(
-    inviteeUid: number,
-  ): Promise<SpotAPISuccessResponse<SpotReferralRebateDetail>> {
-    return this.getPrivate('/v2/invitee/rebate/detail', { inviteeUid });
+  getReferralRebateDetail(params: {
+    inviteeUid: number;
+  }): Promise<SpotAPISuccessResponse<SpotReferralRebateDetail>> {
+    return this.getPrivate('/v2/invitee/rebate/detail', params);
   }
 
   /**
