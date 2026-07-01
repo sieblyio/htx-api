@@ -1,70 +1,54 @@
 import { SpotClient } from '../../../src/index.js';
 
-// This example shows how to call Kraken API endpoint with either node.js,
-// javascript (js) or typescript (ts) with the npm module "@siebly/kraken-api" for Kraken exchange
-// for PUBLIC MARKET DATA that requires no authentication
+// This example shows how to call HTX Spot API endpoints with Node.js or TypeScript
+// using the npm module "@siebly/htx-api" for PUBLIC MARKET DATA (no authentication).
 
 /**
- * import { SpotClient } from '@siebly/kraken-api';
+ * import { SpotClient } from '@siebly/htx-api';
  */
 
-// you can initialise public client without api keys as public calls do not require auth
+// Public calls do not require API keys
 const client = new SpotClient();
 
 async function publicCalls() {
   try {
-    // Get server time
-    const serverTime = await client.getServerTime();
-    console.log('Server Time: ', serverTime);
+    const timestamp = await client.getTimestamp();
+    console.log('Server Timestamp: ', timestamp);
 
-    // Get system status
-    const systemStatus = await client.getSystemStatus();
-    console.log('System Status: ', systemStatus);
+    const marketStatus = await client.getMarketStatus();
+    console.log('Market Status: ', marketStatus);
 
-    // Get asset info
-    const assetInfo = await client.getAssetInfo({
-      asset: 'XBT,ETH',
-    });
-    console.log('Asset Info: ', assetInfo);
+    const symbols = await client.getTradingSymbols();
+    console.log('Trading Symbols: ', symbols);
 
-    // Get tradable asset pairs
-    const assetPairs = await client.getAssetPairs({
-      pair: 'XBTUSD,ETHUSD',
-    });
-    console.log('Asset Pairs: ', assetPairs);
+    const ticker = await client.getTicker({ symbol: 'btcusdt' });
+    console.log('Ticker (btcusdt): ', ticker);
 
-    // Get ticker information
-    const ticker = await client.getTicker({
-      pair: 'XBTUSD',
-    });
-    console.log('Ticker: ', ticker);
+    const tickers = await client.getTickers();
+    console.log('All Tickers: ', tickers);
 
-    // Get order book
-    const orderBook = await client.getOrderBook({
-      pair: 'XBTUSD',
-      count: 10,
+    const orderBook = await client.getMarketDepth({
+      symbol: 'btcusdt',
+      depth: 10,
+      type: 'step0',
     });
     console.log('Order Book: ', orderBook);
 
-    // Get OHLC data (candles)
-    const candles = await client.getCandles({
-      pair: 'XBTUSD',
-      interval: 60, // 1 minute
+    const klines = await client.getKlines({
+      symbol: 'btcusdt',
+      period: '1min',
+      size: 10,
     });
-    console.log('OHLC Candles: ', candles);
+    console.log('Klines: ', klines);
 
-    // Get recent trades
-    const recentTrades = await client.getRecentTrades({
-      pair: 'XBTUSD',
-      count: 10,
-    });
-    console.log('Recent Trades: ', recentTrades);
+    const lastTrade = await client.getLastTrade({ symbol: 'btcusdt' });
+    console.log('Last Trade: ', lastTrade);
 
-    // Get recent spreads
-    const recentSpreads = await client.getRecentSpreads({
-      pair: 'XBTUSD',
+    const historyTrades = await client.getHistoryTrades({
+      symbol: 'btcusdt',
+      size: 10,
     });
-    console.log('Recent Spreads: ', recentSpreads);
+    console.log('History Trades: ', historyTrades);
   } catch (e) {
     console.error('Error: ', e);
   }

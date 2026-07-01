@@ -1,151 +1,160 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { DerivativesClient } from '../../../src/index.js';
+import { FuturesClient } from '../../../src/index.js';
 
-// This example shows how to call Kraken API endpoint with either node.js,
-// javascript (js) or typescript (ts) with the npm module "@siebly/kraken-api" for Kraken exchange
-// for FUTURES ORDER MANAGEMENT
+// This example shows how to call HTX Derivatives API endpoints for SUBMITTING ORDERS.
 
 /**
- * import { DerivativesClient } from '@siebly/kraken-api';
+ * import { FuturesClient } from '@siebly/htx-api';
  */
 
-// initialise the client
-/**
- *
- * Kraken Futures API uses API Key and API Secret
- *
- * Example:
- * {
- *   apiKey: 'your-api-key',
- *   apiSecret: 'your-api-secret',
- * }
- *
- * API Key Permissions Required: Orders and trades - Create & modify orders
- *
- */
-const client = new DerivativesClient({
+const client = new FuturesClient({
   apiKey: process.env.API_FUTURES_KEY || 'insertApiKeyHere',
   apiSecret: process.env.API_FUTURES_SECRET || 'insertApiSecretHere',
 });
 
-async function submitLimitOrder() {
-  try {
-    // Submit limit order for Futures
-    const limitOrder = await client.submitOrder({
-      orderType: 'lmt',
-      symbol: 'PF_ETHUSD', // Perpetual ETH/USD
-      side: 'buy',
-      size: 0.01, // Contract size
-      limitPrice: 1000,
-      cliOrdId: client.generateNewOrderID(),
-    });
-    console.log('Limit Order Result: ', JSON.stringify(limitOrder, null, 2));
+const contractCode = 'BTC-USDT';
+const leverRate = 5;
 
-    // Response includes:
-    // - status: placed, partiallyFilled, filled, or rejection reason
-    // - order_id: Unique order identifier
-    // - orderEvents: Array of order events (PLACE, EXECUTE, etc.)
-  } catch (e) {
-    console.error('Submit limit order error: ', e);
-  }
-}
-
-async function submitMarketOrder() {
+async function submitCrossLimitOrder() {
   try {
-    // Submit market order (IOC with 1% price protection)
-    const marketOrder = await client.submitOrder({
-      orderType: 'mkt',
-      symbol: 'PF_ETHUSD',
-      side: 'sell', // or "buy"
-      size: 0.01,
-    });
-    console.log('Market Order Result: ', JSON.stringify(marketOrder, null, 2));
-  } catch (e) {
-    console.error('Submit market order error: ', e);
-  }
-}
-
-async function submitPostOnlyOrder() {
-  try {
-    // Submit post-only order (maker-only)
-    const postOrder = await client.submitOrder({
-      orderType: 'post',
-      symbol: 'PF_ETHUSD',
-      side: 'buy',
-      size: 0.01,
-      limitPrice: 1000,
-      cliOrdId: client.generateNewOrderID(),
-    });
-    console.log('Post-Only Order Result: ', JSON.stringify(postOrder, null, 2));
-  } catch (e) {
-    console.error('Submit post-only order error: ', e);
-  }
-}
-
-async function submitReduceOnlyOrder() {
-  try {
-    // Submit reduce-only order (only closes position, won't open new)
-    const reduceOnlyOrder = await client.submitOrder({
-      orderType: 'lmt',
-      symbol: 'PF_ETHUSD',
-      side: 'sell',
-      size: 1,
-      limitPrice: 1000,
-      reduceOnly: true, // Only reduce existing position
+    const limitOrder = await client.submitLinearSwapCrossOrder({
+      contract_code: contractCode,
+      direction: 'buy',
+      offset: 'open',
+      volume: 1,
+      lever_rate: leverRate,
+      order_price_type: 'limit',
+      price: 10000,
+      client_order_id: Date.now(),
     });
     console.log(
-      'Reduce-Only Order Result: ',
-      JSON.stringify(reduceOnlyOrder, null, 2),
+      'Cross Limit Order Result: ',
+      JSON.stringify(limitOrder, null, 2),
     );
   } catch (e) {
-    console.error('Submit reduce-only order error: ', e);
+    console.error('Submit cross limit order error: ', e);
   }
 }
 
-async function batchOrderSubmit() {
+async function submitCrossMarketOrder() {
   try {
-    // Send, edit, and cancel orders in a single batch request
-    const batchResult = await client.batchOrderManagement({
-      json: {
-        batchOrder: [
-          // Send new order
-          {
-            order: 'send',
-            order_tag: 'order-1', // Tag to map responses
-            orderType: 'lmt',
-            symbol: 'PF_ETHUSD',
-            side: 'buy',
-            size: 0.01,
-            limitPrice: 1000,
-            cliOrdId: client.generateNewOrderID(),
-          },
-          // Send another order
-          {
-            order: 'send',
-            order_tag: 'order-2',
-            orderType: 'lmt',
-            symbol: 'PF_ETHUSD',
-            side: 'buy',
-            size: 0.01,
-            limitPrice: 1100,
-          },
-        ],
-      },
+    const marketOrder = await client.submitLinearSwapCrossOrder({
+      contract_code: contractCode,
+      direction: 'buy',
+      offset: 'open',
+      volume: 1,
+      lever_rate: leverRate,
+      order_price_type: 'opponent',
+      client_order_id: Date.now(),
+    });
+    console.log(
+      'Cross Market Order Result: ',
+      JSON.stringify(marketOrder, null, 2),
+    );
+  } catch (e) {
+    console.error('Submit cross market order error: ', e);
+  }
+}
+
+async function submitIsolatedLimitOrder() {
+  try {
+    const limitOrder = await client.submitLinearSwapIsolatedOrder({
+      contract_code: contractCode,
+      direction: 'buy',
+      offset: 'open',
+      volume: 1,
+      lever_rate: leverRate,
+      order_price_type: 'limit',
+      price: 10000,
+      client_order_id: Date.now(),
+    });
+    console.log(
+      'Isolated Limit Order Result: ',
+      JSON.stringify(limitOrder, null, 2),
+    );
+  } catch (e) {
+    console.error('Submit isolated limit order error: ', e);
+  }
+}
+
+async function submitCrossBatchOrders() {
+  try {
+    const batchResult = await client.submitLinearSwapCrossBatchOrders({
+      orders_data: [
+        {
+          contract_code: contractCode,
+          direction: 'buy',
+          offset: 'open',
+          volume: 1,
+          lever_rate: leverRate,
+          order_price_type: 'limit',
+          price: 10000,
+          client_order_id: Date.now() * 100 + 1,
+        },
+        {
+          contract_code: contractCode,
+          direction: 'sell',
+          offset: 'open',
+          volume: 1,
+          lever_rate: leverRate,
+          order_price_type: 'limit',
+          price: 130000,
+          client_order_id: Date.now() * 100 + 2,
+        },
+      ],
     });
     console.log('Batch Order Result: ', JSON.stringify(batchResult, null, 2));
-
-    // Response includes batchStatus array with results for each order
-    // - status: placed, edited, cancelled, or rejection reason
-    // - order_tag: Maps back to your request
   } catch (e) {
-    console.error('Batch order management error: ', e);
+    console.error('Submit cross batch orders error: ', e);
+  }
+}
+
+async function submitMultiAssetOrder() {
+  try {
+    const multiAssetOrder = await client.submitMultiAssetOrder({
+      contract_code: contractCode,
+      margin_mode: 'cross',
+      side: 'buy',
+      type: 'limit',
+      volume: '1',
+      price: '10000',
+      position_side: 'both',
+      client_order_id: client.generateNewOrderID(),
+    });
+    console.log(
+      'Multi-Asset Order Result: ',
+      JSON.stringify(multiAssetOrder, null, 2),
+    );
+  } catch (e) {
+    console.error('Submit multi-asset order error: ', e);
+  }
+}
+
+async function submitMultiAssetMarketOrder() {
+  try {
+    const multiAssetOrder = await client.submitMultiAssetOrder({
+      contract_code: contractCode,
+      margin_mode: 'cross',
+      side: 'buy',
+      type: 'market',
+      volume: '1',
+      position_side: 'both',
+      client_order_id: client.generateNewOrderID(),
+    });
+    console.log(
+      'Multi-Asset Market Order Result: ',
+      JSON.stringify(multiAssetOrder, null, 2),
+    );
+  } catch (e) {
+    console.error('Submit multi-asset market order error: ', e);
   }
 }
 
 // Uncomment the function you want to test:
 
-// submitLimitOrder();
-// submitMarketOrder();
-// submitPostOnlyOrder();
-// submitReduceOnlyOrder();
-//batchOrderSubmit();
+// submitCrossLimitOrder();
+// submitCrossMarketOrder();
+// submitIsolatedLimitOrder();
+// submitCrossBatchOrders();
+// submitMultiAssetOrder();
+// submitMultiAssetMarketOrder();

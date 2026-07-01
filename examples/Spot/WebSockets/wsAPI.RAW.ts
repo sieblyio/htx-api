@@ -1,3 +1,6 @@
+// TODO: HTX WebSocket API support is not implemented yet (WebsocketAPIClient wrapper + HTX-specific examples still to do).
+// This file is a placeholder copied from the Kraken SDK - it will not work against HTX until WS API integration is complete.
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {
   DefaultLogger,

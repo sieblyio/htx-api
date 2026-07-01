@@ -1,3 +1,6 @@
+// TODO: HTX WebSocket API support is not implemented yet (WebsocketAPIClient wrapper + HTX-specific examples still to do).
+// This file is a draft placeholder - it will not work until WS API integration is complete.
+
 import {
   DefaultLogger,
   LogParams,

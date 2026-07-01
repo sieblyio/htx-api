@@ -1,136 +1,112 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { SpotClient } from '../../../src/index.js';
 
-// This example shows how to call Kraken API endpoint with either node.js,
-// javascript (js) or typescript (ts) with the npm module "@siebly/kraken-api" for Kraken exchange
-// for ACCOUNT INFORMATION
+// This example shows how to call HTX Spot API endpoints for ACCOUNT INFORMATION.
 
 /**
- * import { SpotClient } from '@siebly/kraken-api';
+ * import { SpotClient } from '@siebly/htx-api';
  */
 
-// initialise the client
 /**
- *
- * Kraken API uses API Key and Private Key (base64 encoded)
+ * HTX API uses API Key and API Secret.
  *
  * Example:
  * {
  *   apiKey: 'your-api-key',
- *   apiSecret: 'your-base64-encoded-private-key',
+ *   apiSecret: 'your-api-secret',
  * }
  *
  * API Key Permissions Required:
- * - Funds permissions - Query
- * - Data - Query ledger entries
- *
+ * - Read access for account and balance queries
  */
 const client = new SpotClient({
   apiKey: process.env.API_SPOT_KEY || 'insertApiKeyHere',
   apiSecret: process.env.API_SPOT_SECRET || 'insertApiSecretHere',
 });
 
+async function getAccounts() {
+  try {
+    const accounts = await client.getAccounts();
+    console.log('Accounts: ', JSON.stringify(accounts, null, 2));
+
+    // Use the spot account id for trading and balance queries
+    const spotAccount = accounts.data?.find(
+      (account) => account.type === 'spot',
+    );
+    console.log('Spot Account ID: ', spotAccount?.id);
+  } catch (e) {
+    console.error('Get accounts error: ', e);
+  }
+}
+
 async function getAccountBalance() {
   try {
-    // Get all cash balances (net of pending withdrawals)
-    const balances = await client.getAccountBalance();
-    console.log('Account Balances: ', JSON.stringify(balances, null, 2));
+    const accounts = await client.getAccounts();
+    const accountId = accounts.data?.find(
+      (account) => account.type === 'spot',
+    )?.id;
 
-    // Note: Staking/Earn assets may have these extensions:
-    // .B - balances in new yield-bearing products
-    // .F - balances earning automatically in Kraken Rewards
-    // .T - tokenized assets
+    if (!accountId) {
+      console.error('No spot account id found');
+      return;
+    }
+
+    const balance = await client.getAccountBalance({ accountId });
+    console.log('Account Balance: ', JSON.stringify(balance, null, 2));
   } catch (e) {
     console.error('Get account balance error: ', e);
   }
 }
 
-async function getExtendedBalance() {
+async function getAccountValuation() {
   try {
-    // Get extended balances including credits and held amounts
-    // Available balance = balance + credit - credit_used - hold_trade
-    const extendedBalances = await client.getExtendedBalance();
-    console.log(
-      'Extended Balances: ',
-      JSON.stringify(extendedBalances, null, 2),
-    );
-  } catch (e) {
-    console.error('Get extended balance error: ', e);
-  }
-}
-
-async function getTradeBalance() {
-  try {
-    // Get trade balance summary (margin info)
-    const tradeBalance = await client.getTradeBalance();
-    console.log('Trade Balance: ', JSON.stringify(tradeBalance, null, 2));
-
-    // Response includes:
-    // - eb: equivalent balance
-    // - tb: trade balance
-    // - m: margin amount
-    // - n: unrealized P&L
-    // - e: equity
-    // - mf: free margin
-  } catch (e) {
-    console.error('Get trade balance error: ', e);
-  }
-}
-
-async function getLedgers() {
-  try {
-    // Query specific ledger entries by ID
-    const ledgers = await client.getLedgers({
-      id: 'LUI2RA-CJFLB-EN5I4P,L2QE42-IGSZ3-WEVTLK',
-      trades: false,
+    const valuation = await client.getAccountValuation({
+      accountType: 'spot',
+      valuationCurrency: 'USD',
     });
-    console.log('Ledger Entries: ', JSON.stringify(ledgers, null, 2));
-
-    // Ledger entry types include:
-    // - trade, deposit, withdrawal, transfer, margin
-    // - adjustment, rollover, spend, receive, settled
-    // - credit, staking, reward, dividend, sale, conversion
+    console.log('Account Valuation: ', JSON.stringify(valuation, null, 2));
   } catch (e) {
-    console.error('Query ledgers error: ', e);
+    console.error('Get account valuation error: ', e);
   }
 }
 
-async function getLedgersInfo() {
+async function getAssetValuation() {
   try {
-    // Get ledger info with filters (returns 50 most recent by default)
-    const ledgersInfo = await client.getLedgersInfo({
-      asset: 'XBT', // Filter by asset
-      type: 'deposit', // Filter by type
+    const assetValuation = await client.getAssetValuation({
+      accountType: 'spot',
+      valuationCurrency: 'BTC',
     });
-    console.log('Ledgers Info: ', JSON.stringify(ledgersInfo, null, 2));
+    console.log('Asset Valuation: ', JSON.stringify(assetValuation, null, 2));
   } catch (e) {
-    console.error('Get ledgers info error: ', e);
+    console.error('Get asset valuation error: ', e);
   }
 }
 
-async function getTradingVolume() {
+async function getAccountLedger() {
   try {
-    // Get 30-day USD trading volume and fee schedule
-    const tradingVolume = await client.getTradingVolume({
-      pair: 'XBTUSD,ETHUSD',
+    const ledger = await client.getAccountLedger({
+      limit: 50,
     });
-    console.log('Trading Volume: ', JSON.stringify(tradingVolume, null, 2));
-
-    // Response includes:
-    // - currency: volume currency
-    // - volume: current trading volume
-    // - fees: fee schedule by pair
-    // - fees_maker: maker fee schedule
+    console.log('Account Ledger: ', JSON.stringify(ledger, null, 2));
   } catch (e) {
-    console.error('Get trading volume error: ', e);
+    console.error('Get account ledger error: ', e);
+  }
+}
+
+async function getFeeRate() {
+  try {
+    const feeRate = await client.getFeeRate({ symbols: 'btcusdt,ethusdt' });
+    console.log('Fee Rate: ', JSON.stringify(feeRate, null, 2));
+  } catch (e) {
+    console.error('Get fee rate error: ', e);
   }
 }
 
 // Uncomment the function you want to test:
 
-getAccountBalance();
-// getExtendedBalance();
-// getTradeBalance();
-// getLedgers();
-// getLedgersInfo();
-// getTradingVolume();
+getAccounts();
+// getAccountBalance();
+// getAccountValuation();
+// getAssetValuation();
+// getAccountLedger();
+// getFeeRate();

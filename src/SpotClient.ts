@@ -110,7 +110,6 @@ import {
   SpotSubUserStatusResult,
   SpotSubUserTradableMarketResult,
   SpotSubUserTransferPermissionsResult,
-  SpotSystemStatusPage,
   SpotTicker,
   SpotTradeTimestampGroup,
   SpotTradingSymbol,
@@ -178,16 +177,6 @@ export class SpotClient extends BaseRestClient {
    * Reference Data
    *
    */
-
-  /**
-   * Get System Status
-   *
-   * Get system status, incidents and planned maintenance.
-   * Uses status.huobigroup.com (no signature, different base URL).
-   */
-  getSystemStatus(): Promise<SpotSystemStatusPage> {
-    return this.get('https://status.huobigroup.com/api/v2/summary.json');
-  }
 
   /**
    * Get Market Status

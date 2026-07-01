@@ -1,149 +1,132 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { SpotClient } from '../../../src/index.js';
 
-// This example shows how to call Kraken API endpoint with either node.js,
-// javascript (js) or typescript (ts) with the npm module "@siebly/kraken-api" for Kraken exchange
-// for ORDER MANAGEMENT
+// This example shows how to call HTX Spot API endpoints for ORDER MANAGEMENT.
 
 /**
- * import { SpotClient } from '@siebly/kraken-api';
+ * import { SpotClient } from '@siebly/htx-api';
  */
 
-// initialise the client
-/**
- *
- * Kraken API uses API Key and Private Key (base64 encoded)
- *
- * Example:
- * {
- *   apiKey: 'your-api-key',
- *   apiSecret: 'your-base64-encoded-private-key',
- * }
- *
- * API Key Permissions Required:
- * - Funds permissions - Query (for balance)
- * - Orders and trades - Query open orders & trades
- * - Orders and trades - Query closed orders & trades
- *
- */
 const client = new SpotClient({
   apiKey: process.env.API_SPOT_KEY || 'insertApiKeyHere',
   apiSecret: process.env.API_SPOT_SECRET || 'insertApiSecretHere',
 });
 
-async function getTradeBalance() {
-  try {
-    // Get trade balance summary
-    const tradeBalance = await client.getTradeBalance();
-    console.log('Trade Balance: ', JSON.stringify(tradeBalance, null, 2));
-  } catch (e) {
-    console.error('Get trade balance error: ', e);
-  }
-}
-
 async function getOpenOrders() {
   try {
-    // Get all open orders
-    const openOrders = await client.getOpenOrders();
+    const openOrders = await client.getOpenOrders({ symbol: 'btcusdt' });
     console.log('Open Orders: ', JSON.stringify(openOrders, null, 2));
   } catch (e) {
     console.error('Get open orders error: ', e);
   }
 }
 
-async function getOpenOrdersWithTrades() {
-  try {
-    // Get open orders with related trades
-    const openOrdersWithTrades = await client.getOpenOrders({
-      trades: true, // Include trades related to orders
-    });
-    console.log(
-      'Open Orders with Trades: ',
-      JSON.stringify(openOrdersWithTrades, null, 2),
-    );
-  } catch (e) {
-    console.error('Get open orders with trades error: ', e);
-  }
-}
-
 async function getOpenOrdersByClientId() {
   try {
-    // Get open orders filtered by client order ID
-    const ordersByClId = await client.getOpenOrders({
-      cl_ord_id: '9cc788d8-9c00-4b25-94d3-26d93603948d',
+    const order = await client.getOrderByClientId({
+      clientOrderId: 'your-client-order-id-here',
+    });
+    console.log('Order by Client ID: ', JSON.stringify(order, null, 2));
+  } catch (e) {
+    console.error('Get order by client id error: ', e);
+  }
+}
+
+async function getOrderHistory() {
+  try {
+    const orderHistory = await client.getOrderHistory({
+      symbol: 'btcusdt',
+      states: 'filled,canceled,partial-canceled',
+      size: 50,
+    });
+    console.log('Order History: ', JSON.stringify(orderHistory, null, 2));
+  } catch (e) {
+    console.error('Get order history error: ', e);
+  }
+}
+
+async function getOrderHistory48h() {
+  try {
+    const orderHistory = await client.getOrderHistory48h({
+      symbol: 'btcusdt',
+      size: 50,
+    });
+    console.log('Order History (48h): ', JSON.stringify(orderHistory, null, 2));
+  } catch (e) {
+    console.error('Get order history 48h error: ', e);
+  }
+}
+
+async function getMatchResults() {
+  try {
+    const matchResults = await client.getMatchResults({
+      symbol: 'btcusdt',
+      size: 50,
+    });
+    console.log('Match Results: ', JSON.stringify(matchResults, null, 2));
+  } catch (e) {
+    console.error('Get match results error: ', e);
+  }
+}
+
+async function cancelOrderById() {
+  try {
+    const cancelResult = await client.cancelOrderById({
+      orderId: '1234567890123456',
+      symbol: 'btcusdt',
+    });
+    console.log('Cancel Order Result: ', JSON.stringify(cancelResult, null, 2));
+  } catch (e) {
+    console.error('Cancel order by id error: ', e);
+  }
+}
+
+async function cancelOrderByClientId() {
+  try {
+    const cancelResult = await client.cancelOrderByClientId({
+      'client-order-id': 'your-client-order-id-here',
     });
     console.log(
-      'Open Orders by Client ID: ',
-      JSON.stringify(ordersByClId, null, 2),
+      'Cancel by Client ID Result: ',
+      JSON.stringify(cancelResult, null, 2),
     );
   } catch (e) {
-    console.error('Get open orders by client ID error: ', e);
+    console.error('Cancel order by client id error: ', e);
   }
 }
 
-async function getClosedOrders() {
+async function cancelAllOrders() {
   try {
-    // Get closed orders (last 50)
-    const closedOrders = await client.getClosedOrders();
-    console.log('Closed Orders: ', JSON.stringify(closedOrders, null, 2));
-  } catch (e) {
-    console.error('Get closed orders error: ', e);
-  }
-}
-
-async function getClosedOrdersWithFilters() {
-  try {
-    // Get closed orders with filters
-    const closedOrdersFiltered = await client.getClosedOrders({
-      trades: true, // Include related trades
-      start: Math.floor(Date.now() / 1000) - 86400 * 7, // Last 7 days
-      closetime: 'close', // Filter by close time
-    });
+    const cancelAllResult = await client.cancelAllOrders({ symbol: 'btcusdt' });
     console.log(
-      'Closed Orders (Last 7 days): ',
-      JSON.stringify(closedOrdersFiltered, null, 2),
+      'Cancel All Orders Result: ',
+      JSON.stringify(cancelAllResult, null, 2),
     );
   } catch (e) {
-    console.error('Get closed orders with filters error: ', e);
+    console.error('Cancel all orders error: ', e);
   }
 }
 
-async function getClosedOrdersByClientId() {
+async function setCancelAllAfter() {
   try {
-    // Get closed orders by client order ID
-    const closedByClId = await client.getClosedOrders({
-      cl_ord_id: '9cc788d8-9c00-4b25-94d3-26d93603948d',
-      trades: true,
-    });
+    const cancelAfterResult = await client.setCancelAllAfter({ timeout: 120 });
     console.log(
-      'Closed Orders by Client ID: ',
-      JSON.stringify(closedByClId, null, 2),
+      'Cancel All After Result: ',
+      JSON.stringify(cancelAfterResult, null, 2),
     );
   } catch (e) {
-    console.error('Get closed orders by client ID error: ', e);
-  }
-}
-
-async function getOrdersByTxId() {
-  try {
-    // Query specific orders by transaction ID
-    const ordersByTxId = await client.getOrders({
-      txid: 'OQCLML-BW3P3-BUCMWZ,OZNOZE-2DOVH-Q4DOQT',
-      trades: true,
-    });
-    console.log('Orders by TxID: ', JSON.stringify(ordersByTxId, null, 2));
-  } catch (e) {
-    console.error('Get orders by TxID error: ', e);
+    console.error('Set cancel all after error: ', e);
   }
 }
 
 // Uncomment the function you want to test:
 
-// getTradeBalance();
 // getOpenOrders();
-// getOpenOrdersWithTrades();
 // getOpenOrdersByClientId();
-// getClosedOrders();
-// getClosedOrdersWithFilters();
-// getClosedOrdersByClientId();
-// getOrdersByTxId();
+// getOrderHistory();
+// getOrderHistory48h();
+// getMatchResults();
+// cancelOrderById();
+// cancelOrderByClientId();
+// cancelAllOrders();
+// setCancelAllAfter();
