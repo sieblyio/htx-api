@@ -18,8 +18,8 @@ import { SpotClient } from '../../../src/index.js';
 }); */
 
 const client = new SpotClient({
-  apiKey: '3a37d498-10b288b3-bgrveg5tmn-5156e',
-  apiSecret: '51004d3e-f1c206ba-fcfeb917-ad042',
+  apiKey: process.env.API_SPOT_KEY || 'insertApiKeyHere',
+  apiSecret: process.env.API_SPOT_SECRET || 'insertApiSecretHere',
 });
 
 async function getSpotAccountId(): Promise<string | number | undefined> {
