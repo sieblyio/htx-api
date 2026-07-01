@@ -403,6 +403,8 @@ import { FuturesAPISuccessResponse } from './types/response/shared.types.js';
  * The FuturesClient provides integration to HTX futures and swap REST APIs.
  */
 export class FuturesClient extends BaseRestClient {
+  private clientOrderIdSeq = 0;
+
   getClientType(): RestClientType {
     // Deliberately default to the AWS CDN domain for HTX. The non-AWS domain (Cloudflare CDN) has certificate issues at the root certificate authority. HTX is aware.
     return REST_CLIENT_TYPE_ENUM.futuresAWS;
@@ -414,15 +416,14 @@ export class FuturesClient extends BaseRestClient {
    *
    */
 
-  generateNewOrderID(): string {
+  generateNewOrderID(): number {
     // Generate a short UUID format (32 hex characters without dashes)
     // TODO: CHECK ID FOR HTX FUTURES
-    const hexChars = '0123456789abcdef';
-    let result = '';
-    for (let i = 0; i < 32; i++) {
-      result += hexChars[Math.floor(Math.random() * 16)];
-    }
-    return result;
+    // HTX futures client_order_id must be in [1, 9223372036854775807]
+    const MAX_CLIENT_ORDER_ID = 9223372036854775807;
+    this.clientOrderIdSeq += 1;
+    const id = Date.now() * 1000 + this.clientOrderIdSeq;
+    return Math.min(Math.max(1, id), MAX_CLIENT_ORDER_ID);
   }
 
   /**
