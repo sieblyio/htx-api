@@ -12,9 +12,14 @@ import { SpotClient } from '../../../src/index.js';
  *
  * API Key Permissions Required: Trade permission (create orders)
  */
-const client = new SpotClient({
+/* const client = new SpotClient({
   apiKey: process.env.API_SPOT_KEY || 'insertApiKeyHere',
   apiSecret: process.env.API_SPOT_SECRET || 'insertApiSecretHere',
+}); */
+
+const client = new SpotClient({
+  apiKey: '3a37d498-10b288b3-bgrveg5tmn-5156e',
+  apiSecret: '51004d3e-f1c206ba-fcfeb917-ad042',
 });
 
 async function getSpotAccountId(): Promise<string | number | undefined> {
@@ -34,7 +39,7 @@ async function submitMarketOrder() {
       'account-id': accountId,
       symbol: 'btcusdt',
       type: 'buy-market',
-      amount: '10', // buy-market amount is quote currency value (USDT)
+      amount: '1', // buy-market amount is quote currency value (USDT)
       'client-order-id': client.generateNewOrderID(),
     });
     console.log('Market Order Result: ', newOrder);
@@ -107,9 +112,9 @@ async function submitBatchOrders() {
       {
         'account-id': accountId,
         symbol: 'btcusdt',
-        type: 'sell-limit',
+        type: 'buy-limit',
         amount: '0.0001',
-        price: '130000',
+        price: '10000',
         'client-order-id': client.generateNewOrderID(),
       },
     ]);
