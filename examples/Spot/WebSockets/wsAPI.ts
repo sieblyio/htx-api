@@ -1,18 +1,14 @@
-// TODO: HTX WebSocket API support is not implemented yet (WebsocketAPIClient wrapper + HTX-specific examples still to do).
-// This file is a placeholder copied from the Kraken SDK - it will not work against HTX until WS API integration is complete.
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {
   DefaultLogger,
   LogParams,
   WebsocketAPIClient,
 } from '../../../src/index.js';
-// normally you should install this module via npm: `npm install @siebly/kraken-api` and import the module:
-// import { DefaultLogger, LogParams, WebsocketAPIClient, WS_KEY_MAP } from '@siebly/kraken-api';
+
+// Install from npm in your own project:
+// import { WebsocketAPIClient } from '@siebly/htx-api';
 
 const customLogger: DefaultLogger = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  trace: (...params: LogParams): void => {
+  trace: (..._params: LogParams): void => {
     // console.log('trace', ...params);
   },
   info: (...params: LogParams): void => {
@@ -53,116 +49,75 @@ async function start() {
   );
 
   /**
-   * The below examples demonstrate how you can subscribe to private topics.
-   *
-   * Note: while the documentation specifies "token" as a required parameter, the SDK will automatically:
-   * - fetch the token using your API key/secret,
-   * - manage token caching/refreshing,
-   * - include the token in the request for you.
-   *
-   * So you do NOT need to manually fetch or provide the token when subscribing to private topics.
-   *
-   * Do note that all of these include the "spotPrivateV2" WsKey reference. This tells the WebsocketClient to use the private "wss://ws-auth.kraken.com/v2" endpoint for these private subscription requests.
+   * Optional: authenticate the spot trade websocket before the first request.
+   * The first WS API request will also connect/authenticate automatically.
    */
+  // await client.getWSClient().connectWSAPI(WS_KEY_MAP.spotTrade);
 
-  try {
-    const addOrderResponse = await client.submitSpotOrder({
-      order_type: 'limit',
-      side: 'buy',
-      limit_price: 26500.4,
-      order_userref: 100054,
-      order_qty: 1.2,
-      symbol: 'BTC/USD',
-    });
-    console.log('addOrderResponse: ', addOrderResponse);
+  /**
+   * These are live trading commands. Keep this false until the params below
+   * have been reviewed for your account, symbol, and order intent.
+   */
+  const runLiveTradingExamples = false;
 
-    const addOrderConditionalResponse = await client.submitSpotOrder({
-      order_type: 'limit',
-      side: 'buy',
-      order_qty: 1.2,
-      symbol: 'BTC/USD',
-      limit_price: 28440,
-      conditional: {
-        order_type: 'stop-loss-limit',
-        trigger_price: 28410,
-        limit_price: 28400,
-      },
-    });
-    console.log('addOrderConditionalResponse: ', addOrderConditionalResponse);
-
-    const addOrderTriggersResponse = await client.submitSpotOrder({
-      order_type: 'stop-loss',
-      side: 'sell',
-      order_qty: 100,
-      symbol: 'MATIC/USD',
-      triggers: {
-        reference: 'last',
-        price: 10.0,
-        price_type: 'pct',
-      },
-    });
-    console.log('addOrderTriggersResponse: ', addOrderTriggersResponse);
-
-    const amendOrderResponse = await client.amendSpotOrder({
-      cl_ord_id: '2c6be801-1f53-4f79-a0bb-4ea1c95dfae9',
-      limit_price: 10000,
-      order_qty: 1.2,
-    });
-    console.log('amendOrderResponse: ', amendOrderResponse);
-
-    const amendOrderPostOnlyResponse = await client.amendSpotOrder({
-      order_id: 'OAIYAU-LGI3M-PFM5VW',
-      order_qty: 1.2,
-      limit_price: 1100.3,
-      deadline: '2025-11-19T09:53:59.050Z',
-      post_only: true,
-    });
-    console.log('amendOrderPostOnlyResponse: ', amendOrderPostOnlyResponse);
-
-    const cancelOrderResponse = await client.cancelSpotOrder({
-      order_id: ['OM5CRX-N2HAL-GFGWE9', 'OLUMT4-UTEGU-ZYM7E9'],
-    });
-    console.log('cancelOrderResponse: ', cancelOrderResponse);
-
-    const cancelAllResponse = await client.cancelAllSpotOrders();
-    console.log('cancelAllResponse: ', cancelAllResponse);
-
-    const cancelAllOrdersAfterResponse = await client.cancelAllSpotOrdersAfter({
-      timeout: 100,
-    });
-    console.log('cancelAllOrdersAfterResponse: ', cancelAllOrdersAfterResponse);
-
-    const batchAddResponse = await client.batchSubmitSpotOrders({
-      deadline: '2025-11-19T09:53:59.050Z',
-      orders: [
-        {
-          limit_price: 1010.1,
-          order_qty: 1.2,
-          order_type: 'limit',
-          order_userref: 1,
-          side: 'buy',
-        },
-        {
-          limit_price: 1100.3,
-          order_qty: 1.2,
-          order_type: 'limit',
-          order_userref: 2,
-          side: 'sell',
-          stp_type: 'cancel_both',
-        },
-      ],
-      symbol: 'BTC/USD',
-      validate: false,
-    });
-    console.log('batchAddResponse: ', batchAddResponse);
-
-    const batchCancelResponse = await client.batchCancelSpotOrders({
-      orders: ['OM5CRX-N2HAL-GFGWE9', 'OLUMT4-UTEGU-ZYM7E9'],
-    });
-    console.log('batchCancelResponse: ', batchCancelResponse);
-  } catch (e) {
-    console.error('Req error: ', e);
+  if (!runLiveTradingExamples) {
+    console.log('Set runLiveTradingExamples=true after reviewing the params.');
+    return;
   }
+
+  const order = await client.submitSpotOrder({
+    'account-id': 123456,
+    symbol: 'btcusdt',
+    type: 'buy-limit',
+    amount: '0.001',
+    price: '20000',
+    source: 'spot-api',
+    'client-order-id': `htx-api-${Date.now()}`,
+  });
+  console.log('submitSpotOrder:', order);
+
+  const batchOrder = await client.submitSpotBatchOrders([
+    {
+      'account-id': 123456,
+      symbol: 'btcusdt',
+      type: 'buy-limit',
+      amount: '0.001',
+      price: '19000',
+      source: 'spot-api',
+    },
+    {
+      'account-id': 123456,
+      symbol: 'ethusdt',
+      type: 'buy-limit',
+      amount: '0.01',
+      price: '1000',
+      source: 'spot-api',
+    },
+  ]);
+  console.log('submitSpotBatchOrders:', batchOrder);
+
+  const marginOrder = await client.submitSpotMarginOrder({
+    'account-id': 123456,
+    symbol: 'btcusdt',
+    type: 'sell-limit',
+    amount: '0.001',
+    price: '40000',
+    source: 'super-margin-api',
+    'trade-purpose': 2,
+  });
+  console.log('submitSpotMarginOrder:', marginOrder);
+
+  const cancelOrders = await client.cancelSpotOrders({
+    'order-ids': ['123456789'],
+  });
+  console.log('cancelSpotOrders:', cancelOrders);
+
+  const cancelAll = await client.cancelAllSpotOrders({
+    'account-id': 123456,
+    symbol: 'btcusdt',
+    size: 100,
+  });
+  console.log('cancelAllSpotOrders:', cancelAll);
 }
 
 start();
