@@ -26,6 +26,10 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export function removeInternalParamFields<TParams>(params: TParams): TParams {
+  if (Array.isArray(params)) {
+    return params.map(removeInternalParamFields) as TParams;
+  }
+
   if (!isRecord(params)) {
     return params;
   }

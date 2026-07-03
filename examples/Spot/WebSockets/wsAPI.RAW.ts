@@ -27,19 +27,9 @@ async function start() {
   };
 
   /**
-   * The WebsocketClient is the core class to manage WebSocket subscriptions. Give it the topics you want to subscribe to, and it will handle the rest:
-   * - Connection management (connect, disconnect, reconnect)
-   * - Authentication for private topics
-   * - Subscription management (subscribe, unsubscribe, resubscribe on reconnect)
-   * - Message handling (dispatch messages to appropriate handlers)
-   *
-   * All you need to do is provide the topics you want to subscribe to when calling `subscribe()`, and the client will take care of the rest.
-   *
-   * Here we create a WebsocketClient instance with API key/secret for private topic subscriptions.
-   *
-   * In terms of product groups such as Spot, Derivatives, etc., the WebsocketClient understand the product group from the WsKey you provide when subscribing. For example, using `WS_KEY_MAP.spotPrivateV2` indicates that the subscription is for Spot private topics, as shown below.
-   *
-   * Refer to WS_KEY_MAP in the source code for all available WsKey options.
+   * WebsocketClient can send low-level WS API request/response commands with
+   * sendWSAPIRequest(). Use WebsocketAPIClient if you prefer typed wrapper
+   * methods for the same trading commands.
    */
   const client = new WebsocketClient(
     {
@@ -77,7 +67,7 @@ async function start() {
       amount: '0.001',
       price: '20000',
       source: 'spot-api',
-      'client-order-id': `htx-api-${Date.now()}`,
+      'client-order-id': client.generateNewOrderID(),
     },
   );
   console.log('create-order:', submitOrderResponse);

@@ -11,7 +11,16 @@ import {
   omitKeys,
   removeInternalParamFields,
 } from './lib/misc-util.js';
-import { REST_CLIENT_TYPE_ENUM, serializeParams } from './lib/requestUtils.js';
+import {
+  APIIDMain,
+  generateNewOrderID,
+  getOrderIdPrefix,
+  logInvalidOrderId,
+  REST_CLIENT_TYPE_ENUM,
+  serializeParams,
+  validateWSAPICustomOrderID,
+  validateWSAPIDerivativesChannelKey,
+} from './lib/requestUtils.js';
 import {
   getSignKeyType,
   SignAlgorithm,
@@ -41,9 +50,16 @@ import {
 } from './lib/websocket/websocket-util.js';
 import { WSConnectedResult } from './lib/websocket/WsStore.types.js';
 import {
+  SpotV1OrderAutoPlaceReq,
+  SpotV1OrderPlaceReq,
+} from './types/request/spot.types.js';
+import { OrderIdProperty } from './types/response/shared.types.js';
+import {
   Exact,
   WS_API_Operations,
+  WSAPIDerivativesOperation,
   WSAPIOperation,
+  WSAPISpotOperation,
   WSAPITopicRequestParamMap,
   WSAPITopicResponseMap,
   WSAPIWsKey,
@@ -226,11 +242,11 @@ export class WebsocketClient extends BaseWebsocketClient<
     // Used by other exchanges for commands that don't require authentication.
     if (requestFlags?.authIsOptional !== true) {
       this.logger.trace(
-        'sendWSAPIRequest(): assertIsAuthenticated(${wsKey})...',
+        `sendWSAPIRequest(): assertIsAuthenticated(${wsKey})...`,
       );
       await this.assertIsAuthenticated(wsKey);
       this.logger.trace(
-        'sendWSAPIRequest(): assertIsAuthenticated(${wsKey}) ok',
+        `sendWSAPIRequest(): assertIsAuthenticated(${wsKey}) ok`,
       );
     }
 
@@ -300,6 +316,14 @@ export class WebsocketClient extends BaseWebsocketClient<
     return false;
   }
 
+  public generateNewOrderID(): string {
+    return generateNewOrderID();
+  }
+
+  public getOrderIdPrefix(): string {
+    return getOrderIdPrefix();
+  }
+
   protected async triggerCustomReconnectionWorkflow(): Promise<void> {
     return;
   }
@@ -317,6 +341,7 @@ export class WebsocketClient extends BaseWebsocketClient<
 
     // These WS Keys use native ping frames, since the JSON ping is not supported for these websocket endpoints (confirmed by HTX)
     const isNativeClientPingWsKey =
+      TRADE_WS_KEYS.includes(wsKey) ||
       wsKey === WS_KEY_MAP.derivativesIndex ||
       wsKey === WS_KEY_MAP.derivativesSystem ||
       wsKey === WS_KEY_MAP.spotPrivateV2;
@@ -470,6 +495,18 @@ export class WebsocketClient extends BaseWebsocketClient<
         const isError = this.isErrorEvent(parsed);
 
         if (isError) {
+          const authPromise =
+            this.getWsStore().getAuthenticationInProgressPromise(wsKey);
+
+          if (authPromise) {
+            const wsState = this.getWsStore().get(wsKey, true);
+            wsState.authRequestState = undefined;
+            wsState.pendingAuthEvent = undefined;
+            wsState.isAuthenticated = false;
+            authPromise.reject?.(emittableEvent);
+            this.getWsStore().removeAuthenticationInProgressPromise(wsKey);
+          }
+
           results.push({
             eventType: 'exception',
             event: emittableEvent,
@@ -555,7 +592,7 @@ export class WebsocketClient extends BaseWebsocketClient<
   }
 
   protected authPrivateConnectionsOnConnect(wsKey: WsKey): boolean {
-    return this.isAuthOnConnectWsKey(wsKey);
+    return this.isAuthOnConnectWsKey(wsKey) && !TRADE_WS_KEYS.includes(wsKey);
   }
 
   protected isAuthOnConnectWsKey(wsKey: WsKey): boolean {
@@ -672,26 +709,33 @@ export class WebsocketClient extends BaseWebsocketClient<
     cid: string,
   ): HTXWSAPIRawRequest {
     if (wsKey === WS_KEY_MAP.spotTrade) {
-      const request: HTXSpotWSAPIRawRequest<string, unknown> = {
+      const request: HTXSpotWSAPIRawRequest<WSAPISpotOperation, unknown> = {
         cid,
-        ch: operation,
+        ch: operation as WSAPISpotOperation,
       };
 
       if (typeof params !== 'undefined') {
         request.params = removeInternalParamFields(params);
       }
 
+      validateWSAPICustomOrderID(request, wsKey);
+
       return request;
     }
 
-    const request: HTXDerivativesWSAPIRawRequest<string, unknown> = {
+    const request: HTXDerivativesWSAPIRawRequest<
+      WSAPIDerivativesOperation,
+      unknown
+    > = {
       cid,
-      op: operation,
+      op: operation as WSAPIDerivativesOperation,
     };
 
     if (typeof params !== 'undefined') {
       request.data = removeInternalParamFields(params);
     }
+
+    validateWSAPIDerivativesChannelKey(request, wsKey);
 
     return request;
   }
@@ -1126,5 +1170,30 @@ export class WebsocketClient extends BaseWebsocketClient<
     }
 
     return undefined;
+  }
+
+  /**
+   *
+   * Misc Utility Methods
+   *
+   */
+
+  /**
+   * Validate syntax meets requirements set by HTX.
+   * Log warning if not.
+   */
+  public validateOrderId(
+    params: SpotV1OrderPlaceReq | SpotV1OrderAutoPlaceReq,
+    orderIdProperty: OrderIdProperty,
+  ): void {
+    if (!params[orderIdProperty]) {
+      params[orderIdProperty] = generateNewOrderID();
+      return;
+    }
+
+    const expectedOrderIdPrefix1 = `${APIIDMain}`;
+    if (!params[orderIdProperty].startsWith(expectedOrderIdPrefix1)) {
+      logInvalidOrderId(orderIdProperty, expectedOrderIdPrefix1, params);
+    }
   }
 }

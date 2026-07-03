@@ -307,7 +307,7 @@ See [FuturesClient](./src/FuturesClient.ts) for further information.
 HTX supports two types of WebSocket connections:
 
 1. **WebSocket Subscriptions** - Real-time market data and account updates via the `WebsocketClient`
-2. **WebSocket API** - REST-like request/response trading via `sendWSAPIRequest()` (TODO: dedicated `WebsocketAPIClient` wrapper)
+2. **WebSocket API** - REST-like request/response trading via `WebsocketAPIClient` or `sendWSAPIRequest()`
 
 ### WebSocket Subscriptions (WebsocketClient)
 
@@ -440,9 +440,9 @@ For more comprehensive examples, including custom logging and error handling, ch
 
 ### WebSocket API (WebsocketAPIClient)
 
-> **TODO:** WebSocket API documentation and a dedicated `WebsocketAPIClient` wrapper are still in progress. Low-level WS API support is available today via `WebsocketClient.sendWSAPIRequest()`, but README examples for trading over WebSockets will be added once the WS API integration is complete.
+Use `WebsocketAPIClient` for typed REST-like trading methods, or call `WebsocketClient.sendWSAPIRequest()` directly for lower-level control.
 
-The underlying `sendWSAPIRequest(wsKey, operation, params)` method is already available on [WebsocketClient](./src/WebsocketClient.ts) for spot and derivatives trade sockets (`WS_KEY_MAP.spotTrade`, `WS_KEY_MAP.linearSwapTrade`, etc.).
+// TODO: examples and detailed docs here, similar to Binance.
 
 ---
 

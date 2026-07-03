@@ -1,114 +1,138 @@
-/**
- * Websocket API v2 Spot Request Types
- */
+export type HTXSpotOrderType =
+  | 'buy-market'
+  | 'sell-market'
+  | 'buy-limit'
+  | 'sell-limit'
+  | 'buy-ioc'
+  | 'sell-ioc'
+  | 'buy-limit-maker'
+  | 'sell-limit-maker'
+  | 'buy-stop-limit'
+  | 'sell-stop-limit'
+  | 'buy-limit-fok'
+  | 'sell-limit-fok'
+  | string;
 
-export interface WSAPIAddSpotOrderParams {
-  order_type:
-    | 'limit'
-    | 'market'
-    | 'iceberg'
-    | 'stop-loss'
-    | 'stop-loss-limit'
-    | 'take-profit'
-    | 'take-profit-limit'
-    | 'trailing-stop'
-    | 'trailing-stop-limit'
-    | 'settle-position';
-  side: 'buy' | 'sell';
-  order_qty: number;
+export interface WSAPISpotOrderParams {
+  'account-id': number | string;
   symbol: string;
-  limit_price?: number;
-  limit_price_type?: 'static' | 'pct' | 'quote';
-  triggers?: {
-    reference?: 'index' | 'last';
-    price: number;
-    price_type?: 'static' | 'pct' | 'quote';
-  };
-  time_in_force?: 'gtc' | 'gtd' | 'ioc';
-  margin?: boolean;
-  post_only?: boolean;
-  reduce_only?: boolean;
-  effective_time?: string;
-  expire_time?: string;
-  deadline?: string;
-  cl_ord_id?: string;
-  order_userref?: number;
-  conditional?: {
-    order_type:
-      | 'limit'
-      | 'stop-loss'
-      | 'stop-loss-limit'
-      | 'take-profit'
-      | 'take-profit-limit'
-      | 'trailing-stop'
-      | 'trailing-stop-limit';
-    limit_price?: number;
-    limit_price_type?: 'static' | 'pct' | 'quote';
-    trigger_price?: number;
-    trigger_price_type?: 'static' | 'pct' | 'quote';
-    stop_price?: number;
-  };
-  display_qty?: number;
-  fee_preference?: 'base' | 'quote';
-  no_mpp?: boolean;
-  stp_type?: 'cancel_newest' | 'cancel_oldest' | 'cancel_both';
-  cash_order_qty?: number;
-  validate?: boolean;
-  sender_sub_id?: string;
+  type: HTXSpotOrderType;
+  amount?: string | number;
+  price?: string | number;
+  'market-amount'?: string | number;
+  source?: string;
+  'client-order-id'?: string;
+  'self-match-prevent'?: number;
+  self_match_prevent?: number;
+  self_match_prevent_new?:
+    | 'cancel_taker'
+    | 'cancel_maker'
+    | 'cancel_both'
+    | string;
+  'stop-price'?: string | number;
+  operator?: 'gte' | 'lte' | string;
+  'coupon-id'?: string;
+  [key: string]: unknown;
 }
 
-export interface WSAPIAmendSpotOrderParams {
-  order_id?: string;
-  cl_ord_id?: string;
-  order_qty: number;
-  display_qty?: number;
-  limit_price?: number;
-  limit_price_type?: 'static' | 'pct' | 'quote';
-  post_only?: boolean;
-  trigger_price?: number;
-  trigger_price_type?: 'static' | 'pct' | 'quote';
-  deadline?: string;
+export type WSAPISpotBatchOrderParams = WSAPISpotOrderParams[];
+
+export interface WSAPISpotMarginOrderParams extends WSAPISpotOrderParams {
+  'repay-amount'?: string | number;
+  'trade-purpose'?: number;
+}
+
+export interface WSAPISpotCancelOrdersParams {
+  'order-ids'?: string[];
+  'client-order-ids'?: string[];
+}
+
+export interface WSAPISpotCancelAllOrdersParams {
+  'account-id': number | string;
   symbol?: string;
+  types?: string;
+  side?: 'buy' | 'sell' | string;
+  size?: number;
 }
 
-export interface WSAPICancelSpotOrderParams {
-  order_id?: string[];
-  cl_ord_id?: string[];
-  order_userref?: number[];
+export type HTXDerivativesDirection = 'buy' | 'sell' | string;
+export type HTXDerivativesOffset = 'open' | 'close' | 'both' | string;
+
+export interface WSAPIDerivativesOrderParams {
+  contract_code?: string;
+  direction?: HTXDerivativesDirection;
+  offset?: HTXDerivativesOffset;
+  price?: string | number;
+  lever_rate?: number;
+  volume?: string | number;
+  order_price_type?: string;
+  client_order_id?: string | number;
+  reduce_only?: number;
+  tp_trigger_price?: string | number;
+  tp_order_price?: string | number;
+  tp_order_price_type?: string;
+  sl_trigger_price?: string | number;
+  sl_order_price?: string | number;
+  sl_order_price_type?: string;
+  self_match_prevent?: string | number;
+  self_match_prevent_new?: string;
+  [key: string]: unknown;
 }
 
-export interface WSAPICancelAllSpotOrdersAfterParams {
-  timeout: number;
+export type WSAPIDerivativesBatchOrderParams = WSAPIDerivativesOrderParams[];
+
+export interface WSAPIDerivativesCancelOrderParams {
+  order_id?: string | number;
+  order_id_str?: string;
+  client_order_id?: string | number;
+  contract_code?: string;
+  [key: string]: unknown;
 }
 
-export interface WSAPIBatchAddSpotOrdersParams {
-  deadline?: string;
-  symbol: string;
-  validate?: boolean;
-  orders: Omit<WSAPIAddSpotOrderParams, 'symbol'>[];
+export interface WSAPIDerivativesCancelAllOrdersParams {
+  contract_code?: string;
+  direction?: HTXDerivativesDirection;
+  offset?: HTXDerivativesOffset;
+  [key: string]: unknown;
 }
 
-export interface WSAPIBatchCancelSpotOrdersParams {
-  orders: string[];
-  cl_ord_id?: string[];
+export interface WSAPIDerivativesPlaceOrderParams {
+  contract_code: string;
+  margin_mode: 'cross' | 'isolated' | string;
+  position_side?: 'long' | 'short' | 'both' | string;
+  side: HTXDerivativesDirection;
+  type: 'market' | 'limit' | 'post_only' | string;
+  price_match?: string | null;
+  time_in_force?: 'gtc' | 'ioc' | 'fok' | string;
+  client_order_id?: string;
+  price?: string;
+  volume: string;
+  reduce_only?: number;
+  tp_trigger_price?: string;
+  tp_order_price?: string;
+  tp_type?: string;
+  tp_trigger_price_type?: 'last' | 'mark' | string;
+  sl_trigger_price?: string;
+  sl_order_price?: string;
+  sl_type?: string;
+  sl_trigger_price_type?: 'last' | 'mark' | string;
+  price_protect?: boolean | string;
+  self_match_prevent?: string;
+  [key: string]: unknown;
 }
 
-export interface WSAPIEditSpotOrderParams {
-  order_id: string;
-  symbol: string;
-  order_qty?: number;
-  limit_price?: number;
-  display_qty?: number;
-  triggers?: {
-    reference?: 'index' | 'last';
-    price: number;
-    price_type?: 'static' | 'pct' | 'quote';
-  };
-  post_only?: boolean;
-  reduce_only?: boolean;
-  fee_preference?: 'base' | 'quote';
-  no_mpp?: boolean;
-  order_userref?: number;
-  deadline?: string;
-  validate?: boolean;
+export type WSAPIDerivativesBatchPlaceOrderParams =
+  WSAPIDerivativesPlaceOrderParams[];
+
+export interface WSAPIDerivativesV5CancelOrderParams {
+  contract_code: string;
+  order_id?: string;
+  client_order_id?: string;
+  [key: string]: unknown;
+}
+
+export interface WSAPIDerivativesV5CancelAllOrdersParams {
+  contract_code?: string;
+  margin_mode?: 'cross' | 'isolated' | string;
+  [key: string]: unknown;
 }

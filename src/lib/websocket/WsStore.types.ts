@@ -54,6 +54,12 @@ export interface WsStoredState<TWSTopicSubscribeEvent extends string | object> {
   /** Whether this connection has completed authentication (only applies to private connections) */
   isAuthenticated?: boolean;
 
+  /** Tracks a multi-step authentication attempt that has not completed yet */
+  authRequestState?: 'preparing' | 'waitingForEvent' | 'sending';
+
+  /** Auth-ready event received while the auth request was still being prepared */
+  pendingAuthEvent?: object;
+
   /**
    * Whether this connection has completed authentication before for the Websocket API, so it knows to automatically reauth if reconnected
    */

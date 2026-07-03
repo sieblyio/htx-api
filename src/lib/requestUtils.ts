@@ -1,6 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { OrderIdProperty } from '../types/response/shared.types';
+import {
+  HTXWSAPIRequest,
+  WSAPIDerivativesOperation,
+  WSAPISpotOperation,
+} from '../types/websockets/ws-api';
+import {
+  isDerivativesWSAPIRequest,
+  isSpotWSAPIRequest,
+} from './websocket/type-guards.js';
+import { WS_KEY_MAP, WsKey } from './websocket/websocket-util.js';
 
 /**
  * Used to switch how authentication/requests work under the hood
@@ -142,7 +152,7 @@ export function logInvalidOrderId(
   params: object,
 ) {
   console.warn(
-    `WARNING: '${orderIdProperty}' invalid - it should be prefixed with ${expectedOrderIdPrefix}. Use the 'client.generateNewOrderID()' REST client utility method to generate a fresh order ID on demand. Original request: ${JSON.stringify(
+    `WARNING: '${orderIdProperty}' invalid - it should be prefixed with ${expectedOrderIdPrefix}. Use 'client.generateNewOrderID()' to generate a fresh order ID on demand, or prefix your own suffix with 'client.getOrderIdPrefix()'. Original request: ${JSON.stringify(
       params,
     )}`,
   );
@@ -150,6 +160,157 @@ export function logInvalidOrderId(
 
 export const APIIDMainKey = 'channel_code';
 export const APIIDMain = 'AA8568bd0c';
+
+function getWSAPICustomOrderIdProperties(
+  operation: WSAPISpotOperation | string,
+  wsKey: WsKey,
+): OrderIdProperty[] {
+  switch (wsKey) {
+    case WS_KEY_MAP.spotPublic:
+    case WS_KEY_MAP.spotFeed:
+    case WS_KEY_MAP.spotPrivateV2:
+    case WS_KEY_MAP.linearSwapPublic:
+    case WS_KEY_MAP.linearSwapPrivate:
+    case WS_KEY_MAP.linearSwapTrade:
+    case WS_KEY_MAP.coinDeliveryPublic:
+    case WS_KEY_MAP.coinDeliveryPrivate:
+    case WS_KEY_MAP.coinDeliveryTrade:
+    case WS_KEY_MAP.coinSwapPublic:
+    case WS_KEY_MAP.coinSwapPrivate:
+    case WS_KEY_MAP.coinSwapTrade:
+    case WS_KEY_MAP.derivativesIndex:
+    case WS_KEY_MAP.derivativesSystem:
+      return [];
+
+    case WS_KEY_MAP.spotTrade: {
+      switch (operation) {
+        case 'create-order':
+        case 'create-batchorder':
+        case 'create-margin-order':
+          return ['client-order-id'];
+      }
+
+      return [];
+    }
+    default: {
+      return [];
+    }
+  }
+}
+
+function isOrderParamRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function getOrderParamRecords(params: unknown): Record<string, unknown>[] {
+  if (Array.isArray(params)) {
+    return params.filter(isOrderParamRecord);
+  }
+
+  if (isOrderParamRecord(params)) {
+    return [params];
+  }
+
+  return [];
+}
+
+export function requiresWSAPINewCustomOID(
+  request: HTXWSAPIRequest,
+  wsKey: WsKey,
+): boolean {
+  if (wsKey !== WS_KEY_MAP.spotTrade || !isSpotWSAPIRequest(request)) {
+    return false;
+  }
+
+  return getWSAPICustomOrderIdProperties(request.ch, wsKey).length > 0;
+}
+
+export function validateWSAPICustomOrderID(
+  request: HTXWSAPIRequest,
+  wsKey: WsKey,
+): void {
+  if (wsKey !== WS_KEY_MAP.spotTrade) {
+    return;
+  }
+
+  if (!isSpotWSAPIRequest(request) || typeof request.params === 'undefined') {
+    return;
+  }
+
+  const newClientOIDProperties = getWSAPICustomOrderIdProperties(
+    request.ch,
+    wsKey,
+  );
+
+  if (!newClientOIDProperties.length) {
+    return;
+  }
+
+  const orderParamRecords = getOrderParamRecords(request.params);
+  const expectedOrderIdPrefix1 = `${getOrderIdPrefix()}`;
+
+  for (const params of orderParamRecords) {
+    for (const orderIdProperty of newClientOIDProperties) {
+      const orderId = params[orderIdProperty];
+
+      if (!orderId) {
+        params[orderIdProperty] = generateNewOrderID();
+        continue;
+      }
+
+      if (
+        typeof orderId !== 'string' ||
+        !orderId.startsWith(expectedOrderIdPrefix1)
+      ) {
+        logInvalidOrderId(orderIdProperty, expectedOrderIdPrefix1, params);
+      }
+    }
+  }
+}
+
+function isDerivativesWSAPIOrderPlacementOperation(
+  operation: WSAPIDerivativesOperation | string,
+): boolean {
+  switch (operation) {
+    case 'create_order':
+    case 'create_cross_order':
+    case 'create_batchorder':
+    case 'create_cross_batchorder':
+    case 'place_order':
+    case 'place_batch_orders':
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+export function validateWSAPIDerivativesChannelKey(
+  request: HTXWSAPIRequest,
+  wsKey: WsKey,
+): void {
+  switch (wsKey) {
+    case WS_KEY_MAP.linearSwapTrade:
+    case WS_KEY_MAP.coinDeliveryTrade:
+    case WS_KEY_MAP.coinSwapTrade:
+      break;
+
+    default:
+      return;
+  }
+
+  if (
+    !isDerivativesWSAPIRequest(request) ||
+    typeof request.data === 'undefined' ||
+    !isDerivativesWSAPIOrderPlacementOperation(request.op)
+  ) {
+    return;
+  }
+
+  for (const params of getOrderParamRecords(request.data)) {
+    params[APIIDMainKey] = APIIDMain;
+  }
+}
 
 export function isEmptyObject(obj: any, acceptStringIfNotEmpty: boolean) {
   if (obj && acceptStringIfNotEmpty && typeof obj === 'string') {
@@ -202,4 +363,17 @@ export function getBaseDomain(url: string): string {
   }
 
   return url;
+}
+
+export function generateNewOrderID(): string {
+  const hexChars = '0123456789abcdef';
+  let result = APIIDMain;
+  for (let i = 0; i < 54; i++) {
+    result += hexChars[Math.floor(Math.random() * 16)];
+  }
+  return result;
+}
+
+export function getOrderIdPrefix(): string {
+  return APIIDMain;
 }

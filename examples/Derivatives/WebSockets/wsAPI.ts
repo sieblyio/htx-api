@@ -1,5 +1,5 @@
-// TODO: HTX WebSocket API support is not implemented yet (WebsocketAPIClient wrapper + HTX-specific examples still to do).
-// This file is a draft placeholder - it will not work until WS API integration is complete.
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// Typed derivatives WS API example using WebsocketAPIClient.
 
 import {
   DefaultLogger,
@@ -63,7 +63,6 @@ async function start() {
     side: 'buy',
     type: 'limit',
     time_in_force: 'gtc',
-    client_order_id: `htx-api-${Date.now()}`,
     price: '20000',
     volume: '1',
     reduce_only: 0,

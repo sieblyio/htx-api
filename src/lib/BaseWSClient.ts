@@ -24,6 +24,7 @@ import {
 } from './websocket/websocket-util.js';
 import { WsStore } from './websocket/WsStore.js';
 import {
+  DeferredPromise,
   WSConnectedResult,
   WsConnectionStateEnum,
 } from './websocket/WsStore.types.js';
@@ -742,40 +743,92 @@ export abstract class BaseWebsocketClient<
     wsKey: TWSKey,
     eventToAuth?: object,
   ): Promise<unknown> {
-    try {
-      this.logger.trace('Sending auth request...', {
+    const wsState = this.wsStore.get(wsKey, true);
+    const existingAuthPromise =
+      this.wsStore.getAuthenticationInProgressPromise(wsKey);
+    if (existingAuthPromise?.promise) {
+      if (eventToAuth && wsState.authRequestState === 'waitingForEvent') {
+        return this.advanceAuthRequest(wsKey, existingAuthPromise, eventToAuth);
+      }
+
+      if (eventToAuth && wsState.authRequestState === 'preparing') {
+        wsState.pendingAuthEvent = eventToAuth;
+      }
+
+      this.logger.trace('Auth request already in progress - awaiting...', {
         ...this.WS_LOGGER_CATEGORY,
         wsKey,
-        eventToAuth,
       });
+      return existingAuthPromise.promise;
+    }
 
+    const authPromise = this.wsStore.createAuthenticationInProgressPromise(
+      wsKey,
+      false,
+    );
+
+    return this.advanceAuthRequest(wsKey, authPromise, eventToAuth);
+  }
+
+  private async advanceAuthRequest(
+    wsKey: TWSKey,
+    authPromise: DeferredPromise<WSConnectedResult & { event: unknown }>,
+    eventToAuth?: object,
+  ): Promise<unknown> {
+    const wsState = this.wsStore.get(wsKey, true);
+    wsState.authRequestState = 'preparing';
+
+    try {
       await this.assertIsConnected(wsKey);
 
       // If not required, this won't return anything
       const request = await this.getWsAuthRequestEvent(wsKey, eventToAuth);
       if (!request) {
         // Short-circuit this for the next time it's called
-        const wsState = this.wsStore.get(wsKey, true);
         wsState.isAuthenticated = true;
-        return;
-      }
-
-      if (!this.wsStore.getAuthenticationInProgressPromise(wsKey)) {
-        this.wsStore.createAuthenticationInProgressPromise(wsKey, false);
+        wsState.authRequestState = undefined;
+        wsState.pendingAuthEvent = undefined;
+        authPromise.resolve?.({
+          wsKey,
+          event: eventToAuth,
+          ws: wsState.ws!,
+        });
+        this.wsStore.removeAuthenticationInProgressPromise(wsKey);
+        return authPromise.promise;
       }
 
       if (request === 'waitForEvent') {
-        return this.wsStore.getAuthenticationInProgressPromise(wsKey)?.promise;
+        wsState.authRequestState = 'waitingForEvent';
+        const pendingAuthEvent = wsState.pendingAuthEvent;
+        if (pendingAuthEvent) {
+          wsState.pendingAuthEvent = undefined;
+          return this.sendAuthRequest(wsKey, pendingAuthEvent);
+        }
+
+        return authPromise.promise;
       }
+
+      wsState.authRequestState = 'sending';
+      this.logger.trace('Sending auth request...', {
+        ...this.WS_LOGGER_CATEGORY,
+        wsKey,
+        eventToAuth,
+      });
 
       this.tryWsSend(
         wsKey,
         typeof request === 'string' ? request : JSON.stringify(request),
+        true,
       );
 
-      return this.wsStore.getAuthenticationInProgressPromise(wsKey)?.promise;
+      return authPromise.promise;
     } catch (e) {
       this.logger.trace(e, { ...this.WS_LOGGER_CATEGORY, wsKey });
+      wsState.authRequestState = undefined;
+      wsState.pendingAuthEvent = undefined;
+      authPromise.reject?.(e);
+      this.wsStore.removeAuthenticationInProgressPromise(wsKey);
+      return authPromise.promise;
     }
   }
 
@@ -1179,7 +1232,16 @@ export abstract class BaseWebsocketClient<
 
     // Some websockets require an auth packet to be sent after opening the connection
     if (this.authPrivateConnectionsOnConnect(wsKey)) {
-      await this.assertIsAuthenticated(wsKey);
+      try {
+        await this.assertIsAuthenticated(wsKey);
+      } catch (e) {
+        this.logger.error('Exception trying to authenticate websocket', {
+          ...this.WS_LOGGER_CATEGORY,
+          wsKey,
+          exception: e,
+        });
+        return;
+      }
     }
 
     // Reconnect to topics known before it connected
@@ -1221,6 +1283,8 @@ export abstract class BaseWebsocketClient<
   private onWsAuthenticated(wsKey: TWSKey, event: unknown) {
     const wsState = this.wsStore.get(wsKey, true);
     wsState.isAuthenticated = true;
+    wsState.authRequestState = undefined;
+    wsState.pendingAuthEvent = undefined;
 
     const authEvent = isObjectLike(event) ? event : {};
 
@@ -1388,7 +1452,13 @@ export abstract class BaseWebsocketClient<
                 wsKey,
               },
             );
-            this.sendAuthRequest(wsKey, emittable.event);
+            this.sendAuthRequest(wsKey, emittable.event).catch((e) => {
+              this.logger.error('Exception trying to send auth request', {
+                ...this.WS_LOGGER_CATEGORY,
+                wsKey,
+                exception: e,
+              });
+            });
             continue;
           }
 
@@ -1476,6 +1546,15 @@ export abstract class BaseWebsocketClient<
 
     const wsState = this.wsStore.get(wsKey, true);
     wsState.isAuthenticated = false;
+    wsState.authRequestState = undefined;
+    wsState.pendingAuthEvent = undefined;
+
+    const authenticationInProgressPromise =
+      this.wsStore.getAuthenticationInProgressPromise(wsKey);
+    if (authenticationInProgressPromise?.reject) {
+      authenticationInProgressPromise.reject('connection lost');
+    }
+    this.wsStore.removeAuthenticationInProgressPromise(wsKey);
 
     const wsConnectionState = this.wsStore.getConnectionState(wsKey);
 

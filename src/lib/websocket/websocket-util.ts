@@ -98,13 +98,9 @@ export const DERIVATIVES_WS_KEYS: WsKey[] = [
 
 export const PRIVATE_WS_KEYS: WsKey[] = [
   WS_KEY_MAP.spotPrivateV2,
-  WS_KEY_MAP.spotTrade,
   WS_KEY_MAP.linearSwapPrivate,
-  WS_KEY_MAP.linearSwapTrade,
   WS_KEY_MAP.coinDeliveryPrivate,
-  WS_KEY_MAP.coinDeliveryTrade,
   WS_KEY_MAP.coinSwapPrivate,
-  WS_KEY_MAP.coinSwapTrade,
 ];
 
 export const TRADE_WS_KEYS: WsKey[] = [

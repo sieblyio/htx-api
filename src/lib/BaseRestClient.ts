@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 // NOTE: https.Agent is Node.js-only and not available in browser environments
@@ -21,7 +20,6 @@ import {
 import {
   checkWebCryptoAPISupported,
   getSignKeyType,
-  hashMessage,
   SignAlgorithm,
   SignEncodeMethod,
   signMessage,

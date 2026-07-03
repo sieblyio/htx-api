@@ -1,5 +1,5 @@
-// TODO: HTX WebSocket API support is not implemented yet (WebsocketAPIClient wrapper + HTX-specific examples still to do).
-// Low-level sendWSAPIRequest() exists on WebsocketClient, but user-facing examples are still to do.
+// Raw low-level WS API example using WebsocketClient.sendWSAPIRequest().
+// Prefer WebsocketAPIClient for typed wrapper methods.
 
 import {
   DefaultLogger,

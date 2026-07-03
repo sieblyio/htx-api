@@ -1551,7 +1551,7 @@ export class SpotClient extends BaseRestClient {
   }
 
   /**
-   * Validate syntax meets requirements set by binance. Log warning if not.
+   * Validate syntax meets requirements set by HTX. Log warning if not.
    */
   private validateOrderId(
     params: SpotV1OrderPlaceReq | SpotV1OrderAutoPlaceReq,
