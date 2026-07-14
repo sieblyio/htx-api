@@ -440,9 +440,45 @@ For more comprehensive examples, including custom logging and error handling, ch
 
 ### WebSocket API (WebsocketAPIClient)
 
-Use `WebsocketAPIClient` for typed REST-like trading methods, or call `WebsocketClient.sendWSAPIRequest()` directly for lower-level control.
+Use `WebsocketAPIClient` for typed REST-like trading methods over a persisted WebSocket connection, or call `WebsocketClient.sendWSAPIRequest()` directly for lower-level control.
 
-// TODO: examples and detailed docs here, similar to Binance.
+Trade connections connect and authenticate lazily on the first request. Optional pre-connect: `client.getWSClient().connectWSAPI(WS_KEY_MAP.spotTrade)`.
+
+Trade keys: `spotTrade`, `linearSwapTrade`, `coinDeliveryTrade`, `coinSwapTrade`.
+
+```javascript
+import { WebsocketAPIClient, WS_KEY_MAP } from '@siebly/htx-api';
+
+const client = new WebsocketAPIClient({
+  apiKey: 'your-api-key',
+  apiSecret: 'your-api-secret',
+});
+
+// Spot
+const order = await client.submitSpotOrder({
+  'account-id': 123456,
+  symbol: 'btcusdt',
+  type: 'buy-limit',
+  amount: '0.001',
+  price: '20000',
+  source: 'spot-api',
+});
+
+// Derivatives
+const linearOrder = await client.placeLinearSwapOrder({
+  contract_code: 'BTC-USDT',
+  margin_mode: 'cross',
+  position_side: 'long',
+  side: 'buy',
+  type: 'limit',
+  time_in_force: 'gtc',
+  price: '20000',
+  volume: '1',
+  reduce_only: 0,
+});
+```
+
+See [WebsocketAPIClient](./src/WebsocketAPIClient.ts) for all typed methods. Examples: [Spot](./examples/Spot/WebSockets/wsAPI.ts), [Derivatives](./examples/Derivatives/WebSockets/wsAPI.ts), [raw spot](./examples/Spot/WebSockets/wsAPI.RAW.ts), [raw derivatives](./examples/Derivatives/WebSockets/wsAPI.RAW.ts).
 
 ---
 

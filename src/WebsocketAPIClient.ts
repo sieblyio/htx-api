@@ -55,23 +55,23 @@ export class WebsocketAPIClient {
     this.setupDefaultEventListeners();
   }
 
-  public getWSClient(): WebsocketClient {
+  getWSClient(): WebsocketClient {
     return this.wsClient;
   }
 
-  public setTimeOffsetMs(newOffset: number): void {
+  setTimeOffsetMs(newOffset: number): void {
     return this.getWSClient().setTimeOffsetMs(newOffset);
   }
 
-  public generateNewOrderID(): string {
+  generateNewOrderID(): string {
     return this.wsClient.generateNewOrderID();
   }
 
-  public getOrderIdPrefix(): string {
+  getOrderIdPrefix(): string {
     return this.wsClient.getOrderIdPrefix();
   }
 
-  public submitSpotOrder(
+  submitSpotOrder(
     params: WSAPISpotOrderParams,
   ): Promise<WSAPIBaseResponse<string | WSAPISpotOrderResult, 'create-order'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -81,7 +81,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public submitSpotBatchOrders(
+  submitSpotBatchOrders(
     params: WSAPISpotBatchOrderParams,
   ): Promise<WSAPIBaseResponse<WSAPISpotOrderResult[], 'create-batchorder'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -91,7 +91,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public submitSpotMarginOrder(
+  submitSpotMarginOrder(
     params: WSAPISpotMarginOrderParams,
   ): Promise<WSAPIBaseResponse<WSAPISpotOrderResult, 'create-margin-order'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -101,7 +101,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public cancelSpotOrders(
+  cancelSpotOrders(
     params: WSAPISpotCancelOrdersParams,
   ): Promise<WSAPIBaseResponse<WSAPISpotCancelOrdersResult, 'cancel'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -111,7 +111,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public cancelAllSpotOrders(
+  cancelAllSpotOrders(
     params: WSAPISpotCancelAllOrdersParams,
   ): Promise<WSAPIBaseResponse<WSAPISpotCancelAllOrdersResult, 'cancelall'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -121,7 +121,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public submitLinearSwapOrder(
+  submitLinearSwapOrder(
     params: WSAPIDerivativesOrderParams,
   ): Promise<WSAPIBaseResponse<WSAPIDerivativesOrderResult, 'create_order'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -131,7 +131,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public submitLinearSwapCrossOrder(
+  submitLinearSwapCrossOrder(
     params: WSAPIDerivativesOrderParams,
   ): Promise<
     WSAPIBaseResponse<WSAPIDerivativesOrderResult, 'create_cross_order'>
@@ -143,7 +143,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public submitLinearSwapBatchOrders(
+  submitLinearSwapBatchOrders(
     params: WSAPIDerivativesBatchOrderParams,
   ): Promise<
     WSAPIBaseResponse<WSAPIDerivativesOrderResult[], 'create_batchorder'>
@@ -155,7 +155,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public submitLinearSwapCrossBatchOrders(
+  submitLinearSwapCrossBatchOrders(
     params: WSAPIDerivativesBatchOrderParams,
   ): Promise<
     WSAPIBaseResponse<WSAPIDerivativesOrderResult[], 'create_cross_batchorder'>
@@ -167,7 +167,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public cancelLinearSwapOrder(
+  cancelLinearSwapOrder(
     params: WSAPIDerivativesCancelOrderParams,
   ): Promise<WSAPIBaseResponse<WSAPIDerivativesOrderResult, 'cancel'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -177,7 +177,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public cancelLinearSwapCrossOrder(
+  cancelLinearSwapCrossOrder(
     params: WSAPIDerivativesCancelOrderParams,
   ): Promise<WSAPIBaseResponse<WSAPIDerivativesOrderResult, 'cross_cancel'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -187,7 +187,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public cancelAllLinearSwapOrders(
+  cancelAllLinearSwapOrders(
     params: WSAPIDerivativesCancelAllOrdersParams,
   ): Promise<WSAPIBaseResponse<WSAPIDerivativesOrderResult, 'cancelall'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -197,7 +197,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public cancelAllLinearSwapCrossOrders(
+  cancelAllLinearSwapCrossOrders(
     params: WSAPIDerivativesCancelAllOrdersParams,
   ): Promise<
     WSAPIBaseResponse<WSAPIDerivativesOrderResult, 'cross_cancelall'>
@@ -209,7 +209,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public placeLinearSwapOrder(
+  placeLinearSwapOrder(
     params: WSAPIDerivativesPlaceOrderParams,
   ): Promise<WSAPIBaseResponse<WSAPIDerivativesV5OrderResult, 'place_order'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -219,7 +219,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public placeLinearSwapBatchOrders(
+  placeLinearSwapBatchOrders(
     params: WSAPIDerivativesBatchPlaceOrderParams,
   ): Promise<
     WSAPIBaseResponse<WSAPIDerivativesV5OrderResult[], 'place_batch_orders'>
@@ -231,7 +231,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public cancelLinearSwapV5Order(
+  cancelLinearSwapV5Order(
     params: WSAPIDerivativesV5CancelOrderParams,
   ): Promise<WSAPIBaseResponse<WSAPIDerivativesV5OrderResult, 'cancel_order'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -241,7 +241,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public cancelLinearSwapV5BatchOrders(
+  cancelLinearSwapV5BatchOrders(
     params: WSAPIDerivativesV5CancelOrderParams[],
   ): Promise<
     WSAPIBaseResponse<WSAPIDerivativesV5OrderResult[], 'cancel_batch_orders'>
@@ -253,7 +253,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public cancelAllLinearSwapV5Orders(
+  cancelAllLinearSwapV5Orders(
     params: WSAPIDerivativesV5CancelAllOrdersParams,
   ): Promise<
     WSAPIBaseResponse<WSAPIDerivativesV5OrderResult, 'cancel_all_orders'>
@@ -265,7 +265,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public submitCoinDeliveryOrder(
+  submitCoinDeliveryOrder(
     params: WSAPIDerivativesOrderParams,
   ): Promise<WSAPIBaseResponse<WSAPIDerivativesOrderResult, 'create_order'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -275,7 +275,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public submitCoinDeliveryBatchOrders(
+  submitCoinDeliveryBatchOrders(
     params: WSAPIDerivativesBatchOrderParams,
   ): Promise<
     WSAPIBaseResponse<WSAPIDerivativesOrderResult[], 'create_batchorder'>
@@ -287,7 +287,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public cancelCoinDeliveryOrder(
+  cancelCoinDeliveryOrder(
     params: WSAPIDerivativesCancelOrderParams,
   ): Promise<WSAPIBaseResponse<WSAPIDerivativesOrderResult, 'cancel'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -297,7 +297,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public cancelAllCoinDeliveryOrders(
+  cancelAllCoinDeliveryOrders(
     params: WSAPIDerivativesCancelAllOrdersParams,
   ): Promise<WSAPIBaseResponse<WSAPIDerivativesOrderResult, 'cancelall'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -307,7 +307,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public submitCoinSwapOrder(
+  submitCoinSwapOrder(
     params: WSAPIDerivativesOrderParams,
   ): Promise<WSAPIBaseResponse<WSAPIDerivativesOrderResult, 'create_order'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -317,7 +317,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public submitCoinSwapBatchOrders(
+  submitCoinSwapBatchOrders(
     params: WSAPIDerivativesBatchOrderParams,
   ): Promise<
     WSAPIBaseResponse<WSAPIDerivativesOrderResult[], 'create_batchorder'>
@@ -329,7 +329,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public cancelCoinSwapOrder(
+  cancelCoinSwapOrder(
     params: WSAPIDerivativesCancelOrderParams,
   ): Promise<WSAPIBaseResponse<WSAPIDerivativesOrderResult, 'cancel'>> {
     return this.wsClient.sendWSAPIRequest(
@@ -339,7 +339,7 @@ export class WebsocketAPIClient {
     );
   }
 
-  public cancelAllCoinSwapOrders(
+  cancelAllCoinSwapOrders(
     params: WSAPIDerivativesCancelAllOrdersParams,
   ): Promise<WSAPIBaseResponse<WSAPIDerivativesOrderResult, 'cancelall'>> {
     return this.wsClient.sendWSAPIRequest(

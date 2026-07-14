@@ -1,23 +1,5 @@
 import { RestClientOptions } from '../../lib/requestUtils.js';
 
-// TODO
-// OLD CODE, KRAKEN
-
-export type DerivativesAPISuccessResponse<TData> = {
-  result: 'success';
-  serverTime: string;
-} & TData;
-
-export interface DerivativesAPIErrorResponse {
-  result: 'error';
-  error: string;
-  serverTime: string;
-}
-
-export type DerivativesAPIResponse<TData> =
-  | DerivativesAPISuccessResponse<TData>
-  | DerivativesAPIErrorResponse;
-
 export interface GenericAPIError<TBody = unknown> {
   code: number;
   message: string;
