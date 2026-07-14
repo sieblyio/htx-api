@@ -56,70 +56,90 @@ async function start() {
     return;
   }
 
-  const order = await client.submitSpotOrder({
-    'account-id': 123456,
-    symbol: 'btcusdt',
-    type: 'buy-limit',
-    amount: '0.001',
-    price: '20000',
-    source: 'spot-api',
-    //
-    // Example of a custom order ID:
-    // to make your own, always include the prefix:
-    // 'client-order-id': `${client.getOrderIdPrefix()}${Date.now()}`,
-    //
-    // or to generate a new unique order ID:
-    // 'client-order-id': client.generateNewOrderID(),
-    //
-    // Note: if you do use the client-order-id, it must be prefixed with `client.getOrderIdPrefix()` and unique. `client.generateNewOrderID()` is the recommended way to generate a unique order ID.
-    // Do not store state in custom order IDs. They are best used as look-up keys for a local state cache.
-    // For more guidance refer to the best practices on Siebly.io:
-    // https://siebly.io/reference/glossary#custom-order-id
-  });
-  console.log('submitSpotOrder:', order);
-
-  const batchOrder = await client.submitSpotBatchOrders([
-    {
+  try {
+    const order = await client.submitSpotOrder({
       'account-id': 123456,
       symbol: 'btcusdt',
       type: 'buy-limit',
       amount: '0.001',
-      price: '19000',
+      price: '20000',
       source: 'spot-api',
-    },
-    {
+      //
+      // Example of a custom order ID:
+      // to make your own, always include the prefix:
+      // 'client-order-id': `${client.getOrderIdPrefix()}${Date.now()}`,
+      //
+      // or to generate a new unique order ID:
+      // 'client-order-id': client.generateNewOrderID(),
+      //
+      // Note: if you do use the client-order-id, it must be prefixed with `client.getOrderIdPrefix()` and unique. `client.generateNewOrderID()` is the recommended way to generate a unique order ID.
+      // Do not store state in custom order IDs. They are best used as look-up keys for a local state cache.
+      // For more guidance refer to the best practices on Siebly.io:
+      // https://siebly.io/reference/glossary#custom-order-id
+    });
+    console.log('submitSpotOrder:', order);
+  } catch (e) {
+    console.error('submitSpotOrder error:', e);
+  }
+
+  try {
+    const batchOrder = await client.submitSpotBatchOrders([
+      {
+        'account-id': 123456,
+        symbol: 'btcusdt',
+        type: 'buy-limit',
+        amount: '0.001',
+        price: '19000',
+        source: 'spot-api',
+      },
+      {
+        'account-id': 123456,
+        symbol: 'ethusdt',
+        type: 'buy-limit',
+        amount: '0.01',
+        price: '1000',
+        source: 'spot-api',
+      },
+    ]);
+    console.log('submitSpotBatchOrders:', batchOrder);
+  } catch (e) {
+    console.error('submitSpotBatchOrders error:', e);
+  }
+
+  try {
+    const marginOrder = await client.submitSpotMarginOrder({
       'account-id': 123456,
-      symbol: 'ethusdt',
-      type: 'buy-limit',
-      amount: '0.01',
-      price: '1000',
-      source: 'spot-api',
-    },
-  ]);
-  console.log('submitSpotBatchOrders:', batchOrder);
+      symbol: 'btcusdt',
+      type: 'sell-limit',
+      amount: '0.001',
+      price: '40000',
+      source: 'super-margin-api',
+      'trade-purpose': 2,
+    });
+    console.log('submitSpotMarginOrder:', marginOrder);
+  } catch (e) {
+    console.error('submitSpotMarginOrder error:', e);
+  }
 
-  const marginOrder = await client.submitSpotMarginOrder({
-    'account-id': 123456,
-    symbol: 'btcusdt',
-    type: 'sell-limit',
-    amount: '0.001',
-    price: '40000',
-    source: 'super-margin-api',
-    'trade-purpose': 2,
-  });
-  console.log('submitSpotMarginOrder:', marginOrder);
+  try {
+    const cancelOrders = await client.cancelSpotOrders({
+      'order-ids': ['123456789'],
+    });
+    console.log('cancelSpotOrders:', cancelOrders);
+  } catch (e) {
+    console.error('cancelSpotOrders error:', e);
+  }
 
-  const cancelOrders = await client.cancelSpotOrders({
-    'order-ids': ['123456789'],
-  });
-  console.log('cancelSpotOrders:', cancelOrders);
-
-  const cancelAll = await client.cancelAllSpotOrders({
-    'account-id': 123456,
-    symbol: 'btcusdt',
-    size: 100,
-  });
-  console.log('cancelAllSpotOrders:', cancelAll);
+  try {
+    const cancelAll = await client.cancelAllSpotOrders({
+      'account-id': 123456,
+      symbol: 'btcusdt',
+      size: 100,
+    });
+    console.log('cancelAllSpotOrders:', cancelAll);
+  } catch (e) {
+    console.error('cancelAllSpotOrders error:', e);
+  }
 }
 
 start();
