@@ -1,8 +1,10 @@
-const { WebsocketAPIClient } = require('@siebly/kraken-api');
+import { WebsocketAPIClient } from '@siebly/htx-api';
+// or, if require is preferred:
+// const { WebsocketAPIClient } = require('@siebly/htx-api');
 
-// This example shows how to call this Kraken WebSocket API endpoint with either node.js, javascript (js) or typescript (ts) with the npm module "@siebly/kraken-api" for Kraken exchange
-// This Kraken API SDK is available on npm via "npm install @siebly/kraken-api"
-// WS API ENDPOINT: add_order
+// This example shows how to call this HTX WebSocket API endpoint with either node.js, javascript (js) or typescript (ts) with the npm module "@siebly/htx-api" for HTX exchange
+// This HTX API SDK is available on npm via "npm install @siebly/htx-api"
+// WS API ENDPOINT: create-order
 // METHOD: WebSocket API
 // PUBLIC: NO
 

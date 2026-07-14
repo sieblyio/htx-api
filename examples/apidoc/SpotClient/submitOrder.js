@@ -1,8 +1,10 @@
-const { SpotClient } = require('@siebly/kraken-api');
+import { SpotClient } from '@siebly/htx-api';
+// or, if require is preferred:
+// const { SpotClient } = require('@siebly/htx-api');
 
-// This example shows how to call this Kraken API endpoint with either node.js, javascript (js) or typescript (ts) with the npm module "@siebly/kraken-api" for Kraken exchange
-// This Kraken API SDK is available on npm via "npm install @siebly/kraken-api"
-// ENDPOINT: 0/private/AddOrder
+// This example shows how to call this HTX API endpoint with either node.js, javascript (js) or typescript (ts) with the npm module "@siebly/htx-api" for HTX exchange
+// This HTX API SDK is available on npm via "npm install @siebly/htx-api"
+// ENDPOINT: /v1/order/orders/place
 // METHOD: POST
 // PUBLIC: NO
 
