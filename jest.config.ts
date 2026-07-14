@@ -44,7 +44,7 @@ const config: Config = {
   //   "clover"
   // ],
 
-  setupFiles: ['./test/setupTests.ts'],
+  // setupFiles: ['./test/setupTests.ts'],
 
   // An object that configures minimum threshold enforcement for coverage results
   // coverageThreshold: undefined,
