@@ -45,4 +45,4 @@ function generateConfig(name) {
   return config;
 }
 
-module.exports = generateConfig('krakenapi');
+module.exports = generateConfig('htxapi');

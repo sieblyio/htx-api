@@ -869,24 +869,6 @@ export abstract class BaseRestClient {
       default: {
         neverGuard(clientType, `Unhandled client type: "${clientType}"`);
       }
-      // case REST_CLIENT_TYPE_ENUM.derivatives: {
-      //   // Support for Authorization header, if provided:
-      //   // https://github.com/tiagosiebler/kucoin-api/issues/2
-      //   // Use restClient.setAccessToken(newToken), if you need to store a new access token
-      //   // Not supported for Kraken at this time
-      //   if (this.apiAccessToken) {
-      //     signHeaders = {
-      //       Authorization: this.apiAccessToken,
-      //     };
-      //   } else {
-      //     signHeaders = {
-      //       Authent: signResult.sign,
-      //       APIKey: this.apiKey,
-      //       'Content-Type': 'application/x-www-form-urlencoded',
-      //     };
-      //   }
-      //   break;
-      // }
     }
 
     const queryParams = signResult.queryParamsWithSign
