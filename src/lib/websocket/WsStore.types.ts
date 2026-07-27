@@ -1,4 +1,4 @@
-import WebSocket from 'isomorphic-ws';
+import { WebSocketLike } from '../../types/websockets/ws-portable.js';
 
 export enum WsConnectionStateEnum {
   INITIAL = 0,
@@ -18,12 +18,12 @@ export interface DeferredPromise<TSuccess = unknown, TError = unknown> {
 
 export interface WSConnectedResult {
   wsKey: string;
-  ws: WebSocket;
+  ws: WebSocketLike;
 }
 
 export interface WsStoredState<TWSTopicSubscribeEvent extends string | object> {
   /** The currently active websocket connection */
-  ws?: WebSocket;
+  ws?: WebSocketLike;
 
   /** The current lifecycle state of the connection (enum) */
   connectionState?: WsConnectionStateEnum;

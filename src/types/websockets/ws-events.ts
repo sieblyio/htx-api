@@ -1,13 +1,11 @@
+import { MessageEventLike } from './ws-portable.js';
+
+export type { MessageEventLike } from './ws-portable.js';
+
 export interface WsDataEvent<TData = unknown, TWSKey = string> {
   data: TData;
   table: string;
   wsKey: TWSKey;
-}
-
-export interface MessageEventLike<TData = string> {
-  target: WebSocket;
-  type: 'message';
-  data: TData;
 }
 
 export function isMessageEvent(msg: unknown): msg is MessageEventLike<string> {

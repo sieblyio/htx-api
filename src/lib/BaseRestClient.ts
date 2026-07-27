@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosRequestConfig, AxiosResponse, Method } from 'axios';
-// NOTE: https.Agent is Node.js-only and not available in browser environments
-// Browser builds (via webpack) exclude this module - see webpack.config.js fallback settings
-import https from 'https';
 
+import {
+  configureHttpsKeepAlive,
+  DEFAULT_REQUEST_HEADERS,
+} from './https-agent.js';
 import { neverGuard } from './misc-util.js';
 import {
   APIIDMain,
@@ -167,29 +168,16 @@ export abstract class BaseRestClient {
       /** inject custom request options based on axios specs - see axios docs for more guidance on AxiosRequestConfig: https://github.com/axios/axios#request-config */
       ...networkOptions,
       headers: {
-        UserAgent: '@siebly/htx-api',
-        locale: 'en-US',
+        ...DEFAULT_REQUEST_HEADERS,
+        ...networkOptions.headers,
       },
     };
 
-    // If enabled, configure a https agent with keepAlive enabled
-    // NOTE: This is Node.js-only functionality. In browser environments, this code is skipped
-    // as the 'https' module is excluded via webpack fallback configuration.
-    // Browser connection pooling is handled automatically by the browser itself.
     if (this.options.keepAlive) {
-      // Extract existing https agent parameters, if provided, to prevent the keepAlive flag from overwriting an existing https agent completely
-      const existingHttpsAgent = this.globalRequestOptions.httpsAgent as
-        | https.Agent
-        | undefined;
-      const existingAgentOptions = existingHttpsAgent?.options || {};
-
-      // For more advanced configuration, raise an issue on GitHub or use the "networkOptions"
-      // parameter to define a custom httpsAgent with the desired properties
-      this.globalRequestOptions.httpsAgent = new https.Agent({
-        ...existingAgentOptions,
-        keepAlive: true,
-        keepAliveMsecs: this.options.keepAliveMsecs,
-      });
+      configureHttpsKeepAlive(
+        this.globalRequestOptions,
+        this.options.keepAliveMsecs,
+      );
     }
 
     this.baseUrl = getRestBaseUrl(restClientOptions, this.getClientType());

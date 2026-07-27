@@ -27,11 +27,34 @@ jobs:
           registry-url: 'https://registry.npmjs.org/'
           cache: 'npm'
 
+      - name: 'Use pinned npm'
+        run: npm install --global --ignore-scripts npm@11.12.0
+
       - name: Install
         run: npm ci --ignore-scripts
 
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run test:types
+
+      - name: Test focused units
+        run: npm run test:unit
+
       - name: Build
         run: npm run build
+
+      - name: Test browser packaging
+        run: node scripts/browser-smoke.mjs
+
+      - name: Test package consumers
+        run: |
+          node scripts/consumer-smoke.mjs
+          node scripts/consumer-types-smoke.mjs
+
+      - name: Test packed package
+        run: node scripts/packed-consumer-smoke.mjs
 
       - name: Test Public REST API Calls
         run: npm run test -- public.test.ts

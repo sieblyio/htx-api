@@ -1,5 +1,7 @@
-import WebSocket from 'isomorphic-ws';
-
+import {
+  WebSocketLike,
+  WebSocketReadyState,
+} from '../../types/websockets/ws-portable.js';
 import { DefaultLogger } from './logger.js';
 import {
   DeferredPromise,
@@ -143,11 +145,11 @@ export class WsStore<
     return this.get(key) && this.isWsOpen(key);
   }
 
-  getWs(key: WsKey): WebSocket | undefined {
+  getWs(key: WsKey): WebSocketLike | undefined {
     return this.get(key)?.ws;
   }
 
-  setWs(key: WsKey, wsConnection: WebSocket): WebSocket {
+  setWs(key: WsKey, wsConnection: WebSocketLike): WebSocketLike {
     if (this.isWsOpen(key)) {
       this.logger.info(
         'WsStore setConnection() overwriting existing open connection: ',
@@ -373,7 +375,7 @@ export class WsStore<
     const existingConnection = this.getWs(key);
     return (
       !!existingConnection &&
-      existingConnection.readyState === existingConnection.OPEN
+      existingConnection.readyState === WebSocketReadyState.OPEN
     );
   }
 

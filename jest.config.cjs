@@ -3,9 +3,8 @@
  * https://jestjs.io/docs/configuration
  */
 
-import type { Config } from 'jest';
-
-const config: Config = {
+/** @type {import('jest').Config} */
+const config = {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
@@ -54,8 +53,6 @@ const config: Config = {
 
   // Make calling deprecated APIs throw helpful error messages
   // errorOnDeprecated: false,
-
-  extensionsToTreatAsEsm: ['.ts'],
 
   // The default configuration for fake timers
   // fakeTimers: {
@@ -191,13 +188,7 @@ const config: Config = {
   // transform: undefined,
 
   transform: {
-    '^.+\\.m?[tj]sx?$': [
-      'ts-jest',
-      {
-        tsconfig: 'test/tsconfig.test.json',
-        useESM: true,
-      },
-    ],
+    '^.+\\.tsx?$': '<rootDir>/scripts/jest-transformer.cjs',
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
@@ -205,9 +196,6 @@ const config: Config = {
   //   "/node_modules/",
   //   "\\.pnp\\.[^\\/]+$"
   // ],
-
-  // Prevents import esm module error from v1 axios release, issue #5026
-  transformIgnorePatterns: ['node_modules/(?!axios)'],
 
   // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
   // unmockedModulePathPatterns: undefined,
@@ -223,4 +211,4 @@ const config: Config = {
   // watchman: true,
 };
 
-export default config;
+module.exports = config;

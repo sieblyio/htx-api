@@ -24,7 +24,7 @@ export type SignEncodeMethod = 'hex' | 'base64' | 'binary';
 export type SignAlgorithm = 'SHA-256' | 'SHA-512';
 
 interface UTF8Encoder {
-  encode(input?: string): Uint8Array;
+  encode(input?: string): Uint8Array<ArrayBuffer>;
 }
 
 export type SignKeyType = 'HMAC' | 'RSASSA-PKCS1-v1_5' | 'Ed25519';

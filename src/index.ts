@@ -1,4 +1,5 @@
 export * from './FuturesClient.js';
+export * from './lib/misc-util.js';
 export { generateNewOrderID, getOrderIdPrefix } from './lib/requestUtils.js';
 export * from './lib/websocket/logger.js';
 export * from './lib/websocket/websocket-util.js';
@@ -11,6 +12,7 @@ export * from './types/response/ws.js';
 export * from './types/websockets/ws-api.js';
 export * from './types/websockets/ws-events.js';
 export * from './types/websockets/ws-general.js';
+export * from './types/websockets/ws-portable.js';
 export * from './types/websockets/ws-subscriptions.js';
 export * from './WebsocketAPIClient.js';
 export * from './WebsocketClient.js';

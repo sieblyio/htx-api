@@ -1,9 +1,8 @@
 import { AxiosRequestConfig } from 'axios';
-import type { ClientRequestArgs } from 'http';
-import WebSocket from 'isomorphic-ws';
 
 import { RestClientOptions } from '../../lib/requestUtils.js';
 import { HtxWSNetwork } from '../../lib/websocket/websocket-util.js';
+import { WSConnectionOptions } from './ws-portable.js';
 
 /** General configuration for the WebsocketClient */
 export interface WSClientConfigurableOptions {
@@ -28,10 +27,7 @@ export interface WSClientConfigurableOptions {
   restOptions?: RestClientOptions;
   requestOptions?: AxiosRequestConfig;
 
-  wsOptions?: {
-    protocols?: string[];
-    agent?: ClientRequestArgs['agent'];
-  } & Partial<WebSocket.ClientOptions | ClientRequestArgs>;
+  wsOptions?: WSConnectionOptions;
 
   wsUrl?: string;
 

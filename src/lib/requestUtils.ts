@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { OrderIdProperty } from '../types/response/shared.types';
+import { OrderIdProperty } from '../types/response/shared.types.js';
 import {
   HTXWSAPIRequest,
   WSAPIDerivativesOperation,
   WSAPISpotOperation,
-} from '../types/websockets/ws-api';
+} from '../types/websockets/ws-api.js';
 import {
   isDerivativesWSAPIRequest,
   isSpotWSAPIRequest,

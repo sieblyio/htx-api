@@ -1,5 +1,3 @@
-import WebSocket from 'isomorphic-ws';
-
 import {
   BaseWebsocketClient,
   EmittableEvent,
@@ -72,6 +70,10 @@ import {
   WsDerivativesAuthParams,
   WsSpotAuthParams,
 } from './types/websockets/ws-general.js';
+import {
+  WebSocketLike,
+  WebSocketReadyState,
+} from './types/websockets/ws-portable.js';
 import {
   isPrivateTopic,
   WSTopic,
@@ -209,9 +211,8 @@ export class WebsocketClient extends BaseWebsocketClient<
     TWSOperation extends keyof WSAPITopicRequestParamMap &
       WSAPIWsKeyTopicMap[TWSKey],
     TWSParams extends Exact<WSAPITopicRequestParamMap[TWSOperation]>,
-    TWSAPIResponse extends
-      | WSAPITopicResponseMap[TWSOperation]
-      | object = WSAPITopicResponseMap[TWSOperation],
+    TWSAPIResponse extends WSAPITopicResponseMap[TWSOperation] | object =
+      WSAPITopicResponseMap[TWSOperation],
   >(
     wsKey: TWSKey,
     operation: TWSOperation,
@@ -224,9 +225,8 @@ export class WebsocketClient extends BaseWebsocketClient<
     TWSOperation extends keyof WSAPITopicRequestParamMap &
       WSAPIWsKeyTopicMap[TWSKey],
     TWSParams extends Exact<WSAPITopicRequestParamMap[TWSOperation]>,
-    TWSAPIResponse extends
-      | WSAPITopicResponseMap[TWSOperation]
-      | object = WSAPITopicResponseMap[TWSOperation],
+    TWSAPIResponse extends WSAPITopicResponseMap[TWSOperation] | object =
+      WSAPITopicResponseMap[TWSOperation],
   >(
     wsKey: TWSKey,
     operation: TWSOperation,
@@ -336,7 +336,7 @@ export class WebsocketClient extends BaseWebsocketClient<
     return getHtxWsUrl(wsKey, this.getWsNetwork());
   }
 
-  protected sendPingEvent(wsKey: WsKey, ws: WebSocket) {
+  protected sendPingEvent(wsKey: WsKey, ws: WebSocketLike): boolean {
     const ts = Date.now() + this.getTimeOffsetMs();
 
     // These WS Keys use native ping frames, since the JSON ping is not supported for these websocket endpoints (confirmed by HTX)
@@ -353,31 +353,31 @@ export class WebsocketClient extends BaseWebsocketClient<
             'Unable to send WS ping frame. Not available in this environment.',
             { ...WS_LOGGER_CATEGORY, wsKey },
           );
-          return;
+          return false;
         }
 
-        if (ws.readyState !== WebSocket.OPEN) {
+        if (ws.readyState !== WebSocketReadyState.OPEN) {
           this.logger.trace(
             'WS ready state not open - refusing to send WS ping frame',
             { ...WS_LOGGER_CATEGORY, wsKey, readyState: ws.readyState },
           );
-          return;
+          return false;
         }
 
         ws.ping();
+        return true;
       } catch (e) {
         this.logger.error('Failed to send WS ping frame', {
           ...WS_LOGGER_CATEGORY,
           wsKey,
           exception: e,
         });
+        return false;
       }
-
-      return;
     }
 
     if (this.isSpotPrivateProtocolWsKey(wsKey)) {
-      this.tryWsSend(
+      return this.tryWsSendWithStatus(
         wsKey,
         JSON.stringify({
           action: 'ping',
@@ -386,21 +386,19 @@ export class WebsocketClient extends BaseWebsocketClient<
           },
         }),
       );
-      return;
     }
 
     if (this.isDerivativesOperationProtocolWsKey(wsKey)) {
-      this.tryWsSend(
+      return this.tryWsSendWithStatus(
         wsKey,
         JSON.stringify({
           op: 'ping',
           ts,
         }),
       );
-      return;
     }
 
-    this.tryWsSend(
+    return this.tryWsSendWithStatus(
       wsKey,
       JSON.stringify({
         ping: ts,
@@ -408,7 +406,7 @@ export class WebsocketClient extends BaseWebsocketClient<
     );
   }
 
-  protected sendPongEvent(wsKey: WsKey, _ws: WebSocket, event?: unknown) {
+  protected sendPongEvent(wsKey: WsKey, _ws: WebSocketLike, event?: unknown) {
     const parsed = this.parseWsMessage(event);
     const ts = this.getHeartbeatTimestamp(parsed) || Date.now();
 
