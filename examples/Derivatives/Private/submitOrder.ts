@@ -26,7 +26,6 @@ async function submitLinearSwapIsolatedOrder() {
       volume: 1,
       lever_rate: leverRate,
       order_price_type: 'market',
-      client_order_id: client.generateNewOrderID(),
     });
     console.log('Linear Swap Isolated Order: ', res);
   } catch (e) {
@@ -43,7 +42,6 @@ async function submitLinearSwapCrossOrder() {
       volume: 2,
       lever_rate: leverRate,
       order_price_type: 'market',
-      client_order_id: client.generateNewOrderID(),
     });
     console.log('Linear Swap Cross Order: ', res);
   } catch (e) {
@@ -62,7 +60,6 @@ async function submitLinearSwapIsolatedBatchOrders() {
           volume: 3,
           lever_rate: leverRate,
           order_price_type: 'market',
-          client_order_id: client.generateNewOrderID(),
         },
       ],
     });
@@ -86,7 +83,6 @@ async function submitLinearSwapCrossBatchOrders() {
           volume: 4,
           lever_rate: leverRate,
           order_price_type: 'market',
-          client_order_id: client.generateNewOrderID(),
         },
       ],
     });
@@ -108,7 +104,6 @@ async function submitMultiAssetOrder() {
       type: 'market',
       volume: '5',
       position_side: 'long',
-      client_order_id: String(client.generateNewOrderID()),
     });
     console.log('Multi-Asset Order: ', res);
   } catch (e) {
@@ -126,7 +121,6 @@ async function submitMultiAssetBatchOrders() {
         type: 'market',
         volume: '6',
         position_side: 'long',
-        client_order_id: String(client.generateNewOrderID()),
       },
     ]);
     console.log('Multi-Asset Batch Orders: ', res);
@@ -145,7 +139,6 @@ async function submitCoinMDeliveryOrder() {
       volume: 7,
       lever_rate: leverRate,
       order_price_type: 'opponent',
-      client_order_id: client.generateNewOrderID(),
     });
     console.log('Coin-M Delivery Order: ', res);
   } catch (e) {
@@ -165,7 +158,6 @@ async function submitCoinMDeliveryBatchOrders() {
           volume: 8,
           lever_rate: leverRate,
           order_price_type: 'opponent',
-          client_order_id: client.generateNewOrderID(),
         },
       ],
     });
@@ -184,7 +176,6 @@ async function submitCoinMPerpOrder() {
       volume: 9,
       lever_rate: leverRate,
       order_price_type: 'opponent',
-      client_order_id: client.generateNewOrderID(),
     });
     console.log('Coin-M Perp Order: ', res);
   } catch (e) {
@@ -203,7 +194,6 @@ async function submitCoinMPerpBatchOrders() {
           volume: 10,
           lever_rate: leverRate,
           order_price_type: 'opponent',
-          client_order_id: client.generateNewOrderID(),
         },
       ],
     });
@@ -220,7 +210,6 @@ async function submitCoinMPerpLightningCloseOrder() {
       volume: 11,
       direction: 'sell',
       order_price_type: 'lightning',
-      client_order_id: client.generateNewOrderID(),
     });
     console.log('Coin-M Perp Lightning Close Order: ', res);
   } catch (e) {
