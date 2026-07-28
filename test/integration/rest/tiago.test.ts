@@ -1,4 +1,4 @@
-import { SpotClient } from '../../src/index.js';
+import { SpotClient } from '../../../src/index.js';
 
 describe('REST PUBLIC', () => {
   describe('public endpoints - SpotClient', () => {

@@ -169,11 +169,11 @@ ${runtimeConsumerAssertions}
 `,
     ),
     copyFile(
-      path.join(repoRoot, 'test/consumer/browser-rest.ts'),
+      path.join(repoRoot, 'test/packaging/fixtures/browser-rest.ts'),
       path.join(consumerRoot, 'src/browser-rest.ts'),
     ),
     copyFile(
-      path.join(repoRoot, 'test/consumer/browser-websocket.ts'),
+      path.join(repoRoot, 'test/packaging/fixtures/browser-websocket.ts'),
       path.join(consumerRoot, 'src/browser-websocket.ts'),
     ),
   ]);

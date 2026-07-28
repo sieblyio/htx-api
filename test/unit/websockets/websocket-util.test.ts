@@ -7,8 +7,8 @@ import {
   getPromiseRefPrefixForWSAPIRequest,
   isBinaryLike,
   WS_KEY_MAP,
-} from '../../src/lib/websocket/websocket-util';
-import { WebSocketLike } from '../../src/types/websockets/ws-portable';
+} from '../../../src/lib/websocket/websocket-util';
+import { WebSocketLike } from '../../../src/types/websockets/ws-portable';
 
 describe('websocket-util', () => {
   describe('getPromiseRefForWSAPIRequest()', () => {

@@ -1,12 +1,11 @@
 import NodeWebSocket, { ClientOptions } from 'ws';
 
-import { WebsocketClient } from '../../src/WebsocketClient';
 import {
   MessageEventLike,
   WebSocketBinaryData,
   WebSocketLike,
   WSConnectionOptions,
-} from '../../src/types/websockets/ws-portable';
+} from '../../src/types/websockets/ws-portable.js';
 
 declare const browserSocket: WebSocket;
 declare const browserMessage: MessageEvent<ArrayBuffer>;
@@ -22,9 +21,9 @@ acceptSocket(nodeSocket);
 const portableMessage: MessageEventLike<ArrayBuffer> = browserMessage;
 const portableOptions: WSConnectionOptions = nodeOptions;
 const portableBinary: WebSocketBinaryData = nodeBuffer;
-
-new WebsocketClient({ wsOptions: nodeOptions });
+const browserProtocols: WSConnectionOptions = { protocols: 'chat' };
 
 void portableMessage;
 void portableOptions;
 void portableBinary;
+void browserProtocols;

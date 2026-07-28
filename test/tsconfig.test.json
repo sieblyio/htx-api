@@ -10,5 +10,5 @@
     "types": ["node", "jest"]
   },
   "include": ["../src/**/*.*", "../test/**/*.*"],
-  "exclude": ["consumer/**/*"]
+  "exclude": ["packaging/fixtures/**/*", "types/**/*"]
 }

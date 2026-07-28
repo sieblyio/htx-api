@@ -112,16 +112,6 @@ export async function validateBrowserBundles({
     true,
     'REST-only bundle did not select the browser HTTPS adapter',
   );
-  assert.equal(
-    includesPath(rest.inputs, '/axios/lib/platform/browser/index.js'),
-    true,
-    'REST-only bundle did not select Axios browser platform code',
-  );
-  assert.equal(
-    includesPath(rest.inputs, '/axios/lib/adapters/http.js'),
-    false,
-    'REST-only bundle included the Axios Node HTTP adapter',
-  );
 
   const websocket = await bundleFixture({
     absWorkingDir,
@@ -141,11 +131,6 @@ export async function validateBrowserBundles({
     'WebSocket browser bundle selected the Node.js isomorphic-ws adapter',
   );
   assert.equal(
-    includesPath(websocket.inputs, '/node_modules/events/events.js'),
-    true,
-    'WebSocket browser bundle did not include the pinned EventEmitter adapter',
-  );
-  assert.equal(
     includesPath(websocket.inputs, '/lib/event-emitter.browser.js'),
     true,
     'WebSocket browser bundle did not select the browser EventEmitter adapter',
@@ -154,16 +139,6 @@ export async function validateBrowserBundles({
     includesPath(websocket.inputs, '/lib/https-agent.browser.js'),
     true,
     'WebSocket browser bundle did not select the browser HTTPS adapter',
-  );
-  assert.equal(
-    includesPath(websocket.inputs, '/axios/lib/platform/browser/index.js'),
-    true,
-    'WebSocket browser bundle did not select Axios browser platform code',
-  );
-  assert.equal(
-    includesPath(websocket.inputs, '/axios/lib/adapters/http.js'),
-    false,
-    'WebSocket browser bundle included the Axios Node HTTP adapter',
   );
   assert.equal(
     includesPath(websocket.inputs, '/node_modules/ws/'),

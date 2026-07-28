@@ -1,4 +1,4 @@
-import { FuturesClient } from '../../src/index.js';
+import { FuturesClient } from '../../../src/index.js';
 import { getTestProxy } from '../proxy.util.js';
 
 describe('REST PRIVATE FUTURES WRITE', () => {

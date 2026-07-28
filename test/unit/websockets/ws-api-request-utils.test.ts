@@ -4,12 +4,12 @@ import {
   getOrderIdPrefix,
   validateWSAPICustomOrderID,
   validateWSAPIDerivativesChannelKey,
-} from '../../src/lib/requestUtils';
-import { WS_KEY_MAP } from '../../src/lib/websocket/websocket-util';
+} from '../../../src/lib/requestUtils';
+import { WS_KEY_MAP } from '../../../src/lib/websocket/websocket-util';
 import {
   HTXDerivativesWSAPIRequest,
   HTXSpotWSAPIRequest,
-} from '../../src/types/websockets/ws-api';
+} from '../../../src/types/websockets/ws-api';
 
 describe('WS API request utilities', () => {
   afterEach(() => {

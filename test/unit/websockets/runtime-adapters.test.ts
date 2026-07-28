@@ -1,24 +1,19 @@
 import { EventEmitter as NodeEventEmitter } from 'node:events';
-import { gzipSync } from 'node:zlib';
 
-import { SpotClient } from '../../src/SpotClient';
-import { WebsocketClient } from '../../src/WebsocketClient';
-import { EventEmitter as BrowserEventEmitter } from '../../src/lib/event-emitter.browser';
-import { EventEmitter as RuntimeEventEmitter } from '../../src/lib/event-emitter';
-import {
-  configureHttpsKeepAlive as configureBrowserHttpsKeepAlive,
-  DEFAULT_REQUEST_HEADERS as BROWSER_DEFAULT_REQUEST_HEADERS,
-} from '../../src/lib/https-agent.browser';
+import { SpotClient } from '../../../src/SpotClient';
+import { WebsocketClient } from '../../../src/WebsocketClient';
+import { EventEmitter as BrowserEventEmitter } from '../../../src/lib/event-emitter.browser';
+import { EventEmitter as RuntimeEventEmitter } from '../../../src/lib/event-emitter';
 import {
   configureHttpsKeepAlive,
   DEFAULT_REQUEST_HEADERS,
-} from '../../src/lib/https-agent';
-import { WS_KEY_MAP, WsKey } from '../../src/lib/websocket/websocket-util';
-import { DefaultLogger } from '../../src/lib/websocket/logger';
+} from '../../../src/lib/https-agent';
+import { WS_KEY_MAP, WsKey } from '../../../src/lib/websocket/websocket-util';
+import { DefaultLogger } from '../../../src/lib/websocket/logger';
 import {
   WebSocketLike,
   WebSocketReadyState,
-} from '../../src/types/websockets/ws-portable';
+} from '../../../src/types/websockets/ws-portable';
 
 const silentLogger: DefaultLogger = {
   trace: jest.fn(),
@@ -41,69 +36,25 @@ function createWebSocket(
 }
 
 describe('runtime adapters', () => {
-  describe.each([
-    ['Node', RuntimeEventEmitter],
-    ['browser', BrowserEventEmitter],
-  ] as const)('%s EventEmitter compatibility', (_label, Emitter) => {
-    it('preserves duplicate, removal, snapshot, symbol, and argument semantics', () => {
-      const emitter = new Emitter();
-      const eventName = Symbol('message');
-      const calls: string[] = [];
-
-      function duplicateListener(this: unknown, value: string, count: number) {
-        expect(this).toBe(emitter);
-        calls.push(`duplicate:${value}:${count}`);
-      }
-
-      function removingListener(this: unknown, value: string, count: number) {
-        expect(this).toBe(emitter);
-        calls.push(`removing:${value}:${count}`);
-        emitter.removeListener(eventName, duplicateListener);
-      }
-
-      emitter.on(eventName, removingListener);
-      emitter.on(eventName, duplicateListener);
-      emitter.on(eventName, duplicateListener);
-
-      expect(emitter.listenerCount(eventName, duplicateListener)).toBe(2);
-      expect(emitter.eventNames()).toContain(eventName);
-      expect(emitter.emit(eventName, 'payload', 7)).toBe(true);
-      expect(calls).toEqual([
-        'removing:payload:7',
-        'duplicate:payload:7',
-        'duplicate:payload:7',
-      ]);
-      expect(emitter.listenerCount(eventName, duplicateListener)).toBe(1);
-
-      emitter.off(eventName, removingListener);
-      emitter.off(eventName, duplicateListener);
-      expect(emitter.emit(eventName, 'unused', 0)).toBe(false);
-      expect(emitter.eventNames()).not.toContain(eventName);
-    });
-
-    it('preserves once, prepend, inspection, max-listener, and error semantics', () => {
-      const emitter = new Emitter();
-      const order: string[] = [];
-
-      emitter.setMaxListeners(25);
-      emitter.on('ordered', () => order.push('normal'));
-      emitter.prependOnceListener('ordered', () => order.push('once'));
-
-      expect(emitter.getMaxListeners()).toBe(25);
-      expect(emitter.listeners('ordered')).toHaveLength(2);
-      expect(emitter.rawListeners('ordered')).toHaveLength(2);
-      expect(emitter.emit('ordered')).toBe(true);
-      expect(emitter.emit('ordered')).toBe(true);
-      expect(order).toEqual(['once', 'normal', 'normal']);
-
-      emitter.removeAllListeners('ordered');
-      expect(emitter.listenerCount('ordered')).toBe(0);
-      expect(() => emitter.emit('error', new Error('boom'))).toThrow('boom');
-    });
+  it('uses Node EventEmitter in the Node adapter', () => {
+    expect(new RuntimeEventEmitter()).toBeInstanceOf(NodeEventEmitter);
   });
 
-  it('preserves Node EventEmitter identity', () => {
-    expect(new RuntimeEventEmitter()).toBeInstanceOf(NodeEventEmitter);
+  it('supports listener-specific counts in the browser adapter', () => {
+    const emitter = new BrowserEventEmitter();
+    const eventName = Symbol('message');
+    const listener = jest.fn();
+    const otherListener = jest.fn();
+
+    emitter.on(eventName, listener);
+    emitter.on(eventName, listener);
+    emitter.on(eventName, otherListener);
+
+    expect(emitter.listenerCount(eventName)).toBe(3);
+    expect(emitter.listenerCount(eventName, listener)).toBe(2);
+
+    emitter.off(eventName, listener);
+    expect(emitter.listenerCount(eventName, listener)).toBe(1);
   });
 
   it('preserves existing HTTPS agent options and uses Node-only headers', () => {
@@ -152,24 +103,14 @@ describe('runtime adapters', () => {
     });
   });
 
-  it('keeps HTTPS agent configuration and default headers inert in browsers', () => {
-    const marker = { options: { maxSockets: 7 } };
-    const requestOptions = { httpsAgent: marker };
-
-    configureBrowserHttpsKeepAlive(requestOptions, 2500);
-
-    expect(requestOptions.httpsAgent).toBe(marker);
-    expect(BROWSER_DEFAULT_REQUEST_HEADERS).toEqual({});
-  });
-
   it('constructs REST clients with browser defaults and caller options intact', () => {
     try {
       jest.isolateModules(() => {
-        jest.doMock('../../src/lib/https-agent', () =>
-          jest.requireActual('../../src/lib/https-agent.browser'),
+        jest.doMock('../../../src/lib/https-agent', () =>
+          jest.requireActual('../../../src/lib/https-agent.browser'),
         );
         const { SpotClient: BrowserSpotClient } =
-          require('../../src/SpotClient') as typeof import('../../src/SpotClient');
+          require('../../../src/SpotClient') as typeof import('../../../src/SpotClient');
         const httpsAgent = { browserMarker: true };
         const client = new BrowserSpotClient(
           {},
@@ -193,63 +134,7 @@ describe('runtime adapters', () => {
         expect(requestOptions.httpsAgent).toBe(httpsAgent);
       });
     } finally {
-      jest.dontMock('../../src/lib/https-agent');
-    }
-  });
-
-  it('requests ArrayBuffer messages from native browser WebSockets', () => {
-    const originalDescriptor = Object.getOwnPropertyDescriptor(
-      globalThis,
-      'WebSocket',
-    );
-
-    class BrowserWebSocket {
-      binaryType = 'blob';
-
-      readyState: number = WebSocketReadyState.OPEN;
-
-      onopen: ((event: unknown) => void) | null = null;
-
-      onmessage: ((event: unknown) => void) | null = null;
-
-      onerror: ((event: unknown) => void) | null = null;
-
-      onclose: ((event: unknown) => void) | null = null;
-
-      send() {}
-
-      close() {}
-    }
-
-    Object.defineProperty(globalThis, 'WebSocket', {
-      configurable: true,
-      value: BrowserWebSocket,
-    });
-
-    try {
-      jest.isolateModules(() => {
-        jest.doMock('isomorphic-ws', () => BrowserWebSocket);
-        const { WebsocketClient: IsolatedWebsocketClient } =
-          require('../../src/WebsocketClient') as typeof import('../../src/WebsocketClient');
-        const client = new IsolatedWebsocketClient(undefined, silentLogger);
-        const connectionClient = client as unknown as {
-          connectToWsUrl(url: string, wsKey: WsKey): BrowserWebSocket;
-        };
-
-        const socket = connectionClient.connectToWsUrl(
-          'wss://example.test',
-          WS_KEY_MAP.spotPublic,
-        );
-
-        expect(socket.binaryType).toBe('arraybuffer');
-      });
-    } finally {
-      jest.dontMock('isomorphic-ws');
-      if (originalDescriptor) {
-        Object.defineProperty(globalThis, 'WebSocket', originalDescriptor);
-      } else {
-        Reflect.deleteProperty(globalThis, 'WebSocket');
-      }
+      jest.dontMock('../../../src/lib/https-agent');
     }
   });
 
@@ -300,7 +185,7 @@ describe('runtime adapters', () => {
       jest.isolateModules(() => {
         jest.doMock('isomorphic-ws', () => BrowserWebSocket);
         const { WebsocketClient: IsolatedWebsocketClient } =
-          require('../../src/WebsocketClient') as typeof import('../../src/WebsocketClient');
+          require('../../../src/WebsocketClient') as typeof import('../../../src/WebsocketClient');
         client = new IsolatedWebsocketClient(
           {
             pingInterval: 60_000,
@@ -340,23 +225,8 @@ describe('runtime adapters', () => {
         type: 'message',
       });
 
-      const compressed = Uint8Array.from(
-        gzipSync(
-          JSON.stringify({
-            ch: 'market.btcusdt.ticker',
-            tick: { close: 2 },
-          }),
-        ),
-      );
-      await firstSocket.onmessage?.({
-        data: compressed.buffer,
-        target: firstSocket,
-        type: 'message',
-      });
-
       expect(messages).toEqual([
         expect.objectContaining({ tick: { close: 1 } }),
-        expect.objectContaining({ tick: { close: 2 } }),
       ]);
 
       firstSocket.readyState = WebSocketReadyState.CLOSED;

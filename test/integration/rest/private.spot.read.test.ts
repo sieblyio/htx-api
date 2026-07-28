@@ -1,13 +1,13 @@
-import { FuturesClient } from '../../src/index.js';
+import { SpotClient } from '../../../src/index.js';
 import { getTestProxy } from '../proxy.util.js';
 
-describe('REST PRIVATE FUTURES READ', () => {
+describe('REST PRIVATE SPOT READ', () => {
   const account = {
-    key: process.env.API_FUTURES_KEY,
-    secret: process.env.API_FUTURES_SECRET,
+    key: process.env.API_SPOT_KEY,
+    secret: process.env.API_SPOT_SECRET,
   };
 
-  const rest = new FuturesClient(
+  const rest = new SpotClient(
     {
       apiKey: account.key,
       apiSecret: account.secret,
@@ -21,15 +21,14 @@ describe('REST PRIVATE FUTURES READ', () => {
   });
 
   describe('private GET without params', () => {
-    it('should succeed calling getLinearSwapAccountType', async () => {
+    it('should succeed calling getAccounts', async () => {
       try {
-        const res = await rest.getLinearSwapAccountType();
-
+        const res = await rest.getAccounts();
         // console.log(`res "${expect.getState().currentTestName}"`, res);
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
-        expect(res.data).toHaveProperty('account_type');
+        expect(Array.isArray(res.data)).toBe(true);
       } catch (e: unknown) {
         console.log(
           `err "${expect.getState().currentTestName}"`,
@@ -39,9 +38,9 @@ describe('REST PRIVATE FUTURES READ', () => {
       }
     });
 
-    it('should succeed calling getLinearSwapSubPermissions', async () => {
+    it('should succeed calling getAccountSwitchUserInfo', async () => {
       try {
-        const res = await rest.getLinearSwapSubPermissions();
+        const res = await rest.getAccountSwitchUserInfo();
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
@@ -56,9 +55,11 @@ describe('REST PRIVATE FUTURES READ', () => {
   });
 
   describe('private GET with params', () => {
-    it('should succeed calling getLinearSwapSubPermissions with params', async () => {
+    it('should succeed calling getAccountValuation with params', async () => {
       try {
-        const res = await rest.getLinearSwapSubPermissions({ sub_uid: '1' });
+        const res = await rest.getAccountValuation({
+          valuationCurrency: 'BTC',
+        });
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
@@ -71,12 +72,9 @@ describe('REST PRIVATE FUTURES READ', () => {
       }
     });
 
-    it('should succeed calling getLinearSwapCrossTradeState with params', async () => {
+    it('should succeed calling getOpenOrders with params', async () => {
       try {
-        const res = await rest.getLinearSwapCrossTradeState({
-          contract_code: 'btc-usdt',
-          business_type: 'swap',
-        });
+        const res = await rest.getOpenOrders({ symbol: 'btcusdt' });
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
@@ -90,15 +88,22 @@ describe('REST PRIVATE FUTURES READ', () => {
       }
     });
 
-    it('should succeed calling getLinearSwapCrossTransferState with params', async () => {
+    it('should succeed calling getAccountBalance with accountId', async () => {
       try {
-        const res = await rest.getLinearSwapCrossTransferState({
-          margin_account: 'USDT',
+        const accountsRes = await rest.getAccounts();
+        const accountId = accountsRes.data?.[0]?.id;
+        if (!accountId) {
+          expect(accountsRes.data?.length).toBeGreaterThan(0);
+          return;
+        }
+
+        const res = await rest.getAccountBalance({
+          accountId: String(accountId),
         });
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
-        expect(Array.isArray(res.data)).toBe(true);
+        expect(res.data).toHaveProperty('list');
       } catch (e: unknown) {
         console.log(
           `err "${expect.getState().currentTestName}"`,

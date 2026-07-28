@@ -8,8 +8,8 @@
     "test": "jest --passWithNoTests",
     "test:extensions": "tsc -p tsconfig.extensions.json",
     "test:packed": "npm run build && node test/packaging/packed-consumer-smoke.mjs",
-    "test:types": "npm run test:extensions && tsc -p test/tsconfig.test.json --noEmit && tsc -p test/types/tsconfig.exact.json",
-    "test:unit": "jest --passWithNoTests --runInBand test/websockets",
+    "test:types": "npm run test:extensions && tsc -p test/tsconfig.test.json --noEmit && tsc -p test/types/tsconfig.json",
+    "test:unit": "jest --passWithNoTests --runInBand test/unit",
     "lint": "eslint src"
   },
   "main": "dist/cjs/index.js",
