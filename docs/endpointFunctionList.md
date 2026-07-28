@@ -2,7 +2,7 @@
 # Endpoint maps
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/htx-api">
+  <a href="https://www.npmjs.com/package/@siebly/htx-api">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://github.com/sieblyio/htx-api/blob/main/docs/images/logoDarkMode2.svg?raw=true#gh-dark-mode-only">
       <img alt="SDK Logo" src="https://github.com/sieblyio/htx-api/blob/main/docs/images/logoBrightMode2.svg?raw=true#gh-light-mode-only">

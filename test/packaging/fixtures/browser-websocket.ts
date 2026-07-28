@@ -1,4 +1,4 @@
-import { SpotClient, WebsocketClient, WS_KEY_MAP } from 'htx-api';
+import { SpotClient, WebsocketClient, WS_KEY_MAP } from '@siebly/htx-api';
 
 /** Exercise the package's REST browser adapter in the full SDK fixture. */
 export function createPublicRestClient() {

@@ -1,15 +1,15 @@
 # Node.js & JavaScript SDK for HTX REST APIs & WebSockets
 
 [![Build & Test](https://github.com/sieblyio/htx-api/actions/workflows/e2etest.yml/badge.svg?branch=main)](https://github.com/sieblyio/htx-api/actions/workflows/e2etest.yml)
-[![npm version](https://img.shields.io/npm/v/htx-api)][1]
-[![npm size](https://img.shields.io/bundlephobia/min/htx-api/latest)][1]
-[![npm downloads](https://img.shields.io/npm/dt/htx-api)][1]
+[![npm version](https://img.shields.io/npm/v/%40siebly%2Fhtx-api)][1]
+[![npm size](https://img.shields.io/bundlephobia/min/%40siebly%2Fhtx-api/latest)][1]
+[![npm downloads](https://img.shields.io/npm/dt/%40siebly%2Fhtx-api)][1]
 [![last commit](https://img.shields.io/github/last-commit/sieblyio/htx-api)][1]
 [![Telegram](https://img.shields.io/badge/chat-on%20telegram-blue.svg)](https://t.me/nodetraders)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sieblyio/htx-api)
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/htx-api">
+  <a href="https://www.npmjs.com/package/@siebly/htx-api">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://github.com/sieblyio/htx-api/blob/main/docs/images/logoDarkMode2.svg?raw=true#gh-dark-mode-only">
       <img alt="SDK Logo" src="https://github.com/sieblyio/htx-api/blob/main/docs/images/logoBrightMode2.svg?raw=true#gh-light-mode-only">
@@ -17,7 +17,7 @@
   </a>
 </p>
 
-[1]: https://www.npmjs.com/package/htx-api
+[1]: https://www.npmjs.com/package/@siebly/htx-api
 
 Complete & robust JavaScript & Node.js SDK for the HTX REST APIs and WebSockets:
 
@@ -68,7 +68,7 @@ Complete & robust JavaScript & Node.js SDK for the HTX REST APIs and WebSockets:
 
 ## Installation
 
-`npm install --save htx-api`
+`npm install --save @siebly/htx-api`
 
 Node.js usage requires Node 22.13.0 or newer. Browser applications should follow the public-data and credential-safety guidance below.
 
@@ -101,7 +101,7 @@ Check out our JavaScript/TypeScript/Node.js SDKs & Projects:
   - [Bitget Node.js SDK: bitget-api](https://www.npmjs.com/package/bitget-api)
   - [Kucoin Node.js SDK: kucoin-api](https://www.npmjs.com/package/kucoin-api)
   - [Coinbase Node.js SDK: coinbase-api](https://www.npmjs.com/package/coinbase-api)
-  - [HTX Node.js SDK: htx-api](https://www.npmjs.com/package/htx-api)
+  - [HTX Node.js SDK: @siebly/htx-api](https://www.npmjs.com/package/@siebly/htx-api)
 - Try my misc utilities:
   - [OrderBooks Node.js: orderbooks](https://www.npmjs.com/package/orderbooks)
   - [Crypto Exchange Account State Cache: accountstate](https://www.npmjs.com/package/accountstate)
@@ -149,9 +149,9 @@ Both clients default to HTX's AWS CDN domains for better connectivity. You can o
 To use HTX's Spot APIs, import (or require) the `SpotClient`:
 
 ```javascript
-import { SpotClient } from 'htx-api';
+import { SpotClient } from '@siebly/htx-api';
 // or if you prefer require:
-// const { SpotClient } = require('htx-api');
+// const { SpotClient } = require('@siebly/htx-api');
 
 // For public endpoints, API credentials are optional
 const publicClient = new SpotClient();
@@ -247,9 +247,9 @@ See [SpotClient](./src/SpotClient.ts) for further information.
 Use the `FuturesClient` for futures and swap trading operations:
 
 ```javascript
-import { FuturesClient } from 'htx-api';
+import { FuturesClient } from '@siebly/htx-api';
 // or if you prefer require:
-// const { FuturesClient } = require('htx-api');
+// const { FuturesClient } = require('@siebly/htx-api');
 
 // For public endpoints, API credentials are optional
 const publicClient = new FuturesClient();
@@ -334,9 +334,9 @@ Each connection is tracked using a `WsKey` (see [WS_KEY_MAP](./src/lib/websocket
 For public market data, API credentials are not required:
 
 ```javascript
-import { WebsocketClient, WS_KEY_MAP } from 'htx-api';
+import { WebsocketClient, WS_KEY_MAP } from '@siebly/htx-api';
 // or if you prefer require:
-// const { WebsocketClient, WS_KEY_MAP } = require('htx-api');
+// const { WebsocketClient, WS_KEY_MAP } = require('@siebly/htx-api');
 
 // Create WebSocket client for public streams
 const wsClient = new WebsocketClient();
@@ -398,7 +398,7 @@ wsClient.subscribe(
 For private account data streams, API credentials are required:
 
 ```javascript
-import { WebsocketClient, WS_KEY_MAP } from 'htx-api';
+import { WebsocketClient, WS_KEY_MAP } from '@siebly/htx-api';
 
 // Create WebSocket client with API credentials for private streams
 const wsClient = new WebsocketClient({
@@ -452,7 +452,7 @@ Trade connections connect and authenticate lazily on the first request. Optional
 Trade keys: `spotTrade`, `linearSwapTrade`, `coinDeliveryTrade`, `coinSwapTrade`.
 
 ```javascript
-import { WebsocketAPIClient, WS_KEY_MAP } from 'htx-api';
+import { WebsocketAPIClient, WS_KEY_MAP } from '@siebly/htx-api';
 
 const client = new WebsocketAPIClient({
   apiKey: 'your-api-key',
@@ -492,7 +492,7 @@ See [WebsocketAPIClient](./src/WebsocketAPIClient.ts) for all typed methods. Exa
 Pass a custom logger which supports the log methods `trace`, `info` and `error`, or override methods from the default logger as desired.
 
 ```javascript
-import { WebsocketClient, DefaultLogger } from 'htx-api';
+import { WebsocketClient, DefaultLogger } from '@siebly/htx-api';
 
 // E.g. customise logging for only the trace level:
 const customLogger = {
@@ -530,12 +530,12 @@ Browser applications should use the SDK only for public market data. Keep API ke
 Install and import the package normally; no SDK-specific Vite plugin or Node.js polyfill is required:
 
 ```bash
-npm install htx-api
+npm install @siebly/htx-api
 ```
 
 ```tsx
 import { useEffect, useState } from 'react';
-import { SpotClient, WebsocketClient, WS_KEY_MAP } from 'htx-api';
+import { SpotClient, WebsocketClient, WS_KEY_MAP } from '@siebly/htx-api';
 
 export function BtcTicker() {
   const [ticker, setTicker] = useState<unknown>();
@@ -567,7 +567,7 @@ The cleanup is important during navigation, hot reloads, and React Strict Mode d
 Webpack 5 can consume the same package entry directly:
 
 ```javascript
-import { SpotClient, WebsocketClient } from 'htx-api';
+import { SpotClient, WebsocketClient } from '@siebly/htx-api';
 ```
 
 Use a normal `target: 'web'` application build. The SDK does not require a checked-in UMD bundle or `resolve.fallback` shims for Node.js core modules.

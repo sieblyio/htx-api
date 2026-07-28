@@ -41,7 +41,7 @@ describe('REST PRIVATE FUTURES WRITE', () => {
     });
   });
 
-  describe.only('private POST with params', () => {
+  describe('private POST with params', () => {
     it('should fail submitLinearSwapIsolatedOrder with invalid params (validates signature)', async () => {
       try {
         const res = await rest.submitLinearSwapIsolatedOrder({

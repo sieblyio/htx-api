@@ -1,5 +1,5 @@
 {
-  "name": "htx-api",
+  "name": "@siebly/htx-api",
   "version": "0.0.2",
   "description": "Complete & robust Node.js SDK for HTX's REST APIs and WebSockets, with TypeScript & strong end to end tests.",
   "scripts": {

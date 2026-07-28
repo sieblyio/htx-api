@@ -54,7 +54,11 @@ try {
     true,
   );
   const [packResult] = JSON.parse(packOutput);
-  assert.equal(packResult.name, 'htx-api', 'Packed npm package has wrong name');
+  assert.equal(
+    packResult.name,
+    '@siebly/htx-api',
+    'Packed npm package has wrong name',
+  );
   const tarballPath = path.join(tempRoot, packResult.filename);
   const packedFiles = new Set(packResult.files.map((file) => file.path));
 
@@ -155,7 +159,7 @@ assert.equal(typeof wsClient.closeAll, 'function');
     writeFile(
       path.join(consumerRoot, 'esm.mjs'),
       `import assert from 'node:assert/strict';
-import * as sdk from 'htx-api';
+import * as sdk from '@siebly/htx-api';
 
 ${runtimeConsumerAssertions}
 `,
@@ -163,7 +167,7 @@ ${runtimeConsumerAssertions}
     writeFile(
       path.join(consumerRoot, 'commonjs.cjs'),
       `const assert = require('node:assert/strict');
-const sdk = require('htx-api');
+const sdk = require('@siebly/htx-api');
 
 ${runtimeConsumerAssertions}
 `,
