@@ -355,7 +355,7 @@ import type {
   FuturesOrderLimit,
   FuturesPositionInfo,
   FuturesPositionLimit,
-  FuturesPositionSide,
+  FuturesPositionSideInfo,
   FuturesPriceLimit,
   FuturesRelationTpslOrder,
   FuturesSettlementRecordsPage,
@@ -1771,7 +1771,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getLinearSwapIsolatedPositionMode(params: {
     margin_account: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesPositionSide[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesPositionSideInfo[]>> {
     return this.getPrivate('/linear-swap-api/v1/swap_position_side', params);
   }
 
@@ -1782,7 +1782,7 @@ export class FuturesClient extends BaseRestClient {
    */
   getLinearSwapCrossPositionMode(params: {
     margin_account: string;
-  }): Promise<FuturesAPISuccessResponse<FuturesPositionSide[]>> {
+  }): Promise<FuturesAPISuccessResponse<FuturesPositionSideInfo[]>> {
     return this.getPrivate(
       '/linear-swap-api/v1/swap_cross_position_side',
       params,

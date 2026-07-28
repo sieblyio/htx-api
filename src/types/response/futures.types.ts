@@ -640,7 +640,7 @@ export interface FuturesIsolatedAccountPosition {
 }
 
 /** Cross position item (in positions array) from swap_cross_account_position_info */
-export interface FuturesCrossAccountPosition {
+export interface FuturesCrossAccountPositionItem {
   symbol: string;
   contract_code: string;
   volume: number;
@@ -685,7 +685,7 @@ export interface FuturesCrossAccountPosition {
   position_mode: string;
   contract_detail: FuturesCrossAccountContractDetail[];
   futures_contract_detail: FuturesCrossAccountContractDetail[];
-  positions: FuturesCrossAccountPosition[];
+  positions: FuturesCrossAccountPositionItem[];
   adl_risk_percent?: string | number;
 }
 
@@ -1341,7 +1341,7 @@ export interface FuturesMatchResult {
 }
 
 /** Position mode item from swap_position_side and swap_cross_position_side */
-export interface FuturesPositionSide {
+export interface FuturesPositionSideInfo {
   margin_account: string;
   position_mode: 'single_side' | 'dual_side';
 }

@@ -1,5 +1,5 @@
 !.gitkeep
-.DS_STORE
+.DS_Store
 *.log
 npm-debug.log*
 yarn-debug.log*
