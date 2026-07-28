@@ -6,7 +6,7 @@ import { validateBrowserBundles } from './browser-bundle-validation.mjs';
 
 const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
-  '..',
+  '../..',
 );
 const tempRoot = await mkdtemp(path.join(repoRoot, '.tmp-browser-smoke-'));
 

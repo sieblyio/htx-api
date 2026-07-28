@@ -15,7 +15,7 @@ import { validateBrowserBundles } from './browser-bundle-validation.mjs';
 
 const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
-  '..',
+  '../..',
 );
 const npmCli = process.env.npm_execpath;
 let npmCache;

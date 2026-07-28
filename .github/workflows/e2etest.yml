@@ -46,15 +46,15 @@ jobs:
         run: npm run build
 
       - name: Test browser packaging
-        run: node scripts/browser-smoke.mjs
+        run: node test/packaging/browser-smoke.mjs
 
       - name: Test package consumers
         run: |
-          node scripts/consumer-smoke.mjs
-          node scripts/consumer-types-smoke.mjs
+          node test/consumer/consumer-smoke.mjs
+          node test/consumer/consumer-types-smoke.mjs
 
       - name: Test packed package
-        run: node scripts/packed-consumer-smoke.mjs
+        run: node test/packaging/packed-consumer-smoke.mjs
 
       - name: Test Public REST API Calls
         run: npm run test -- public.test.ts

@@ -1,5 +1,6 @@
 const { transformSync } = require('esbuild');
 
+/** Compile TypeScript test files into the CommonJS format expected by Jest. */
 module.exports = {
   process(sourceText, sourcePath) {
     const result = transformSync(sourceText, {

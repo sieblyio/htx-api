@@ -4,6 +4,7 @@ import path from 'node:path';
 
 import { build } from 'esbuild';
 
+/** Bundle consumer fixtures and verify that browser-safe package paths resolve. */
 const normalisePath = (value) => value.replaceAll('\\', '/');
 const nodeBuiltins = new Set(
   builtinModules.map((name) => name.replace(/^node:/, '')),

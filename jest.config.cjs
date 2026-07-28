@@ -188,7 +188,7 @@ const config = {
   // transform: undefined,
 
   transform: {
-    '^.+\\.tsx?$': '<rootDir>/scripts/jest-transformer.cjs',
+    '^.+\\.tsx?$': '<rootDir>/test/config/jest-transformer.cjs',
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
