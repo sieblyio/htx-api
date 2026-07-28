@@ -30,6 +30,19 @@ import {
 const MISSING_API_KEYS_ERROR =
   'API Key & Secret are BOTH required to use the authenticated REST client';
 
+const OMITTED_FROM_ERROR = 'omittedFromError';
+
+function redactSignedUrl(url: string | undefined): string | undefined {
+  if (!url) {
+    return url;
+  }
+
+  return url.replace(
+    /([?&](?:AccessKeyId|Signature)=)[^&#]*/gi,
+    `$1${OMITTED_FROM_ERROR}`,
+  );
+}
+
 interface SignedRequest<
   T extends object | undefined = object,
   TReqData = object,
@@ -381,16 +394,9 @@ export abstract class BaseRestClient {
                 throw throwable;
               }
 
-              // TODO: catch this error:
-              // submitLinearSwapIsolatedBatchOrders
-              // submitLinearSwapCrossBatchOrders
-              // submitCoinMDeliveryBatchOrders
-              // submitCoinMPerpBatchOrders; tracking volume 22 undefined
-              // res submitCoinMPerpBatchOrders {
-              //   status: 'ok',
-              //   data: { errors: [ [Object] ], success: [] },
-              //   ts: 1776594235749
-              // }
+              // A successful batch request may contain both accepted and
+              // rejected orders. Return the full response so callers can
+              // handle data.success and data.errors independently.
 
               break;
             }
@@ -417,9 +423,10 @@ export abstract class BaseRestClient {
           params,
           options: {
             ...options,
+            url: redactSignedUrl(options.url),
             headers: {
               ...options.headers,
-              APIKey: 'omittedFromError',
+              APIKey: OMITTED_FROM_ERROR,
             },
           },
         }),
@@ -457,9 +464,10 @@ export abstract class BaseRestClient {
       requestOptions: {
         ...this.options,
         // Prevent credentials from leaking into error messages
-        apiKey: 'omittedFromError',
-        apiSecret: 'omittedFromError',
-        apiPassphrase: 'omittedFromError',
+        apiKey: OMITTED_FROM_ERROR,
+        apiSecret: OMITTED_FROM_ERROR,
+        apiAccessToken: OMITTED_FROM_ERROR,
+        apiPassphrase: OMITTED_FROM_ERROR,
       },
       requestParams,
     };
@@ -553,6 +561,14 @@ export abstract class BaseRestClient {
               }
             } else {
               res.requestData[APIIDMainKey] = APIIDMain;
+
+              if (Array.isArray(res.requestData.orders_data)) {
+                for (const order of res.requestData.orders_data) {
+                  if (typeof order === 'object' && order !== null) {
+                    order[APIIDMainKey] = APIIDMain;
+                  }
+                }
+              }
             }
           }
 

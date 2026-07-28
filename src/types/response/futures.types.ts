@@ -1094,7 +1094,10 @@ export interface FuturesCrossSwitchLeverRate {
   business_type: string;
 }
 
-/** Batch order response data from swap_batchorder and swap_cross_batchorder */
+/**
+ * Batch order response data from swap_batchorder and swap_cross_batchorder.
+ * A successful request can contain both accepted and rejected orders.
+ */
 export interface FuturesBatchOrder {
   errors: FuturesBatchOrderError[];
   success: FuturesBatchOrderSuccess[];
