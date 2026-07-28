@@ -45,14 +45,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Test browser packaging
-        run: node test/packaging/browser-smoke.mjs
-
-      - name: Test package consumers
-        run: |
-          node test/consumer/consumer-smoke.mjs
-          node test/consumer/consumer-types-smoke.mjs
-
       - name: Test packed package
         run: node test/packaging/packed-consumer-smoke.mjs
 

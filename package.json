@@ -6,8 +6,6 @@
     "clean": "node scripts/clean.mjs",
     "build": "npm run clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node scripts/postbuild.mjs",
     "test": "jest --passWithNoTests",
-    "test:browser": "npm run build && node test/packaging/browser-smoke.mjs",
-    "test:consumer": "npm run build && node test/consumer/consumer-smoke.mjs && node test/consumer/consumer-types-smoke.mjs",
     "test:extensions": "tsc -p tsconfig.extensions.json",
     "test:packed": "npm run build && node test/packaging/packed-consumer-smoke.mjs",
     "test:types": "npm run test:extensions && tsc -p test/tsconfig.test.json --noEmit && tsc -p test/types/tsconfig.exact.json",

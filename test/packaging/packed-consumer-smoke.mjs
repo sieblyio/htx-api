@@ -106,6 +106,37 @@ try {
     consumerRoot,
   );
 
+  const runtimeConsumerAssertions = `
+const expectedConstructors = [
+  'FuturesClient',
+  'SpotClient',
+  'WebsocketAPIClient',
+  'WebsocketClient',
+];
+
+for (const exportName of expectedConstructors) {
+  assert.equal(
+    typeof sdk[exportName],
+    'function',
+    \`Consumer is missing \${exportName}\`,
+  );
+}
+
+assert.equal(typeof sdk.WS_KEY_MAP, 'object', 'Consumer is missing WS_KEY_MAP');
+assert.equal(
+  typeof sdk.DefaultLogger,
+  'object',
+  'Consumer is missing DefaultLogger',
+);
+
+const restClient = new sdk.SpotClient();
+const wsClient = new sdk.WebsocketClient();
+
+assert.equal(typeof restClient.getTicker, 'function');
+assert.equal(typeof wsClient.on, 'function');
+assert.equal(typeof wsClient.closeAll, 'function');
+`;
+
   for (const unwantedTypes of ['node', 'ws']) {
     const unwantedPath = path.join(
       consumerRoot,
@@ -124,19 +155,17 @@ try {
     writeFile(
       path.join(consumerRoot, 'esm.mjs'),
       `import assert from 'node:assert/strict';
-import { SpotClient, WebsocketClient } from 'htx-api';
+import * as sdk from 'htx-api';
 
-assert.equal(typeof new SpotClient().getTicker, 'function');
-assert.equal(typeof new WebsocketClient().on, 'function');
+${runtimeConsumerAssertions}
 `,
     ),
     writeFile(
       path.join(consumerRoot, 'commonjs.cjs'),
       `const assert = require('node:assert/strict');
-const { SpotClient, WebsocketClient } = require('htx-api');
+const sdk = require('htx-api');
 
-assert.equal(typeof new SpotClient().getTicker, 'function');
-assert.equal(typeof new WebsocketClient().on, 'function');
+${runtimeConsumerAssertions}
 `,
     ),
     copyFile(
