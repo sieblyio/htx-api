@@ -56,65 +56,89 @@ async function start() {
     return;
   }
 
-  const linearOrder = await client.placeLinearSwapOrder({
-    contract_code: 'BTC-USDT',
-    margin_mode: 'cross',
-    position_side: 'long',
-    side: 'buy',
-    type: 'limit',
-    time_in_force: 'gtc',
-    price: '20000',
-    volume: '1',
-    reduce_only: 0,
-  });
-  console.log('placeLinearSwapOrder:', linearOrder);
+  try {
+    const linearOrder = await client.placeLinearSwapOrder({
+      contract_code: 'BTC-USDT',
+      margin_mode: 'cross',
+      position_side: 'long',
+      side: 'buy',
+      type: 'limit',
+      time_in_force: 'gtc',
+      price: '20000',
+      volume: '1',
+      reduce_only: 0,
+    });
+    console.log('placeLinearSwapOrder:', linearOrder);
+  } catch (e) {
+    console.error('placeLinearSwapOrder error:', e);
+  }
 
-  const linearLegacyOrder = await client.submitLinearSwapOrder({
-    contract_code: 'BTC-USDT',
-    direction: 'buy',
-    offset: 'open',
-    price: '20000',
-    lever_rate: 5,
-    volume: 1,
-    order_price_type: 'limit',
-    client_order_id: Date.now(),
-  });
-  console.log('submitLinearSwapOrder:', linearLegacyOrder);
+  try {
+    const linearLegacyOrder = await client.submitLinearSwapOrder({
+      contract_code: 'BTC-USDT',
+      direction: 'buy',
+      offset: 'open',
+      price: '20000',
+      lever_rate: 5,
+      volume: 1,
+      order_price_type: 'limit',
+      client_order_id: Date.now(),
+    });
+    console.log('submitLinearSwapOrder:', linearLegacyOrder);
+  } catch (e) {
+    console.error('submitLinearSwapOrder error:', e);
+  }
 
-  const deliveryOrder = await client.submitCoinDeliveryOrder({
-    contract_code: 'BTC-USD',
-    direction: 'buy',
-    offset: 'open',
-    price: '20000',
-    lever_rate: 5,
-    volume: 1,
-    order_price_type: 'limit',
-    client_order_id: Date.now(),
-  });
-  console.log('submitCoinDeliveryOrder:', deliveryOrder);
+  try {
+    const deliveryOrder = await client.submitCoinDeliveryOrder({
+      contract_code: 'BTC-USD',
+      direction: 'buy',
+      offset: 'open',
+      price: '20000',
+      lever_rate: 5,
+      volume: 1,
+      order_price_type: 'limit',
+      client_order_id: Date.now(),
+    });
+    console.log('submitCoinDeliveryOrder:', deliveryOrder);
+  } catch (e) {
+    console.error('submitCoinDeliveryOrder error:', e);
+  }
 
-  const coinSwapOrder = await client.submitCoinSwapOrder({
-    contract_code: 'BTC-USD',
-    direction: 'buy',
-    offset: 'open',
-    price: '20000',
-    lever_rate: 5,
-    volume: 1,
-    order_price_type: 'limit',
-    client_order_id: Date.now(),
-  });
-  console.log('submitCoinSwapOrder:', coinSwapOrder);
+  try {
+    const coinSwapOrder = await client.submitCoinSwapOrder({
+      contract_code: 'BTC-USD',
+      direction: 'buy',
+      offset: 'open',
+      price: '20000',
+      lever_rate: 5,
+      volume: 1,
+      order_price_type: 'limit',
+      client_order_id: Date.now(),
+    });
+    console.log('submitCoinSwapOrder:', coinSwapOrder);
+  } catch (e) {
+    console.error('submitCoinSwapOrder error:', e);
+  }
 
-  const cancelLinearOrder = await client.cancelLinearSwapOrder({
-    contract_code: 'BTC-USDT',
-    order_id: '123456789',
-  });
-  console.log('cancelLinearSwapOrder:', cancelLinearOrder);
+  try {
+    const cancelLinearOrder = await client.cancelLinearSwapOrder({
+      contract_code: 'BTC-USDT',
+      order_id: '123456789',
+    });
+    console.log('cancelLinearSwapOrder:', cancelLinearOrder);
+  } catch (e) {
+    console.error('cancelLinearSwapOrder error:', e);
+  }
 
-  const cancelAllCross = await client.cancelAllLinearSwapCrossOrders({
-    contract_code: 'BTC-USDT',
-  });
-  console.log('cancelAllLinearSwapCrossOrders:', cancelAllCross);
+  try {
+    const cancelAllCross = await client.cancelAllLinearSwapCrossOrders({
+      contract_code: 'BTC-USDT',
+    });
+    console.log('cancelAllLinearSwapCrossOrders:', cancelAllCross);
+  } catch (e) {
+    console.error('cancelAllLinearSwapCrossOrders error:', e);
+  }
 
   console.log('WS API keys:', {
     linear: WS_KEY_MAP.linearSwapTrade,
