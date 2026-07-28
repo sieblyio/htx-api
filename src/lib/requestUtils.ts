@@ -175,6 +175,7 @@ function getWSAPICustomOrderIdProperties(
     case WS_KEY_MAP.linearSwapPublic:
     case WS_KEY_MAP.linearSwapPrivate:
     case WS_KEY_MAP.linearSwapTrade:
+    case WS_KEY_MAP.derivativesPrivateV5:
     case WS_KEY_MAP.coinDeliveryPublic:
     case WS_KEY_MAP.coinDeliveryPrivate:
     case WS_KEY_MAP.coinDeliveryTrade:

@@ -133,6 +133,7 @@ export class WebsocketClient extends BaseWebsocketClient<
       this.connect(WS_KEY_MAP.spotPrivateV2),
       this.connect(WS_KEY_MAP.linearSwapPublic),
       this.connect(WS_KEY_MAP.linearSwapPrivate),
+      this.connect(WS_KEY_MAP.derivativesPrivateV5),
       this.connect(WS_KEY_MAP.coinDeliveryPublic),
       this.connect(WS_KEY_MAP.coinDeliveryPrivate),
       this.connect(WS_KEY_MAP.coinSwapPublic),
@@ -951,6 +952,7 @@ export class WebsocketClient extends BaseWebsocketClient<
   private isDerivativesTopicProtocolWsKey(wsKey: WsKey): boolean {
     return (
       wsKey === WS_KEY_MAP.linearSwapPrivate ||
+      wsKey === WS_KEY_MAP.derivativesPrivateV5 ||
       wsKey === WS_KEY_MAP.coinDeliveryPrivate ||
       wsKey === WS_KEY_MAP.coinSwapPrivate ||
       wsKey === WS_KEY_MAP.derivativesSystem

@@ -21,6 +21,8 @@ export const WS_KEY_MAP = {
   linearSwapPrivate: 'linearSwapPrivate',
   /** Linear futures WS API */
   linearSwapTrade: 'linearSwapTrade',
+  /** V5 unified derivatives account events */
+  derivativesPrivateV5: 'derivativesPrivateV5',
 
   coinDeliveryPublic: 'coinDeliveryPublic',
   coinDeliveryPrivate: 'coinDeliveryPrivate',
@@ -64,6 +66,7 @@ export const WS_KEY_PATH_MAP: Record<WsKey, string> = {
   linearSwapPublic: '/linear-swap-ws',
   linearSwapPrivate: '/linear-swap-notification',
   linearSwapTrade: '/linear-swap-trade',
+  derivativesPrivateV5: '/ws/v5/notification',
 
   coinDeliveryPublic: '/ws',
   coinDeliveryPrivate: '/notification',
@@ -88,6 +91,7 @@ export const DERIVATIVES_WS_KEYS: WsKey[] = [
   WS_KEY_MAP.linearSwapPublic,
   WS_KEY_MAP.linearSwapPrivate,
   WS_KEY_MAP.linearSwapTrade,
+  WS_KEY_MAP.derivativesPrivateV5,
   WS_KEY_MAP.coinDeliveryPublic,
   WS_KEY_MAP.coinDeliveryPrivate,
   WS_KEY_MAP.coinDeliveryTrade,
@@ -101,6 +105,7 @@ export const DERIVATIVES_WS_KEYS: WsKey[] = [
 export const PRIVATE_WS_KEYS: WsKey[] = [
   WS_KEY_MAP.spotPrivateV2,
   WS_KEY_MAP.linearSwapPrivate,
+  WS_KEY_MAP.derivativesPrivateV5,
   WS_KEY_MAP.coinDeliveryPrivate,
   WS_KEY_MAP.coinSwapPrivate,
 ];
@@ -118,6 +123,7 @@ export const GZIP_WS_KEYS: WsKey[] = [
   WS_KEY_MAP.linearSwapPublic,
   WS_KEY_MAP.linearSwapPrivate,
   WS_KEY_MAP.linearSwapTrade,
+  WS_KEY_MAP.derivativesPrivateV5,
   WS_KEY_MAP.coinDeliveryPublic,
   WS_KEY_MAP.coinDeliveryPrivate,
   WS_KEY_MAP.coinDeliveryTrade,

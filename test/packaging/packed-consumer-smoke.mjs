@@ -128,6 +128,11 @@ for (const exportName of expectedConstructors) {
 
 assert.equal(typeof sdk.WS_KEY_MAP, 'object', 'Consumer is missing WS_KEY_MAP');
 assert.equal(
+  sdk.WS_KEY_MAP.derivativesPrivateV5,
+  'derivativesPrivateV5',
+  'Consumer is missing the V5 private derivatives WebSocket key',
+);
+assert.equal(
   typeof sdk.DefaultLogger,
   'object',
   'Consumer is missing DefaultLogger',

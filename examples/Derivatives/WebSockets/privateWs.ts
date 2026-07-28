@@ -44,7 +44,7 @@ async function start() {
         payload: { contract_code: linearSwapContractCode },
       },
     ],
-    WS_KEY_MAP.multiAssetPrivate,
+    WS_KEY_MAP.derivativesPrivateV5,
   );
 
   /**

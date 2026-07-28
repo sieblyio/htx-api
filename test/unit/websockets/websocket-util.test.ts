@@ -5,12 +5,32 @@ import {
   decompressMessageEvent,
   getPromiseRefForWSAPIRequest,
   getPromiseRefPrefixForWSAPIRequest,
+  getWsUrl,
   isBinaryLike,
+  isDerivativesWsKey,
+  isGzipWsKey,
+  isPrivateWsKey,
   WS_KEY_MAP,
 } from '../../../src/lib/websocket/websocket-util';
 import { WebSocketLike } from '../../../src/types/websockets/ws-portable';
 
 describe('websocket-util', () => {
+  describe('derivativesPrivateV5', () => {
+    it('uses the V5 private derivatives endpoint and connection traits', () => {
+      const wsKey = WS_KEY_MAP.derivativesPrivateV5;
+
+      expect(getWsUrl(wsKey, 'standard')).toBe(
+        'wss://api.hbdm.com/ws/v5/notification',
+      );
+      expect(getWsUrl(wsKey, 'aws')).toBe(
+        'wss://api.hbdm.vn/ws/v5/notification',
+      );
+      expect(isDerivativesWsKey(wsKey)).toBe(true);
+      expect(isPrivateWsKey(wsKey)).toBe(true);
+      expect(isGzipWsKey(wsKey)).toBe(true);
+    });
+  });
+
   describe('getPromiseRefForWSAPIRequest()', () => {
     it('should correlate WS API requests by cid instead of operation', () => {
       const request = {
