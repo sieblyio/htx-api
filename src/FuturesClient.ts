@@ -2,6 +2,7 @@ import { BaseRestClient } from './lib/BaseRestClient.js';
 import {
   APIIDMain,
   APIIDMainKey,
+  generateNewOrderID,
   REST_CLIENT_TYPE_ENUM,
   RestClientType,
 } from './lib/requestUtils.js';
@@ -417,13 +418,7 @@ export class FuturesClient extends BaseRestClient {
    */
 
   generateNewOrderID(): string {
-    // Generate a short UUID format (54 hex characters without dashes)
-    const hexChars = '0123456789abcdef';
-    let result = APIIDMain;
-    for (let i = 0; i < 54; i++) {
-      result += hexChars[Math.floor(Math.random() * 16)];
-    }
-    return result;
+    return generateNewOrderID();
   }
 
   /**

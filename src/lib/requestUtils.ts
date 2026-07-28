@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { OrderIdProperty } from '../types/response/shared.types.js';
+import {
+  OrderIdProperty,
+  SpotOrderIdProperty,
+} from '../types/response/shared.types.js';
 import {
   HTXWSAPIRequest,
   WSAPIDerivativesOperation,
@@ -147,7 +150,7 @@ export function serializeParams<
 }
 
 export function logInvalidOrderId(
-  orderIdProperty: OrderIdProperty,
+  orderIdProperty: SpotOrderIdProperty,
   expectedOrderIdPrefix: string,
   params: object,
 ) {

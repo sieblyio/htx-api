@@ -1,6 +1,7 @@
 import { BaseRestClient } from './lib/BaseRestClient.js';
 import {
-  APIIDMain,
+  generateNewOrderID,
+  getOrderIdPrefix,
   logInvalidOrderId,
   REST_CLIENT_TYPE_ENUM,
   RestClientType,
@@ -55,8 +56,8 @@ import type {
   SpotWithdrawCreateReq,
 } from './types/request/spot.types.js';
 import {
-  OrderIdProperty,
   SpotAPISuccessResponse,
+  SpotOrderIdProperty,
 } from './types/response/shared.types.js';
 import {
   SpotAccount,
@@ -162,14 +163,7 @@ export class SpotClient extends BaseRestClient {
    */
 
   generateNewOrderID(): string {
-    // Generate a short UUID format (54 hex characters without dashes)
-    // Compatible with HTX client-order-id parameter
-    const hexChars = '0123456789abcdef';
-    let result = APIIDMain;
-    for (let i = 0; i < 54; i++) {
-      result += hexChars[Math.floor(Math.random() * 16)];
-    }
-    return result;
+    return generateNewOrderID();
   }
 
   /**
@@ -756,6 +750,7 @@ export class SpotClient extends BaseRestClient {
   placeConditionalOrder(
     params: SpotV2AlgoOrdersPlaceReq,
   ): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersPlaceResult>> {
+    this.validateOrderId(params, 'clientOrderId');
     return this.postPrivate('/v2/algo-orders', { body: params });
   }
 
@@ -1554,17 +1549,17 @@ export class SpotClient extends BaseRestClient {
    * Validate syntax meets requirements set by HTX. Log warning if not.
    */
   private validateOrderId(
-    params: SpotV1OrderPlaceReq | SpotV1OrderAutoPlaceReq,
-    orderIdProperty: OrderIdProperty,
+    params: Partial<Record<SpotOrderIdProperty, string>>,
+    orderIdProperty: SpotOrderIdProperty,
   ): void {
     if (!params[orderIdProperty]) {
       params[orderIdProperty] = this.generateNewOrderID();
       return;
     }
 
-    const expectedOrderIdPrefix1 = `${APIIDMain}`;
-    if (!params[orderIdProperty].startsWith(expectedOrderIdPrefix1)) {
-      logInvalidOrderId(orderIdProperty, expectedOrderIdPrefix1, params);
+    const expectedOrderIdPrefix = getOrderIdPrefix();
+    if (!params[orderIdProperty].startsWith(expectedOrderIdPrefix)) {
+      logInvalidOrderId(orderIdProperty, expectedOrderIdPrefix, params);
     }
   }
 }

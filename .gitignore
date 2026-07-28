@@ -30,3 +30,4 @@ doc
 futuresOrder2.ts
 .vscode/
 WSWIP.md
+.tmp-packed*

@@ -48,3 +48,4 @@ export type SpotAPIResponse<TData> =
   | SpotAPIErrorResponse;
 
 export type OrderIdProperty = 'client-order-id';
+export type SpotOrderIdProperty = OrderIdProperty | 'clientOrderId';
