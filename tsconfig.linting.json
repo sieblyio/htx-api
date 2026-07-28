@@ -1,17 +1,19 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "outDir": "dist/cjs",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "target": "esnext",
-    "rootDir": "../",
-    "allowJs": true
+    "rootDir": ".",
+    "allowJs": true,
+    "noEmit": true,
+    "types": ["node", "jest"]
   },
   "include": [
     "src/**/*.*",
     "test/**/*.*",
     "examples/**/*.*",
-    ".eslintrc.cjs",
-    "jest.config.ts"
+    "eslint.config.cjs",
+    "jest.config.cjs"
   ]
 }

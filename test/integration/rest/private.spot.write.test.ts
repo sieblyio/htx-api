@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SpotClient } from '../../src/index.js';
+import { SpotClient } from '../../../src/index.js';
 import { getTestProxy } from '../proxy.util.js';
 
 function validateKeyPermissionException(e: any) {

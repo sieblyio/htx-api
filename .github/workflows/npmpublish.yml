@@ -31,19 +31,53 @@ jobs:
           registry-url: https://registry.npmjs.org/
           package-manager-cache: false
 
-      - name: Assert latest npm
-        # run: npm i -g npm@latest # pin to v11 until npm v12 bug is fixed: https://github.com/npm/cli/issues/9722
-        run: npm i -g npm@11
+      - name: Use pinned npm
+        run: npm install --global --ignore-scripts npm@11.12.0
 
-      - name: Guard - block registry overrides and shady files
+      - name: Verify exact repository npm policy
         run: |
-          # fail if any .npmrc exists in repo
-          if git ls-files -z | xargs -0 -I{} bash -lc '[[ "{}" == *.npmrc ]]' | grep -q .; then
-            echo "Repo contains an .npmrc. Refusing to publish."; exit 1;
-          fi
-          # fail if publishConfig.registry set
+          node <<'NODE'
+          const { readFileSync, readdirSync } = require('node:fs');
+          const { join, relative, sep } = require('node:path');
+
+          const npmrcFiles = [];
+
+          function findNpmrcFiles(directory) {
+            for (const entry of readdirSync(directory, { withFileTypes: true })) {
+              if (entry.name === '.git' || entry.name === 'node_modules') {
+                continue;
+              }
+
+              const entryPath = join(directory, entry.name);
+              if (entry.name === '.npmrc') {
+                npmrcFiles.push(relative('.', entryPath).split(sep).join('/'));
+              } else if (entry.isDirectory()) {
+                findNpmrcFiles(entryPath);
+              }
+            }
+          }
+
+          findNpmrcFiles('.');
+          npmrcFiles.sort();
+
+          if (npmrcFiles.length !== 1 || npmrcFiles[0] !== '.npmrc') {
+            console.error(
+              `Expected only the root .npmrc; found: ${npmrcFiles.join(', ') || 'none'}`,
+            );
+            process.exit(1);
+          }
+
+          if (readFileSync('.npmrc', 'utf8') !== 'min-release-age=30\n') {
+            console.error('Root .npmrc must contain exactly: min-release-age=30');
+            process.exit(1);
+          }
+          NODE
+
+      - name: Guard publish target and release workflow
+        run: |
+          # Reject repository-level registry redirection.
           node -e "const p=require('./package.json'); if(p.publishConfig?.registry){console.error('publishConfig.registry present - refuse to publish'); process.exit(1)}"
-          # optional: block workflow/script changes in the release commit
+          # Block release-time workflow or script changes.
           SHA=$(git rev-list -n 1 "$RELEASE_TAG")
           PARENT=$(git rev-list -n 1 "$SHA^")
           git diff --name-only "$PARENT" "$SHA" | grep -E '^\\.github/(workflows|scripts)/' \

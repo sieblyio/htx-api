@@ -1,4 +1,4 @@
-import { isDeepObjectMatch } from '../../src/lib/websocket/WsStore';
+import { isDeepObjectMatch } from '../../../src/lib/websocket/WsStore';
 
 describe('WsStore', () => {
   describe('isDeepObjectMatch()', () => {
@@ -113,9 +113,7 @@ describe('WsStore', () => {
     });
 
     it('should NOT match string to object', () => {
-      expect(
-        isDeepObjectMatch('ticker', { topic: 'ticker' }),
-      ).toBeFalsy();
+      expect(isDeepObjectMatch('ticker', { topic: 'ticker' })).toBeFalsy();
     });
   });
 });

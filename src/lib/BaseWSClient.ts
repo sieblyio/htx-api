@@ -1,5 +1,4 @@
-import { EventEmitter } from 'events';
-import WebSocket from 'isomorphic-ws';
+import WebSocketImplementation from 'isomorphic-ws';
 
 import {
   isMessageEvent,
@@ -10,7 +9,13 @@ import {
   WSClientConfigurableOptions,
   WsEventInternalSrc,
 } from '../types/websockets/ws-general.js';
+import {
+  EventListener,
+  WebSocketLike,
+  WSConnectionOptions,
+} from '../types/websockets/ws-portable.js';
 import { WSTopic } from '../types/websockets/ws-subscriptions.js';
+import { EventEmitter } from './event-emitter.js';
 import { isObjectLike } from './misc-util.js';
 import { checkWebCryptoAPISupported } from './webCryptoAPI.js';
 import { DefaultLogger } from './websocket/logger.js';
@@ -29,6 +34,24 @@ import {
   WsConnectionStateEnum,
 } from './websocket/WsStore.types.js';
 
+interface WebSocketConstructor {
+  new (
+    url: string,
+    protocols?: string | string[],
+    options?: Omit<WSConnectionOptions, 'protocols'>,
+  ): WebSocketLike;
+}
+
+const RuntimeWebSocket =
+  WebSocketImplementation as unknown as WebSocketConstructor;
+
+function isNativeBrowserWebSocket(ws: WebSocketLike): boolean {
+  return (
+    typeof globalThis.WebSocket === 'function' &&
+    ws instanceof globalThis.WebSocket
+  );
+}
+
 type UseTheExceptionEventInstead = never;
 type WSClientEventPayload<WsKey extends string> = Record<string, unknown> & {
   wsKey: WsKey;
@@ -44,7 +67,7 @@ interface WSClientEventMap<WsKey extends string> {
     wsKey: WsKey;
     event: unknown;
     wsUrl: string;
-    ws: WebSocket;
+    ws: WebSocketLike;
   }) => void;
 
   /** Reconnecting a dropped connection */
@@ -55,7 +78,7 @@ interface WSClientEventMap<WsKey extends string> {
     wsKey: WsKey;
     event: unknown;
     wsUrl: string;
-    ws: WebSocket;
+    ws: WebSocketLike;
   }) => void;
 
   /** Connection closed */
@@ -81,8 +104,8 @@ interface WSClientEventMap<WsKey extends string> {
 }
 
 export interface EmittableEvent<
-  TEventType extends
-    keyof WSClientEventMap<string> = keyof WSClientEventMap<string>,
+  TEventType extends keyof WSClientEventMap<string> =
+    keyof WSClientEventMap<string>,
 > {
   eventType:
     | TEventType
@@ -105,6 +128,45 @@ export interface BaseWebsocketClient<
     event: U,
     listener: WSClientEventMap<TWSKey>[U],
   ): this;
+
+  addListener<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+
+  once<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+
+  prependListener<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+
+  prependOnceListener<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+
+  off<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+
+  removeListener<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+
+  removeAllListeners(event?: keyof WSClientEventMap<TWSKey>): this;
+
+  listeners(event: keyof WSClientEventMap<TWSKey>): EventListener[];
+
+  listenerCount(
+    event: keyof WSClientEventMap<TWSKey>,
+    listener?: WSClientEventMap<TWSKey>[keyof WSClientEventMap<TWSKey>],
+  ): number;
 
   emit<U extends keyof WSClientEventMap<TWSKey>>(
     event: U,
@@ -283,11 +345,11 @@ export abstract class BaseWebsocketClient<
     wsKey: TWSKey,
   ): Promise<void>;
 
-  protected abstract sendPingEvent(wsKey: TWSKey, ws: WebSocket): void;
+  protected abstract sendPingEvent(wsKey: TWSKey, ws: WebSocketLike): boolean;
 
   protected abstract sendPongEvent(
     wsKey: TWSKey,
-    ws: WebSocket,
+    ws: WebSocketLike,
     event?: unknown,
   ): void;
 
@@ -610,26 +672,25 @@ export abstract class BaseWebsocketClient<
     return this.wsStore.getConnectionInProgressPromise(wsKey)?.promise;
   }
 
-  private connectToWsUrl(url: string, wsKey: TWSKey): WebSocket {
+  private connectToWsUrl(url: string, wsKey: TWSKey): WebSocketLike {
     this.logger.trace(`Opening WS connection to URL: ${url}`, {
       ...this.WS_LOGGER_CATEGORY,
       wsKey,
     });
 
     const { protocols = [], ...wsOptions } = this.options.wsOptions || {};
-    const ws: WebSocket & { wsKey?: string } = new WebSocket(
-      url,
-      protocols,
-      wsOptions,
-    );
+    const ws = new RuntimeWebSocket(url, protocols, wsOptions);
 
-    ws.onopen = (event: WebSocket.Event) =>
-      this.onWsOpen(event, wsKey, url, ws);
-    ws.onmessage = (event: WebSocket.MessageEvent) =>
+    if (isNativeBrowserWebSocket(ws)) {
+      ws.binaryType = 'arraybuffer';
+    }
+
+    ws.onopen = (event: unknown) => this.onWsOpen(event, wsKey, url, ws);
+    ws.onmessage = (event: MessageEventLike<unknown>) =>
       this.onWsMessage(event, wsKey, ws);
-    ws.onerror = (event: WebSocket.ErrorEvent) =>
+    ws.onerror = (event: unknown) =>
       this.parseWsError('WebSocket onWsError', event, wsKey);
-    ws.onclose = (event: WebSocket.CloseEvent) => this.onWsClose(event, wsKey);
+    ws.onclose = (event: unknown) => this.onWsClose(event, wsKey);
 
     // Event handlers for native heartbeats / ping/pong frames
     if (typeof ws.on === 'function') {
@@ -884,7 +945,14 @@ export abstract class BaseWebsocketClient<
       );
       return;
     }
-    this.sendPingEvent(wsKey, ws);
+    const didSendPing = this.sendPingEvent(wsKey, ws);
+    if (!didSendPing) {
+      this.logger.trace('Ping was not sent; pong timeout not started', {
+        ...this.WS_LOGGER_CATEGORY,
+        wsKey,
+      });
+      return;
+    }
 
     this.wsStore.get(wsKey, true).activePongTimer = setTimeout(
       () => this.executeReconnectableClose(wsKey, 'Pong timeout'),
@@ -1097,11 +1165,11 @@ export abstract class BaseWebsocketClient<
   /**
    * Try sending a string event on a WS connection (identified by the WS Key)
    */
-  public tryWsSend(
+  private tryWsSendWithResult(
     wsKey: TWSKey,
     wsMessage: string,
     throwExceptions?: boolean,
-  ) {
+  ): boolean {
     try {
       this.logger.trace('Sending upstream ws message: ', {
         ...this.WS_LOGGER_CATEGORY,
@@ -1120,6 +1188,7 @@ export abstract class BaseWebsocketClient<
         );
       }
       ws.send(wsMessage);
+      return true;
     } catch (e) {
       this.logger.error('Failed to send WS message', {
         ...this.WS_LOGGER_CATEGORY,
@@ -1130,14 +1199,32 @@ export abstract class BaseWebsocketClient<
       if (throwExceptions) {
         throw e;
       }
+      return false;
     }
   }
 
+  public tryWsSend(
+    wsKey: TWSKey,
+    wsMessage: string,
+    throwExceptions?: boolean,
+  ): void {
+    this.tryWsSendWithResult(wsKey, wsMessage, throwExceptions);
+  }
+
+  /** Send a message while reporting whether it reached the socket API. */
+  protected tryWsSendWithStatus(
+    wsKey: TWSKey,
+    wsMessage: string,
+    throwExceptions?: boolean,
+  ): boolean {
+    return this.tryWsSendWithResult(wsKey, wsMessage, throwExceptions);
+  }
+
   private async onWsOpen(
-    event: WebSocket.Event,
+    event: unknown,
     wsKey: TWSKey,
     url: string,
-    ws: WebSocket,
+    ws: WebSocketLike,
   ) {
     const didReconnectSuccessfully =
       this.wsStore.isConnectionState(
@@ -1333,7 +1420,7 @@ export abstract class BaseWebsocketClient<
   private onWsPing(
     event: unknown,
     wsKey: TWSKey,
-    ws: WebSocket,
+    ws: WebSocketLike,
     source: WsEventInternalSrc,
   ) {
     const typedEvent = isObjectLike(event) ? event : undefined;
@@ -1366,7 +1453,7 @@ export abstract class BaseWebsocketClient<
   private async onWsMessage(
     event: unknown,
     wsKey: TWSKey,
-    ws: WebSocket,
+    ws: WebSocketLike,
     didDecompress = false,
   ): Promise<unknown> {
     try {

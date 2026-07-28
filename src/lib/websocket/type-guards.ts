@@ -4,7 +4,7 @@ import {
   HTXWSAPIRequest,
   WSAPIDerivativesOperation,
   WSAPISpotOperation,
-} from '../../types/websockets/ws-api';
+} from '../../types/websockets/ws-api.js';
 
 export function isSpotWSAPIRequest(
   request: HTXWSAPIRequest,

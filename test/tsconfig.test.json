@@ -1,11 +1,14 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "baseUrl": "",
-    "outDir": "dist",
+    "declaration": false,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "target": "esnext",
-    "rootDir": "../"
+    "rootDir": "../",
+    "types": ["node", "jest"]
   },
-  "include": ["../src/**/*.*", "../test/**/*.*"]
+  "include": ["../src/**/*.*", "../test/**/*.*"],
+  "exclude": ["packaging/fixtures/**/*", "types/**/*"]
 }

@@ -1,15 +1,15 @@
 # Node.js & JavaScript SDK for HTX REST APIs & WebSockets
 
 [![Build & Test](https://github.com/sieblyio/htx-api/actions/workflows/e2etest.yml/badge.svg?branch=main)](https://github.com/sieblyio/htx-api/actions/workflows/e2etest.yml)
-[![npm version](https://img.shields.io/npm/v/@siebly/htx-api)][1]
-[![npm size](https://img.shields.io/bundlephobia/min/@siebly/htx-api/latest)][1]
-[![npm downloads](https://img.shields.io/npm/dt/@siebly/htx-api)][1]
+[![npm version](https://img.shields.io/npm/v/htx-api)][1]
+[![npm size](https://img.shields.io/bundlephobia/min/htx-api/latest)][1]
+[![npm downloads](https://img.shields.io/npm/dt/htx-api)][1]
 [![last commit](https://img.shields.io/github/last-commit/sieblyio/htx-api)][1]
 [![Telegram](https://img.shields.io/badge/chat-on%20telegram-blue.svg)](https://t.me/nodetraders)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sieblyio/htx-api)
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@siebly/htx-api">
+  <a href="https://www.npmjs.com/package/htx-api">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://github.com/sieblyio/htx-api/blob/main/docs/images/logoDarkMode2.svg?raw=true#gh-dark-mode-only">
       <img alt="SDK Logo" src="https://github.com/sieblyio/htx-api/blob/main/docs/images/logoBrightMode2.svg?raw=true#gh-light-mode-only">
@@ -17,7 +17,7 @@
   </a>
 </p>
 
-[1]: https://www.npmjs.com/package/@siebly/htx-api
+[1]: https://www.npmjs.com/package/htx-api
 
 Complete & robust JavaScript & Node.js SDK for the HTX REST APIs and WebSockets:
 
@@ -34,7 +34,7 @@ Complete & robust JavaScript & Node.js SDK for the HTX REST APIs and WebSockets:
   - Smart WebSocket persistence with automatic reconnection handling.
   - Emit `reconnected` event when dropped connection is restored.
   - Support for both public and private WebSocket streams.
-- Browser-friendly HMAC signature mechanism.
+- Portable HMAC signing support for trusted server-side runtimes.
 - Automatically supports both ESM and CJS projects.
 - Heavy automated end-to-end testing with real API calls.
 - Proxy support via axios integration.
@@ -58,14 +58,19 @@ Complete & robust JavaScript & Node.js SDK for the HTX REST APIs and WebSockets:
     - [WebSocket API (WebsocketAPIClient)](#websocket-api-websocketapiclient)
 - [Customise Logging](#customise-logging)
 - [Browser/Frontend Usage](#browserfrontend-usage)
+  - [React and Vite](#react-and-vite)
   - [Webpack](#webpack)
+  - [Browser Requirements](#browser-requirements)
+  - [Security and CORS](#security-and-cors)
 - [LLMs & AI](#use-with-llms--ai)
 - [Used By](#used-by)
 - [Contributions & Thanks](#contributions--thanks)
 
 ## Installation
 
-`npm install --save @siebly/htx-api`
+`npm install --save htx-api`
+
+Node.js usage requires Node 22.13.0 or newer. Browser applications should follow the public-data and credential-safety guidance below.
 
 ## Examples
 
@@ -144,9 +149,9 @@ Both clients default to HTX's AWS CDN domains for better connectivity. You can o
 To use HTX's Spot APIs, import (or require) the `SpotClient`:
 
 ```javascript
-import { SpotClient } from '@siebly/htx-api';
+import { SpotClient } from 'htx-api';
 // or if you prefer require:
-// const { SpotClient } = require('@siebly/htx-api');
+// const { SpotClient } = require('htx-api');
 
 // For public endpoints, API credentials are optional
 const publicClient = new SpotClient();
@@ -242,9 +247,9 @@ See [SpotClient](./src/SpotClient.ts) for further information.
 Use the `FuturesClient` for futures and swap trading operations:
 
 ```javascript
-import { FuturesClient } from '@siebly/htx-api';
+import { FuturesClient } from 'htx-api';
 // or if you prefer require:
-// const { FuturesClient } = require('@siebly/htx-api');
+// const { FuturesClient } = require('htx-api');
 
 // For public endpoints, API credentials are optional
 const publicClient = new FuturesClient();
@@ -329,9 +334,9 @@ Each connection is tracked using a `WsKey` (see [WS_KEY_MAP](./src/lib/websocket
 For public market data, API credentials are not required:
 
 ```javascript
-import { WebsocketClient, WS_KEY_MAP } from '@siebly/htx-api';
+import { WebsocketClient, WS_KEY_MAP } from 'htx-api';
 // or if you prefer require:
-// const { WebsocketClient, WS_KEY_MAP } = require('@siebly/htx-api');
+// const { WebsocketClient, WS_KEY_MAP } = require('htx-api');
 
 // Create WebSocket client for public streams
 const wsClient = new WebsocketClient();
@@ -393,7 +398,7 @@ wsClient.subscribe(
 For private account data streams, API credentials are required:
 
 ```javascript
-import { WebsocketClient, WS_KEY_MAP } from '@siebly/htx-api';
+import { WebsocketClient, WS_KEY_MAP } from 'htx-api';
 
 // Create WebSocket client with API credentials for private streams
 const wsClient = new WebsocketClient({
@@ -447,7 +452,7 @@ Trade connections connect and authenticate lazily on the first request. Optional
 Trade keys: `spotTrade`, `linearSwapTrade`, `coinDeliveryTrade`, `coinSwapTrade`.
 
 ```javascript
-import { WebsocketAPIClient, WS_KEY_MAP } from '@siebly/htx-api';
+import { WebsocketAPIClient, WS_KEY_MAP } from 'htx-api';
 
 const client = new WebsocketAPIClient({
   apiKey: 'your-api-key',
@@ -487,7 +492,7 @@ See [WebsocketAPIClient](./src/WebsocketAPIClient.ts) for all typed methods. Exa
 Pass a custom logger which supports the log methods `trace`, `info` and `error`, or override methods from the default logger as desired.
 
 ```javascript
-import { WebsocketClient, DefaultLogger } from '@siebly/htx-api';
+import { WebsocketClient, DefaultLogger } from 'htx-api';
 
 // E.g. customise logging for only the trace level:
 const customLogger = {
@@ -516,15 +521,72 @@ In rare situations, you may want to see the raw HTTP requests being built as wel
 
 ## Browser/Frontend Usage
 
+The package's ESM entry can be imported directly by modern frontend bundlers. Do not build or copy a separate SDK bundle into your application.
+
+Browser applications should use the SDK only for public market data. Keep API keys, API secrets, authenticated REST calls, private WebSocket subscriptions, and WebSocket API trading on a trusted backend.
+
+### React and Vite
+
+Install and import the package normally; no SDK-specific Vite plugin or Node.js polyfill is required:
+
+```bash
+npm install htx-api
+```
+
+```tsx
+import { useEffect, useState } from 'react';
+import { SpotClient, WebsocketClient, WS_KEY_MAP } from 'htx-api';
+
+export function BtcTicker() {
+  const [ticker, setTicker] = useState<unknown>();
+
+  useEffect(() => {
+    const restClient = new SpotClient();
+    const wsClient = new WebsocketClient();
+
+    restClient.getTicker({ symbol: 'btcusdt' }).then(setTicker);
+
+    const onMessage = (message: unknown) => setTicker(message);
+    wsClient.on('message', onMessage);
+    wsClient.subscribe('market.btcusdt.ticker', WS_KEY_MAP.spotPublic);
+
+    return () => {
+      wsClient.off('message', onMessage);
+      wsClient.closeAll();
+    };
+  }, []);
+
+  return <pre>{JSON.stringify(ticker, null, 2)}</pre>;
+}
+```
+
+The cleanup is important during navigation, hot reloads, and React Strict Mode development checks so that an old socket is not left reconnecting in the background.
+
 ### Webpack
 
-Build a bundle using webpack:
+Webpack 5 can consume the same package entry directly:
 
-- `npm install`
-- `npm run build`
-- `npm run pack`
+```javascript
+import { SpotClient, WebsocketClient } from 'htx-api';
+```
 
-The bundle can be found in `dist/`. Altough usage should be largely consistent, smaller differences will exist. Documentation is still TODO.
+Use a normal `target: 'web'` application build. The SDK does not require a checked-in UMD bundle or `resolve.fallback` shims for Node.js core modules.
+
+Direct `<script>`-tag globals are not supported. Use the package through an ESM-aware bundler or application build instead.
+
+### Browser Requirements
+
+Use a modern browser with native `WebSocket`, `TextEncoder`, `TextDecoder`, and `DecompressionStream` support. Secure-context Web Crypto support (`globalThis.crypto.subtle`) is required by signing code, although credentials should not be used in a frontend application.
+
+Browser WebSockets do not expose Node.js-only operations such as custom agents, protocol-level `ping()`, or `terminate()`. The SDK uses browser-safe behavior for these cases. If your Content Security Policy restricts connections, allow the required HTX `https://` and `wss://` origins in `connect-src`.
+
+### Security and CORS
+
+- Never place an API key or secret in browser code, local storage, or frontend environment variables such as `VITE_*` or `REACT_APP_*`; those values are visible to users.
+- Send authenticated REST and WebSocket API operations through your own backend. Expose only the narrow application operations the frontend needs.
+- HTX controls which REST endpoints and headers are permitted by CORS. A browser cannot bypass a rejected preflight request; use a same-origin backend endpoint instead of disabling browser security.
+- Do not expose an unrestricted forwarding proxy. Validate destinations, authentication, request shapes, and rate limits on the backend.
+- Browser support does not imply that every HTX endpoint is suitable for direct frontend access. Public REST and public market-data WebSockets are the intended use cases.
 
 ## Use with LLMs & AI
 

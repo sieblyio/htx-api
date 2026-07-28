@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
-    "baseUrl": ".",
     "noEmitOnError": true,
     "declaration": true,
     "esModuleInterop": true,
@@ -10,7 +9,6 @@
     "lib": ["esnext", "dom"],
     "listEmittedFiles": false,
     "listFiles": false,
-    "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "noUnusedParameters": true,
@@ -21,12 +19,9 @@
     "sourceMap": true,
     "strict": true,
     "strictNullChecks": true,
-    "types": ["node", "jest"],
-    "module": "commonjs",
-    "outDir": "dist/cjs",
+    "types": ["node"],
     "target": "esnext"
   },
-  "compileOnSave": true,
   "exclude": ["node_modules", "dist"],
-  "include": ["src/**/*.*", "test/**/*.*", ".eslintrc.cjs"]
+  "include": ["src/**/*.*"]
 }

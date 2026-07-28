@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
+const { fixupPluginRules } = require('@eslint/compat');
 const tsEslintPlugin = require('@typescript-eslint/eslint-plugin');
+const requireExtensionsPlugin = fixupPluginRules(
+  require('eslint-plugin-require-extensions'),
+);
 const simpleImportSortPlugin = require('eslint-plugin-simple-import-sort');
 const prettierPlugin = require('eslint-plugin-prettier');
 const prettierConfig = require('eslint-config-prettier');
-const requireExtensions = require('eslint-plugin-require-extensions')
 
 module.exports = [
   {
@@ -14,6 +17,7 @@ module.exports = [
   },
   ...tsEslintPlugin.configs['flat/recommended'],
   {
+    name: 'htx/typescript',
     files: ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts'],
     languageOptions: {
       parserOptions: {
@@ -23,13 +27,15 @@ module.exports = [
       },
     },
     plugins: {
+      'require-extensions': requireExtensionsPlugin,
       'simple-import-sort': simpleImportSortPlugin,
-      'require-extensions': requireExtensions,
       prettier: prettierPlugin,
     },
     rules: {
       ...prettierConfig.rules,
       'prettier/prettier': 'error',
+      'require-extensions/require-extensions': 'error',
+      'require-extensions/require-index': 'error',
       'arrow-body-style': 'off',
       'prefer-arrow-callback': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',

@@ -1,6 +1,8 @@
-import WebSocket from 'isomorphic-ws';
-
 import { MessageEventLike } from '../../types/websockets/ws-events.js';
+import {
+  WebSocketBinaryData,
+  WebSocketLike,
+} from '../../types/websockets/ws-portable.js';
 import { WSTopic } from '../../types/websockets/ws-subscriptions.js';
 
 export const WS_KEY_MAP = {
@@ -201,16 +203,14 @@ export type HTXWSAPIRawRequest =
  * Does nothing if `ws` is undefined. Does nothing in browsers.
  */
 export function safeTerminateWs(
-  ws?: WebSocket | unknown,
+  ws?: WebSocketLike | unknown,
   fallbackToClose?: boolean,
 ): boolean {
   if (!ws) {
     return false;
   }
 
-  const websocket = ws as WebSocket & {
-    terminate?: () => void;
-  };
+  const websocket = ws as WebSocketLike;
 
   if (typeof websocket.terminate === 'function') {
     websocket.terminate();
@@ -271,7 +271,7 @@ export function getPromiseRefPrefixForWSAPIRequest(wsKey: WsKey): string {
 
 export function isBufferMessageEvent(
   msg: unknown,
-): msg is MessageEventLike<Buffer | ArrayBuffer | ArrayBufferView> {
+): msg is MessageEventLike<WebSocketBinaryData> {
   if (typeof msg !== 'object' || !msg) {
     return false;
   }
@@ -284,9 +284,7 @@ export function isBufferMessageEvent(
   return isBinaryLike(message.data);
 }
 
-export function isBinaryLike(
-  data: unknown,
-): data is Buffer | ArrayBuffer | ArrayBufferView {
+export function isBinaryLike(data: unknown): data is WebSocketBinaryData {
   return (
     isNodeBuffer(data) ||
     data instanceof ArrayBuffer ||
@@ -295,21 +293,23 @@ export function isBinaryLike(
 }
 
 export function binaryDataToUint8Array(
-  data: Buffer | ArrayBuffer | ArrayBufferView,
-): Uint8Array {
+  data: WebSocketBinaryData,
+): Uint8Array<ArrayBuffer> {
   if (isNodeBuffer(data)) {
-    return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+    return Uint8Array.from(data);
   }
 
   if (data instanceof ArrayBuffer) {
     return new Uint8Array(data);
   }
 
-  return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+  return Uint8Array.from(
+    new Uint8Array(data.buffer, data.byteOffset, data.byteLength),
+  );
 }
 
 export function bufferLooksLikeText(
-  data?: Buffer | ArrayBuffer | ArrayBufferView | null,
+  data?: WebSocketBinaryData | null,
 ): boolean {
   if (!data) {
     return false;
@@ -325,8 +325,8 @@ export function bufferLooksLikeText(
 }
 
 export async function decompressMessageEvent(
-  event: MessageEventLike<Buffer | ArrayBuffer | ArrayBufferView>,
-  format: CompressionFormat = 'gzip',
+  event: MessageEventLike<WebSocketBinaryData>,
+  format: WebSocketCompressionFormat = 'gzip',
 ): Promise<MessageEventLike<string>> {
   const data = event.data;
   if (typeof data === 'string') {
@@ -339,6 +339,12 @@ export async function decompressMessageEvent(
       type: 'message',
       data: new TextDecoder().decode(binaryDataToUint8Array(data)),
     };
+  }
+
+  if (typeof DecompressionStream !== 'function') {
+    throw new Error(
+      'Compressed WebSocket messages require DecompressionStream support',
+    );
   }
 
   const ds = new DecompressionStream(format);
@@ -365,6 +371,14 @@ export async function decompressMessageEvent(
   };
 }
 
-function isNodeBuffer(data: unknown): data is Buffer {
-  return typeof Buffer !== 'undefined' && Buffer.isBuffer(data);
+export type WebSocketCompressionFormat = 'deflate' | 'deflate-raw' | 'gzip';
+
+function isNodeBuffer(data: unknown): data is Uint8Array {
+  const bufferConstructor = (
+    globalThis as typeof globalThis & {
+      Buffer?: { isBuffer(value: unknown): boolean };
+    }
+  ).Buffer;
+
+  return bufferConstructor?.isBuffer(data) === true;
 }
