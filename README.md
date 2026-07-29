@@ -21,7 +21,7 @@
 
 Complete & robust JavaScript & Node.js SDK for the HTX REST APIs and WebSockets:
 
-- Professional, robust & performant HTX SDK with extensive production use in live trading environments.
+- Professional, robust & complete HTX SDK for all JavaScript runtimes.
 - Complete integration with HTX REST APIs and WebSockets.
   - Dedicated REST clients for Spot and Derivatives (linear swap, coin swap, delivery futures)
   - Unified WebSocket client for all markets
