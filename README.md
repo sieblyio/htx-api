@@ -198,7 +198,7 @@ client
 // Submit a limit order
 client
   .submitOrder({
-    'account-id': 'your-account-id',
+    'account-id': 'your-account-id', // Retrievable via getAccounts() as shown above
     symbol: 'btcusdt',
     type: 'buy-limit',
     amount: '0.0001',
@@ -216,7 +216,7 @@ client
 client
   .submitBatchOrders([
     {
-      'account-id': 'your-account-id',
+      'account-id': 'your-account-id', // Retrievable via getAccounts() as shown above
       symbol: 'btcusdt',
       type: 'buy-limit',
       amount: '0.0001',
@@ -616,7 +616,7 @@ Have my projects helped you? Share the love, there are many ways you can show yo
 - Sign up with my referral links:
   - OKX (receive a 20% fee discount!): https://www.okx.com/join/42013004
   - Binance (receive a 20% fee discount!): https://accounts.binance.com/register?ref=OKFFGIJJ
-  - HyperLiquid (receive a 4% fee discount!): https://app.hyperliquid.xyz/join/SDK
+  - HyperLiquid (receive a 4% fee discount!): https://app.hyperliquid.xyz/join/SIEBLY
   - Gate: https://www.gate.io/signup/NODESDKS?ref_type=103
 
 <!---
