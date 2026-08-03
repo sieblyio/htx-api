@@ -39,6 +39,8 @@ Complete & robust JavaScript & Node.js SDK for the HTX REST APIs and WebSockets:
 - Heavy automated end-to-end testing with real API calls.
 - Proxy support via axios integration.
 - Active community support & collaboration in telegram: [Node.js Algo Traders](https://t.me/nodetraders).
+- Looking to get started as soon as possible? Review our [HTX JavaScript QuickStart Guide](https://siebly.io/sdk/htx/javascript) on our website.
+- Looking to learn about all product groups & features? Review our [HTX JavaScript Tutorial](https://siebly.io/sdk/htx/javascript/tutorial) on our website.
 
 ## Table of Contents
 
