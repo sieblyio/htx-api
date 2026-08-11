@@ -5958,8 +5958,12 @@ export interface SpotTradingSymbol {
   wr?: string | null;
   d?: number | null;
   elr?: string | null;
+  /** Whether the symbol supports RPI trading */
+  enable_rpi?: boolean | number | string;
   p?: { id?: number; name?: string; weight?: number }[];
 }
+⋮----
+/** Whether the symbol supports RPI trading */
 ⋮----
 export interface SpotCurrency {
   cc: string;
@@ -6078,13 +6082,16 @@ export interface SpotV1MarketSymbolSettings {
   pp?: number;
   ap?: number;
   vp?: number;
+  /** @deprecated No longer valid. */
   minoa?: number | string;
   maxoa?: number | string;
   minov?: number | string;
+  /** @deprecated No longer valid. */
   lominoa?: number | string;
   lomaxoa?: number | string;
   lomaxba?: number | string;
   lomaxsa?: number | string;
+  /** @deprecated No longer valid. */
   smminoa?: number | string;
   smmaxoa?: number | string;
   bmmaxov?: number | string;
@@ -6103,6 +6110,12 @@ export interface SpotV1MarketSymbolSettings {
   flr?: number | string;
   castate?: string;
 }
+⋮----
+/** @deprecated No longer valid. */
+⋮----
+/** @deprecated No longer valid. */
+⋮----
+/** @deprecated No longer valid. */
 ⋮----
 /** Chain info item from /v1/settings/common/chains */
 export interface SpotV1ChainInfo {
@@ -6174,14 +6187,22 @@ export interface SpotV2TransactFeeRate {
   takerFeeRate: string;
   actualMakerRate: string;
   actualTakerRate: string;
+  /** RPI order fee rate */
+  rpiFeeRate?: string;
 }
+⋮----
+/** RPI order fee rate */
 ⋮----
 /** Currency reference item from /v2/reference/currencies */
 export interface SpotV2CurrencyReference {
   currency?: string;
   instStatus?: string;
   chains?: SpotV2ChainReference[];
+  /** Whether the currency supports direct transfers to Poloniex */
+  externalTransferEnabled?: boolean | string | number;
 }
+⋮----
+/** Whether the currency supports direct transfers to Poloniex */
 ⋮----
 /**
  * Market Data
@@ -6771,10 +6792,12 @@ export interface SpotDepositWithdrawRecord {
   type: string;
   'sub-type'?: string;
   currency: string;
+  /** Chain name. Poloniex rapid transfer defaults to t397342. */
   chain: string;
   'tx-hash': string;
   amount: number;
   'from-addr-tag'?: string;
+  /** On-chain address, or UID:XXXX for Poloniex→HTX rapid transfers. */
   address: string;
   'address-tag'?: string;
   fee: number;
@@ -6784,6 +6807,10 @@ export interface SpotDepositWithdrawRecord {
   'error-code'?: string;
   'error-msg'?: string;
 }
+⋮----
+/** Chain name. Poloniex rapid transfer defaults to t397342. */
+⋮----
+/** On-chain address, or UID:XXXX for Poloniex→HTX rapid transfers. */
 ⋮----
 /** VASP exchange from GET /v1/query/vasp-list */
 export interface SpotVaspExchange {
@@ -6854,9 +6881,13 @@ export interface SpotSubUserCreationResult {
   userName: string;
   note?: string;
   uid?: number;
+  /** Spot account id for spot order transactions */
+  spotAccountId?: number;
   errCode?: string;
   errMessage?: string;
 }
+⋮----
+/** Spot account id for spot order transactions */
 ⋮----
 /** Sub user from GET /v2/sub-user/user-list */
 export interface SpotSubUserList {
@@ -7111,7 +7142,15 @@ export interface SpotReferralReferral {
   invitee_rebate_rate_partner_contract?: string | null;
   join_time_m2: number;
   join_time_partner?: number | null;
+  /** Whether advanced KYC was completed */
+  completed_kyc?: boolean | number | string;
+  /** Invitee email */
+  mail?: string | null;
 }
+⋮----
+/** Whether advanced KYC was completed */
+⋮----
+/** Invitee email */
 ⋮----
 /** Open order from GET /v1/order/openOrders */
 export interface SpotV1OpenOrder {
@@ -7130,6 +7169,27 @@ export interface SpotV1OpenOrder {
   state: string;
   'stop-price'?: string;
   operator?: string;
+}
+⋮----
+/** Result from POST /v5/account/universal_transfer */
+export interface SpotUniversalTransferResult {
+  transfer_id: number;
+}
+⋮----
+/** Record from GET /v5/account/universal_transfer_records */
+export interface SpotUniversalTransferRecord {
+  id: number;
+  transfer_id: number | string;
+  amount: string;
+  currency?: string;
+  status?: string;
+  from_account_type: string;
+  to_account_type: string;
+  from_account_asset?: string;
+  to_account_asset?: string;
+  from_asset_type?: string;
+  to_asset_type?: string;
+  transfer_time?: number;
 }
 
 ================
@@ -7426,6 +7486,8 @@ export interface SpotV1OrderPlaceReq {
   'stop-price'?: string;
   /** Operator for stop price (lte, gte, etc) */
   operator?: string;
+  /** RPI order - type must be buy-limit or sell-limit */
+  'time-in-force'?: 'rpi';
 }
 ⋮----
 /** Account ID from GET /v1/account/accounts. Required for trading. */
@@ -7447,6 +7509,8 @@ export interface SpotV1OrderPlaceReq {
 /** Trigger price for stop-limit orders */
 ⋮----
 /** Operator for stop price (lte, gte, etc) */
+⋮----
+/** RPI order - type must be buy-limit or sell-limit */
 ⋮----
 /** Margin order with auto borrow/repay for POST /v1/order/auto/place. Sub-accounts not supported. */
 export interface SpotV1OrderAutoPlaceReq {
@@ -7936,15 +8000,23 @@ export interface SpotCrossMarginLoanOrdersReq {
 ⋮----
 /** Req for POST /v1/dw/withdraw/api/create. Create withdraw request. */
 export interface SpotWithdrawCreateReq {
-  /** Destination address. Or UID:1234567, PHONE:xxx, MAIL:xxx for internal. */
+  /**
+   * Destination address.
+   * On-chain: chain address.
+   * Internal: UID:1234567, PHONE:xxx, MAIL:xxx.
+   * Poloniex zero-fee cross-exchange: POLOUSER:{UUID} (linked on HTX first).
+   */
   address: string;
   /** Crypto currency */
   currency: string;
   /** Amount to withdraw */
   amount: string;
-  /** Fee. Use 0 for UID withdraw. */
+  /** Fee. Use 0 for UID withdraw and Poloniex cross-exchange transfers. */
   fee?: number;
-  /** Chain. Required for UID. Required for multi-chain coins. */
+  /**
+   * Chain. Required for multi-chain coins.
+   * For internal withdraw or Poloniex cross-exchange transfer, use t397342.
+   */
   chain?: string;
   /** Address tag. For UID withdraw, use recipient UID. */
   'addr-tag'?: string;
@@ -7956,15 +8028,23 @@ export interface SpotWithdrawCreateReq {
   'user-name-vasp'?: string;
 }
 ⋮----
-/** Destination address. Or UID:1234567, PHONE:xxx, MAIL:xxx for internal. */
+/**
+   * Destination address.
+   * On-chain: chain address.
+   * Internal: UID:1234567, PHONE:xxx, MAIL:xxx.
+   * Poloniex zero-fee cross-exchange: POLOUSER:{UUID} (linked on HTX first).
+   */
 ⋮----
 /** Crypto currency */
 ⋮----
 /** Amount to withdraw */
 ⋮----
-/** Fee. Use 0 for UID withdraw. */
+/** Fee. Use 0 for UID withdraw and Poloniex cross-exchange transfers. */
 ⋮----
-/** Chain. Required for UID. Required for multi-chain coins. */
+/**
+   * Chain. Required for multi-chain coins.
+   * For internal withdraw or Poloniex cross-exchange transfer, use t397342.
+   */
 ⋮----
 /** Address tag. For UID withdraw, use recipient UID. */
 ⋮----
@@ -8000,7 +8080,11 @@ export interface SpotDepositWithdrawQueryReq {
 ⋮----
 /** Req for GET /v2/account/withdraw/address. Query withdraw address. */
 export interface SpotWithdrawAddressReq {
-  /** Crypto currency. Use "t247117" for universal address. */
+  /**
+   * Crypto currency.
+   * Use "t247117" for universal address.
+   * Use "t397342" to query Poloniex UID withdraw addresses added on platform.
+   */
   currency?: string;
   /** Block chain name. Omit for all chains. */
   chain?: string;
@@ -8012,7 +8096,11 @@ export interface SpotWithdrawAddressReq {
   fromId?: number;
 }
 ⋮----
-/** Crypto currency. Use "t247117" for universal address. */
+/**
+   * Crypto currency.
+   * Use "t247117" for universal address.
+   * Use "t397342" to query Poloniex UID withdraw addresses added on platform.
+   */
 ⋮----
 /** Block chain name. Omit for all chains. */
 ⋮----
@@ -8449,6 +8537,248 @@ export interface SpotEarnUserAssetsReq {
 /** Page number. Default 1. */
 ⋮----
 /** Items per page, max 100. Default 10. */
+⋮----
+/** Account type for POST /v5/account/universal_transfer */
+export type SpotUniversalTransferAccountType =
+  | 'otc'
+  | 'spot'
+  | 'linear-swap'
+  | 'futures'
+  | 'swap'
+  | 'margin'
+  | 'super-margin'
+  | 'otc-options';
+⋮----
+/** Req for POST /v5/account/universal_transfer. Create universal transfer. */
+export interface SpotUniversalTransferReq {
+  amount: number | string;
+  currency: string;
+  from_account_type: SpotUniversalTransferAccountType;
+  to_account_type: SpotUniversalTransferAccountType;
+  from_asset_type?: string;
+  to_asset_type?: string;
+}
+⋮----
+/** Req for GET /v5/account/universal_transfer_records. Universal transfer history. */
+export interface SpotUniversalTransferRecordsReq {
+  transfer_id?: number | string;
+  currency?: string;
+  status?: 'success' | 'pending' | 'failed';
+  start_time?: number;
+  end_time?: number;
+  from?: number;
+  limit?: number;
+  direct?: 'prev' | 'next';
+}
+
+================
+File: src/lib/requestUtils.ts
+================
+/* eslint-disable @typescript-eslint/no-explicit-any */
+⋮----
+import {
+  OrderIdProperty,
+  SpotOrderIdProperty,
+} from '../types/response/shared.types.js';
+import {
+  HTXWSAPIRequest,
+  WSAPIDerivativesOperation,
+  WSAPISpotOperation,
+} from '../types/websockets/ws-api.js';
+import {
+  isDerivativesWSAPIRequest,
+  isSpotWSAPIRequest,
+} from './websocket/type-guards.js';
+import { WS_KEY_MAP, WsKey } from './websocket/websocket-util.js';
+⋮----
+/**
+ * Used to switch how authentication/requests work under the hood
+ */
+⋮----
+/** Spot */
+⋮----
+/** Spot AWS */
+⋮----
+/**
+   * Futures Cloudflare CDN (default for futures clients)
+   */
+⋮----
+/**
+   * Futures
+   *
+   * If you can't connect "https://api.hbdm.com", please use "https://api.btcgateway.pro" for debug purpose. If your server is deployed in AWS, we recommend using "https://api.hbdm.vn".
+   */
+⋮----
+/**
+   * Futures AWS CDN
+   */
+⋮----
+export type RestClientType =
+  (typeof REST_CLIENT_TYPE_ENUM)[keyof typeof REST_CLIENT_TYPE_ENUM];
+⋮----
+[REST_CLIENT_TYPE_ENUM.futures]: 'https://api.hbdm.com', // Cloudflare's CDN
+// If you can't connect "https://api.hbdm.com", please use "https://api.btcgateway.pro" for debug purpose. If your server is deployed in AWS, HTX recommend using "https://api.hbdm.vn".
+⋮----
+[REST_CLIENT_TYPE_ENUM.futuresAWS]: 'https://api.hbdm.vn', // AWS's CDN
+⋮----
+export interface RestClientOptions {
+  /** Your API key */
+  apiKey?: string;
+
+  /** Your API secret */
+  apiSecret?: string;
+
+  /**
+   * Use access token instead of sign, if this is provided.
+   * For guidance refer to: https://github.com/tiagosiebler/kucoin-api/issues/2
+   */
+  apiAccessToken?: string;
+
+  /** Default: false. If true, we'll throw errors if any params are undefined */
+  strictParamValidation?: boolean;
+
+  /**
+   * Optionally override API protocol + domain
+   * e.g baseUrl: 'https://api.huobi.pro'
+   **/
+  baseUrl?: string;
+
+  /**
+   * Advanced: force a specific base URL.
+   * - For AWS deployments, use REST_CLIENT_TYPE_ENUM.spotAWS for spot or REST_CLIENT_TYPE_ENUM.futuresAWS for futures.
+   * - If you can't connect to the default futures endpoint (Cloudflare's CDN), you can use REST_CLIENT_TYPE_ENUM.futuresAlt1 to connect to the alternative endpoint (btcgateway.pro). https://www.htx.com/en-us/opend/newApiPages/?id=707
+   */
+  baseUrlKey?: RestClientType;
+
+  /** Default: true. whether to try and post-process request exceptions (and throw them). */
+  parseExceptions?: boolean;
+
+  customTimestampFn?: () => number;
+
+  /**
+   * Enable keep alive for REST API requests (via axios).
+   */
+  keepAlive?: boolean;
+
+  /**
+   * When using HTTP KeepAlive, how often to send TCP KeepAlive packets over sockets being kept alive. Default = 1000.
+   * Only relevant if keepAlive is set to true.
+   * Default: 1000 (defaults comes from https agent)
+   */
+  keepAliveMsecs?: number;
+
+  /**
+   * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
+   *
+   * Look in the examples folder for a demonstration on using node's createHmac instead.
+   */
+  customSignMessageFn?: (message: string, secret: string) => Promise<string>;
+}
+⋮----
+/** Your API key */
+⋮----
+/** Your API secret */
+⋮----
+/**
+   * Use access token instead of sign, if this is provided.
+   * For guidance refer to: https://github.com/tiagosiebler/kucoin-api/issues/2
+   */
+⋮----
+/** Default: false. If true, we'll throw errors if any params are undefined */
+⋮----
+/**
+   * Optionally override API protocol + domain
+   * e.g baseUrl: 'https://api.huobi.pro'
+   **/
+⋮----
+/**
+   * Advanced: force a specific base URL.
+   * - For AWS deployments, use REST_CLIENT_TYPE_ENUM.spotAWS for spot or REST_CLIENT_TYPE_ENUM.futuresAWS for futures.
+   * - If you can't connect to the default futures endpoint (Cloudflare's CDN), you can use REST_CLIENT_TYPE_ENUM.futuresAlt1 to connect to the alternative endpoint (btcgateway.pro). https://www.htx.com/en-us/opend/newApiPages/?id=707
+   */
+⋮----
+/** Default: true. whether to try and post-process request exceptions (and throw them). */
+⋮----
+/**
+   * Enable keep alive for REST API requests (via axios).
+   */
+⋮----
+/**
+   * When using HTTP KeepAlive, how often to send TCP KeepAlive packets over sockets being kept alive. Default = 1000.
+   * Only relevant if keepAlive is set to true.
+   * Default: 1000 (defaults comes from https agent)
+   */
+⋮----
+/**
+   * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
+   *
+   * Look in the examples folder for a demonstration on using node's createHmac instead.
+   */
+⋮----
+export type GenericAPIResponse<T = any> = Promise<T>;
+⋮----
+export function serializeParams<
+  T extends Record<string, any> | undefined = object,
+>(
+  params: T,
+  strict_validation: boolean | undefined,
+  encodeValues: boolean,
+  prefixWith: string,
+  repeatArrayValuesAsKVPairs: boolean,
+): string
+⋮----
+// Only prefix if there's a value
+⋮----
+export function logInvalidOrderId(
+  orderIdProperty: SpotOrderIdProperty,
+  expectedOrderIdPrefix: string,
+  params: object,
+)
+⋮----
+function getWSAPICustomOrderIdProperties(
+  operation: WSAPISpotOperation | string,
+  wsKey: WsKey,
+): OrderIdProperty[]
+⋮----
+function isOrderParamRecord(value: unknown): value is Record<string, unknown>
+⋮----
+function getOrderParamRecords(params: unknown): Record<string, unknown>[]
+⋮----
+export function requiresWSAPINewCustomOID(
+  request: HTXWSAPIRequest,
+  wsKey: WsKey,
+): boolean
+⋮----
+export function validateWSAPICustomOrderID(
+  request: HTXWSAPIRequest,
+  wsKey: WsKey,
+): void
+⋮----
+function isDerivativesWSAPIOrderPlacementOperation(
+  operation: WSAPIDerivativesOperation | string,
+): boolean
+⋮----
+export function validateWSAPIDerivativesChannelKey(
+  request: HTXWSAPIRequest,
+  wsKey: WsKey,
+): void
+⋮----
+export function isEmptyObject(obj: any, acceptStringIfNotEmpty: boolean)
+⋮----
+export function getRestBaseUrl(
+  restClientOptions: RestClientOptions,
+  restClientType: RestClientType,
+): string
+⋮----
+/**
+ * Iterates to extract pure domain from URL.
+ * https://example.com/v1/endpoint -> example.com
+ */
+export function getBaseDomain(url: string): string
+⋮----
+export function generateNewOrderID(): string
+⋮----
+export function getOrderIdPrefix(): string
 
 ================
 File: README.md
@@ -8548,17 +8878,17 @@ Refer to the [examples](./examples) folder for implementation demos, including:
 
 Check out our JavaScript/TypeScript/Node.js SDKs & Projects:
 
-- Visit our website: [https://Siebly.io](https://siebly.io/?ref=gh)
+- Visit our website: [https://Siebly.io](https://siebly.io/)
 - Try our REST API & WebSocket SDKs published on npmjs:
-  - [Bybit Node.js SDK: bybit-api](https://www.npmjs.com/package/bybit-api)
-  - [Kraken Node.js SDK: @siebly/kraken-api](https://www.npmjs.com/package/@siebly/kraken-api)
-  - [OKX Node.js SDK: okx-api](https://www.npmjs.com/package/okx-api)
-  - [Binance Node.js SDK: binance](https://www.npmjs.com/package/binance)
-  - [Gate (gate.com) Node.js SDK: gateio-api](https://www.npmjs.com/package/gateio-api)
-  - [Bitget Node.js SDK: bitget-api](https://www.npmjs.com/package/bitget-api)
-  - [Kucoin Node.js SDK: kucoin-api](https://www.npmjs.com/package/kucoin-api)
-  - [Coinbase Node.js SDK: coinbase-api](https://www.npmjs.com/package/coinbase-api)
-  - [HTX Node.js SDK: @siebly/htx-api](https://www.npmjs.com/package/@siebly/htx-api)
+  - [Bybit JavaScript SDK: bybit-api](https://www.npmjs.com/package/bybit-api)
+  - [Kraken JavaScript SDK: @siebly/kraken-api](https://www.npmjs.com/package/@siebly/kraken-api)
+  - [OKX JavaScript SDK: okx-api](https://www.npmjs.com/package/okx-api)
+  - [Binance JavaScript SDK: binance](https://www.npmjs.com/package/binance)
+  - [Gate (gate.com) JavaScript SDK: gateio-api](https://www.npmjs.com/package/gateio-api)
+  - [Bitget JavaScript SDK: bitget-api](https://www.npmjs.com/package/bitget-api)
+  - [Kucoin JavaScript SDK: kucoin-api](https://www.npmjs.com/package/kucoin-api)
+  - [Coinbase JavaScript SDK: coinbase-api](https://www.npmjs.com/package/coinbase-api)
+  - [HTX JavaScript SDK: @siebly/htx-api](https://www.npmjs.com/package/@siebly/htx-api)
 - Try my misc utilities:
   - [OrderBooks Node.js: orderbooks](https://www.npmjs.com/package/orderbooks)
   - [Crypto Exchange Account State Cache: accountstate](https://www.npmjs.com/package/accountstate)
@@ -9095,225 +9425,16 @@ Contributions are encouraged, I will review any incoming pull requests. See the 
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=sieblyio/bybit-api,sieblyio/okx-api,sieblyio/binance,sieblyio/bitget-api,sieblyio/gateio-api,sieblyio/kucoin-api,sieblyio/coinbase-api,sieblyio/orderbooks,sieblyio/accountstate,sieblyio/awesome-crypto-examples&type=Date)](https://star-history.com/#sieblyio/bybit-api&sieblyio/okx-api&sieblyio/binance&sieblyio/bitget-api&sieblyio/gateio-api&sieblyio/kucoin-api&sieblyio/coinbase-api&sieblyio/orderbooks&sieblyio/accountstate&sieblyio/awesome-crypto-examples&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=sieblyio/bybit-api,sieblyio/okx-api,sieblyio/binance,sieblyio/bitget-api,sieblyio/bitmart-api,sieblyio/gateio-api,sieblyio/kucoin-api,sieblyio/coinbase-api,sieblyio/orderbooks,sieblyio/accountstate,sieblyio/awesome-crypto-examples&type=Date)](https://star-history.com/#sieblyio/bybit-api&sieblyio/okx-api&sieblyio/binance&sieblyio/bitget-api&sieblyio/bitmart-api&sieblyio/gateio-api&sieblyio/kucoin-api&sieblyio/coinbase-api&sieblyio/orderbooks&sieblyio/accountstate&sieblyio/awesome-crypto-examples&Date)
 
 <!-- template_star_history_end -->
-
-================
-File: src/lib/requestUtils.ts
-================
-/* eslint-disable @typescript-eslint/no-explicit-any */
-⋮----
-import {
-  OrderIdProperty,
-  SpotOrderIdProperty,
-} from '../types/response/shared.types.js';
-import {
-  HTXWSAPIRequest,
-  WSAPIDerivativesOperation,
-  WSAPISpotOperation,
-} from '../types/websockets/ws-api.js';
-import {
-  isDerivativesWSAPIRequest,
-  isSpotWSAPIRequest,
-} from './websocket/type-guards.js';
-import { WS_KEY_MAP, WsKey } from './websocket/websocket-util.js';
-⋮----
-/**
- * Used to switch how authentication/requests work under the hood
- */
-⋮----
-/** Spot */
-⋮----
-/** Spot AWS */
-⋮----
-/**
-   * Futures Cloudflare CDN (default for futures clients)
-   */
-⋮----
-/**
-   * Futures
-   *
-   * If you can't connect "https://api.hbdm.com", please use "https://api.btcgateway.pro" for debug purpose. If your server is deployed in AWS, we recommend using "https://api.hbdm.vn".
-   */
-⋮----
-/**
-   * Futures AWS CDN
-   */
-⋮----
-export type RestClientType =
-  (typeof REST_CLIENT_TYPE_ENUM)[keyof typeof REST_CLIENT_TYPE_ENUM];
-⋮----
-[REST_CLIENT_TYPE_ENUM.futures]: 'https://api.hbdm.com', // Cloudflare's CDN
-// If you can't connect "https://api.hbdm.com", please use "https://api.btcgateway.pro" for debug purpose. If your server is deployed in AWS, HTX recommend using "https://api.hbdm.vn".
-⋮----
-[REST_CLIENT_TYPE_ENUM.futuresAWS]: 'https://api.hbdm.vn', // AWS's CDN
-⋮----
-export interface RestClientOptions {
-  /** Your API key */
-  apiKey?: string;
-
-  /** Your API secret */
-  apiSecret?: string;
-
-  /**
-   * Use access token instead of sign, if this is provided.
-   * For guidance refer to: https://github.com/tiagosiebler/kucoin-api/issues/2
-   */
-  apiAccessToken?: string;
-
-  /** Default: false. If true, we'll throw errors if any params are undefined */
-  strictParamValidation?: boolean;
-
-  /**
-   * Optionally override API protocol + domain
-   * e.g baseUrl: 'https://api.huobi.pro'
-   **/
-  baseUrl?: string;
-
-  /**
-   * Advanced: force a specific base URL.
-   * - For AWS deployments, use REST_CLIENT_TYPE_ENUM.spotAWS for spot or REST_CLIENT_TYPE_ENUM.futuresAWS for futures.
-   * - If you can't connect to the default futures endpoint (Cloudflare's CDN), you can use REST_CLIENT_TYPE_ENUM.futuresAlt1 to connect to the alternative endpoint (btcgateway.pro). https://www.htx.com/en-us/opend/newApiPages/?id=707
-   */
-  baseUrlKey?: RestClientType;
-
-  /** Default: true. whether to try and post-process request exceptions (and throw them). */
-  parseExceptions?: boolean;
-
-  customTimestampFn?: () => number;
-
-  /**
-   * Enable keep alive for REST API requests (via axios).
-   */
-  keepAlive?: boolean;
-
-  /**
-   * When using HTTP KeepAlive, how often to send TCP KeepAlive packets over sockets being kept alive. Default = 1000.
-   * Only relevant if keepAlive is set to true.
-   * Default: 1000 (defaults comes from https agent)
-   */
-  keepAliveMsecs?: number;
-
-  /**
-   * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
-   *
-   * Look in the examples folder for a demonstration on using node's createHmac instead.
-   */
-  customSignMessageFn?: (message: string, secret: string) => Promise<string>;
-}
-⋮----
-/** Your API key */
-⋮----
-/** Your API secret */
-⋮----
-/**
-   * Use access token instead of sign, if this is provided.
-   * For guidance refer to: https://github.com/tiagosiebler/kucoin-api/issues/2
-   */
-⋮----
-/** Default: false. If true, we'll throw errors if any params are undefined */
-⋮----
-/**
-   * Optionally override API protocol + domain
-   * e.g baseUrl: 'https://api.huobi.pro'
-   **/
-⋮----
-/**
-   * Advanced: force a specific base URL.
-   * - For AWS deployments, use REST_CLIENT_TYPE_ENUM.spotAWS for spot or REST_CLIENT_TYPE_ENUM.futuresAWS for futures.
-   * - If you can't connect to the default futures endpoint (Cloudflare's CDN), you can use REST_CLIENT_TYPE_ENUM.futuresAlt1 to connect to the alternative endpoint (btcgateway.pro). https://www.htx.com/en-us/opend/newApiPages/?id=707
-   */
-⋮----
-/** Default: true. whether to try and post-process request exceptions (and throw them). */
-⋮----
-/**
-   * Enable keep alive for REST API requests (via axios).
-   */
-⋮----
-/**
-   * When using HTTP KeepAlive, how often to send TCP KeepAlive packets over sockets being kept alive. Default = 1000.
-   * Only relevant if keepAlive is set to true.
-   * Default: 1000 (defaults comes from https agent)
-   */
-⋮----
-/**
-   * Allows you to provide a custom "signMessage" function, e.g. to use node's much faster createHmac method
-   *
-   * Look in the examples folder for a demonstration on using node's createHmac instead.
-   */
-⋮----
-export type GenericAPIResponse<T = any> = Promise<T>;
-⋮----
-export function serializeParams<
-  T extends Record<string, any> | undefined = object,
->(
-  params: T,
-  strict_validation: boolean | undefined,
-  encodeValues: boolean,
-  prefixWith: string,
-  repeatArrayValuesAsKVPairs: boolean,
-): string
-⋮----
-// Only prefix if there's a value
-⋮----
-export function logInvalidOrderId(
-  orderIdProperty: SpotOrderIdProperty,
-  expectedOrderIdPrefix: string,
-  params: object,
-)
-⋮----
-function getWSAPICustomOrderIdProperties(
-  operation: WSAPISpotOperation | string,
-  wsKey: WsKey,
-): OrderIdProperty[]
-⋮----
-function isOrderParamRecord(value: unknown): value is Record<string, unknown>
-⋮----
-function getOrderParamRecords(params: unknown): Record<string, unknown>[]
-⋮----
-export function requiresWSAPINewCustomOID(
-  request: HTXWSAPIRequest,
-  wsKey: WsKey,
-): boolean
-⋮----
-export function validateWSAPICustomOrderID(
-  request: HTXWSAPIRequest,
-  wsKey: WsKey,
-): void
-⋮----
-function isDerivativesWSAPIOrderPlacementOperation(
-  operation: WSAPIDerivativesOperation | string,
-): boolean
-⋮----
-export function validateWSAPIDerivativesChannelKey(
-  request: HTXWSAPIRequest,
-  wsKey: WsKey,
-): void
-⋮----
-export function isEmptyObject(obj: any, acceptStringIfNotEmpty: boolean)
-⋮----
-export function getRestBaseUrl(
-  restClientOptions: RestClientOptions,
-  restClientType: RestClientType,
-): string
-⋮----
-/**
- * Iterates to extract pure domain from URL.
- * https://example.com/v1/endpoint -> example.com
- */
-export function getBaseDomain(url: string): string
-⋮----
-export function generateNewOrderID(): string
-⋮----
-export function getOrderIdPrefix(): string
 
 ================
 File: package.json
 ================
 {
   "name": "@siebly/htx-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Complete & robust Node.js SDK for HTX's REST APIs and WebSockets, with TypeScript & strong end to end tests.",
   "scripts": {
     "clean": "node scripts/clean.mjs",
@@ -9419,1751 +9540,6 @@ File: package.json
   },
   "homepage": "https://github.com/sieblyio/htx-api#readme"
 }
-
-================
-File: src/lib/BaseRestClient.ts
-================
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import axios, { AxiosRequestConfig, AxiosResponse, Method } from 'axios';
-⋮----
-import {
-  configureHttpsKeepAlive,
-  DEFAULT_REQUEST_HEADERS,
-} from './https-agent.js';
-import { neverGuard } from './misc-util.js';
-import {
-  APIIDMain,
-  APIIDMainKey,
-  GenericAPIResponse,
-  getBaseDomain,
-  getRestBaseUrl,
-  isEmptyObject,
-  REST_CLIENT_TYPE_ENUM,
-  RestClientOptions,
-  RestClientType,
-  serializeParams,
-} from './requestUtils.js';
-import {
-  checkWebCryptoAPISupported,
-  getSignKeyType,
-  SignAlgorithm,
-  SignEncodeMethod,
-  signMessage,
-  SignMessageOptions,
-} from './webCryptoAPI.js';
-⋮----
-function redactSignedUrl(url: string | undefined): string | undefined
-⋮----
-interface SignedRequest<
-  T extends object | undefined = object,
-  TReqData = object,
-  TReqQuery = object,
-> {
-  originalParams: T;
-  paramsWithSign?: T & { sign: string };
-  // all request params intended for request body (e.g. POST)
-  requestData?: TReqData;
-  // all params intended for request query string (e.g. GET)
-  requestQuery?: TReqQuery;
-  serializedParams: string;
-  sign: string;
-  queryParamsWithSign: string;
-  timestamp: number;
-  recvWindow: number;
-}
-⋮----
-// all request params intended for request body (e.g. POST)
-⋮----
-// all params intended for request query string (e.g. GET)
-⋮----
-interface UnsignedRequest<T extends object | undefined = object> {
-  originalParams: T;
-  paramsWithSign: T;
-  queryParamsWithSign: undefined;
-}
-⋮----
-type SignMethod = 'htx';
-⋮----
-/**
- * Some requests require some params to be in the query string and some in the body. Some even support passing params via headers.
- * This type anticipates these are possible in any combination.
- *
- * The request builder will automatically handle where parameters should go.
- */
-type ParamsInQueryBodyOrHeader = {
-  query?: object;
-  body?: object;
-  headers?: object;
-};
-⋮----
-// request: {
-//   url: response.config.url,
-//   method: response.config.method,
-//   data: response.config.data,
-//   headers: response.config.headers,
-// },
-⋮----
-/**
- * Impure, mutates params to remove any values that have a key but are undefined.
- */
-function deleteUndefinedValues(params?: any): void
-⋮----
-export abstract class BaseRestClient
-⋮----
-// A unique incrementing nonce
-⋮----
-/** Defines the client type (affecting how requests & signatures behave) */
-abstract getClientType(): RestClientType;
-⋮----
-/**
-   * Create an instance of the REST client. Pass API credentials in the object in the first parameter.
-   * @param {RestClientOptions} [restClientOptions={}] options to configure REST API connectivity
-   * @param {AxiosRequestConfig} [networkOptions={}] HTTP networking options for axios
-   */
-constructor(
-    restClientOptions: RestClientOptions = {},
-    networkOptions: AxiosRequestConfig = {},
-)
-⋮----
-/** Throw errors if any request params are empty */
-⋮----
-/** in ms == 5 minutes by default */
-⋮----
-/** inject custom request options based on axios specs - see axios docs for more guidance on AxiosRequestConfig: https://github.com/axios/axios#request-config */
-⋮----
-// Check Web Crypto API support when credentials are provided
-⋮----
-// Throw if one of the 3 values is missing, but at least one of them is set
-⋮----
-/**
-   * Generates a timestamp for signing API requests.
-   *
-   * This method can be overridden or customized using `customTimestampFn`
-   * to implement a custom timestamp synchronization mechanism.
-   * If no custom function is provided, it defaults to the current system time.
-   */
-private getSignTimestampMs(): number
-⋮----
-private getNextRequestNonce(): string
-⋮----
-private hasValidCredentials()
-⋮----
-setAccessToken(newAccessToken: string)
-⋮----
-hasAccessToken(): boolean
-⋮----
-protected get(endpoint: string, params?: object)
-⋮----
-// GET only supports params in the query string
-⋮----
-protected post(endpoint: string, params?: ParamsInQueryBodyOrHeader)
-⋮----
-protected getPrivate(endpoint: string, params?: object)
-⋮----
-// GET only supports params in the query string
-⋮----
-protected postPrivate(endpoint: string, params?: ParamsInQueryBodyOrHeader)
-⋮----
-protected deletePrivate(
-    endpoint: string,
-    params?: ParamsInQueryBodyOrHeader,
-)
-⋮----
-protected putPrivate(endpoint: string, params?: ParamsInQueryBodyOrHeader)
-⋮----
-// protected patchPrivate(endpoint: string, params?: any) {
-protected patchPrivate(endpoint: string, params?: ParamsInQueryBodyOrHeader)
-⋮----
-/**
-   * @private Make a HTTP request to a specific endpoint. Private endpoint API calls are automatically signed.
-   */
-private async _call(
-    method: Method,
-    endpoint: string,
-    params?: ParamsInQueryBodyOrHeader,
-    isPublicApi?: boolean,
-): GenericAPIResponse
-⋮----
-// Sanity check to make sure it's only ever prefixed by one forward slash
-⋮----
-// Build a request and handle signature process
-⋮----
-// Dispatch request
-⋮----
-/**
-           * Throw if response contains error (SPOT), e.g:
-           * {
-           *    status: 'error',
-           *    'err-code': 'api-signature-not-valid',
-           *    'err-msg': 'Signature not valid: API key has no permission [API Key没有权限]',
-           *    data: null
-           * }
-           */
-⋮----
-// const res = {
-//   result: 'error',
-//   error: 'authenticationError',
-//   serverTime: '2025-10-29T15:02:39.341Z',
-// };
-⋮----
-// futures exceptions, e.g.
-// data: {
-//   code: 403,
-//   msg: 'Incorrect signature method [错误的签名方法]',
-//   data: null,
-//   ts: 1775823398810
-// }
-// 6001, The Single-Asset Collateral mode is temporarily unavailable.
-⋮----
-// A successful batch request may contain both accepted and
-// rejected orders. Return the full response so callers can
-// handle data.success and data.errors independently.
-⋮----
-/**
-   * @private generic handler to parse request exceptions
-   */
-parseException(e: any, requestParams: any): unknown
-⋮----
-// Something happened in setting up the request that triggered an error
-⋮----
-// request made but no response received
-⋮----
-// The request was made and the server responded with a status code
-// that falls out of the range of 2xx
-⋮----
-// console.error('err: ', response?.data);
-⋮----
-// Prevent credentials from leaking into error messages
-⋮----
-private async signMessage(
-    paramsStr: string,
-    secret: string,
-    method: SignEncodeMethod,
-    algorithm: SignAlgorithm,
-    options?: SignMessageOptions,
-): Promise<string>
-⋮----
-/**
-   * @private sign request and set recv window
-   */
-private async signRequest<
-    T extends ParamsInQueryBodyOrHeader | undefined = object,
-  >(
-    domain: string,
-    data: T,
-    endpoint: string,
-    method: Method,
-    signMethod: SignMethod,
-): Promise<SignedRequest<T>>
-⋮----
-// Don't prefix with ? as part of sign. Prefix after sign
-⋮----
-// Array values are repeated into key value pairs
-// E.g. orderIds:[1,2] becomes orderIds=1&orderIds=2
-⋮----
-// const isFuturesRequest =
-//   clientType === REST_CLIENT_TYPE_ENUM.futures ||
-//   clientType === REST_CLIENT_TYPE_ENUM.futuresAWS ||
-//   clientType === REST_CLIENT_TYPE_ENUM.futuresAlt1;
-⋮----
-// const isSpotRequest =
-//   clientType === REST_CLIENT_TYPE_ENUM.spot ||
-//   clientType === REST_CLIENT_TYPE_ENUM.spotAWS;
-⋮----
-// The 'timestamp' should be formated as 'YYYY-MM-DDThh:mm:ss' // and URL encoded.
-⋮----
-.split('.')[0]; // Remove milliseconds from ISO string
-⋮----
-// HTX spot signs auth params plus GET query params. POST body stays unsigned.
-⋮----
-// // Only sign when no access token is provided
-// if (!this.hasAccessToken()) {
-//   try {
-//     const signMessageInput =
-//       endpoint + (await hashMessage(signInput, 'binary', 'SHA-256'));
-⋮----
-//     // node:crypto equivalent
-//     // const sign = createHmac(
-//     //   'sha512',
-//     //   Buffer.from(this.apiSecret!, 'base64'),
-//     // )
-//     //   .update(signMessage, 'binary')
-//     //   .digest('base64');
-⋮----
-//     const sign = await this.signMessage(
-//       signMessageInput,
-//       this.apiSecret!,
-//       'base64',
-//       'SHA-512',
-//       {
-//         isSecretB64Encoded: true,
-//         isInputBinaryString: true,
-//       },
-//     );
-⋮----
-//     res.sign = sign;
-//   } catch (error) {
-//     // Check if this is a base64 decoding error (invalid API credentials)
-//     if (
-//       error instanceof Error &&
-//       (error.name === 'InvalidCharacterError' ||
-//         error.message?.includes('Invalid character'))
-//     ) {
-//       const credentialError = new Error(
-//         'Failed to sign request: Invalid API credentials detected.\n\n' +
-//           '⚠️  PLEASE CHECK YOUR API KEY AND SECRET:\n' +
-//           '   - Ensure your API Secret is a valid base64-encoded string\n' +
-//           '   - HTX provides API secrets in base64 format\n\n' +
-//           `Original error: ${error.message}\n` +
-//           `Stack trace: ${error.stack}`,
-//       );
-//       credentialError.name = 'InvalidCredentialsError';
-//       throw credentialError;
-//     }
-//     // Re-throw other errors as-is
-//     throw error;
-//   }
-// }
-⋮----
-private async prepareSignParams<TParams extends object | undefined>(
-    domain: string,
-    method: Method,
-    endpoint: string,
-    signMethod: SignMethod,
-    params?: TParams,
-    isPublicApi?: true,
-  ): Promise<UnsignedRequest<TParams>>;
-⋮----
-private async prepareSignParams<TParams extends object | undefined>(
-    domain: string,
-    method: Method,
-    endpoint: string,
-    signMethod: SignMethod,
-    params?: TParams,
-    isPublicApi?: false | undefined,
-  ): Promise<SignedRequest<TParams>>;
-⋮----
-private async prepareSignParams<TParams extends object | undefined>(
-    domain: string,
-    method: Method,
-    endpoint: string,
-    signMethod: SignMethod,
-    params?: TParams,
-    isPublicApi?: boolean,
-)
-⋮----
-/** Returns an axios request object. Handles signing process automatically if this is a private API call */
-private async buildRequest(
-    method: Method,
-    endpoint: string,
-    domain: string,
-    url: string,
-    params?: ParamsInQueryBodyOrHeader,
-    isPublicApi?: boolean,
-): Promise<AxiosRequestConfig>
-⋮----
-// console.log('signResult->pre', {
-//   url,
-//   method,
-//   endpoint,
-//   params,
-//   isPublicApi,
-// });
-⋮----
-// console.log('signResult', signResult);
-⋮----
-// spot: https://www.htx.com/en-us/opend/newApiPages/?id=419
-/**
-         * All params go in query string. E.g. these params:
-         * AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
-         * order-id=1234567890
-         * SignatureMethod=Ed25519
-         * SignatureVersion=2
-         * Timestamp=2017-05-11T15%3A19%3A30
-         *
-         * Become:
-         * https://api.huobi.pro/v1/order/orders?AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx&order-id=1234567890&SignatureMethod=Ed25519&SignatureVersion=2&Timestamp=2017-05-11T15%3A19%3A30&Signature=4F65x5A2bLyMWVQj3Aqp%2BB4w%2BivaA7n5Oi2SuYtCJ9o%3D
-         *
-         * Ed25519 or HmacSHA256
-         *
-         * - GET request: All parameters are included in URL, and do not carry body(content-length>0), in otherwise will return 403 error code.
-         * - POST request: All parameters are formatted as JSON and put int the request body
-         *
-         * Rate limit headers, TODO: It is suggested to read HTTP Header X-HB-RateLimit-Requests-Remain and X-HB-RateLimit-Requests-Expire to get the remaining count of request and the expire time for current rate limit time window, then you can adjust the API access rate dynamically.
-         * The new version rate limit is applied on UID basis, which means, the overall access rate, from all API keys under same UID, to single endpoint, shouldn’t exceed the rate limit applied on that endpoint.
-         */
-⋮----
-// 'API-Key': this.apiKey,
-// 'API-Sign': signResult.sign,
-⋮----
-// GET With signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L57
-⋮----
-// console.log('signParams for GET WITH SIGN: ', signResult);
-⋮----
-// GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L44
-⋮----
-// spot: https://www.htx.com/en-us/opend/newApiPages/?id=419
-/**
-         * All params go in query string. E.g. these params:
-         * AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
-         * order-id=1234567890
-         * SignatureMethod=Ed25519
-         * SignatureVersion=2
-         * Timestamp=2017-05-11T15%3A19%3A30
-         *
-         * Become:
-         * https://api.huobi.pro/v1/order/orders?AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx&order-id=1234567890&SignatureMethod=Ed25519&SignatureVersion=2&Timestamp=2017-05-11T15%3A19%3A30&Signature=4F65x5A2bLyMWVQj3Aqp%2BB4w%2BivaA7n5Oi2SuYtCJ9o%3D
-         *
-         * Ed25519 or HmacSHA256
-         *
-         * - GET request: All parameters are included in URL, and do not carry body(content-length>0), in otherwise will return 403 error code.
-         * - POST request: All parameters are formatted as JSON and put int the request body
-         *
-         * Rate limit headers, TODO: It is suggested to read HTTP Header X-HB-RateLimit-Requests-Remain and X-HB-RateLimit-Requests-Expire to get the remaining count of request and the expire time for current rate limit time window, then you can adjust the API access rate dynamically.
-         * The new version rate limit is applied on UID basis, which means, the overall access rate, from all API keys under same UID, to single endpoint, shouldn’t exceed the rate limit applied on that endpoint.
-         */
-⋮----
-// 'API-Key': this.apiKey,
-// 'API-Sign': signResult.sign,
-⋮----
-// if (method === 'GET') {
-//   signHeaders = {
-//     ...signHeaders,
-//     // GET With signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L57
-//     'Content-Type': 'application/x-www-form-urlencoded',
-//   };
-//   // console.log('signParams for GET WITH SIGN: ', signResult);
-//   break;
-// }
-⋮----
-// if (method === 'POST') {
-//   signHeaders = {
-//     ...signHeaders,
-//     // GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L44
-//     'Content-Type': 'application/json',
-//   };
-// }
-
-================
-File: src/SpotClient.ts
-================
-import { BaseRestClient } from './lib/BaseRestClient.js';
-import {
-  generateNewOrderID,
-  getOrderIdPrefix,
-  logInvalidOrderId,
-  REST_CLIENT_TYPE_ENUM,
-  RestClientType,
-} from './lib/requestUtils.js';
-import type {
-  SpotAccountTransferReq,
-  SpotBrokerAccountCapitalSnapshotReq,
-  SpotBrokerSubUserFeeRateAddReq,
-  SpotCrossMarginLoanOrdersReq,
-  SpotDepositWithdrawQueryReq,
-  SpotEarnProjectListReq,
-  SpotEarnRedeemReq,
-  SpotEarnSubscribeReq,
-  SpotEarnUserAssetsReq,
-  SpotGetAccountHistoryReq,
-  SpotGetAccountLedgerReq,
-  SpotGetAssetValuationReq,
-  SpotGetChainsReq,
-  SpotGetDepthReq,
-  SpotGetKlineReq,
-  SpotGetMatchResultsReq,
-  SpotGetOpenOrdersReq,
-  SpotGetOrderHistory48hReq,
-  SpotGetOrderHistoryReq,
-  SpotMarginLoanOrderReq,
-  SpotMarginLoanOrdersReq,
-  SpotMarginRepaymentReq,
-  SpotMarginTransferInIsolatedReq,
-  SpotMarginTransferOutIsolatedReq,
-  SpotP2POrderHistoryReq,
-  SpotReferralAllRebateDetailReq,
-  SpotReferralRebateHistoryReq,
-  SpotReferralReferralsReq,
-  SpotRepaymentRecordReq,
-  SpotSubUserApiKeyCreationReq,
-  SpotSubUserApiKeyUpdateReq,
-  SpotSubUserDepositHistoryReq,
-  SpotSubUserManagedTransferHistoryReq,
-  SpotSubUserTradableMarketReq,
-  SpotSubUserTransferPermissionsReq,
-  SpotSubUserTransferReq,
-  SpotV1FuturesTransferReq,
-  SpotV1OrderAutoPlaceReq,
-  SpotV1OrderBatchCancelOpenOrdersReq,
-  SpotV1OrderPlaceReq,
-  SpotV2AccountTransferReq,
-  SpotV2AlgoOrdersHistoryReq,
-  SpotV2AlgoOrdersOpeningReq,
-  SpotV2AlgoOrdersPlaceReq,
-  SpotV2PointTransferReq,
-  SpotWithdrawAddressReq,
-  SpotWithdrawCreateReq,
-} from './types/request/spot.types.js';
-import {
-  SpotAPISuccessResponse,
-  SpotOrderIdProperty,
-} from './types/response/shared.types.js';
-import {
-  SpotAccount,
-  SpotAccountBalance,
-  SpotAccountHistory,
-  SpotAccountTransferResult,
-  SpotBrokerAccountCapitalSnapshot,
-  SpotBrokerFeeRateAddResult,
-  SpotBrokerSubUserFeeRate,
-  SpotBrokerUserRebateStatus,
-  SpotCrossMarginAccountBalance,
-  SpotCrossMarginLoanOrder,
-  SpotCurrency,
-  SpotDepositAddress,
-  SpotDepositWithdrawRecord,
-  SpotDepth,
-  SpotDetailTick,
-  SpotEarnProject,
-  SpotEarnRedeemResult,
-  SpotEarnSubscribeResult,
-  SpotEarnUserAsset,
-  SpotKline,
-  SpotLastTrade,
-  SpotMarginAccountBalance,
-  SpotMarginLimit,
-  SpotMarginLoanInfo,
-  SpotMarginLoanInfoCurrency,
-  SpotMarginLoanOrder,
-  SpotMarginRepaymentResult,
-  SpotMarketStatusResponse,
-  SpotMergedTicker,
-  SpotP2POrderHistory,
-  SpotReferralAllRebateDetail,
-  SpotReferralRebateDetail,
-  SpotReferralRebateHistoryRecord,
-  SpotReferralReferral,
-  SpotRepaymentRecord,
-  SpotSubUserAccountsResult,
-  SpotSubUserApiKey,
-  SpotSubUserApiKeyCreationResult,
-  SpotSubUserApiKeyUpdateResult,
-  SpotSubUserBalanceResult,
-  SpotSubUserCreationResult,
-  SpotSubUserDeductModeResult,
-  SpotSubUserDepositHistoryRecord,
-  SpotSubUserEntrustUser,
-  SpotSubUserList,
-  SpotSubUserLockStatusResult,
-  SpotSubUserManagedTransferRecord,
-  SpotSubUsersAggregatedBalance,
-  SpotSubUserStatusResult,
-  SpotSubUserTradableMarketResult,
-  SpotSubUserTransferPermissionsResult,
-  SpotTicker,
-  SpotTradeTimestampGroup,
-  SpotTradingSymbol,
-  SpotV1AccountOverviewInfo,
-  SpotV1AccountSwitchUserInfo,
-  SpotV1ChainInfo,
-  SpotV1CurrencySettings,
-  SpotV1MarketSymbolSettings,
-  SpotV1OpenOrder,
-  SpotV1OrderAutoPlaceResult,
-  SpotV1OrderBatchCancelOpenOrdersResult,
-  SpotV1OrderBatchCancelResult,
-  SpotV1OrderBatchPlaceResult,
-  SpotV1OrderCancelByClientOrderIdResult,
-  SpotV1OrderCancelResult,
-  SpotV1OrderDetail,
-  SpotV1OrderHistory,
-  SpotV1OrderHistory48h,
-  SpotV1OrderMatchResult,
-  SpotV1SymbolSettings,
-  SpotV2AccountLedger,
-  SpotV2AccountValuation,
-  SpotV2AlgoOrder,
-  SpotV2AlgoOrdersCancelAllAfterResult,
-  SpotV2AlgoOrdersCancellationResult,
-  SpotV2AlgoOrdersPlaceResult,
-  SpotV2AssetValuation,
-  SpotV2CurrencyReference,
-  SpotV2PointAccount,
-  SpotV2PointTransfer,
-  SpotV2TransactFeeRate,
-  SpotVaspExchange,
-  SpotWithdrawAddress,
-  SpotWithdrawQuota,
-} from './types/response/spot.types.js';
-⋮----
-/**
- * The SpotClient provides integration to the HTX Spot API.
- */
-export class SpotClient extends BaseRestClient
-⋮----
-getClientType(): RestClientType
-⋮----
-// Favour the spot AWS domain, as recommended by the API docs
-⋮----
-/**
-   *
-   * Misc Utility Methods
-   *
-   */
-⋮----
-generateNewOrderID(): string
-⋮----
-/**
-   *
-   * Reference Data
-   *
-   */
-⋮----
-/**
-   * Get Market Status
-   *
-   * Returns current market status.
-   * 1=normal, 2=halted, 3=cancel-only.
-   */
-getMarketStatus(): Promise<SpotMarketStatusResponse>
-⋮----
-/**
-   * Get Current Timestamp (V1)
-   *
-   * Returns current server time in milliseconds since epoch. No signature required.
-   */
-getTimestamp(): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Get all Supported Trading Symbols (V2)
-   *
-   * Returns all supported trading symbols. Pass ts for incremental updates.
-   */
-getTradingSymbols(params?: {
-    ts?: number;
-}): Promise<SpotAPISuccessResponse<SpotTradingSymbol[]>>
-⋮----
-/**
-   * Get all Supported Currencies (V2)
-   *
-   * Returns all supported currencies. Pass ts for incremental updates.
-   */
-getCurrencies(params?: {
-    ts?: number;
-}): Promise<SpotAPISuccessResponse<SpotCurrency[]>>
-⋮----
-/**
-   * Get Currencys Settings (V1)
-   *
-   * Returns currency settings. No signature required. Pass ts for incremental updates.
-   */
-getCurrencysSettings(params?: {
-    ts?: number;
-}): Promise<SpotAPISuccessResponse<SpotV1CurrencySettings[]>>
-⋮----
-/**
-   * Get Symbols Settings (V1)
-   *
-   * Returns symbol settings. No signature required. Pass ts for incremental updates.
-   */
-getSymbolsSettings(params?: {
-    ts?: number;
-}): Promise<SpotAPISuccessResponse<SpotV1SymbolSettings[]>>
-⋮----
-/**
-   * Get Market Symbols Settings (V1)
-   *
-   * Returns market symbol settings. No signature required. Pass symbols (NA=all) and/or ts for incremental updates.
-   */
-getMarketSymbolsSettings(params?: {
-    symbols?: string;
-    ts?: number;
-}): Promise<SpotAPISuccessResponse<SpotV1MarketSymbolSettings[]>>
-⋮----
-/**
-   * Get Chains Information (V1)
-   *
-   * Returns chain info per currency. No signature required. Pass show-desc, currency, and/or ts for incremental updates.
-   */
-getChainsInfo(
-    params?: SpotGetChainsReq,
-): Promise<SpotAPISuccessResponse<SpotV1ChainInfo[]>>
-⋮----
-/**
-   * Get Reference Currencies & Chains (V2)
-   *
-   * Returns static reference info for each currency and its chains. No signature required.
-   */
-getReferenceCurrencies(params?: {
-    currency?: string;
-    authorizedUser?: boolean;
-}): Promise<SpotAPISuccessResponse<SpotV2CurrencyReference[]>>
-⋮----
-/**
-   *
-   * Market Data
-   *
-   */
-⋮----
-/**
-   * Get Klines (Candles)
-   *
-   * Returns candlestick data for a symbol. No signature required.
-   */
-getKlines(
-    params: SpotGetKlineReq,
-): Promise<SpotAPISuccessResponse<SpotKline[]>>
-⋮----
-/**
-   * Get Latest Aggregated Ticker
-   *
-   * Returns latest ticker with 24h aggregated market data. No signature required.
-   */
-getTicker(params: {
-    symbol: string;
-}): Promise<SpotAPISuccessResponse<SpotMergedTicker, 'tick'>>
-⋮----
-/**
-   * Get Latest Tickers for All Pairs
-   *
-   * Returns latest tickers for all supported pairs. No signature required.
-   */
-getTickers(): Promise<SpotAPISuccessResponse<SpotTicker[]>>
-⋮----
-/**
-   * Get Market Depth
-   *
-   * Returns order book for a symbol. No signature required.
-   */
-getMarketDepth(
-    params: SpotGetDepthReq,
-): Promise<SpotAPISuccessResponse<SpotDepth, 'tick'>>
-⋮----
-/**
-   * Get the Last Trade
-   *
-   * Returns latest trade with price, volume, direction. No signature required.
-   */
-getLastTrade(params: {
-    symbol: string;
-}): Promise<SpotAPISuccessResponse<SpotLastTrade, 'tick'>>
-⋮----
-/**
-   * Get the Most Recent Trades
-   *
-   * Returns recent trades grouped by timestamp. No signature required.
-   */
-getHistoryTrades(params: {
-    symbol: string;
-    size?: number;
-}): Promise<SpotAPISuccessResponse<SpotTradeTimestampGroup[]>>
-⋮----
-/**
-   * Get the Last 24h Market Summary
-   *
-   * Returns 24h trading summary for a symbol. No signature required.
-   */
-get24hMarketSummary(params: {
-    symbol: string;
-}): Promise<SpotAPISuccessResponse<SpotDetailTick, 'tick'>>
-⋮----
-/**
-   * Get Full Order Book
-   *
-   * Returns complete market depth, up to 5000 levels. Updated once per second. No signature required.
-   */
-getFullOrderBook(params: {
-    symbol: string;
-}): Promise<SpotAPISuccessResponse<SpotDepth, 'tick'>>
-⋮----
-/**
-   *
-   * Account
-   *
-   */
-⋮----
-/**
-   * Get all Accounts of the Current User
-   *
-   * Returns list of accounts owned by this API user. Signature required.
-   */
-getAccounts(): Promise<SpotAPISuccessResponse<SpotAccount[]>>
-⋮----
-/**
-   * Get Account Balance of a Specific Account
-   *
-   * Returns balance for account specified by account id. Signature required. OTC not supported.
-   */
-getAccountBalance(params: {
-    accountId: string | number;
-}): Promise<SpotAPISuccessResponse<SpotAccountBalance>>
-⋮----
-/**
-   * Get The Total Valuation of Platform Assets
-   *
-   * Returns total asset valuation in BTC or fiat. Signature required.
-   */
-getAccountValuation(params?: {
-    accountType?: string;
-    valuationCurrency?: string;
-}): Promise<SpotAPISuccessResponse<SpotV2AccountValuation>>
-⋮----
-/**
-   * Get Asset Valuation
-   *
-   * Returns valuation of total assets in BTC or fiat. Signature required.
-   */
-getAssetValuation(
-    params?: SpotGetAssetValuationReq,
-): Promise<SpotAPISuccessResponse<SpotV2AssetValuation>>
-⋮----
-/**
-   * Asset Transfer
-   *
-   * Transfer asset between accounts (spot, margin, sub-users). Signature required. Trade permission.
-   */
-submitTransfer(
-    params: SpotAccountTransferReq,
-): Promise<SpotAPISuccessResponse<SpotAccountTransferResult>>
-⋮----
-/**
-   * Get Account History
-   *
-   * Returns amount changes of specified account. Signature required. Max 1h query window, 30 days range.
-   */
-getAccountHistory(
-    params: SpotGetAccountHistoryReq,
-  ): Promise<
-    SpotAPISuccessResponse<SpotAccountHistory[]> & { 'next-id'?: number }
-  > {
-    return this.getPrivate('/v1/account/history', params);
-⋮----
-/**
-   * Get Account Ledger
-   *
-   * Returns amount changes (phase 1: transfer only). Max 10-day window, 180 days range. Signature required.
-   */
-getAccountLedger(
-    params?: SpotGetAccountLedgerReq,
-  ): Promise<
-    SpotAPISuccessResponse<SpotV2AccountLedger[]> & { nextId?: number }
-  > {
-    return this.getPrivate('/v2/account/ledger', params);
-⋮----
-/**
-   * V2 Account Transfer
-   *
-   * Transfer funds between spot, linear-swap, otc, futures, swap. Signature required. Trade permission.
-   */
-submitV2AccountTransfer(
-    params: SpotV2AccountTransferReq,
-): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Futures Transfer
-   *
-   * Transfer between spot and future contract account. pro-to-futures = spot -> contract, futures-to-pro = contract -> spot. Signature required. Trade permission.
-   */
-submitFuturesTransfer(
-    params: SpotV1FuturesTransferReq,
-): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Get Point Balance
-   *
-   * Query termless and terminable point balance. Parent can query sub user via subUid. Signature required. Read permission. Rate: 2/s.
-   */
-getPointBalance(params?: {
-    subUid?: string;
-}): Promise<SpotAPISuccessResponse<SpotV2PointAccount>>
-⋮----
-/**
-   * Point Transfer
-   *
-   * Transfer points between parent and sub user. groupId=0 for termless; for terminable query sub balance first. Signature required. Trade permission. Rate: 2/s.
-   */
-submitPointTransfer(
-    params: SpotV2PointTransferReq,
-): Promise<SpotAPISuccessResponse<SpotV2PointTransfer>>
-⋮----
-/**
-   * Get User Deduction Info
-   *
-   * Query point card vs HTX deduction settings. Signature required. Read permission. Rate: 5/s.
-   */
-getAccountSwitchUserInfo(): Promise<
-    SpotAPISuccessResponse<SpotV1AccountSwitchUserInfo>
-  > {
-    return this.getPrivate('/v1/account/switch/user/info');
-⋮----
-/**
-   * Get Deductible Currency Overview
-   *
-   * Query asset that can be used to deduct fees. Signature required. Read permission. Rate: 5/s.
-   */
-getAccountOverviewInfo(): Promise<
-    SpotAPISuccessResponse<SpotV1AccountOverviewInfo>
-  > {
-    return this.getPrivate('/v1/account/overview/info');
-⋮----
-/**
-   * Set Spot/Margin Fee Deduction Method
-   *
-   * switchType: 0=point card, 1=currency (pass deductionCurrency), 2=close. Signature required. Read permission. Rate: 2/s.
-   */
-updateFeeDeductionMethod(params: {
-    switchType: 0 | 1 | 2;
-    deductionCurrency?: string;
-}): Promise<SpotAPISuccessResponse<null>>
-⋮----
-/**
-   *
-   * Trading
-   *
-   */
-⋮----
-/**
-   * Place a New Order
-   *
-   * Places order to be matched. Set account-id and source per account type. Signature required. Trade permission. Rate: 100/2s.
-   */
-submitOrder(
-    params: SpotV1OrderPlaceReq,
-): Promise<SpotAPISuccessResponse<string>>
-⋮----
-/**
-   * Place a Batch of Orders
-   *
-   * Max 10 orders per batch. Each returns order-id or err-code/err-msg. Signature required. Trade permission. Rate: 50/2s.
-   */
-submitBatchOrders(
-    params: SpotV1OrderPlaceReq[],
-): Promise<SpotAPISuccessResponse<SpotV1OrderBatchPlaceResult[]>>
-⋮----
-/**
-   * Margin Order (Auto Borrow/Repay)
-   *
-   * Auto borrow to place or auto repay. Sub-accounts not supported. Use amount or market-amount. Signature required. Trade permission. Rate: 100/2s.
-   */
-submitMarginOrder(
-    params: SpotV1OrderAutoPlaceReq,
-): Promise<SpotAPISuccessResponse<SpotV1OrderAutoPlaceResult>>
-⋮----
-/**
-   * Cancel Order by Order ID
-   *
-   * Submits cancel request. Verify via order status or match result. Signature required. Trade permission. Rate: 100/2s.
-   */
-cancelOrderById(params: {
-    orderId: string;
-    symbol?: string;
-}): Promise<SpotAPISuccessResponse<SpotV1OrderCancelResult>>
-⋮----
-/**
-   * Cancel Order by Client Order ID
-   *
-   * Prefer cancelOrder (by order-id) when possible. Submits cancel request; verify via order status. Signature required. Trade permission. Rate: 100/2s.
-   */
-cancelOrderByClientId(params: {
-    'client-order-id': string;
-}): Promise<SpotAPISuccessResponse<SpotV1OrderCancelByClientOrderIdResult>>
-⋮----
-/**
-   * Cancel All Spot Orders
-   *
-   * Cancel all open spot orders. Pass symbol for specific pair(s), comma-separated; omit for all. Signature required. Trade permission. Rate: 1/2s.
-   */
-cancelAllOrders(params?: {
-    symbol?: string;
-}): Promise<SpotAPISuccessResponse<null>>
-⋮----
-/**
-   * Get All Open Orders
-   *
-   * Returns unfilled orders. Filter by account-id, symbol, side. Signature required. Read permission. Rate: 50/2s.
-   */
-getOpenOrders(
-    params?: SpotGetOpenOrdersReq,
-): Promise<SpotAPISuccessResponse<SpotV1OpenOrder[]>>
-⋮----
-/**
-   * Cancel Multiple Orders by Criteria
-   *
-   * Cancel up to 100 orders matching account-id, symbol, types, side. Submit only; verify via order status. Signature required. Trade permission. Rate: 50/2s.
-   */
-batchCancelOpenOrders(
-    params?: SpotV1OrderBatchCancelOpenOrdersReq,
-): Promise<SpotAPISuccessResponse<SpotV1OrderBatchCancelOpenOrdersResult>>
-⋮----
-/**
-   * Cancel Multiple Orders by IDs
-   *
-   * Cancel by order-ids or client-order-ids (max 50). Prefer order-ids. Signature required. Trade permission. Rate: 50/2s.
-   */
-batchCancelOrders(params: {
-    'order-ids'?: string[];
-    'client-order-ids'?: string[];
-}): Promise<SpotAPISuccessResponse<SpotV1OrderBatchCancelResult>>
-⋮----
-/**
-   * Dead Man's Switch (Cancel All After)
-   *
-   * Turn on/off. timeout=0 to turn off. timeout>=5 to turn on: must call twice within timeout seconds or all spot orders (max 500) are canceled. Signature required. Trade permission.
-   */
-setCancelAllAfter(params: {
-    timeout: number;
-}): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancelAllAfterResult>>
-⋮----
-/**
-   * Get Order Detail by Order ID
-   *
-   * Returns order detail. API-created orders not queryable 2h after cancel. Signature required. Read permission. Rate: 50/2s.
-   */
-getOrder(params: {
-    orderId: string;
-}): Promise<SpotAPISuccessResponse<SpotV1OrderDetail>>
-⋮----
-/**
-   * Get Order Detail by Client Order ID
-   *
-   * Returns latest status of order with given client order ID. Signature required. Read permission. Rate: 50/2s.
-   */
-getOrderByClientId(params: {
-    clientOrderId: string;
-}): Promise<SpotAPISuccessResponse<SpotV1OrderDetail>>
-⋮----
-/**
-   * Get Match Results of an Order
-   *
-   * Returns match/trade results for a specific order. Signature required. Read permission. Rate: 50/2s.
-   */
-getOrderMatch(params: {
-    orderId: string;
-}): Promise<SpotAPISuccessResponse<SpotV1OrderMatchResult[]>>
-⋮----
-/**
-   * Search Past Orders
-   *
-   * Historical orders by symbol, states, time range. Max 48h window, 180 days range. API orders not queryable 2h after cancel. Signature required. Read permission. Rate: 50/2s.
-   */
-getOrderHistory(
-    params: SpotGetOrderHistoryReq,
-): Promise<SpotAPISuccessResponse<SpotV1OrderHistory[]>>
-⋮----
-/**
-   * Search Historical Orders within 48 Hours
-   *
-   * Orders by time range. Default: last 48h. next-time in last item when more exist. API orders not queryable 2h after cancel. Signature required. Read permission. Rate: 20/2s.
-   */
-getOrderHistory48h(
-    params?: SpotGetOrderHistory48hReq,
-): Promise<SpotAPISuccessResponse<SpotV1OrderHistory48h[]>>
-⋮----
-/**
-   * Search Match Results
-   *
-   * Match results of filled/partial orders by symbol, types, time. 48h window, 120 days range. Signature required. Read permission. Rate: 20/2s.
-   */
-getMatchResults(
-    params?: SpotGetMatchResultsReq,
-): Promise<SpotAPISuccessResponse<SpotV1OrderMatchResult[]>>
-⋮----
-/**
-   * Get Transact Fee Rate
-   *
-   * Query fee rates for trading pairs. Max 10 symbols. Signature required. Read permission. Rate: 50/2s.
-   */
-getFeeRate(params: {
-    symbols: string;
-}): Promise<SpotAPISuccessResponse<SpotV2TransactFeeRate[]>>
-⋮----
-/**
-   *
-   * Conditional Order
-   *
-   */
-⋮----
-/**
-   * Place a Conditional Order
-   *
-   * Conditional orders only via this endpoint (not Trading section). Signature required. Trade permission. Rate: 20/2s.
-   */
-placeConditionalOrder(
-    params: SpotV2AlgoOrdersPlaceReq,
-): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersPlaceResult>>
-⋮----
-/**
-   * Cancel Conditional Orders (before triggering)
-   *
-   * Only cancels conditional orders that have not triggered yet. Max 50 orders. Signature required. Trade permission. Rate: 20/2s.
-   */
-cancelConditionalOrders(params: {
-    clientOrderIds: string[];
-}): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancellationResult>>
-⋮----
-/**
-   * Query Open Conditional Orders (before triggering)
-   *
-   * Returns conditional orders with orderStatus=created. Signature required. Read permission. Rate: 20/2s.
-   */
-getOpenConditionalOrders(
-    params?: SpotV2AlgoOrdersOpeningReq,
-): Promise<SpotAPISuccessResponse<SpotV2AlgoOrder[]> &
-⋮----
-/**
-   * Query Conditional Order History
-   *
-   * Returns canceled/rejected/triggered conditional orders. For triggered, use Trading section for latest status. Signature required. Read permission. Rate: 20/2s.
-   */
-getConditionalOrderHistory(
-    params?: SpotV2AlgoOrdersHistoryReq,
-): Promise<SpotAPISuccessResponse<SpotV2AlgoOrder[]> &
-⋮----
-/**
-   * Query a Specific Conditional Order
-   *
-   * By clientOrderId. Covers created, triggered, canceled, rejected. Signature required. Read permission. Rate: 20/2s.
-   */
-getConditionalOrder(params: {
-    clientOrderId: string;
-}): Promise<SpotAPISuccessResponse<SpotV2AlgoOrder>>
-⋮----
-/**
-   *
-   * Margin Loan (Cross/Isolated)
-   *
-   */
-⋮----
-/**
-   * Repayment Record Reference
-   *
-   * Query repayment records. Sorted by repayTime. Main and sub-accounts. Signature required. Read permission. Rate: 2/2s.
-   */
-getRepaymentRecords(
-    params?: SpotRepaymentRecordReq,
-  ): Promise<
-    SpotAPISuccessResponse<SpotRepaymentRecord[]> & { nextId?: number }
-  > {
-    return this.getPrivate('/v2/account/repayment', params);
-⋮----
-/**
-   * Repay Margin Loan (Cross/Isolated)
-   *
-   * Loan interest paid first if no transactId. Main and sub-accounts. Signature required. Trade permission. Rate: 2/s.
-   */
-repayMarginLoan(
-    params: SpotMarginRepaymentReq,
-): Promise<SpotAPISuccessResponse<SpotMarginRepaymentResult[]>>
-⋮----
-/**
-   * Transfer Asset from Spot Trading Account to Isolated Margin Account
-   *
-   * Signature required. Trade permission. Rate: 2/2s.
-   */
-transferSpotToIsolatedMargin(
-    params: SpotMarginTransferInIsolatedReq,
-): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Transfer Asset from Isolated Margin Account to Spot Trading Account
-   *
-   * Signature required. Trade permission. Rate: 2/2s.
-   */
-transferIsolatedMarginToSpot(
-    params: SpotMarginTransferOutIsolatedReq,
-): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Get Loan Interest Rate and Quota (Isolated)
-   *
-   * Returns loan interest rates and quota per symbol. Signature required. Read permission. Rate: 20/2s.
-   */
-getMarginLoanInfo(params?: {
-    symbols?: string;
-}): Promise<SpotAPISuccessResponse<SpotMarginLoanInfo[]>>
-⋮----
-/**
-   * Request a Margin Loan (Isolated)
-   *
-   * Places order to borrow margin. Signature required. Trade permission. Rate: 2/2s.
-   */
-requestMarginLoan(
-    params: SpotMarginLoanOrderReq,
-): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Repay Margin Loan (Isolated)
-   *
-   * Repays with asset in margin account. Signature required. Trade permission. Rate: 2/2s.
-   */
-repayMarginLoanIsolated(params: {
-    orderId: string;
-    amount: string;
-}): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Search Past Margin Orders (Isolated)
-   *
-   * Returns margin loan orders by criteria. Signature required. Read permission. Rate: 100/2s.
-   */
-getMarginLoanOrders(
-    params?: SpotMarginLoanOrdersReq,
-): Promise<SpotAPISuccessResponse<SpotMarginLoanOrder[]>>
-⋮----
-/**
-   * Get the Balance of the Margin Loan Account (Isolated)
-   *
-   * Signature required. Read permission. Rate: 100/2s.
-   */
-getMarginAccountBalance(params?: {
-    symbol?: string;
-    'sub-uid'?: number;
-}): Promise<SpotAPISuccessResponse<SpotMarginAccountBalance[]>>
-⋮----
-/**
-   * Transfer Asset from Spot Trading Account to Cross Margin Account
-   *
-   * Signature required. Trade permission.
-   */
-transferSpotToCrossMargin(params: {
-    currency?: string;
-    amount?: string;
-}): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Transfer Asset from Cross Margin Account to Spot Trading Account
-   *
-   * Signature required. Trade permission.
-   */
-transferCrossMarginToSpot(params: {
-    currency?: string;
-    amount?: string;
-}): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Get Loan Interest Rate and Quota (Cross)
-   *
-   * Returns loan interest rates and quota per currency. No params. Signature required. Read permission. Rate: 2/2s.
-   */
-getCrossMarginLoanInfo(): Promise<
-    SpotAPISuccessResponse<SpotMarginLoanInfoCurrency[]>
-  > {
-    return this.getPrivate('/v1/cross-margin/loan-info');
-⋮----
-/**
-   * Request a Margin Loan (Cross)
-   *
-   * Places order to borrow margin. Signature required. Trade permission. Rate: 2/2s.
-   */
-requestCrossMarginLoan(params: {
-    currency?: string;
-    amount?: string;
-}): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Repay Margin Loan (Cross)
-   *
-   * Repays with asset in cross margin account. Signature required. Trade permission. Rate: 2/2s.
-   */
-repayCrossMarginLoan(params: {
-    orderId: string;
-    amount: string;
-}): Promise<SpotAPISuccessResponse<null>>
-⋮----
-/**
-   * Search Past Margin Orders (Cross)
-   *
-   * Returns margin loan orders by criteria. Signature required. Read permission. Rate: 2/2s.
-   */
-getCrossMarginLoanOrders(
-    params?: SpotCrossMarginLoanOrdersReq,
-): Promise<SpotAPISuccessResponse<SpotCrossMarginLoanOrder[]>>
-⋮----
-/**
-   * Get the Balance of the Margin Loan Account (Cross)
-   *
-   * Returns single account object. Signature required. Read permission. Rate: 2/2s.
-   */
-getCrossMarginBalance(params?: {
-    'sub-uid'?: number;
-}): Promise<SpotAPISuccessResponse<SpotCrossMarginAccountBalance>>
-⋮----
-/**
-   * Obtain Leverage Position Limit (Cross)
-   *
-   * Returns position limit at user level per currency. Signature required. Read permission. Rate: 2/2s.
-   */
-getCrossMarginLimit(params?: {
-    currency?: string;
-}): Promise<SpotAPISuccessResponse<SpotMarginLimit[]>>
-⋮----
-/**
-   *
-   * Wallet (Deposit/Withdraw)
-   *
-   */
-⋮----
-/**
-   * Query Deposit Address
-   *
-   * Query deposit address per chain for a currency. Signature required. Read permission. Rate: 20/2s.
-   */
-getDepositAddress(params?: {
-    currency?: string;
-}): Promise<SpotAPISuccessResponse<SpotDepositAddress[]>>
-⋮----
-/**
-   * Query Withdraw Quota
-   *
-   * Query withdrawing quota for currencies. Parent user only. Signature required. Read permission. Rate: 20/2s.
-   */
-getWithdrawQuota(params?: {
-    currency?: string;
-}): Promise<SpotAPISuccessResponse<SpotWithdrawQuota>>
-⋮----
-/**
-   * Query Withdraw Address
-   *
-   * Query withdraw addresses available for API key. Parent user only. Signature required. Read permission.
-   */
-getWithdrawAddress(
-    params?: SpotWithdrawAddressReq,
-  ): Promise<
-    SpotAPISuccessResponse<SpotWithdrawAddress[]> & { 'next-id'?: number }
-  > {
-    return this.getPrivate('/v2/account/withdraw/address', params);
-⋮----
-/**
-   * Create Withdraw Request
-   *
-   * Create withdraw to address in your withdraw list. Parent user only. Withdraw permission. Rate: 20/2s.
-   */
-submitWithdraw(
-    params: SpotWithdrawCreateReq,
-): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Query Withdrawal by Client Order ID
-   *
-   * Query withdraw order submitted with client-order-id. Signature required. Read permission.
-   */
-getWithdrawByClientId(params: {
-    clientOrderId: string;
-}): Promise<SpotAPISuccessResponse<SpotDepositWithdrawRecord | null>>
-⋮----
-/**
-   * Cancel Withdraw Request
-   *
-   * Cancel withdraw by transfer id. Parent user only. Withdraw permission. Rate: 20/2s.
-   */
-cancelWithdraw(params: {
-    withdrawId: number;
-}): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Search Deposit/Withdraw Records
-   *
-   * Search existed withdraws and deposits. Signature required. Read permission. Rate: 20/2s.
-   */
-getDepositWithdrawHistory(
-    params: SpotDepositWithdrawQueryReq,
-): Promise<SpotAPISuccessResponse<SpotDepositWithdrawRecord[]>>
-⋮----
-/**
-   * Get Exchange VASP List
-   *
-   * Exchange list for Korean users (withdraw flow). Public. No signature. Rate: 1/s.
-   */
-getVaspList(): Promise<SpotAPISuccessResponse<SpotVaspExchange[]>>
-⋮----
-/**
-   *
-   * Broker API
-   *
-   */
-⋮----
-/**
-   * Check User Rebate Eligibility
-   *
-   * Check whether user meets rebate conditions. API brokers only. Signature required. Read permission. Rate: 20/2s.
-   */
-getBrokerUserRebateStatus(params: {
-    /** User UID to check */
-    queryUid: string;
-}): Promise<SpotAPISuccessResponse<SpotBrokerUserRebateStatus>>
-⋮----
-/** User UID to check */
-⋮----
-/**
-   * Get Broker Sub-Account Fee Rate
-   *
-   * Query sub-account commission/fee rate. Signature required. Read permission. Rate: 100/2s.
-   */
-getBrokerSubUserFeeRate(params: {
-    /** Sub-account id (user_id, UID minus last digit) */
-    subUId: string;
-    /** 1 Spot, 2 U-standard linear, 3 Coin-Margined swap */
-    bizType: string;
-}): Promise<SpotAPISuccessResponse<SpotBrokerSubUserFeeRate>>
-⋮----
-/** Sub-account id (user_id, UID minus last digit) */
-⋮----
-/** 1 Spot, 2 U-standard linear, 3 Coin-Margined swap */
-⋮----
-/**
-   * Set Broker Sub-User Fee Rate
-   *
-   * Set trading fee rate for sub-accounts. Signature required. Read permission. Rate: 100/2s.
-   */
-setBrokerSubUserFeeRate(
-    params: SpotBrokerSubUserFeeRateAddReq,
-): Promise<SpotAPISuccessResponse<SpotBrokerFeeRateAddResult>>
-⋮----
-/**
-   * Get Account Capital Snapshot
-   *
-   * Request account asset snapshot. Signature required. Read permission. Rate: 100/2s.
-   */
-getBrokerAccountCapitalSnapshot(
-    params: SpotBrokerAccountCapitalSnapshotReq,
-): Promise<SpotAPISuccessResponse<SpotBrokerAccountCapitalSnapshot[]>>
-⋮----
-/**
-   *
-   * SubAccount Management
-   *
-   */
-⋮----
-/**
-   * Set Deduction Mode
-   *
-   * Set deduction fee (HT or point) for parent and sub user. Signature required. Trade permission.
-   */
-updateSubUserDeductMode(params?: {
-    subUids?: string;
-    deductMode?: 'master' | 'sub';
-}): Promise<SpotAPISuccessResponse<SpotSubUserDeductModeResult[]>>
-⋮----
-/**
-   * Query API Key
-   *
-   * Query own or sub user's API key info. Signature required. Read permission.
-   */
-getSubUserApiKey(params?: {
-    uid?: number;
-    accessKey?: string;
-}): Promise<SpotAPISuccessResponse<SpotSubUserApiKey[]>>
-⋮----
-/**
-   * Get UID
-   *
-   * Get current user's UID. Signature required. Read permission.
-   */
-getUserUid(): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Create Sub Users
-   *
-   * Create sub users, max 50 at a time. Signature required. Trade permission.
-   */
-createSubUser(params: {
-    /** Sub users to create, max 50 */
-    userList: { userName: string; note?: string }[];
-    /** GENERAL (default), CONTACT, GRID, FIRE-BLOCK */
-    subAccountType?: string;
-}): Promise<SpotAPISuccessResponse<SpotSubUserCreationResult[]>>
-⋮----
-/** Sub users to create, max 50 */
-⋮----
-/** GENERAL (default), CONTACT, GRID, FIRE-BLOCK */
-⋮----
-/**
-   * Get Sub User List
-   *
-   * Query full list of sub users with UID and status. Signature required. Read permission.
-   */
-getSubUserList(params?: {
-    fromId?: number;
-}): Promise<SpotAPISuccessResponse<SpotSubUserList[]> &
-⋮----
-/**
-   * Lock/Unlock Sub User
-   *
-   * Lock or unlock a sub user. Signature required. Trade permission. Rate: 20/2s.
-   */
-updateSubUserLockStatus(params: {
-    subUid: number;
-    action: 'lock' | 'unlock';
-}): Promise<SpotAPISuccessResponse<SpotSubUserLockStatusResult>>
-⋮----
-/**
-   * Get Sub User Status
-   *
-   * Query sub user status by UID. Signature required. Read permission.
-   */
-getSubUserStatus(params: {
-    subUid: number;
-}): Promise<SpotAPISuccessResponse<SpotSubUserStatusResult>>
-⋮----
-/**
-   * Set Tradable Market for Sub Users
-   *
-   * Set tradable market (isolated/cross margin) for sub users. Signature required. Trade permission.
-   */
-setSubUserTradableMarket(
-    params: SpotSubUserTradableMarketReq,
-): Promise<SpotAPISuccessResponse<SpotSubUserTradableMarketResult[]>>
-⋮----
-/**
-   * Set Asset Transfer Permission for Sub Users
-   *
-   * Set asset transfer permission for sub users. Signature required. Trade permission.
-   */
-setSubUserTransferPermissions(
-    params: SpotSubUserTransferPermissionsReq,
-): Promise<SpotAPISuccessResponse<SpotSubUserTransferPermissionsResult[]>>
-⋮----
-/**
-   * Get Sub User Account List
-   *
-   * Query account list of sub user by UID. Signature required. Read permission.
-   */
-getSubUserAccounts(params: {
-    subUid: number;
-}): Promise<SpotAPISuccessResponse<SpotSubUserAccountsResult>>
-⋮----
-/**
-   * Create Sub User API Key
-   *
-   * Create API key for sub user. Signature required. Trade permission.
-   */
-createSubUserApiKey(
-    params: SpotSubUserApiKeyCreationReq,
-): Promise<SpotAPISuccessResponse<SpotSubUserApiKeyCreationResult>>
-⋮----
-/**
-   * Modify Sub User API Key
-   *
-   * Modify sub user's API key. Signature required. Trade permission.
-   */
-updateSubUserApiKey(
-    params: SpotSubUserApiKeyUpdateReq,
-): Promise<SpotAPISuccessResponse<SpotSubUserApiKeyUpdateResult>>
-⋮----
-/**
-   * Delete Sub User API Key
-   *
-   * Delete sub user's API key. Signature required. Trade permission.
-   */
-deleteSubUserApiKey(params: {
-    subUid: number;
-    accessKey: string;
-}): Promise<SpotAPISuccessResponse<null>>
-⋮----
-/**
-   * Transfer Asset between Parent and Sub Account
-   *
-   * Transfer asset between parent and sub account. Signature required. Trade permission. Rate: 2/2s.
-   */
-submitSubUserTransfer(
-    params: SpotSubUserTransferReq,
-): Promise<SpotAPISuccessResponse<number>>
-⋮----
-/**
-   * Query Sub User Deposit Address
-   *
-   * Query sub user's deposit address per chain. Signature required. Read permission.
-   */
-getSubUserDepositAddress(params: {
-    subUid: number;
-    currency?: string;
-}): Promise<SpotAPISuccessResponse<SpotDepositAddress[]>>
-⋮----
-/**
-   * Query Sub User Deposit History
-   *
-   * Query sub user's deposit history. Signature required. Read permission.
-   */
-getSubUserDepositHistory(params: SpotSubUserDepositHistoryReq): Promise<
-    SpotAPISuccessResponse<SpotSubUserDepositHistoryRecord[]> & {
-      nextId?: number;
-    }
-  > {
-    return this.getPrivate('/v2/sub-user/query-deposit', params);
-⋮----
-/**
-   * Get Aggregated Balance of All Sub Users
-   *
-   * Returns aggregated balance from all sub-users. Signature required. Read permission. Rate: 2/2s.
-   */
-getSubUsersAggregatedBalance(): Promise<
-    SpotAPISuccessResponse<SpotSubUsersAggregatedBalance[]>
-  > {
-    return this.getPrivate('/v1/subuser/aggregate-balance');
-⋮----
-/**
-   * Get Account Balance of a Sub-User
-   *
-   * Returns balance of sub-user by sub-uid. Signature required. Read permission. Rate: 20/2s.
-   */
-getSubUserBalance(params: {
-    subUid: number;
-}): Promise<SpotAPISuccessResponse<SpotSubUserBalanceResult[]>>
-⋮----
-/**
-   * Get Custody Trading Sub-Account List
-   *
-   * Query list of sub-accounts currently being managed. Read permission.
-   */
-getSubUserEntrustUserList(params?: {
-    fromId?: number;
-    limit?: number;
-  }): Promise<
-    SpotAPISuccessResponse<{ list: SpotSubUserEntrustUser[] }> & {
-      nextId?: number;
-    }
-  > {
-    return this.getPrivate('/v2/sub-user/entrust-user-list', params);
-⋮----
-/**
-   * Get Managed Sub-Account Transfer History
-   *
-   * Query transfer records of managed sub-accounts. Read permission.
-   */
-getSubUserManagedTransferHistory(
-    params?: SpotSubUserManagedTransferHistoryReq,
-): Promise<SpotAPISuccessResponse<SpotSubUserManagedTransferRecord[]>>
-⋮----
-/**
-   *
-   * Referral
-   *
-   */
-/**
-   * Query Referral Rebate Detail
-   *
-   * Query rebate info of invitee. Signature required. Read permission.
-   */
-getReferralRebateDetail(params: {
-    inviteeUid: number;
-}): Promise<SpotAPISuccessResponse<SpotReferralRebateDetail>>
-⋮----
-/**
-   * Query Referral Rebate History
-   *
-   * Query historical rebate of invitee. Signature required. Read permission.
-   */
-getReferralRebateHistory(
-    params: SpotReferralRebateHistoryReq,
-): Promise<SpotAPISuccessResponse<SpotReferralRebateHistoryRecord[]>>
-⋮----
-/**
-   * Query All Rebate Detail
-   *
-   * Query all rebate detail. Signature required. Read permission.
-   */
-getReferralAllRebateDetail(params?: SpotReferralAllRebateDetailReq): Promise<
-    SpotAPISuccessResponse<SpotReferralAllRebateDetail[]> & {
-      nextId?: string;
-    }
-  > {
-    return this.getPrivate('/v2/invitee/rebate/all_rebate/detail', params);
-⋮----
-/**
-   * Query Batcher Rebate Detail
-   *
-   * Query rebate detail for multiple invitees. Signature required. Read permission.
-   */
-getReferralMultipleRebateDetail(params?: {
-    inviteeUidList?: string;
-}): Promise<SpotAPISuccessResponse<SpotReferralAllRebateDetail[]>>
-⋮----
-/**
-   * Query Invited User List
-   *
-   * KOL users: query invited user list. Signature required. Read permission. Rate: 1/s.
-   */
-getReferralInvitedUserList(
-    params?: SpotReferralReferralsReq,
-  ): Promise<
-    SpotAPISuccessResponse<SpotReferralReferral[]> & { nextId?: string }
-  > {
-    return this.getPrivate('/v2/invitee/rebate/referrals', params);
-⋮----
-/**
-   *
-   * P2P
-   *
-   */
-⋮----
-/**
-   * Query P2P Order History
-   *
-   * Query C2C historical transaction records. No signature. Read permission. Rate: 20/2s.
-   */
-getP2POrderHistory(params?: SpotP2POrderHistoryReq): Promise<
-    SpotAPISuccessResponse<{
-      ts: number;
-      openApiC2COrderInfoVOList: SpotP2POrderHistory[];
-    }>
-  > {
-    return this.get('/v1/api/c2c/order/history', params);
-⋮----
-/**
-   *
-   * Earn
-   *
-   */
-⋮----
-/**
-   * Query Earn Product List
-   *
-   * Product query. Signature required. Read permission.
-   */
-getEarnProjectList(
-    params: SpotEarnProjectListReq,
-  ): Promise<
-    SpotAPISuccessResponse<{ total: number; items: SpotEarnProject[] }>
-  > {
-    return this.getPrivate('/v1/earn/project/queryEarnProjectList', params);
-⋮----
-/**
-   * Earn Subscription
-   *
-   * Subscribe to Earn product. Signature required. Trade permission.
-   */
-earnSubscribe(
-    params: SpotEarnSubscribeReq,
-): Promise<SpotAPISuccessResponse<SpotEarnSubscribeResult>>
-⋮----
-/**
-   * Earn Redemption
-   *
-   * Redeem Earn product. Signature required. Trade permission. Arrival may be delayed.
-   */
-earnRedeem(
-    params: SpotEarnRedeemReq,
-): Promise<SpotAPISuccessResponse<SpotEarnRedeemResult>>
-⋮----
-/**
-   * Query Earn User Assets
-   *
-   * Position query. Signature required. Read permission.
-   */
-getEarnUserAssets(
-    params: SpotEarnUserAssetsReq,
-  ): Promise<
-    SpotAPISuccessResponse<{ total: number; items: SpotEarnUserAsset[] }>
-  > {
-    return this.getPrivate('/v1/earn/order/user/assets/list', params);
-⋮----
-/**
-   * Validate syntax meets requirements set by HTX. Log warning if not.
-   */
-private validateOrderId(
-    params: Partial<Record<SpotOrderIdProperty, string>>,
-    orderIdProperty: SpotOrderIdProperty,
-): void
 
 ================
 File: src/types/request/futures.types.ts
@@ -15021,6 +13397,1773 @@ export interface FuturesCopyTraderApikeyReq {
 /** Product type. PERP = Perpetual Swap */
 
 ================
+File: src/lib/BaseRestClient.ts
+================
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import axios, { AxiosRequestConfig, AxiosResponse, Method } from 'axios';
+⋮----
+import {
+  configureHttpsKeepAlive,
+  DEFAULT_REQUEST_HEADERS,
+} from './https-agent.js';
+import { neverGuard } from './misc-util.js';
+import {
+  APIIDMain,
+  APIIDMainKey,
+  GenericAPIResponse,
+  getBaseDomain,
+  getRestBaseUrl,
+  isEmptyObject,
+  REST_CLIENT_TYPE_ENUM,
+  RestClientOptions,
+  RestClientType,
+  serializeParams,
+} from './requestUtils.js';
+import {
+  checkWebCryptoAPISupported,
+  getSignKeyType,
+  SignAlgorithm,
+  SignEncodeMethod,
+  signMessage,
+  SignMessageOptions,
+} from './webCryptoAPI.js';
+⋮----
+function redactSignedUrl(url: string | undefined): string | undefined
+⋮----
+interface SignedRequest<
+  T extends object | undefined = object,
+  TReqData = object,
+  TReqQuery = object,
+> {
+  originalParams: T;
+  paramsWithSign?: T & { sign: string };
+  // all request params intended for request body (e.g. POST)
+  requestData?: TReqData;
+  // all params intended for request query string (e.g. GET)
+  requestQuery?: TReqQuery;
+  serializedParams: string;
+  sign: string;
+  queryParamsWithSign: string;
+  timestamp: number;
+  recvWindow: number;
+}
+⋮----
+// all request params intended for request body (e.g. POST)
+⋮----
+// all params intended for request query string (e.g. GET)
+⋮----
+interface UnsignedRequest<T extends object | undefined = object> {
+  originalParams: T;
+  paramsWithSign: T;
+  queryParamsWithSign: undefined;
+}
+⋮----
+type SignMethod = 'htx';
+⋮----
+/**
+ * Some requests require some params to be in the query string and some in the body. Some even support passing params via headers.
+ * This type anticipates these are possible in any combination.
+ *
+ * The request builder will automatically handle where parameters should go.
+ */
+type ParamsInQueryBodyOrHeader = {
+  query?: object;
+  body?: object;
+  headers?: object;
+};
+⋮----
+// request: {
+//   url: response.config.url,
+//   method: response.config.method,
+//   data: response.config.data,
+//   headers: response.config.headers,
+// },
+⋮----
+/**
+ * Impure, mutates params to remove any values that have a key but are undefined.
+ */
+function deleteUndefinedValues(params?: any): void
+⋮----
+export abstract class BaseRestClient
+⋮----
+// A unique incrementing nonce
+⋮----
+/** Defines the client type (affecting how requests & signatures behave) */
+abstract getClientType(): RestClientType;
+⋮----
+/**
+   * Create an instance of the REST client. Pass API credentials in the object in the first parameter.
+   * @param {RestClientOptions} [restClientOptions={}] options to configure REST API connectivity
+   * @param {AxiosRequestConfig} [networkOptions={}] HTTP networking options for axios
+   */
+constructor(
+    restClientOptions: RestClientOptions = {},
+    networkOptions: AxiosRequestConfig = {},
+)
+⋮----
+/** Throw errors if any request params are empty */
+⋮----
+/** in ms == 5 minutes by default */
+⋮----
+/** inject custom request options based on axios specs - see axios docs for more guidance on AxiosRequestConfig: https://github.com/axios/axios#request-config */
+⋮----
+// Check Web Crypto API support when credentials are provided
+⋮----
+// Throw if one of the 3 values is missing, but at least one of them is set
+⋮----
+/**
+   * Generates a timestamp for signing API requests.
+   *
+   * This method can be overridden or customized using `customTimestampFn`
+   * to implement a custom timestamp synchronization mechanism.
+   * If no custom function is provided, it defaults to the current system time.
+   */
+private getSignTimestampMs(): number
+⋮----
+private getNextRequestNonce(): string
+⋮----
+private hasValidCredentials()
+⋮----
+setAccessToken(newAccessToken: string)
+⋮----
+hasAccessToken(): boolean
+⋮----
+protected get(endpoint: string, params?: object)
+⋮----
+// GET only supports params in the query string
+⋮----
+protected post(endpoint: string, params?: ParamsInQueryBodyOrHeader)
+⋮----
+protected getPrivate(endpoint: string, params?: object)
+⋮----
+// GET only supports params in the query string
+⋮----
+protected postPrivate(endpoint: string, params?: ParamsInQueryBodyOrHeader)
+⋮----
+protected deletePrivate(
+    endpoint: string,
+    params?: ParamsInQueryBodyOrHeader,
+)
+⋮----
+protected putPrivate(endpoint: string, params?: ParamsInQueryBodyOrHeader)
+⋮----
+// protected patchPrivate(endpoint: string, params?: any) {
+protected patchPrivate(endpoint: string, params?: ParamsInQueryBodyOrHeader)
+⋮----
+/**
+   * @private Make a HTTP request to a specific endpoint. Private endpoint API calls are automatically signed.
+   */
+private async _call(
+    method: Method,
+    endpoint: string,
+    params?: ParamsInQueryBodyOrHeader,
+    isPublicApi?: boolean,
+): GenericAPIResponse
+⋮----
+// Sanity check to make sure it's only ever prefixed by one forward slash
+⋮----
+// Build a request and handle signature process
+⋮----
+// Dispatch request
+⋮----
+/**
+           * Throw if response contains error (SPOT), e.g:
+           * {
+           *    status: 'error',
+           *    'err-code': 'api-signature-not-valid',
+           *    'err-msg': 'Signature not valid: API key has no permission [API Key没有权限]',
+           *    data: null
+           * }
+           */
+⋮----
+// const res = {
+//   result: 'error',
+//   error: 'authenticationError',
+//   serverTime: '2025-10-29T15:02:39.341Z',
+// };
+⋮----
+// futures exceptions, e.g.
+// data: {
+//   code: 403,
+//   msg: 'Incorrect signature method [错误的签名方法]',
+//   data: null,
+//   ts: 1775823398810
+// }
+// 6001, The Single-Asset Collateral mode is temporarily unavailable.
+⋮----
+// A successful batch request may contain both accepted and
+// rejected orders. Return the full response so callers can
+// handle data.success and data.errors independently.
+⋮----
+/**
+   * @private generic handler to parse request exceptions
+   */
+parseException(e: any, requestParams: any): unknown
+⋮----
+// Something happened in setting up the request that triggered an error
+⋮----
+// request made but no response received
+⋮----
+// The request was made and the server responded with a status code
+// that falls out of the range of 2xx
+⋮----
+// console.error('err: ', response?.data);
+⋮----
+// Prevent credentials from leaking into error messages
+⋮----
+private async signMessage(
+    paramsStr: string,
+    secret: string,
+    method: SignEncodeMethod,
+    algorithm: SignAlgorithm,
+    options?: SignMessageOptions,
+): Promise<string>
+⋮----
+/**
+   * @private sign request and set recv window
+   */
+private async signRequest<
+    T extends ParamsInQueryBodyOrHeader | undefined = object,
+  >(
+    domain: string,
+    data: T,
+    endpoint: string,
+    method: Method,
+    signMethod: SignMethod,
+): Promise<SignedRequest<T>>
+⋮----
+// Don't prefix with ? as part of sign. Prefix after sign
+⋮----
+// Array values are repeated into key value pairs
+// E.g. orderIds:[1,2] becomes orderIds=1&orderIds=2
+⋮----
+// const isFuturesRequest =
+//   clientType === REST_CLIENT_TYPE_ENUM.futures ||
+//   clientType === REST_CLIENT_TYPE_ENUM.futuresAWS ||
+//   clientType === REST_CLIENT_TYPE_ENUM.futuresAlt1;
+⋮----
+// const isSpotRequest =
+//   clientType === REST_CLIENT_TYPE_ENUM.spot ||
+//   clientType === REST_CLIENT_TYPE_ENUM.spotAWS;
+⋮----
+// The 'timestamp' should be formated as 'YYYY-MM-DDThh:mm:ss' // and URL encoded.
+⋮----
+.split('.')[0]; // Remove milliseconds from ISO string
+⋮----
+// HTX spot signs auth params plus GET query params. POST body stays unsigned.
+⋮----
+// // Only sign when no access token is provided
+// if (!this.hasAccessToken()) {
+//   try {
+//     const signMessageInput =
+//       endpoint + (await hashMessage(signInput, 'binary', 'SHA-256'));
+⋮----
+//     // node:crypto equivalent
+//     // const sign = createHmac(
+//     //   'sha512',
+//     //   Buffer.from(this.apiSecret!, 'base64'),
+//     // )
+//     //   .update(signMessage, 'binary')
+//     //   .digest('base64');
+⋮----
+//     const sign = await this.signMessage(
+//       signMessageInput,
+//       this.apiSecret!,
+//       'base64',
+//       'SHA-512',
+//       {
+//         isSecretB64Encoded: true,
+//         isInputBinaryString: true,
+//       },
+//     );
+⋮----
+//     res.sign = sign;
+//   } catch (error) {
+//     // Check if this is a base64 decoding error (invalid API credentials)
+//     if (
+//       error instanceof Error &&
+//       (error.name === 'InvalidCharacterError' ||
+//         error.message?.includes('Invalid character'))
+//     ) {
+//       const credentialError = new Error(
+//         'Failed to sign request: Invalid API credentials detected.\n\n' +
+//           '⚠️  PLEASE CHECK YOUR API KEY AND SECRET:\n' +
+//           '   - Ensure your API Secret is a valid base64-encoded string\n' +
+//           '   - HTX provides API secrets in base64 format\n\n' +
+//           `Original error: ${error.message}\n` +
+//           `Stack trace: ${error.stack}`,
+//       );
+//       credentialError.name = 'InvalidCredentialsError';
+//       throw credentialError;
+//     }
+//     // Re-throw other errors as-is
+//     throw error;
+//   }
+// }
+⋮----
+private async prepareSignParams<TParams extends object | undefined>(
+    domain: string,
+    method: Method,
+    endpoint: string,
+    signMethod: SignMethod,
+    params?: TParams,
+    isPublicApi?: true,
+  ): Promise<UnsignedRequest<TParams>>;
+⋮----
+private async prepareSignParams<TParams extends object | undefined>(
+    domain: string,
+    method: Method,
+    endpoint: string,
+    signMethod: SignMethod,
+    params?: TParams,
+    isPublicApi?: false | undefined,
+  ): Promise<SignedRequest<TParams>>;
+⋮----
+private async prepareSignParams<TParams extends object | undefined>(
+    domain: string,
+    method: Method,
+    endpoint: string,
+    signMethod: SignMethod,
+    params?: TParams,
+    isPublicApi?: boolean,
+)
+⋮----
+/** Returns an axios request object. Handles signing process automatically if this is a private API call */
+private async buildRequest(
+    method: Method,
+    endpoint: string,
+    domain: string,
+    url: string,
+    params?: ParamsInQueryBodyOrHeader,
+    isPublicApi?: boolean,
+): Promise<AxiosRequestConfig>
+⋮----
+// console.log('signResult->pre', {
+//   url,
+//   method,
+//   endpoint,
+//   params,
+//   isPublicApi,
+// });
+⋮----
+// console.log('signResult', signResult);
+⋮----
+// spot: https://www.htx.com/en-us/opend/newApiPages/?id=419
+/**
+         * All params go in query string. E.g. these params:
+         * AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
+         * order-id=1234567890
+         * SignatureMethod=Ed25519
+         * SignatureVersion=2
+         * Timestamp=2017-05-11T15%3A19%3A30
+         *
+         * Become:
+         * https://api.huobi.pro/v1/order/orders?AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx&order-id=1234567890&SignatureMethod=Ed25519&SignatureVersion=2&Timestamp=2017-05-11T15%3A19%3A30&Signature=4F65x5A2bLyMWVQj3Aqp%2BB4w%2BivaA7n5Oi2SuYtCJ9o%3D
+         *
+         * Ed25519 or HmacSHA256
+         *
+         * - GET request: All parameters are included in URL, and do not carry body(content-length>0), in otherwise will return 403 error code.
+         * - POST request: All parameters are formatted as JSON and put int the request body
+         *
+         * Rate limit headers, TODO: It is suggested to read HTTP Header X-HB-RateLimit-Requests-Remain and X-HB-RateLimit-Requests-Expire to get the remaining count of request and the expire time for current rate limit time window, then you can adjust the API access rate dynamically.
+         * The new version rate limit is applied on UID basis, which means, the overall access rate, from all API keys under same UID, to single endpoint, shouldn’t exceed the rate limit applied on that endpoint.
+         */
+⋮----
+// 'API-Key': this.apiKey,
+// 'API-Sign': signResult.sign,
+⋮----
+// GET With signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L57
+⋮----
+// console.log('signParams for GET WITH SIGN: ', signResult);
+⋮----
+// GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L44
+⋮----
+// spot: https://www.htx.com/en-us/opend/newApiPages/?id=419
+/**
+         * All params go in query string. E.g. these params:
+         * AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx
+         * order-id=1234567890
+         * SignatureMethod=Ed25519
+         * SignatureVersion=2
+         * Timestamp=2017-05-11T15%3A19%3A30
+         *
+         * Become:
+         * https://api.huobi.pro/v1/order/orders?AccessKeyId=e2xxxxxx-99xxxxxx-84xxxxxx-7xxxx&order-id=1234567890&SignatureMethod=Ed25519&SignatureVersion=2&Timestamp=2017-05-11T15%3A19%3A30&Signature=4F65x5A2bLyMWVQj3Aqp%2BB4w%2BivaA7n5Oi2SuYtCJ9o%3D
+         *
+         * Ed25519 or HmacSHA256
+         *
+         * - GET request: All parameters are included in URL, and do not carry body(content-length>0), in otherwise will return 403 error code.
+         * - POST request: All parameters are formatted as JSON and put int the request body
+         *
+         * Rate limit headers, TODO: It is suggested to read HTTP Header X-HB-RateLimit-Requests-Remain and X-HB-RateLimit-Requests-Expire to get the remaining count of request and the expire time for current rate limit time window, then you can adjust the API access rate dynamically.
+         * The new version rate limit is applied on UID basis, which means, the overall access rate, from all API keys under same UID, to single endpoint, shouldn’t exceed the rate limit applied on that endpoint.
+         */
+⋮----
+// 'API-Key': this.apiKey,
+// 'API-Sign': signResult.sign,
+⋮----
+// if (method === 'GET') {
+//   signHeaders = {
+//     ...signHeaders,
+//     // GET With signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L57
+//     'Content-Type': 'application/x-www-form-urlencoded',
+//   };
+//   // console.log('signParams for GET WITH SIGN: ', signResult);
+//   break;
+// }
+⋮----
+// if (method === 'POST') {
+//   signHeaders = {
+//     ...signHeaders,
+//     // GET, No signature: https://github.com/HuobiRDCenter/huobi_Python/blob/master/huobi/connection/restapi_sync_client.py#L44
+//     'Content-Type': 'application/json',
+//   };
+// }
+
+================
+File: src/SpotClient.ts
+================
+import { BaseRestClient } from './lib/BaseRestClient.js';
+import {
+  generateNewOrderID,
+  getOrderIdPrefix,
+  logInvalidOrderId,
+  REST_CLIENT_TYPE_ENUM,
+  RestClientType,
+} from './lib/requestUtils.js';
+import type {
+  SpotAccountTransferReq,
+  SpotBrokerAccountCapitalSnapshotReq,
+  SpotBrokerSubUserFeeRateAddReq,
+  SpotCrossMarginLoanOrdersReq,
+  SpotDepositWithdrawQueryReq,
+  SpotEarnProjectListReq,
+  SpotEarnRedeemReq,
+  SpotEarnSubscribeReq,
+  SpotEarnUserAssetsReq,
+  SpotGetAccountHistoryReq,
+  SpotGetAccountLedgerReq,
+  SpotGetAssetValuationReq,
+  SpotGetChainsReq,
+  SpotGetDepthReq,
+  SpotGetKlineReq,
+  SpotGetMatchResultsReq,
+  SpotGetOpenOrdersReq,
+  SpotGetOrderHistory48hReq,
+  SpotGetOrderHistoryReq,
+  SpotMarginLoanOrderReq,
+  SpotMarginLoanOrdersReq,
+  SpotMarginRepaymentReq,
+  SpotMarginTransferInIsolatedReq,
+  SpotMarginTransferOutIsolatedReq,
+  SpotP2POrderHistoryReq,
+  SpotReferralAllRebateDetailReq,
+  SpotReferralRebateHistoryReq,
+  SpotReferralReferralsReq,
+  SpotRepaymentRecordReq,
+  SpotSubUserApiKeyCreationReq,
+  SpotSubUserApiKeyUpdateReq,
+  SpotSubUserDepositHistoryReq,
+  SpotSubUserManagedTransferHistoryReq,
+  SpotSubUserTradableMarketReq,
+  SpotSubUserTransferPermissionsReq,
+  SpotSubUserTransferReq,
+  SpotUniversalTransferRecordsReq,
+  SpotUniversalTransferReq,
+  SpotV1FuturesTransferReq,
+  SpotV1OrderAutoPlaceReq,
+  SpotV1OrderBatchCancelOpenOrdersReq,
+  SpotV1OrderPlaceReq,
+  SpotV2AccountTransferReq,
+  SpotV2AlgoOrdersHistoryReq,
+  SpotV2AlgoOrdersOpeningReq,
+  SpotV2AlgoOrdersPlaceReq,
+  SpotV2PointTransferReq,
+  SpotWithdrawAddressReq,
+  SpotWithdrawCreateReq,
+} from './types/request/spot.types.js';
+import {
+  SpotAPISuccessResponse,
+  SpotOrderIdProperty,
+} from './types/response/shared.types.js';
+import {
+  SpotAccount,
+  SpotAccountBalance,
+  SpotAccountHistory,
+  SpotAccountTransferResult,
+  SpotBrokerAccountCapitalSnapshot,
+  SpotBrokerFeeRateAddResult,
+  SpotBrokerSubUserFeeRate,
+  SpotBrokerUserRebateStatus,
+  SpotCrossMarginAccountBalance,
+  SpotCrossMarginLoanOrder,
+  SpotCurrency,
+  SpotDepositAddress,
+  SpotDepositWithdrawRecord,
+  SpotDepth,
+  SpotDetailTick,
+  SpotEarnProject,
+  SpotEarnRedeemResult,
+  SpotEarnSubscribeResult,
+  SpotEarnUserAsset,
+  SpotKline,
+  SpotLastTrade,
+  SpotMarginAccountBalance,
+  SpotMarginLimit,
+  SpotMarginLoanInfo,
+  SpotMarginLoanInfoCurrency,
+  SpotMarginLoanOrder,
+  SpotMarginRepaymentResult,
+  SpotMarketStatusResponse,
+  SpotMergedTicker,
+  SpotP2POrderHistory,
+  SpotReferralAllRebateDetail,
+  SpotReferralRebateDetail,
+  SpotReferralRebateHistoryRecord,
+  SpotReferralReferral,
+  SpotRepaymentRecord,
+  SpotSubUserAccountsResult,
+  SpotSubUserApiKey,
+  SpotSubUserApiKeyCreationResult,
+  SpotSubUserApiKeyUpdateResult,
+  SpotSubUserBalanceResult,
+  SpotSubUserCreationResult,
+  SpotSubUserDeductModeResult,
+  SpotSubUserDepositHistoryRecord,
+  SpotSubUserEntrustUser,
+  SpotSubUserList,
+  SpotSubUserLockStatusResult,
+  SpotSubUserManagedTransferRecord,
+  SpotSubUsersAggregatedBalance,
+  SpotSubUserStatusResult,
+  SpotSubUserTradableMarketResult,
+  SpotSubUserTransferPermissionsResult,
+  SpotTicker,
+  SpotTradeTimestampGroup,
+  SpotTradingSymbol,
+  SpotUniversalTransferRecord,
+  SpotUniversalTransferResult,
+  SpotV1AccountOverviewInfo,
+  SpotV1AccountSwitchUserInfo,
+  SpotV1ChainInfo,
+  SpotV1CurrencySettings,
+  SpotV1MarketSymbolSettings,
+  SpotV1OpenOrder,
+  SpotV1OrderAutoPlaceResult,
+  SpotV1OrderBatchCancelOpenOrdersResult,
+  SpotV1OrderBatchCancelResult,
+  SpotV1OrderBatchPlaceResult,
+  SpotV1OrderCancelByClientOrderIdResult,
+  SpotV1OrderCancelResult,
+  SpotV1OrderDetail,
+  SpotV1OrderHistory,
+  SpotV1OrderHistory48h,
+  SpotV1OrderMatchResult,
+  SpotV1SymbolSettings,
+  SpotV2AccountLedger,
+  SpotV2AccountValuation,
+  SpotV2AlgoOrder,
+  SpotV2AlgoOrdersCancelAllAfterResult,
+  SpotV2AlgoOrdersCancellationResult,
+  SpotV2AlgoOrdersPlaceResult,
+  SpotV2AssetValuation,
+  SpotV2CurrencyReference,
+  SpotV2PointAccount,
+  SpotV2PointTransfer,
+  SpotV2TransactFeeRate,
+  SpotVaspExchange,
+  SpotWithdrawAddress,
+  SpotWithdrawQuota,
+} from './types/response/spot.types.js';
+⋮----
+/**
+ * The SpotClient provides integration to the HTX Spot API.
+ */
+export class SpotClient extends BaseRestClient
+⋮----
+getClientType(): RestClientType
+⋮----
+// Favour the spot AWS domain, as recommended by the API docs
+⋮----
+/**
+   *
+   * Misc Utility Methods
+   *
+   */
+⋮----
+generateNewOrderID(): string
+⋮----
+/**
+   *
+   * Reference Data
+   *
+   */
+⋮----
+/**
+   * Get Market Status
+   *
+   * Returns current market status.
+   * 1=normal, 2=halted, 3=cancel-only.
+   */
+getMarketStatus(): Promise<SpotMarketStatusResponse>
+⋮----
+/**
+   * Get Current Timestamp (V1)
+   *
+   * Returns current server time in milliseconds since epoch. No signature required.
+   */
+getTimestamp(): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Get all Supported Trading Symbols (V2)
+   *
+   * Returns all supported trading symbols. Pass ts for incremental updates.
+   */
+getTradingSymbols(params?: {
+    ts?: number;
+}): Promise<SpotAPISuccessResponse<SpotTradingSymbol[]>>
+⋮----
+/**
+   * Get all Supported Currencies (V2)
+   *
+   * Returns all supported currencies. Pass ts for incremental updates.
+   */
+getCurrencies(params?: {
+    ts?: number;
+}): Promise<SpotAPISuccessResponse<SpotCurrency[]>>
+⋮----
+/**
+   * Get Currencys Settings (V1)
+   *
+   * Returns currency settings. No signature required. Pass ts for incremental updates.
+   */
+getCurrencysSettings(params?: {
+    ts?: number;
+}): Promise<SpotAPISuccessResponse<SpotV1CurrencySettings[]>>
+⋮----
+/**
+   * Get Symbols Settings (V1)
+   *
+   * Returns symbol settings. No signature required. Pass ts for incremental updates.
+   */
+getSymbolsSettings(params?: {
+    ts?: number;
+}): Promise<SpotAPISuccessResponse<SpotV1SymbolSettings[]>>
+⋮----
+/**
+   * Get Market Symbols Settings (V1)
+   *
+   * Returns market symbol settings. No signature required. Pass symbols (NA=all) and/or ts for incremental updates.
+   */
+getMarketSymbolsSettings(params?: {
+    symbols?: string;
+    ts?: number;
+}): Promise<SpotAPISuccessResponse<SpotV1MarketSymbolSettings[]>>
+⋮----
+/**
+   * Get Chains Information (V1)
+   *
+   * Returns chain info per currency. No signature required. Pass show-desc, currency, and/or ts for incremental updates.
+   */
+getChainsInfo(
+    params?: SpotGetChainsReq,
+): Promise<SpotAPISuccessResponse<SpotV1ChainInfo[]>>
+⋮----
+/**
+   * Get Reference Currencies & Chains (V2)
+   *
+   * Returns static reference info for each currency and its chains. No signature required.
+   */
+getReferenceCurrencies(params?: {
+    currency?: string;
+    authorizedUser?: boolean;
+}): Promise<SpotAPISuccessResponse<SpotV2CurrencyReference[]>>
+⋮----
+/**
+   *
+   * Market Data
+   *
+   */
+⋮----
+/**
+   * Get Klines (Candles)
+   *
+   * Returns candlestick data for a symbol. No signature required.
+   */
+getKlines(
+    params: SpotGetKlineReq,
+): Promise<SpotAPISuccessResponse<SpotKline[]>>
+⋮----
+/**
+   * Get Latest Aggregated Ticker
+   *
+   * Returns latest ticker with 24h aggregated market data. No signature required.
+   */
+getTicker(params: {
+    symbol: string;
+}): Promise<SpotAPISuccessResponse<SpotMergedTicker, 'tick'>>
+⋮----
+/**
+   * Get Latest Tickers for All Pairs
+   *
+   * Returns latest tickers for all supported pairs. No signature required.
+   */
+getTickers(): Promise<SpotAPISuccessResponse<SpotTicker[]>>
+⋮----
+/**
+   * Get Market Depth
+   *
+   * Returns order book for a symbol. No signature required.
+   */
+getMarketDepth(
+    params: SpotGetDepthReq,
+): Promise<SpotAPISuccessResponse<SpotDepth, 'tick'>>
+⋮----
+/**
+   * Get the Last Trade
+   *
+   * Returns latest trade with price, volume, direction. No signature required.
+   */
+getLastTrade(params: {
+    symbol: string;
+}): Promise<SpotAPISuccessResponse<SpotLastTrade, 'tick'>>
+⋮----
+/**
+   * Get the Most Recent Trades
+   *
+   * Returns recent trades grouped by timestamp. No signature required.
+   */
+getHistoryTrades(params: {
+    symbol: string;
+    size?: number;
+}): Promise<SpotAPISuccessResponse<SpotTradeTimestampGroup[]>>
+⋮----
+/**
+   * Get the Last 24h Market Summary
+   *
+   * Returns 24h trading summary for a symbol. No signature required.
+   */
+get24hMarketSummary(params: {
+    symbol: string;
+}): Promise<SpotAPISuccessResponse<SpotDetailTick, 'tick'>>
+⋮----
+/**
+   * Get Full Order Book
+   *
+   * Returns complete market depth, up to 5000 levels. Updated once per second. No signature required.
+   */
+getFullOrderBook(params: {
+    symbol: string;
+}): Promise<SpotAPISuccessResponse<SpotDepth, 'tick'>>
+⋮----
+/**
+   *
+   * Account
+   *
+   */
+⋮----
+/**
+   * Get all Accounts of the Current User
+   *
+   * Returns list of accounts owned by this API user. Signature required.
+   */
+getAccounts(): Promise<SpotAPISuccessResponse<SpotAccount[]>>
+⋮----
+/**
+   * Get Account Balance of a Specific Account
+   *
+   * Returns balance for account specified by account id. Signature required. OTC not supported.
+   */
+getAccountBalance(params: {
+    accountId: string | number;
+}): Promise<SpotAPISuccessResponse<SpotAccountBalance>>
+⋮----
+/**
+   * Get The Total Valuation of Platform Assets
+   *
+   * Returns total asset valuation in BTC or fiat. Signature required.
+   */
+getAccountValuation(params?: {
+    accountType?: string;
+    valuationCurrency?: string;
+}): Promise<SpotAPISuccessResponse<SpotV2AccountValuation>>
+⋮----
+/**
+   * Get Asset Valuation
+   *
+   * Returns valuation of total assets in BTC or fiat. Signature required.
+   */
+getAssetValuation(
+    params?: SpotGetAssetValuationReq,
+): Promise<SpotAPISuccessResponse<SpotV2AssetValuation>>
+⋮----
+/**
+   * Asset Transfer
+   *
+   * Transfer asset between accounts (spot, margin, sub-users). Signature required. Trade permission.
+   */
+submitTransfer(
+    params: SpotAccountTransferReq,
+): Promise<SpotAPISuccessResponse<SpotAccountTransferResult>>
+⋮----
+/**
+   * Get Account History
+   *
+   * Returns amount changes of specified account. Signature required. Max 1h query window, 30 days range.
+   */
+getAccountHistory(
+    params: SpotGetAccountHistoryReq,
+  ): Promise<
+    SpotAPISuccessResponse<SpotAccountHistory[]> & { 'next-id'?: number }
+  > {
+    return this.getPrivate('/v1/account/history', params);
+⋮----
+/**
+   * Get Account Ledger
+   *
+   * Returns amount changes (phase 1: transfer only). Max 10-day window, 180 days range. Signature required.
+   */
+getAccountLedger(
+    params?: SpotGetAccountLedgerReq,
+  ): Promise<
+    SpotAPISuccessResponse<SpotV2AccountLedger[]> & { nextId?: number }
+  > {
+    return this.getPrivate('/v2/account/ledger', params);
+⋮----
+/**
+   * V2 Account Transfer
+   *
+   * Transfer funds between spot, linear-swap, otc, futures, swap. Signature required. Trade permission.
+   */
+submitV2AccountTransfer(
+    params: SpotV2AccountTransferReq,
+): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Create Universal Transfer
+   *
+   * Transfer between account types (spot, margin, futures, options, etc). Host: spot. Trade permission. Rate: 5/2s.
+   */
+submitUniversalTransfer(
+    params: SpotUniversalTransferReq,
+): Promise<SpotAPISuccessResponse<SpotUniversalTransferResult>>
+⋮----
+/**
+   * Get Universal Transfer Records
+   *
+   * Query universal transfer history. Host: spot. Trade permission. Rate: 5/2s.
+   */
+getUniversalTransferRecords(
+    params?: SpotUniversalTransferRecordsReq,
+): Promise<SpotAPISuccessResponse<SpotUniversalTransferRecord[]>>
+⋮----
+/**
+   * Futures Transfer
+   *
+   * Transfer between spot and future contract account. pro-to-futures = spot -> contract, futures-to-pro = contract -> spot. Signature required. Trade permission.
+   */
+submitFuturesTransfer(
+    params: SpotV1FuturesTransferReq,
+): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Get Point Balance
+   *
+   * Query termless and terminable point balance. Parent can query sub user via subUid. Signature required. Read permission. Rate: 2/s.
+   */
+getPointBalance(params?: {
+    subUid?: string;
+}): Promise<SpotAPISuccessResponse<SpotV2PointAccount>>
+⋮----
+/**
+   * Point Transfer
+   *
+   * Transfer points between parent and sub user. groupId=0 for termless; for terminable query sub balance first. Signature required. Trade permission. Rate: 2/s.
+   */
+submitPointTransfer(
+    params: SpotV2PointTransferReq,
+): Promise<SpotAPISuccessResponse<SpotV2PointTransfer>>
+⋮----
+/**
+   * Get User Deduction Info
+   *
+   * Query point card vs HTX deduction settings. Signature required. Read permission. Rate: 5/s.
+   */
+getAccountSwitchUserInfo(): Promise<
+    SpotAPISuccessResponse<SpotV1AccountSwitchUserInfo>
+  > {
+    return this.getPrivate('/v1/account/switch/user/info');
+⋮----
+/**
+   * Get Deductible Currency Overview
+   *
+   * Query asset that can be used to deduct fees. Signature required. Read permission. Rate: 5/s.
+   */
+getAccountOverviewInfo(): Promise<
+    SpotAPISuccessResponse<SpotV1AccountOverviewInfo>
+  > {
+    return this.getPrivate('/v1/account/overview/info');
+⋮----
+/**
+   * Set Spot/Margin Fee Deduction Method
+   *
+   * switchType: 0=point card, 1=currency (pass deductionCurrency), 2=close. Signature required. Read permission. Rate: 2/s.
+   */
+updateFeeDeductionMethod(params: {
+    switchType: 0 | 1 | 2;
+    deductionCurrency?: string;
+}): Promise<SpotAPISuccessResponse<null>>
+⋮----
+/**
+   *
+   * Trading
+   *
+   */
+⋮----
+/**
+   * Place a New Order
+   *
+   * Places order to be matched. Set account-id and source per account type. Signature required. Trade permission. Rate: 100/2s.
+   */
+submitOrder(
+    params: SpotV1OrderPlaceReq,
+): Promise<SpotAPISuccessResponse<string>>
+⋮----
+/**
+   * Place a Batch of Orders
+   *
+   * Max 10 orders per batch. Each returns order-id or err-code/err-msg. Signature required. Trade permission. Rate: 50/2s.
+   */
+submitBatchOrders(
+    params: SpotV1OrderPlaceReq[],
+): Promise<SpotAPISuccessResponse<SpotV1OrderBatchPlaceResult[]>>
+⋮----
+/**
+   * Margin Order (Auto Borrow/Repay)
+   *
+   * Auto borrow to place or auto repay. Sub-accounts not supported. Use amount or market-amount. Signature required. Trade permission. Rate: 100/2s.
+   */
+submitMarginOrder(
+    params: SpotV1OrderAutoPlaceReq,
+): Promise<SpotAPISuccessResponse<SpotV1OrderAutoPlaceResult>>
+⋮----
+/**
+   * Cancel Order by Order ID
+   *
+   * Submits cancel request. Verify via order status or match result. Signature required. Trade permission. Rate: 100/2s.
+   */
+cancelOrderById(params: {
+    orderId: string;
+    symbol?: string;
+}): Promise<SpotAPISuccessResponse<SpotV1OrderCancelResult>>
+⋮----
+/**
+   * Cancel Order by Client Order ID
+   *
+   * Prefer cancelOrder (by order-id) when possible. Submits cancel request; verify via order status. Signature required. Trade permission. Rate: 100/2s.
+   */
+cancelOrderByClientId(params: {
+    'client-order-id': string;
+}): Promise<SpotAPISuccessResponse<SpotV1OrderCancelByClientOrderIdResult>>
+⋮----
+/**
+   * Cancel All Spot Orders
+   *
+   * Cancel all open spot orders. Pass symbol for specific pair(s), comma-separated; omit for all. Signature required. Trade permission. Rate: 1/2s.
+   */
+cancelAllOrders(params?: {
+    symbol?: string;
+}): Promise<SpotAPISuccessResponse<null>>
+⋮----
+/**
+   * Get All Open Orders
+   *
+   * Returns unfilled orders. Filter by account-id, symbol, side. Signature required. Read permission. Rate: 50/2s.
+   */
+getOpenOrders(
+    params?: SpotGetOpenOrdersReq,
+): Promise<SpotAPISuccessResponse<SpotV1OpenOrder[]>>
+⋮----
+/**
+   * Cancel Multiple Orders by Criteria
+   *
+   * Cancel up to 100 orders matching account-id, symbol, types, side. Submit only; verify via order status. Signature required. Trade permission. Rate: 50/2s.
+   */
+batchCancelOpenOrders(
+    params?: SpotV1OrderBatchCancelOpenOrdersReq,
+): Promise<SpotAPISuccessResponse<SpotV1OrderBatchCancelOpenOrdersResult>>
+⋮----
+/**
+   * Cancel Multiple Orders by IDs
+   *
+   * Cancel by order-ids or client-order-ids (max 50). Prefer order-ids. Signature required. Trade permission. Rate: 50/2s.
+   */
+batchCancelOrders(params: {
+    'order-ids'?: string[];
+    'client-order-ids'?: string[];
+}): Promise<SpotAPISuccessResponse<SpotV1OrderBatchCancelResult>>
+⋮----
+/**
+   * Dead Man's Switch (Cancel All After)
+   *
+   * Turn on/off. timeout=0 to turn off. timeout>=5 to turn on: must call twice within timeout seconds or all spot orders (max 500) are canceled. Signature required. Trade permission.
+   */
+setCancelAllAfter(params: {
+    timeout: number;
+}): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancelAllAfterResult>>
+⋮----
+/**
+   * Get Order Detail by Order ID
+   *
+   * Returns order detail. API-created orders not queryable 2h after cancel. Signature required. Read permission. Rate: 50/2s.
+   */
+getOrder(params: {
+    orderId: string;
+}): Promise<SpotAPISuccessResponse<SpotV1OrderDetail>>
+⋮----
+/**
+   * Get Order Detail by Client Order ID
+   *
+   * Returns latest status of order with given client order ID. Signature required. Read permission. Rate: 50/2s.
+   */
+getOrderByClientId(params: {
+    clientOrderId: string;
+}): Promise<SpotAPISuccessResponse<SpotV1OrderDetail>>
+⋮----
+/**
+   * Get Match Results of an Order
+   *
+   * Returns match/trade results for a specific order. Signature required. Read permission. Rate: 50/2s.
+   */
+getOrderMatch(params: {
+    orderId: string;
+}): Promise<SpotAPISuccessResponse<SpotV1OrderMatchResult[]>>
+⋮----
+/**
+   * Search Past Orders
+   *
+   * Historical orders by symbol, states, time range. Max 48h window, 180 days range. API orders not queryable 2h after cancel. Signature required. Read permission. Rate: 50/2s.
+   */
+getOrderHistory(
+    params: SpotGetOrderHistoryReq,
+): Promise<SpotAPISuccessResponse<SpotV1OrderHistory[]>>
+⋮----
+/**
+   * Search Historical Orders within 48 Hours
+   *
+   * Orders by time range. Default: last 48h. next-time in last item when more exist. API orders not queryable 2h after cancel. Signature required. Read permission. Rate: 20/2s.
+   */
+getOrderHistory48h(
+    params?: SpotGetOrderHistory48hReq,
+): Promise<SpotAPISuccessResponse<SpotV1OrderHistory48h[]>>
+⋮----
+/**
+   * Search Match Results
+   *
+   * Match results of filled/partial orders by symbol, types, time. 48h window, 120 days range. Signature required. Read permission. Rate: 20/2s.
+   */
+getMatchResults(
+    params?: SpotGetMatchResultsReq,
+): Promise<SpotAPISuccessResponse<SpotV1OrderMatchResult[]>>
+⋮----
+/**
+   * Get Transact Fee Rate
+   *
+   * Query fee rates for trading pairs. Max 10 symbols. Signature required. Read permission. Rate: 50/2s.
+   */
+getFeeRate(params: {
+    symbols: string;
+}): Promise<SpotAPISuccessResponse<SpotV2TransactFeeRate[]>>
+⋮----
+/**
+   *
+   * Conditional Order
+   *
+   */
+⋮----
+/**
+   * Place a Conditional Order
+   *
+   * Conditional orders only via this endpoint (not Trading section). Signature required. Trade permission. Rate: 20/2s.
+   */
+placeConditionalOrder(
+    params: SpotV2AlgoOrdersPlaceReq,
+): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersPlaceResult>>
+⋮----
+/**
+   * Cancel Conditional Orders (before triggering)
+   *
+   * Only cancels conditional orders that have not triggered yet. Max 50 orders. Signature required. Trade permission. Rate: 20/2s.
+   */
+cancelConditionalOrders(params: {
+    clientOrderIds: string[];
+}): Promise<SpotAPISuccessResponse<SpotV2AlgoOrdersCancellationResult>>
+⋮----
+/**
+   * Query Open Conditional Orders (before triggering)
+   *
+   * Returns conditional orders with orderStatus=created. Signature required. Read permission. Rate: 20/2s.
+   */
+getOpenConditionalOrders(
+    params?: SpotV2AlgoOrdersOpeningReq,
+): Promise<SpotAPISuccessResponse<SpotV2AlgoOrder[]> &
+⋮----
+/**
+   * Query Conditional Order History
+   *
+   * Returns canceled/rejected/triggered conditional orders. For triggered, use Trading section for latest status. Signature required. Read permission. Rate: 20/2s.
+   */
+getConditionalOrderHistory(
+    params?: SpotV2AlgoOrdersHistoryReq,
+): Promise<SpotAPISuccessResponse<SpotV2AlgoOrder[]> &
+⋮----
+/**
+   * Query a Specific Conditional Order
+   *
+   * By clientOrderId. Covers created, triggered, canceled, rejected. Signature required. Read permission. Rate: 20/2s.
+   */
+getConditionalOrder(params: {
+    clientOrderId: string;
+}): Promise<SpotAPISuccessResponse<SpotV2AlgoOrder>>
+⋮----
+/**
+   *
+   * Margin Loan (Cross/Isolated)
+   *
+   */
+⋮----
+/**
+   * Repayment Record Reference
+   *
+   * Query repayment records. Sorted by repayTime. Main and sub-accounts. Signature required. Read permission. Rate: 2/2s.
+   */
+getRepaymentRecords(
+    params?: SpotRepaymentRecordReq,
+  ): Promise<
+    SpotAPISuccessResponse<SpotRepaymentRecord[]> & { nextId?: number }
+  > {
+    return this.getPrivate('/v2/account/repayment', params);
+⋮----
+/**
+   * Repay Margin Loan (Cross/Isolated)
+   *
+   * Loan interest paid first if no transactId. Main and sub-accounts. Signature required. Trade permission. Rate: 2/s.
+   */
+repayMarginLoan(
+    params: SpotMarginRepaymentReq,
+): Promise<SpotAPISuccessResponse<SpotMarginRepaymentResult[]>>
+⋮----
+/**
+   * Transfer Asset from Spot Trading Account to Isolated Margin Account
+   *
+   * Signature required. Trade permission. Rate: 2/2s.
+   */
+transferSpotToIsolatedMargin(
+    params: SpotMarginTransferInIsolatedReq,
+): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Transfer Asset from Isolated Margin Account to Spot Trading Account
+   *
+   * Signature required. Trade permission. Rate: 2/2s.
+   */
+transferIsolatedMarginToSpot(
+    params: SpotMarginTransferOutIsolatedReq,
+): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Get Loan Interest Rate and Quota (Isolated)
+   *
+   * Returns loan interest rates and quota per symbol. Signature required. Read permission. Rate: 20/2s.
+   */
+getMarginLoanInfo(params?: {
+    symbols?: string;
+}): Promise<SpotAPISuccessResponse<SpotMarginLoanInfo[]>>
+⋮----
+/**
+   * Request a Margin Loan (Isolated)
+   *
+   * Places order to borrow margin. Signature required. Trade permission. Rate: 2/2s.
+   */
+requestMarginLoan(
+    params: SpotMarginLoanOrderReq,
+): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Repay Margin Loan (Isolated)
+   *
+   * Repays with asset in margin account. Signature required. Trade permission. Rate: 2/2s.
+   */
+repayMarginLoanIsolated(params: {
+    orderId: string;
+    amount: string;
+}): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Search Past Margin Orders (Isolated)
+   *
+   * Returns margin loan orders by criteria. Signature required. Read permission. Rate: 100/2s.
+   */
+getMarginLoanOrders(
+    params?: SpotMarginLoanOrdersReq,
+): Promise<SpotAPISuccessResponse<SpotMarginLoanOrder[]>>
+⋮----
+/**
+   * Get the Balance of the Margin Loan Account (Isolated)
+   *
+   * Signature required. Read permission. Rate: 100/2s.
+   */
+getMarginAccountBalance(params?: {
+    symbol?: string;
+    'sub-uid'?: number;
+}): Promise<SpotAPISuccessResponse<SpotMarginAccountBalance[]>>
+⋮----
+/**
+   * Transfer Asset from Spot Trading Account to Cross Margin Account
+   *
+   * Signature required. Trade permission.
+   */
+transferSpotToCrossMargin(params: {
+    currency?: string;
+    amount?: string;
+}): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Transfer Asset from Cross Margin Account to Spot Trading Account
+   *
+   * Signature required. Trade permission.
+   */
+transferCrossMarginToSpot(params: {
+    currency?: string;
+    amount?: string;
+}): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Get Loan Interest Rate and Quota (Cross)
+   *
+   * Returns loan interest rates and quota per currency. No params. Signature required. Read permission. Rate: 2/2s.
+   */
+getCrossMarginLoanInfo(): Promise<
+    SpotAPISuccessResponse<SpotMarginLoanInfoCurrency[]>
+  > {
+    return this.getPrivate('/v1/cross-margin/loan-info');
+⋮----
+/**
+   * Request a Margin Loan (Cross)
+   *
+   * Places order to borrow margin. Signature required. Trade permission. Rate: 2/2s.
+   */
+requestCrossMarginLoan(params: {
+    currency?: string;
+    amount?: string;
+}): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Repay Margin Loan (Cross)
+   *
+   * Repays with asset in cross margin account. Signature required. Trade permission. Rate: 2/2s.
+   */
+repayCrossMarginLoan(params: {
+    orderId: string;
+    amount: string;
+}): Promise<SpotAPISuccessResponse<null>>
+⋮----
+/**
+   * Search Past Margin Orders (Cross)
+   *
+   * Returns margin loan orders by criteria. Signature required. Read permission. Rate: 2/2s.
+   */
+getCrossMarginLoanOrders(
+    params?: SpotCrossMarginLoanOrdersReq,
+): Promise<SpotAPISuccessResponse<SpotCrossMarginLoanOrder[]>>
+⋮----
+/**
+   * Get the Balance of the Margin Loan Account (Cross)
+   *
+   * Returns single account object. Signature required. Read permission. Rate: 2/2s.
+   */
+getCrossMarginBalance(params?: {
+    'sub-uid'?: number;
+}): Promise<SpotAPISuccessResponse<SpotCrossMarginAccountBalance>>
+⋮----
+/**
+   * Obtain Leverage Position Limit (Cross)
+   *
+   * Returns position limit at user level per currency. Signature required. Read permission. Rate: 2/2s.
+   */
+getCrossMarginLimit(params?: {
+    currency?: string;
+}): Promise<SpotAPISuccessResponse<SpotMarginLimit[]>>
+⋮----
+/**
+   *
+   * Wallet (Deposit/Withdraw)
+   *
+   */
+⋮----
+/**
+   * Query Deposit Address
+   *
+   * Query deposit address per chain for a currency. Signature required. Read permission. Rate: 20/2s.
+   */
+getDepositAddress(params?: {
+    currency?: string;
+}): Promise<SpotAPISuccessResponse<SpotDepositAddress[]>>
+⋮----
+/**
+   * Query Withdraw Quota
+   *
+   * Query withdrawing quota for currencies. Parent user only. Signature required. Read permission. Rate: 20/2s.
+   */
+getWithdrawQuota(params?: {
+    currency?: string;
+}): Promise<SpotAPISuccessResponse<SpotWithdrawQuota>>
+⋮----
+/**
+   * Query Withdraw Address
+   *
+   * Query withdraw addresses available for API key. Parent user only. Signature required. Read permission.
+   */
+getWithdrawAddress(
+    params?: SpotWithdrawAddressReq,
+  ): Promise<
+    SpotAPISuccessResponse<SpotWithdrawAddress[]> & { 'next-id'?: number }
+  > {
+    return this.getPrivate('/v2/account/withdraw/address', params);
+⋮----
+/**
+   * Create Withdraw Request
+   *
+   * Create withdraw to address in your withdraw list. Parent user only. Withdraw permission. Rate: 20/2s.
+   */
+submitWithdraw(
+    params: SpotWithdrawCreateReq,
+): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Query Withdrawal by Client Order ID
+   *
+   * Query withdraw order submitted with client-order-id. Signature required. Read permission.
+   */
+getWithdrawByClientId(params: {
+    clientOrderId: string;
+}): Promise<SpotAPISuccessResponse<SpotDepositWithdrawRecord | null>>
+⋮----
+/**
+   * Cancel Withdraw Request
+   *
+   * Cancel withdraw by transfer id. Parent user only. Withdraw permission. Rate: 20/2s.
+   */
+cancelWithdraw(params: {
+    withdrawId: number;
+}): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Search Deposit/Withdraw Records
+   *
+   * Search existed withdraws and deposits. Signature required. Read permission. Rate: 20/2s.
+   */
+getDepositWithdrawHistory(
+    params: SpotDepositWithdrawQueryReq,
+): Promise<SpotAPISuccessResponse<SpotDepositWithdrawRecord[]>>
+⋮----
+/**
+   * Get Exchange VASP List
+   *
+   * Exchange list for Korean users (withdraw flow). Public. No signature. Rate: 1/s.
+   */
+getVaspList(): Promise<SpotAPISuccessResponse<SpotVaspExchange[]>>
+⋮----
+/**
+   *
+   * Broker API
+   *
+   */
+⋮----
+/**
+   * Check User Rebate Eligibility
+   *
+   * Check whether user meets rebate conditions. API brokers only. Signature required. Read permission. Rate: 20/2s.
+   */
+getBrokerUserRebateStatus(params: {
+    /** User UID to check */
+    queryUid: string;
+}): Promise<SpotAPISuccessResponse<SpotBrokerUserRebateStatus>>
+⋮----
+/** User UID to check */
+⋮----
+/**
+   * Get Broker Sub-Account Fee Rate
+   *
+   * Query sub-account commission/fee rate. Signature required. Read permission. Rate: 100/2s.
+   */
+getBrokerSubUserFeeRate(params: {
+    /** Sub-account id (user_id, UID minus last digit) */
+    subUId: string;
+    /** 1 Spot, 2 U-standard linear, 3 Coin-Margined swap */
+    bizType: string;
+}): Promise<SpotAPISuccessResponse<SpotBrokerSubUserFeeRate>>
+⋮----
+/** Sub-account id (user_id, UID minus last digit) */
+⋮----
+/** 1 Spot, 2 U-standard linear, 3 Coin-Margined swap */
+⋮----
+/**
+   * Set Broker Sub-User Fee Rate
+   *
+   * Set trading fee rate for sub-accounts. Signature required. Read permission. Rate: 100/2s.
+   */
+setBrokerSubUserFeeRate(
+    params: SpotBrokerSubUserFeeRateAddReq,
+): Promise<SpotAPISuccessResponse<SpotBrokerFeeRateAddResult>>
+⋮----
+/**
+   * Get Account Capital Snapshot
+   *
+   * Request account asset snapshot. Signature required. Read permission. Rate: 100/2s.
+   */
+getBrokerAccountCapitalSnapshot(
+    params: SpotBrokerAccountCapitalSnapshotReq,
+): Promise<SpotAPISuccessResponse<SpotBrokerAccountCapitalSnapshot[]>>
+⋮----
+/**
+   *
+   * SubAccount Management
+   *
+   */
+⋮----
+/**
+   * Set Deduction Mode
+   *
+   * Set deduction fee (HT or point) for parent and sub user. Signature required. Trade permission.
+   */
+updateSubUserDeductMode(params?: {
+    subUids?: string;
+    deductMode?: 'master' | 'sub';
+}): Promise<SpotAPISuccessResponse<SpotSubUserDeductModeResult[]>>
+⋮----
+/**
+   * Query API Key
+   *
+   * Query own or sub user's API key info. Signature required. Read permission.
+   */
+getSubUserApiKey(params?: {
+    uid?: number;
+    accessKey?: string;
+}): Promise<SpotAPISuccessResponse<SpotSubUserApiKey[]>>
+⋮----
+/**
+   * Get UID
+   *
+   * Get current user's UID. Signature required. Read permission.
+   */
+getUserUid(): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Create Sub Users
+   *
+   * Create sub users, max 50 at a time. Signature required. Trade permission.
+   */
+createSubUser(params: {
+    /** Sub users to create, max 50 */
+    userList: { userName: string; note?: string }[];
+    /** GENERAL (default), CONTACT, GRID, FIRE-BLOCK */
+    subAccountType?: string;
+}): Promise<SpotAPISuccessResponse<SpotSubUserCreationResult[]>>
+⋮----
+/** Sub users to create, max 50 */
+⋮----
+/** GENERAL (default), CONTACT, GRID, FIRE-BLOCK */
+⋮----
+/**
+   * Get Sub User List
+   *
+   * Query full list of sub users with UID and status. Signature required. Read permission.
+   */
+getSubUserList(params?: {
+    fromId?: number;
+}): Promise<SpotAPISuccessResponse<SpotSubUserList[]> &
+⋮----
+/**
+   * Lock/Unlock Sub User
+   *
+   * Lock or unlock a sub user. Signature required. Trade permission. Rate: 20/2s.
+   */
+updateSubUserLockStatus(params: {
+    subUid: number;
+    action: 'lock' | 'unlock';
+}): Promise<SpotAPISuccessResponse<SpotSubUserLockStatusResult>>
+⋮----
+/**
+   * Get Sub User Status
+   *
+   * Query sub user status by UID. Signature required. Read permission.
+   */
+getSubUserStatus(params: {
+    subUid: number;
+}): Promise<SpotAPISuccessResponse<SpotSubUserStatusResult>>
+⋮----
+/**
+   * Set Tradable Market for Sub Users
+   *
+   * Set tradable market (isolated/cross margin) for sub users. Signature required. Trade permission.
+   */
+setSubUserTradableMarket(
+    params: SpotSubUserTradableMarketReq,
+): Promise<SpotAPISuccessResponse<SpotSubUserTradableMarketResult[]>>
+⋮----
+/**
+   * Set Asset Transfer Permission for Sub Users
+   *
+   * Set asset transfer permission for sub users. Signature required. Trade permission.
+   */
+setSubUserTransferPermissions(
+    params: SpotSubUserTransferPermissionsReq,
+): Promise<SpotAPISuccessResponse<SpotSubUserTransferPermissionsResult[]>>
+⋮----
+/**
+   * Get Sub User Account List
+   *
+   * Query account list of sub user by UID. Signature required. Read permission.
+   */
+getSubUserAccounts(params: {
+    subUid: number;
+}): Promise<SpotAPISuccessResponse<SpotSubUserAccountsResult>>
+⋮----
+/**
+   * Create Sub User API Key
+   *
+   * Create API key for sub user. Signature required. Trade permission.
+   */
+createSubUserApiKey(
+    params: SpotSubUserApiKeyCreationReq,
+): Promise<SpotAPISuccessResponse<SpotSubUserApiKeyCreationResult>>
+⋮----
+/**
+   * Modify Sub User API Key
+   *
+   * Modify sub user's API key. Signature required. Trade permission.
+   */
+updateSubUserApiKey(
+    params: SpotSubUserApiKeyUpdateReq,
+): Promise<SpotAPISuccessResponse<SpotSubUserApiKeyUpdateResult>>
+⋮----
+/**
+   * Delete Sub User API Key
+   *
+   * Delete sub user's API key. Signature required. Trade permission.
+   */
+deleteSubUserApiKey(params: {
+    subUid: number;
+    accessKey: string;
+}): Promise<SpotAPISuccessResponse<null>>
+⋮----
+/**
+   * Transfer Asset between Parent and Sub Account
+   *
+   * Transfer asset between parent and sub account. Signature required. Trade permission. Rate: 2/2s.
+   */
+submitSubUserTransfer(
+    params: SpotSubUserTransferReq,
+): Promise<SpotAPISuccessResponse<number>>
+⋮----
+/**
+   * Query Sub User Deposit Address
+   *
+   * Query sub user's deposit address per chain. Signature required. Read permission.
+   */
+getSubUserDepositAddress(params: {
+    subUid: number;
+    currency?: string;
+}): Promise<SpotAPISuccessResponse<SpotDepositAddress[]>>
+⋮----
+/**
+   * Query Sub User Deposit History
+   *
+   * Query sub user's deposit history. Signature required. Read permission.
+   */
+getSubUserDepositHistory(params: SpotSubUserDepositHistoryReq): Promise<
+    SpotAPISuccessResponse<SpotSubUserDepositHistoryRecord[]> & {
+      nextId?: number;
+    }
+  > {
+    return this.getPrivate('/v2/sub-user/query-deposit', params);
+⋮----
+/**
+   * Get Aggregated Balance of All Sub Users
+   *
+   * Returns aggregated balance from all sub-users. Signature required. Read permission. Rate: 2/2s.
+   */
+getSubUsersAggregatedBalance(): Promise<
+    SpotAPISuccessResponse<SpotSubUsersAggregatedBalance[]>
+  > {
+    return this.getPrivate('/v1/subuser/aggregate-balance');
+⋮----
+/**
+   * Get Account Balance of a Sub-User
+   *
+   * Returns balance of sub-user by sub-uid. Signature required. Read permission. Rate: 20/2s.
+   */
+getSubUserBalance(params: {
+    subUid: number;
+}): Promise<SpotAPISuccessResponse<SpotSubUserBalanceResult[]>>
+⋮----
+/**
+   * Get Custody Trading Sub-Account List
+   *
+   * Query list of sub-accounts currently being managed. Read permission.
+   */
+getSubUserEntrustUserList(params?: {
+    fromId?: number;
+    limit?: number;
+  }): Promise<
+    SpotAPISuccessResponse<{ list: SpotSubUserEntrustUser[] }> & {
+      nextId?: number;
+    }
+  > {
+    return this.getPrivate('/v2/sub-user/entrust-user-list', params);
+⋮----
+/**
+   * Get Managed Sub-Account Transfer History
+   *
+   * Query transfer records of managed sub-accounts. Read permission.
+   */
+getSubUserManagedTransferHistory(
+    params?: SpotSubUserManagedTransferHistoryReq,
+): Promise<SpotAPISuccessResponse<SpotSubUserManagedTransferRecord[]>>
+⋮----
+/**
+   *
+   * Referral
+   *
+   */
+/**
+   * Query Referral Rebate Detail
+   *
+   * Query rebate info of invitee. Signature required. Read permission.
+   */
+getReferralRebateDetail(params: {
+    inviteeUid: number;
+}): Promise<SpotAPISuccessResponse<SpotReferralRebateDetail>>
+⋮----
+/**
+   * Query Referral Rebate History
+   *
+   * Query historical rebate of invitee. Signature required. Read permission.
+   */
+getReferralRebateHistory(
+    params: SpotReferralRebateHistoryReq,
+): Promise<SpotAPISuccessResponse<SpotReferralRebateHistoryRecord[]>>
+⋮----
+/**
+   * Query All Rebate Detail
+   *
+   * Query all rebate detail. Signature required. Read permission.
+   */
+getReferralAllRebateDetail(params?: SpotReferralAllRebateDetailReq): Promise<
+    SpotAPISuccessResponse<SpotReferralAllRebateDetail[]> & {
+      nextId?: string;
+    }
+  > {
+    return this.getPrivate('/v2/invitee/rebate/all_rebate/detail', params);
+⋮----
+/**
+   * Query Batcher Rebate Detail
+   *
+   * Query rebate detail for multiple invitees. Signature required. Read permission.
+   */
+getReferralMultipleRebateDetail(params?: {
+    inviteeUidList?: string;
+}): Promise<SpotAPISuccessResponse<SpotReferralAllRebateDetail[]>>
+⋮----
+/**
+   * Query Invited User List
+   *
+   * KOL users: query invited user list. Signature required. Read permission. Rate: 1/s.
+   */
+getReferralInvitedUserList(
+    params?: SpotReferralReferralsReq,
+  ): Promise<
+    SpotAPISuccessResponse<SpotReferralReferral[]> & { nextId?: string }
+  > {
+    return this.getPrivate('/v2/invitee/rebate/referrals', params);
+⋮----
+/**
+   *
+   * P2P
+   *
+   */
+⋮----
+/**
+   * Query P2P Order History
+   *
+   * Query C2C historical transaction records. No signature. Read permission. Rate: 20/2s.
+   */
+getP2POrderHistory(params?: SpotP2POrderHistoryReq): Promise<
+    SpotAPISuccessResponse<{
+      ts: number;
+      openApiC2COrderInfoVOList: SpotP2POrderHistory[];
+    }>
+  > {
+    return this.get('/v1/api/c2c/order/history', params);
+⋮----
+/**
+   *
+   * Earn
+   *
+   */
+⋮----
+/**
+   * Query Earn Product List
+   *
+   * Product query. Signature required. Read permission.
+   */
+getEarnProjectList(
+    params: SpotEarnProjectListReq,
+  ): Promise<
+    SpotAPISuccessResponse<{ total: number; items: SpotEarnProject[] }>
+  > {
+    return this.getPrivate('/v1/earn/project/queryEarnProjectList', params);
+⋮----
+/**
+   * Earn Subscription
+   *
+   * Subscribe to Earn product. Signature required. Trade permission.
+   */
+earnSubscribe(
+    params: SpotEarnSubscribeReq,
+): Promise<SpotAPISuccessResponse<SpotEarnSubscribeResult>>
+⋮----
+/**
+   * Earn Redemption
+   *
+   * Redeem Earn product. Signature required. Trade permission. Arrival may be delayed.
+   */
+earnRedeem(
+    params: SpotEarnRedeemReq,
+): Promise<SpotAPISuccessResponse<SpotEarnRedeemResult>>
+⋮----
+/**
+   * Query Earn User Assets
+   *
+   * Position query. Signature required. Read permission.
+   */
+getEarnUserAssets(
+    params: SpotEarnUserAssetsReq,
+  ): Promise<
+    SpotAPISuccessResponse<{ total: number; items: SpotEarnUserAsset[] }>
+  > {
+    return this.getPrivate('/v1/earn/order/user/assets/list', params);
+⋮----
+/**
+   * Validate syntax meets requirements set by HTX. Log warning if not.
+   */
+private validateOrderId(
+    params: Partial<Record<SpotOrderIdProperty, string>>,
+    orderIdProperty: SpotOrderIdProperty,
+): void
+
+================
 File: src/types/response/futures.types.ts
 ================
 /**
@@ -15297,9 +15440,12 @@ export interface FuturesIndexPrice {
 export interface FuturesIndexConstituentComponent {
   exchange: string;
   symbol: string;
+  /** Price as string. -1 means HTX masked proprietary third-party index pricing. */
   symbol_price: string;
   weights: string;
 }
+⋮----
+/** Price as string. -1 means HTX masked proprietary third-party index pricing. */
 ⋮----
 /** Index constituents data from swap_contract_constituents. contract_code or symbol per product. */
 export interface FuturesIndexConstituents {
@@ -16875,19 +17021,19 @@ export interface FuturesV5AccountBalance {
 ⋮----
 /** Set asset mode response data from POST /v5/account/asset_mode */
 export interface FuturesV5AssetMode {
-  /** 0: Single-asset collateral; 1: Multi-assets collateral */
-  assets_mode: 0 | 1;
+  /** 0: Single-asset collateral (old); 1: Multi-assets collateral; 2: Single-asset collateral (new) */
+  assets_mode: 0 | 1 | 2;
 }
 ⋮----
-/** 0: Single-asset collateral; 1: Multi-assets collateral */
+/** 0: Single-asset collateral (old); 1: Multi-assets collateral; 2: Single-asset collateral (new) */
 ⋮----
 /** Get asset mode response data from GET /v5/account/asset_mode */
 export interface FuturesV5AssetModeGet {
-  /** 0: Single-asset collateral; 1: Multi-assets collateral */
-  asset_mode: 0 | 1;
+  /** 0: Single-asset collateral (old); 1: Multi-assets collateral; 2: Single-asset collateral (new) */
+  asset_mode: 0 | 1 | 2;
 }
 ⋮----
-/** 0: Single-asset collateral; 1: Multi-assets collateral */
+/** 0: Single-asset collateral (old); 1: Multi-assets collateral; 2: Single-asset collateral (new) */
 ⋮----
 /** Fee deduction crypto from /v5/account/fee_deduction_currency */
 export interface FuturesV5FeeDeductionCurrency {
@@ -18124,7 +18270,11 @@ export interface FuturesCmDeliveryTrade {
   ts: number;
   quantity: string;
   symbol: string;
+  /** Whether the trade is an RPI trade */
+  'is-rpi-trade'?: boolean | number | string;
 }
+⋮----
+/** Whether the trade is an RPI trade */
 ⋮----
 /** Last trade tick from GET /market/trade. Payload in "tick". */
 export interface FuturesCmDeliveryLastTrade {
@@ -18141,7 +18291,11 @@ export interface FuturesCmDeliveryTradeHistoryItem {
   direction: string;
   ts: number;
   quantity?: string | number;
+  /** Whether the trade is an RPI trade */
+  'is-rpi-trade'?: boolean | number | string;
 }
+⋮----
+/** Whether the trade is an RPI trade */
 ⋮----
 /** Trade history from GET /market/history/trade. Each group has trades by timestamp. Payload in "data". Alias: getCoinMDeliveryTradeHistory. */
 export interface FuturesCmDeliveryTradeHistory {
@@ -20749,7 +20903,7 @@ getMultiAssetMode(): Promise<
    * Signature required. Trade permission. Rate limit: 1 req/10s per UID.
    */
 updateMultiAssetMode(params: {
-    assets_mode: 0 | 1;
+    assets_mode: 0 | 1 | 2;
 }): Promise<FuturesAPISuccessResponse<FuturesV5AssetMode>>
 ⋮----
 /**

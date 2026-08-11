@@ -43,6 +43,8 @@ import type {
   SpotSubUserTradableMarketReq,
   SpotSubUserTransferPermissionsReq,
   SpotSubUserTransferReq,
+  SpotUniversalTransferRecordsReq,
+  SpotUniversalTransferReq,
   SpotV1FuturesTransferReq,
   SpotV1OrderAutoPlaceReq,
   SpotV1OrderBatchCancelOpenOrdersReq,
@@ -114,6 +116,8 @@ import {
   SpotTicker,
   SpotTradeTimestampGroup,
   SpotTradingSymbol,
+  SpotUniversalTransferRecord,
+  SpotUniversalTransferResult,
   SpotV1AccountOverviewInfo,
   SpotV1AccountSwitchUserInfo,
   SpotV1ChainInfo,
@@ -458,6 +462,28 @@ export class SpotClient extends BaseRestClient {
     params: SpotV2AccountTransferReq,
   ): Promise<SpotAPISuccessResponse<number>> {
     return this.postPrivate('/v2/account/transfer', { body: params });
+  }
+
+  /**
+   * Create Universal Transfer
+   *
+   * Transfer between account types (spot, margin, futures, options, etc). Host: spot. Trade permission. Rate: 5/2s.
+   */
+  submitUniversalTransfer(
+    params: SpotUniversalTransferReq,
+  ): Promise<SpotAPISuccessResponse<SpotUniversalTransferResult>> {
+    return this.postPrivate('/v5/account/universal_transfer', { body: params });
+  }
+
+  /**
+   * Get Universal Transfer Records
+   *
+   * Query universal transfer history. Host: spot. Trade permission. Rate: 5/2s.
+   */
+  getUniversalTransferRecords(
+    params?: SpotUniversalTransferRecordsReq,
+  ): Promise<SpotAPISuccessResponse<SpotUniversalTransferRecord[]>> {
+    return this.getPrivate('/v5/account/universal_transfer_records', params);
   }
 
   /**

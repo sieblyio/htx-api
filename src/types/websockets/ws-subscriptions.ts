@@ -56,6 +56,9 @@ export const WS_DERIVATIVES_PRIVATE_TOPICS = [
   'positions_cross.$contract_code',
   'matchOrders.$contract_code',
   'matchOrders_cross.$contract_code',
+  'match_orders.$contract_code',
+  'trade_detail.$contract_code',
+  'algo_orders.$contract_code',
   'trigger_order.$contract_code',
   'trigger_order_cross.$contract_code',
   'accounts_unify.USDT',
@@ -87,6 +90,12 @@ export function isPrivateTopic(topic: string): boolean {
     topic.startsWith('positions_cross.') ||
     topic.startsWith('matchOrders.') ||
     topic.startsWith('matchOrders_cross.') ||
+    topic === 'match_orders' ||
+    topic.startsWith('match_orders.') ||
+    topic === 'trade_detail' ||
+    topic.startsWith('trade_detail.') ||
+    topic === 'algo_orders' ||
+    topic.startsWith('algo_orders.') ||
     topic.startsWith('trigger_order') ||
     topic.startsWith('trade.clearing')
   );
