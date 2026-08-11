@@ -21,15 +21,17 @@ describe('REST PRIVATE FUTURES WRITE', () => {
   });
 
   describe('private POST without params', () => {
-    it('should succeed or fail getLinearSwapCrossOpenOrders with empty body (validates signature)', async () => {
+    // Linear USDT-M openorders (cross + isolated) return HTX 6023 on api.hbdm.vn.
+    // Coin-M perp openorders is the same empty-body POST + signature path / response shape.
+    it('should succeed or fail getCoinMPerpOpenOrders with empty body (validates signature)', async () => {
       try {
-        const res = await rest.getLinearSwapCrossOpenOrders();
+        const res = await rest.getCoinMPerpOpenOrders();
 
         expect(res).toBeDefined();
         expect(res.data).toBeDefined();
         expect(res.data).toHaveProperty('orders');
       } catch (e: unknown) {
-        // Expected with read-only keys or no cross margin - validates signature
+        // Expected with read-only keys - validates signature
         const err = e as { body?: unknown; message?: string };
         expect(e).toBe('');
 
