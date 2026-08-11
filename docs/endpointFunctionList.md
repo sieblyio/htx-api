@@ -14,7 +14,7 @@ Each REST client is a JavaScript class, which provides functions individually ma
 
 The following table shows all methods available in each REST client, whether the method requires authentication (automatically handled if API keys are provided), as well as the exact endpoint each method is connected to.
 
-This can be used to easily find which method to call, once you have [found which endpoint you're looking to use](https://github.com/tiagosiebler/awesome-crypto-examples/wiki/How-to-find-SDK-functions-that-match-API-docs-endpoint).
+This can be used to easily find which method to call, once you have [found which endpoint you're looking to use](https://github.com/sieblyio/awesome-crypto-examples/wiki/How-to-find-SDK-functions-that-match-API-docs-endpoint).
 
 All REST clients are in the [src](/src) folder. For usage examples, make sure to check the [examples](/examples) folder.
 
@@ -50,116 +50,118 @@ This table includes all endpoints from the official Exchange API docs and corres
 
 | Function | AUTH | HTTP Method | Endpoint |
 | -------- | :------: | :------: | -------- |
-| [getMarketStatus()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L181) |  | GET | `/v2/market-status` |
-| [getTimestamp()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L190) |  | GET | `/v1/common/timestamp` |
-| [getTradingSymbols()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L199) |  | GET | `/v2/settings/common/symbols` |
-| [getCurrencies()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L210) |  | GET | `/v2/settings/common/currencies` |
-| [getCurrencysSettings()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L221) |  | GET | `/v1/settings/common/currencys` |
-| [getSymbolsSettings()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L232) |  | GET | `/v1/settings/common/symbols` |
-| [getMarketSymbolsSettings()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L243) |  | GET | `/v1/settings/common/market-symbols` |
-| [getChainsInfo()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L255) |  | GET | `/v1/settings/common/chains` |
-| [getReferenceCurrencies()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L266) |  | GET | `/v2/reference/currencies` |
-| [getKlines()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L284) |  | GET | `/market/history/kline` |
-| [getTicker()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L295) |  | GET | `/market/detail/merged` |
-| [getTickers()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L306) |  | GET | `/market/tickers` |
-| [getMarketDepth()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L315) |  | GET | `/market/depth` |
-| [getLastTrade()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L326) |  | GET | `/market/trade` |
-| [getHistoryTrades()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L337) |  | GET | `/market/history/trade` |
-| [get24hMarketSummary()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L349) |  | GET | `/market/detail` |
-| [getFullOrderBook()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L360) |  | GET | `/market/fullMbp` |
-| [getAccounts()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L377) | :closed_lock_with_key:  | GET | `/v1/account/accounts` |
-| [getAccountBalance()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L386) | :closed_lock_with_key:  | GET | `/v1/account/accounts/{accountId}/balance` |
-| [getAccountValuation()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L397) | :closed_lock_with_key:  | GET | `/v2/account/valuation` |
-| [getAssetValuation()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L409) | :closed_lock_with_key:  | GET | `/v2/account/asset-valuation` |
-| [submitTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L420) | :closed_lock_with_key:  | POST | `/v1/account/transfer` |
-| [getAccountHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L431) | :closed_lock_with_key:  | GET | `/v1/account/history` |
-| [getAccountLedger()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L444) | :closed_lock_with_key:  | GET | `/v2/account/ledger` |
-| [submitV2AccountTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L457) | :closed_lock_with_key:  | POST | `/v2/account/transfer` |
-| [submitFuturesTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L468) | :closed_lock_with_key:  | POST | `/v1/futures/transfer` |
-| [getPointBalance()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L479) | :closed_lock_with_key:  | GET | `/v2/point/account` |
-| [submitPointTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L490) | :closed_lock_with_key:  | POST | `/v2/point/transfer` |
-| [getAccountSwitchUserInfo()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L501) | :closed_lock_with_key:  | GET | `/v1/account/switch/user/info` |
-| [getAccountOverviewInfo()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L512) | :closed_lock_with_key:  | GET | `/v1/account/overview/info` |
-| [updateFeeDeductionMethod()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L523) | :closed_lock_with_key:  | POST | `/v1/account/fee/switch` |
-| [submitOrder()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L541) | :closed_lock_with_key:  | POST | `/v1/order/orders/place` |
-| [submitBatchOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L553) | :closed_lock_with_key:  | POST | `/v1/order/batch-orders` |
-| [submitMarginOrder()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L567) | :closed_lock_with_key:  | POST | `/v1/order/auto/place` |
-| [cancelOrderById()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L579) | :closed_lock_with_key:  | POST | `/v1/order/orders/{orderId}/submitcancel` |
-| [cancelOrderByClientId()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L594) | :closed_lock_with_key:  | POST | `/v1/order/orders/submitCancelClientOrder` |
-| [cancelAllOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L607) | :closed_lock_with_key:  | GET | `/v1/order/cancelAllOrders` |
-| [getOpenOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L618) | :closed_lock_with_key:  | GET | `/v1/order/openOrders` |
-| [batchCancelOpenOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L629) | :closed_lock_with_key:  | POST | `/v1/order/orders/batchCancelOpenOrders` |
-| [batchCancelOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L642) | :closed_lock_with_key:  | POST | `/v1/order/orders/batchcancel` |
-| [setCancelAllAfter()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L654) | :closed_lock_with_key:  | POST | `/v2/algo-orders/cancel-all-after` |
-| [getOrder()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L667) | :closed_lock_with_key:  | GET | `/v1/order/orders/{orderId}` |
-| [getOrderByClientId()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L678) | :closed_lock_with_key:  | GET | `/v1/order/orders/getClientOrder` |
-| [getOrderMatch()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L689) | :closed_lock_with_key:  | GET | `/v1/order/orders/{orderId}/matchresults` |
-| [getOrderHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L700) | :closed_lock_with_key:  | GET | `/v1/order/orders` |
-| [getOrderHistory48h()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L711) | :closed_lock_with_key:  | GET | `/v1/order/history` |
-| [getMatchResults()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L722) | :closed_lock_with_key:  | GET | `/v1/order/matchresults` |
-| [getFeeRate()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L733) | :closed_lock_with_key:  | GET | `/v2/reference/transact-fee-rate` |
-| [placeConditionalOrder()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L750) | :closed_lock_with_key:  | POST | `/v2/algo-orders` |
-| [cancelConditionalOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L762) | :closed_lock_with_key:  | POST | `/v2/algo-orders/cancellation` |
-| [getOpenConditionalOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L773) | :closed_lock_with_key:  | GET | `/v2/algo-orders/opening` |
-| [getConditionalOrderHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L784) | :closed_lock_with_key:  | GET | `/v2/algo-orders/history` |
-| [getConditionalOrder()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L795) | :closed_lock_with_key:  | GET | `/v2/algo-orders/specific` |
-| [getRepaymentRecords()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L812) | :closed_lock_with_key:  | GET | `/v2/account/repayment` |
-| [repayMarginLoan()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L825) | :closed_lock_with_key:  | POST | `/v2/account/repayment` |
-| [transferSpotToIsolatedMargin()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L836) | :closed_lock_with_key:  | POST | `/v1/dw/transfer-in/margin` |
-| [transferIsolatedMarginToSpot()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L847) | :closed_lock_with_key:  | POST | `/v1/dw/transfer-out/margin` |
-| [getMarginLoanInfo()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L858) | :closed_lock_with_key:  | GET | `/v1/margin/loan-info` |
-| [requestMarginLoan()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L869) | :closed_lock_with_key:  | POST | `/v1/margin/orders` |
-| [repayMarginLoanIsolated()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L880) | :closed_lock_with_key:  | POST | `/v1/margin/orders/{orderId}/repay` |
-| [getMarginLoanOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L895) | :closed_lock_with_key:  | GET | `/v1/margin/loan-orders` |
-| [getMarginAccountBalance()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L906) | :closed_lock_with_key:  | GET | `/v1/margin/accounts/balance` |
-| [transferSpotToCrossMargin()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L918) | :closed_lock_with_key:  | POST | `/v1/cross-margin/transfer-in` |
-| [transferCrossMarginToSpot()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L930) | :closed_lock_with_key:  | POST | `/v1/cross-margin/transfer-out` |
-| [getCrossMarginLoanInfo()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L942) | :closed_lock_with_key:  | GET | `/v1/cross-margin/loan-info` |
-| [requestCrossMarginLoan()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L953) | :closed_lock_with_key:  | POST | `/v1/cross-margin/orders` |
-| [repayCrossMarginLoan()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L965) | :closed_lock_with_key:  | POST | `/v1/cross-margin/orders/{orderId}/repay` |
-| [getCrossMarginLoanOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L980) | :closed_lock_with_key:  | GET | `/v1/cross-margin/loan-orders` |
-| [getCrossMarginBalance()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L991) | :closed_lock_with_key:  | GET | `/v1/cross-margin/accounts/balance` |
-| [getCrossMarginLimit()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1002) | :closed_lock_with_key:  | GET | `/v2/margin/limit` |
-| [getDepositAddress()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1019) | :closed_lock_with_key:  | GET | `/v2/account/deposit/address` |
-| [getWithdrawQuota()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1030) | :closed_lock_with_key:  | GET | `/v2/account/withdraw/quota` |
-| [getWithdrawAddress()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1041) | :closed_lock_with_key:  | GET | `/v2/account/withdraw/address` |
-| [submitWithdraw()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1054) | :closed_lock_with_key:  | POST | `/v1/dw/withdraw/api/create` |
-| [getWithdrawByClientId()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1065) | :closed_lock_with_key:  | GET | `/v1/query/withdraw/client-order-id` |
-| [cancelWithdraw()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1076) | :closed_lock_with_key:  | POST | `/v1/dw/withdraw-virtual/{withdrawId}/cancel` |
-| [getDepositWithdrawHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1090) | :closed_lock_with_key:  | GET | `/v1/query/deposit-withdraw` |
-| [getVaspList()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1101) |  | GET | `/v1/query/vasp-list` |
-| [getBrokerUserRebateStatus()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1116) | :closed_lock_with_key:  | GET | `/broker/v1/user_rebate_status` |
-| [setBrokerSubUserFeeRate()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1142) | :closed_lock_with_key:  | POST | `/broker/v1/sub-user/fee_rate/add` |
-| [getBrokerAccountCapitalSnapshot()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1155) | :closed_lock_with_key:  | POST | `/broker/v1/account_capital_snapshot_everyday` |
-| [updateSubUserDeductMode()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1174) | :closed_lock_with_key:  | POST | `/v2/sub-user/deduct-mode` |
-| [getSubUserApiKey()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1186) | :closed_lock_with_key:  | GET | `/v2/user/api-key` |
-| [getUserUid()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1198) | :closed_lock_with_key:  | GET | `/v2/user/uid` |
-| [getSubUserList()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1221) | :closed_lock_with_key:  | GET | `/v2/sub-user/user-list` |
-| [updateSubUserLockStatus()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1232) | :closed_lock_with_key:  | POST | `/v2/sub-user/management` |
-| [getSubUserStatus()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1244) | :closed_lock_with_key:  | GET | `/v2/sub-user/user-state` |
-| [setSubUserTradableMarket()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1255) | :closed_lock_with_key:  | POST | `/v2/sub-user/tradable-market` |
-| [setSubUserTransferPermissions()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1266) | :closed_lock_with_key:  | POST | `/v2/sub-user/transferability` |
-| [getSubUserAccounts()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1277) | :closed_lock_with_key:  | GET | `/v2/sub-user/account-list` |
-| [createSubUserApiKey()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1288) | :closed_lock_with_key:  | POST | `/v2/sub-user/api-key-generation` |
-| [updateSubUserApiKey()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1301) | :closed_lock_with_key:  | POST | `/v2/sub-user/api-key-modification` |
-| [deleteSubUserApiKey()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1314) | :closed_lock_with_key:  | POST | `/v2/sub-user/api-key-deletion` |
-| [submitSubUserTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1328) | :closed_lock_with_key:  | POST | `/v1/subuser/transfer` |
-| [getSubUserDepositAddress()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1339) | :closed_lock_with_key:  | GET | `/v2/sub-user/deposit-address` |
-| [getSubUserDepositHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1351) | :closed_lock_with_key:  | GET | `/v2/sub-user/query-deposit` |
-| [getSubUsersAggregatedBalance()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1364) | :closed_lock_with_key:  | GET | `/v1/subuser/aggregate-balance` |
-| [getSubUserBalance()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1375) | :closed_lock_with_key:  | GET | `/v1/account/accounts/{subUid}` |
-| [getSubUserEntrustUserList()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1386) | :closed_lock_with_key:  | GET | `/v2/sub-user/entrust-user-list` |
-| [getSubUserManagedTransferHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1402) | :closed_lock_with_key:  | GET | `/v2/sub-user/managed-transfer-history` |
-| [getReferralRebateDetail()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1418) | :closed_lock_with_key:  | GET | `/v2/invitee/rebate/detail` |
-| [getReferralRebateHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1429) | :closed_lock_with_key:  | GET | `/v2/invitee/rebate/history` |
-| [getReferralAllRebateDetail()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1440) | :closed_lock_with_key:  | GET | `/v2/invitee/rebate/all_rebate/detail` |
-| [getReferralMultipleRebateDetail()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1453) | :closed_lock_with_key:  | GET | `/v2/invitee/rebate/batcher_rebate/detail` |
-| [getReferralInvitedUserList()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1464) | :closed_lock_with_key:  | GET | `/v2/invitee/rebate/referrals` |
-| [getP2POrderHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1483) |  | GET | `/v1/api/c2c/order/history` |
-| [getEarnProjectList()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1503) | :closed_lock_with_key:  | GET | `/v1/earn/project/queryEarnProjectList` |
-| [earnSubscribe()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1516) | :closed_lock_with_key:  | POST | `/v1/earn/order/demand/add` |
-| [earnRedeem()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1527) | :closed_lock_with_key:  | POST | `/v1/earn/order/demand/redeem-order` |
-| [getEarnUserAssets()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1540) | :closed_lock_with_key:  | GET | `/v1/earn/order/user/assets/list` |
+| [getMarketStatus()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L185) |  | GET | `/v2/market-status` |
+| [getTimestamp()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L194) |  | GET | `/v1/common/timestamp` |
+| [getTradingSymbols()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L203) |  | GET | `/v2/settings/common/symbols` |
+| [getCurrencies()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L214) |  | GET | `/v2/settings/common/currencies` |
+| [getCurrencysSettings()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L225) |  | GET | `/v1/settings/common/currencys` |
+| [getSymbolsSettings()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L236) |  | GET | `/v1/settings/common/symbols` |
+| [getMarketSymbolsSettings()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L247) |  | GET | `/v1/settings/common/market-symbols` |
+| [getChainsInfo()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L259) |  | GET | `/v1/settings/common/chains` |
+| [getReferenceCurrencies()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L270) |  | GET | `/v2/reference/currencies` |
+| [getKlines()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L288) |  | GET | `/market/history/kline` |
+| [getTicker()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L299) |  | GET | `/market/detail/merged` |
+| [getTickers()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L310) |  | GET | `/market/tickers` |
+| [getMarketDepth()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L319) |  | GET | `/market/depth` |
+| [getLastTrade()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L330) |  | GET | `/market/trade` |
+| [getHistoryTrades()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L341) |  | GET | `/market/history/trade` |
+| [get24hMarketSummary()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L353) |  | GET | `/market/detail` |
+| [getFullOrderBook()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L364) |  | GET | `/market/fullMbp` |
+| [getAccounts()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L381) | :closed_lock_with_key:  | GET | `/v1/account/accounts` |
+| [getAccountBalance()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L390) | :closed_lock_with_key:  | GET | `/v1/account/accounts/{accountId}/balance` |
+| [getAccountValuation()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L401) | :closed_lock_with_key:  | GET | `/v2/account/valuation` |
+| [getAssetValuation()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L413) | :closed_lock_with_key:  | GET | `/v2/account/asset-valuation` |
+| [submitTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L424) | :closed_lock_with_key:  | POST | `/v1/account/transfer` |
+| [getAccountHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L435) | :closed_lock_with_key:  | GET | `/v1/account/history` |
+| [getAccountLedger()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L448) | :closed_lock_with_key:  | GET | `/v2/account/ledger` |
+| [submitV2AccountTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L461) | :closed_lock_with_key:  | POST | `/v2/account/transfer` |
+| [submitUniversalTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L472) | :closed_lock_with_key:  | POST | `/v5/account/universal_transfer` |
+| [getUniversalTransferRecords()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L483) | :closed_lock_with_key:  | GET | `/v5/account/universal_transfer_records` |
+| [submitFuturesTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L494) | :closed_lock_with_key:  | POST | `/v1/futures/transfer` |
+| [getPointBalance()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L505) | :closed_lock_with_key:  | GET | `/v2/point/account` |
+| [submitPointTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L516) | :closed_lock_with_key:  | POST | `/v2/point/transfer` |
+| [getAccountSwitchUserInfo()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L527) | :closed_lock_with_key:  | GET | `/v1/account/switch/user/info` |
+| [getAccountOverviewInfo()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L538) | :closed_lock_with_key:  | GET | `/v1/account/overview/info` |
+| [updateFeeDeductionMethod()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L549) | :closed_lock_with_key:  | POST | `/v1/account/fee/switch` |
+| [submitOrder()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L567) | :closed_lock_with_key:  | POST | `/v1/order/orders/place` |
+| [submitBatchOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L579) | :closed_lock_with_key:  | POST | `/v1/order/batch-orders` |
+| [submitMarginOrder()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L593) | :closed_lock_with_key:  | POST | `/v1/order/auto/place` |
+| [cancelOrderById()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L605) | :closed_lock_with_key:  | POST | `/v1/order/orders/{orderId}/submitcancel` |
+| [cancelOrderByClientId()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L620) | :closed_lock_with_key:  | POST | `/v1/order/orders/submitCancelClientOrder` |
+| [cancelAllOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L633) | :closed_lock_with_key:  | GET | `/v1/order/cancelAllOrders` |
+| [getOpenOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L644) | :closed_lock_with_key:  | GET | `/v1/order/openOrders` |
+| [batchCancelOpenOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L655) | :closed_lock_with_key:  | POST | `/v1/order/orders/batchCancelOpenOrders` |
+| [batchCancelOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L668) | :closed_lock_with_key:  | POST | `/v1/order/orders/batchcancel` |
+| [setCancelAllAfter()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L680) | :closed_lock_with_key:  | POST | `/v2/algo-orders/cancel-all-after` |
+| [getOrder()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L693) | :closed_lock_with_key:  | GET | `/v1/order/orders/{orderId}` |
+| [getOrderByClientId()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L704) | :closed_lock_with_key:  | GET | `/v1/order/orders/getClientOrder` |
+| [getOrderMatch()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L715) | :closed_lock_with_key:  | GET | `/v1/order/orders/{orderId}/matchresults` |
+| [getOrderHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L726) | :closed_lock_with_key:  | GET | `/v1/order/orders` |
+| [getOrderHistory48h()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L737) | :closed_lock_with_key:  | GET | `/v1/order/history` |
+| [getMatchResults()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L748) | :closed_lock_with_key:  | GET | `/v1/order/matchresults` |
+| [getFeeRate()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L759) | :closed_lock_with_key:  | GET | `/v2/reference/transact-fee-rate` |
+| [placeConditionalOrder()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L776) | :closed_lock_with_key:  | POST | `/v2/algo-orders` |
+| [cancelConditionalOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L788) | :closed_lock_with_key:  | POST | `/v2/algo-orders/cancellation` |
+| [getOpenConditionalOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L799) | :closed_lock_with_key:  | GET | `/v2/algo-orders/opening` |
+| [getConditionalOrderHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L810) | :closed_lock_with_key:  | GET | `/v2/algo-orders/history` |
+| [getConditionalOrder()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L821) | :closed_lock_with_key:  | GET | `/v2/algo-orders/specific` |
+| [getRepaymentRecords()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L838) | :closed_lock_with_key:  | GET | `/v2/account/repayment` |
+| [repayMarginLoan()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L851) | :closed_lock_with_key:  | POST | `/v2/account/repayment` |
+| [transferSpotToIsolatedMargin()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L862) | :closed_lock_with_key:  | POST | `/v1/dw/transfer-in/margin` |
+| [transferIsolatedMarginToSpot()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L873) | :closed_lock_with_key:  | POST | `/v1/dw/transfer-out/margin` |
+| [getMarginLoanInfo()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L884) | :closed_lock_with_key:  | GET | `/v1/margin/loan-info` |
+| [requestMarginLoan()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L895) | :closed_lock_with_key:  | POST | `/v1/margin/orders` |
+| [repayMarginLoanIsolated()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L906) | :closed_lock_with_key:  | POST | `/v1/margin/orders/{orderId}/repay` |
+| [getMarginLoanOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L921) | :closed_lock_with_key:  | GET | `/v1/margin/loan-orders` |
+| [getMarginAccountBalance()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L932) | :closed_lock_with_key:  | GET | `/v1/margin/accounts/balance` |
+| [transferSpotToCrossMargin()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L944) | :closed_lock_with_key:  | POST | `/v1/cross-margin/transfer-in` |
+| [transferCrossMarginToSpot()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L956) | :closed_lock_with_key:  | POST | `/v1/cross-margin/transfer-out` |
+| [getCrossMarginLoanInfo()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L968) | :closed_lock_with_key:  | GET | `/v1/cross-margin/loan-info` |
+| [requestCrossMarginLoan()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L979) | :closed_lock_with_key:  | POST | `/v1/cross-margin/orders` |
+| [repayCrossMarginLoan()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L991) | :closed_lock_with_key:  | POST | `/v1/cross-margin/orders/{orderId}/repay` |
+| [getCrossMarginLoanOrders()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1006) | :closed_lock_with_key:  | GET | `/v1/cross-margin/loan-orders` |
+| [getCrossMarginBalance()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1017) | :closed_lock_with_key:  | GET | `/v1/cross-margin/accounts/balance` |
+| [getCrossMarginLimit()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1028) | :closed_lock_with_key:  | GET | `/v2/margin/limit` |
+| [getDepositAddress()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1045) | :closed_lock_with_key:  | GET | `/v2/account/deposit/address` |
+| [getWithdrawQuota()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1056) | :closed_lock_with_key:  | GET | `/v2/account/withdraw/quota` |
+| [getWithdrawAddress()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1067) | :closed_lock_with_key:  | GET | `/v2/account/withdraw/address` |
+| [submitWithdraw()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1080) | :closed_lock_with_key:  | POST | `/v1/dw/withdraw/api/create` |
+| [getWithdrawByClientId()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1091) | :closed_lock_with_key:  | GET | `/v1/query/withdraw/client-order-id` |
+| [cancelWithdraw()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1102) | :closed_lock_with_key:  | POST | `/v1/dw/withdraw-virtual/{withdrawId}/cancel` |
+| [getDepositWithdrawHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1116) | :closed_lock_with_key:  | GET | `/v1/query/deposit-withdraw` |
+| [getVaspList()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1127) |  | GET | `/v1/query/vasp-list` |
+| [getBrokerUserRebateStatus()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1142) | :closed_lock_with_key:  | GET | `/broker/v1/user_rebate_status` |
+| [setBrokerSubUserFeeRate()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1168) | :closed_lock_with_key:  | POST | `/broker/v1/sub-user/fee_rate/add` |
+| [getBrokerAccountCapitalSnapshot()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1181) | :closed_lock_with_key:  | POST | `/broker/v1/account_capital_snapshot_everyday` |
+| [updateSubUserDeductMode()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1200) | :closed_lock_with_key:  | POST | `/v2/sub-user/deduct-mode` |
+| [getSubUserApiKey()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1212) | :closed_lock_with_key:  | GET | `/v2/user/api-key` |
+| [getUserUid()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1224) | :closed_lock_with_key:  | GET | `/v2/user/uid` |
+| [getSubUserList()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1247) | :closed_lock_with_key:  | GET | `/v2/sub-user/user-list` |
+| [updateSubUserLockStatus()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1258) | :closed_lock_with_key:  | POST | `/v2/sub-user/management` |
+| [getSubUserStatus()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1270) | :closed_lock_with_key:  | GET | `/v2/sub-user/user-state` |
+| [setSubUserTradableMarket()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1281) | :closed_lock_with_key:  | POST | `/v2/sub-user/tradable-market` |
+| [setSubUserTransferPermissions()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1292) | :closed_lock_with_key:  | POST | `/v2/sub-user/transferability` |
+| [getSubUserAccounts()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1303) | :closed_lock_with_key:  | GET | `/v2/sub-user/account-list` |
+| [createSubUserApiKey()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1314) | :closed_lock_with_key:  | POST | `/v2/sub-user/api-key-generation` |
+| [updateSubUserApiKey()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1327) | :closed_lock_with_key:  | POST | `/v2/sub-user/api-key-modification` |
+| [deleteSubUserApiKey()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1340) | :closed_lock_with_key:  | POST | `/v2/sub-user/api-key-deletion` |
+| [submitSubUserTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1354) | :closed_lock_with_key:  | POST | `/v1/subuser/transfer` |
+| [getSubUserDepositAddress()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1365) | :closed_lock_with_key:  | GET | `/v2/sub-user/deposit-address` |
+| [getSubUserDepositHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1377) | :closed_lock_with_key:  | GET | `/v2/sub-user/query-deposit` |
+| [getSubUsersAggregatedBalance()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1390) | :closed_lock_with_key:  | GET | `/v1/subuser/aggregate-balance` |
+| [getSubUserBalance()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1401) | :closed_lock_with_key:  | GET | `/v1/account/accounts/{subUid}` |
+| [getSubUserEntrustUserList()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1412) | :closed_lock_with_key:  | GET | `/v2/sub-user/entrust-user-list` |
+| [getSubUserManagedTransferHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1428) | :closed_lock_with_key:  | GET | `/v2/sub-user/managed-transfer-history` |
+| [getReferralRebateDetail()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1444) | :closed_lock_with_key:  | GET | `/v2/invitee/rebate/detail` |
+| [getReferralRebateHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1455) | :closed_lock_with_key:  | GET | `/v2/invitee/rebate/history` |
+| [getReferralAllRebateDetail()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1466) | :closed_lock_with_key:  | GET | `/v2/invitee/rebate/all_rebate/detail` |
+| [getReferralMultipleRebateDetail()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1479) | :closed_lock_with_key:  | GET | `/v2/invitee/rebate/batcher_rebate/detail` |
+| [getReferralInvitedUserList()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1490) | :closed_lock_with_key:  | GET | `/v2/invitee/rebate/referrals` |
+| [getP2POrderHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1509) |  | GET | `/v1/api/c2c/order/history` |
+| [getEarnProjectList()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1529) | :closed_lock_with_key:  | GET | `/v1/earn/project/queryEarnProjectList` |
+| [earnSubscribe()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1542) | :closed_lock_with_key:  | POST | `/v1/earn/order/demand/add` |
+| [earnRedeem()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1553) | :closed_lock_with_key:  | POST | `/v1/earn/order/demand/redeem-order` |
+| [getEarnUserAssets()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L1566) | :closed_lock_with_key:  | GET | `/v1/earn/order/user/assets/list` |
 
 # FuturesClient.ts
 

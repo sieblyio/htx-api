@@ -170,6 +170,8 @@ export interface SpotV1OrderPlaceReq {
   'stop-price'?: string;
   /** Operator for stop price (lte, gte, etc) */
   operator?: string;
+  /** RPI order - type must be buy-limit or sell-limit */
+  'time-in-force'?: 'rpi';
 }
 
 /** Margin order with auto borrow/repay for POST /v1/order/auto/place. Sub-accounts not supported. */
@@ -455,15 +457,23 @@ export interface SpotCrossMarginLoanOrdersReq {
 
 /** Req for POST /v1/dw/withdraw/api/create. Create withdraw request. */
 export interface SpotWithdrawCreateReq {
-  /** Destination address. Or UID:1234567, PHONE:xxx, MAIL:xxx for internal. */
+  /**
+   * Destination address.
+   * On-chain: chain address.
+   * Internal: UID:1234567, PHONE:xxx, MAIL:xxx.
+   * Poloniex zero-fee cross-exchange: POLOUSER:{UUID} (linked on HTX first).
+   */
   address: string;
   /** Crypto currency */
   currency: string;
   /** Amount to withdraw */
   amount: string;
-  /** Fee. Use 0 for UID withdraw. */
+  /** Fee. Use 0 for UID withdraw and Poloniex cross-exchange transfers. */
   fee?: number;
-  /** Chain. Required for UID. Required for multi-chain coins. */
+  /**
+   * Chain. Required for multi-chain coins.
+   * For internal withdraw or Poloniex cross-exchange transfer, use t397342.
+   */
   chain?: string;
   /** Address tag. For UID withdraw, use recipient UID. */
   'addr-tag'?: string;
@@ -491,7 +501,11 @@ export interface SpotDepositWithdrawQueryReq {
 
 /** Req for GET /v2/account/withdraw/address. Query withdraw address. */
 export interface SpotWithdrawAddressReq {
-  /** Crypto currency. Use "t247117" for universal address. */
+  /**
+   * Crypto currency.
+   * Use "t247117" for universal address.
+   * Use "t397342" to query Poloniex UID withdraw addresses added on platform.
+   */
   currency?: string;
   /** Block chain name. Omit for all chains. */
   chain?: string;
@@ -753,4 +767,37 @@ export interface SpotEarnUserAssetsReq {
   pageNum: number;
   /** Items per page, max 100. Default 10. */
   pageSize: number;
+}
+
+/** Account type for POST /v5/account/universal_transfer */
+export type SpotUniversalTransferAccountType =
+  | 'otc'
+  | 'spot'
+  | 'linear-swap'
+  | 'futures'
+  | 'swap'
+  | 'margin'
+  | 'super-margin'
+  | 'otc-options';
+
+/** Req for POST /v5/account/universal_transfer. Create universal transfer. */
+export interface SpotUniversalTransferReq {
+  amount: number | string;
+  currency: string;
+  from_account_type: SpotUniversalTransferAccountType;
+  to_account_type: SpotUniversalTransferAccountType;
+  from_asset_type?: string;
+  to_asset_type?: string;
+}
+
+/** Req for GET /v5/account/universal_transfer_records. Universal transfer history. */
+export interface SpotUniversalTransferRecordsReq {
+  transfer_id?: number | string;
+  currency?: string;
+  status?: 'success' | 'pending' | 'failed';
+  start_time?: number;
+  end_time?: number;
+  from?: number;
+  limit?: number;
+  direct?: 'prev' | 'next';
 }

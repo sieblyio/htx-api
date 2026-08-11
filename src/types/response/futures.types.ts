@@ -264,6 +264,7 @@ export interface FuturesIndexPrice {
 export interface FuturesIndexConstituentComponent {
   exchange: string;
   symbol: string;
+  /** Price as string. -1 means HTX masked proprietary third-party index pricing. */
   symbol_price: string;
   weights: string;
 }
@@ -1786,14 +1787,14 @@ export interface FuturesV5AccountBalance {
 
 /** Set asset mode response data from POST /v5/account/asset_mode */
 export interface FuturesV5AssetMode {
-  /** 0: Single-asset collateral; 1: Multi-assets collateral */
-  assets_mode: 0 | 1;
+  /** 0: Single-asset collateral (old); 1: Multi-assets collateral; 2: Single-asset collateral (new) */
+  assets_mode: 0 | 1 | 2;
 }
 
 /** Get asset mode response data from GET /v5/account/asset_mode */
 export interface FuturesV5AssetModeGet {
-  /** 0: Single-asset collateral; 1: Multi-assets collateral */
-  asset_mode: 0 | 1;
+  /** 0: Single-asset collateral (old); 1: Multi-assets collateral; 2: Single-asset collateral (new) */
+  asset_mode: 0 | 1 | 2;
 }
 
 /** Fee deduction crypto from /v5/account/fee_deduction_currency */
@@ -3023,6 +3024,8 @@ export interface FuturesCmDeliveryTrade {
   ts: number;
   quantity: string;
   symbol: string;
+  /** Whether the trade is an RPI trade */
+  'is-rpi-trade'?: boolean | number | string;
 }
 
 /** Last trade tick from GET /market/trade. Payload in "tick". */
@@ -3040,6 +3043,8 @@ export interface FuturesCmDeliveryTradeHistoryItem {
   direction: string;
   ts: number;
   quantity?: string | number;
+  /** Whether the trade is an RPI trade */
+  'is-rpi-trade'?: boolean | number | string;
 }
 
 /** Trade history from GET /market/history/trade. Each group has trades by timestamp. Payload in "data". Alias: getCoinMDeliveryTradeHistory. */

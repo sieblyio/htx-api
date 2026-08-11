@@ -2335,7 +2335,7 @@ export class FuturesClient extends BaseRestClient {
    * Signature required. Trade permission. Rate limit: 1 req/10s per UID.
    */
   updateMultiAssetMode(params: {
-    assets_mode: 0 | 1;
+    assets_mode: 0 | 1 | 2;
   }): Promise<FuturesAPISuccessResponse<FuturesV5AssetMode>> {
     return this.postPrivate('/v5/account/asset_mode', { body: params });
   }

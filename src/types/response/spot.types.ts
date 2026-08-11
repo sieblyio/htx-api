@@ -97,6 +97,8 @@ export interface SpotTradingSymbol {
   wr?: string | null;
   d?: number | null;
   elr?: string | null;
+  /** Whether the symbol supports RPI trading */
+  enable_rpi?: boolean | number | string;
   p?: { id?: number; name?: string; weight?: number }[];
 }
 
@@ -217,13 +219,16 @@ export interface SpotV1MarketSymbolSettings {
   pp?: number;
   ap?: number;
   vp?: number;
+  /** @deprecated No longer valid. */
   minoa?: number | string;
   maxoa?: number | string;
   minov?: number | string;
+  /** @deprecated No longer valid. */
   lominoa?: number | string;
   lomaxoa?: number | string;
   lomaxba?: number | string;
   lomaxsa?: number | string;
+  /** @deprecated No longer valid. */
   smminoa?: number | string;
   smmaxoa?: number | string;
   bmmaxov?: number | string;
@@ -313,6 +318,8 @@ export interface SpotV2TransactFeeRate {
   takerFeeRate: string;
   actualMakerRate: string;
   actualTakerRate: string;
+  /** RPI order fee rate */
+  rpiFeeRate?: string;
 }
 
 /** Currency reference item from /v2/reference/currencies */
@@ -320,6 +327,8 @@ export interface SpotV2CurrencyReference {
   currency?: string;
   instStatus?: string;
   chains?: SpotV2ChainReference[];
+  /** Whether the currency supports direct transfers to Poloniex */
+  externalTransferEnabled?: boolean | string | number;
 }
 
 /**
@@ -880,10 +889,12 @@ export interface SpotDepositWithdrawRecord {
   type: string;
   'sub-type'?: string;
   currency: string;
+  /** Chain name. Poloniex rapid transfer defaults to t397342. */
   chain: string;
   'tx-hash': string;
   amount: number;
   'from-addr-tag'?: string;
+  /** On-chain address, or UID:XXXX for Poloniex→HTX rapid transfers. */
   address: string;
   'address-tag'?: string;
   fee: number;
@@ -963,6 +974,8 @@ export interface SpotSubUserCreationResult {
   userName: string;
   note?: string;
   uid?: number;
+  /** Spot account id for spot order transactions */
+  spotAccountId?: number;
   errCode?: string;
   errMessage?: string;
 }
@@ -1220,6 +1233,10 @@ export interface SpotReferralReferral {
   invitee_rebate_rate_partner_contract?: string | null;
   join_time_m2: number;
   join_time_partner?: number | null;
+  /** Whether advanced KYC was completed */
+  completed_kyc?: boolean | number | string;
+  /** Invitee email */
+  mail?: string | null;
 }
 
 /** Open order from GET /v1/order/openOrders */
@@ -1239,4 +1256,25 @@ export interface SpotV1OpenOrder {
   state: string;
   'stop-price'?: string;
   operator?: string;
+}
+
+/** Result from POST /v5/account/universal_transfer */
+export interface SpotUniversalTransferResult {
+  transfer_id: number;
+}
+
+/** Record from GET /v5/account/universal_transfer_records */
+export interface SpotUniversalTransferRecord {
+  id: number;
+  transfer_id: number | string;
+  amount: string;
+  currency?: string;
+  status?: string;
+  from_account_type: string;
+  to_account_type: string;
+  from_account_asset?: string;
+  to_account_asset?: string;
+  from_asset_type?: string;
+  to_asset_type?: string;
+  transfer_time?: number;
 }
