@@ -44,14 +44,14 @@
   "dependencies": {
     "axios": "1.18.1",
     "events": "3.3.0",
-    "isomorphic-ws": "^5.0.0",
+    "isomorphic-ws": "5.0.0",
     "ws": "8.21.1"
   },
   "devDependencies": {
     "@eslint/compat": "2.1.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.14",
-    "@types/ws": "^8.18.1",
+    "@types/ws": "8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.59.3",
     "@typescript-eslint/parser": "^8.59.3",
     "esbuild": "0.27.2",
@@ -66,8 +66,13 @@
   },
   "overrides": {
     "@babel/core": "7.29.6",
+    "brace-expansion@<2": "1.1.18",
+    "brace-expansion@>=2 <3": "2.1.4",
+    "brace-expansion@>=5 <6": "5.0.9",
+    "fast-uri@>=3 <4": "3.1.5",
     "form-data": "4.0.6",
-    "js-yaml": "3.15.0"
+    "js-yaml@>=3 <4": "3.15.1",
+    "js-yaml@>=4 <5": "4.3.1"
   },
   "keywords": [
     "htx",
