@@ -67,8 +67,12 @@ jobs:
             process.exit(1);
           }
 
-          if (readFileSync('.npmrc', 'utf8') !== 'min-release-age=30\n') {
-            console.error('Root .npmrc must contain exactly: min-release-age=30');
+          const expectedNpmPolicy = 'min-release-age=30\nsave-exact=true\n';
+
+          if (readFileSync('.npmrc', 'utf8') !== expectedNpmPolicy) {
+            console.error(
+              'Root .npmrc must contain exactly: min-release-age=30 and save-exact=true',
+            );
             process.exit(1);
           }
           NODE
