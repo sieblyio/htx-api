@@ -250,6 +250,8 @@ export interface FuturesContractInfo {
   price_estimated?: unknown[];
   open_type?: number;
   trade_partition?: string;
+  labels?: string[];
+  tradfi_labels?: string[];
 }
 
 /** Index price item from swap_index. symbol optional (CM Delivery uses symbol). */
@@ -587,6 +589,7 @@ export interface FuturesPositionInfo {
   contract_type?: string;
   pair?: string;
   business_type?: string;
+  margin?: number | string;
 }
 
 /** Nested position in swap_account_position_info */
@@ -1756,6 +1759,7 @@ export interface FuturesV5AccountBalanceDetail {
   equity: string;
   isolated_equity: string;
   available: string;
+  isolated_available?: string;
   withdraw_available: string;
   profit_unreal: string;
   isolated_profit_unreal: string;
@@ -1878,6 +1882,7 @@ export interface FuturesV5Order {
   created_time?: string;
   updated_time?: string;
   self_match_prevent?: string;
+  cancel_volume?: string;
 }
 
 /** Execution/trade detail from GET /v5/trade/order/details */
@@ -1910,6 +1915,57 @@ export interface FuturesV5OrderExecutionDetail {
 export interface FuturesV5CancelAfterResp {
   current_time: string;
   trigger_time?: string;
+}
+
+/** Place algo order item from POST /v5/algo/order */
+export interface FuturesV5PlaceAlgoOrderResp {
+  algo_id: string;
+  algo_client_order_id?: string;
+}
+
+/** Cancel algo order item from POST /v5/algo/cancel_orders */
+export interface FuturesV5CancelAlgoOrderResp {
+  algo_id: string;
+  algo_client_order_id?: string;
+  code?: number;
+  message?: string;
+}
+
+/** Algo order from GET /v5/algo/order, /opens, /history */
+export interface FuturesV5AlgoOrder {
+  id?: string | number;
+  algo_id: string;
+  algo_client_order_id?: string;
+  contract_code: string;
+  volume?: string;
+  type: string;
+  state: string;
+  position_side: string;
+  margin_mode: string;
+  side: string;
+  tp_trigger_price?: string;
+  tp_order_price?: string;
+  tp_type?: string;
+  tp_trigger_price_type?: string;
+  sl_trigger_price?: string;
+  sl_order_price?: string;
+  sl_type?: string;
+  sl_trigger_price_type?: string;
+  price?: string;
+  price_match?: string;
+  trigger_price?: string;
+  trigger_price_type?: string;
+  active_price?: string;
+  order_price_type?: string;
+  callback_rate?: string;
+  reduce_only?: boolean | string;
+  actual_volume?: string;
+  actual_price?: string;
+  actual_time?: string;
+  relation_order_id?: string;
+  created_time?: string;
+  updated_time?: string;
+  order_source?: string;
 }
 
 /**
@@ -2251,6 +2307,7 @@ export interface FuturesCmPerpContractInfo {
   create_date: string;
   delivery_time: string;
   contract_status: number;
+  labels?: string[];
 }
 
 /** Item from GET /swap-api/v1/swap_open_interest data[] */
@@ -3676,6 +3733,7 @@ export interface FuturesCmDeliveryContractInfo {
   settlement_time: string;
   delivery_time: string;
   contract_status: number;
+  labels?: string[];
 }
 
 /** GET /api/market/contract_constituents */

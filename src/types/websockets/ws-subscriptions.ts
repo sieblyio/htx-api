@@ -15,6 +15,7 @@ export const WS_SPOT_PUBLIC_TOPICS = [
   'market.$symbol$.kline.$period$',
   'market.$symbol.bbo',
   'market.$symbol.depth.$type',
+  'market.$symbol.fullDepth.$type',
   'market.$symbol.detail',
   'market.$symbol.mbp.$levels',
   'market.$symbol.mbp.refresh.$levels',
@@ -48,6 +49,7 @@ export const WS_DERIVATIVES_PUBLIC_TOPICS = [
 ] as const;
 
 export const WS_DERIVATIVES_PRIVATE_TOPICS = [
+  'account',
   'orders.$contract_code',
   'orders_cross.$contract_code',
   'accounts.$contract_code',
@@ -80,6 +82,8 @@ export type WSTopic =
 
 export function isPrivateTopic(topic: string): boolean {
   return (
+    topic === 'account' ||
+    topic.startsWith('account.') ||
     topic.startsWith('accounts.') ||
     topic.startsWith('accounts#') ||
     topic.startsWith('accounts.update') ||
