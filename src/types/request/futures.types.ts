@@ -1653,6 +1653,96 @@ export interface FuturesV5AdjustMarginReq {
   currency?: string;
 }
 
+/** V5 algo order type */
+export type FuturesV5AlgoOrderType =
+  | 'tp'
+  | 'sl'
+  | 'tp_sl'
+  | 'tpsl'
+  | 'trigger'
+  | 'trailing_stop';
+
+/** V5 algo trigger price type */
+export type FuturesV5AlgoTriggerPriceType = 'last' | 'mark' | 'index';
+
+/** V5 algo TP/SL order type */
+export type FuturesV5AlgoTpSlType =
+  | 'market'
+  | 'limit'
+  | 'optimal_5'
+  | 'optimal_10'
+  | 'optimal_20';
+
+/** Req for POST /v5/algo/order. Place an algo order. */
+export interface FuturesV5SubmitAlgoOrderReq {
+  contract_code: string;
+  type: FuturesV5AlgoOrderType;
+  position_side: FuturesPositionSide;
+  side: FuturesDirection;
+  margin_mode: FuturesMarginMode;
+  algo_client_order_id?: string;
+  volume?: string;
+  tp_trigger_price?: string;
+  tp_order_price?: string;
+  tp_type?: FuturesV5AlgoTpSlType;
+  tp_trigger_price_type?: FuturesV5AlgoTriggerPriceType;
+  sl_trigger_price?: string;
+  sl_order_price?: string;
+  sl_type?: FuturesV5AlgoTpSlType;
+  sl_trigger_price_type?: FuturesV5AlgoTriggerPriceType;
+  price?: string;
+  price_type?: 'optimal_5' | 'optimal_10' | 'optimal_20';
+  trigger_price?: string;
+  trigger_price_type?: FuturesV5AlgoTriggerPriceType;
+  activation_price?: string;
+  active_price?: string;
+  order_price_type?:
+    | 'optimal_5'
+    | 'optimal_10'
+    | 'optimal_20'
+    | 'trailing_mark';
+  callback_rate?: string;
+  reduce_only?: boolean;
+}
+
+/** Req for POST /v5/algo/cancel_orders. Cancel unfilled algo orders. Max 10 per request. */
+export interface FuturesV5CancelAlgoOrderReq {
+  contract_code: string;
+  algo_id?: string;
+  algo_client_order_id?: string;
+}
+
+/** Req for GET /v5/algo/order. Query one algo order. */
+export interface FuturesV5AlgoOrderInfoReq {
+  type: FuturesV5AlgoOrderType;
+  algo_id?: string;
+  algo_client_order_id?: string;
+}
+
+/** Req for GET /v5/algo/order/opens. Untriggered algo orders. */
+export interface FuturesV5AlgoOpenOrdersReq {
+  type: FuturesV5AlgoOrderType;
+  contract_code?: string;
+  algo_id?: string;
+  algo_client_order_id?: string;
+  from?: number | string;
+  limit?: number;
+  direct?: FuturesDirect;
+}
+
+/** Req for GET /v5/algo/order/history. Algo order history. */
+export interface FuturesV5AlgoOrderHistoryReq {
+  type: FuturesV5AlgoOrderType;
+  contract_code?: string;
+  margin_mode?: FuturesMarginMode;
+  states?: string;
+  start_time?: string | number;
+  end_time?: string | number;
+  from?: number | string;
+  limit?: number;
+  direct?: FuturesDirect;
+}
+
 /**
  * USDT Margined Futures Multi Asset - Basic Information (v5 API)
  */

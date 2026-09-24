@@ -95,7 +95,7 @@ export interface SpotGetAccountHistoryReq {
   'account-id': string | number;
   /** Currency filter */
   currency?: string;
-  /** Amount change types, comma-separated. Default all. */
+  /** Amount change types, comma-separated. Default all. Includes loan-disburse, loan-repay, loan-interest-refund, loan-interest-pay. */
   'transact-types'?: string;
   /** Start time (unix ms). Query window max 1 hour. */
   'start-time'?: number;

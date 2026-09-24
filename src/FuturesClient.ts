@@ -196,8 +196,12 @@ import type {
   FuturesUpdateCrossLeverageReq,
   FuturesUpdateUnifiedMarginReq,
   FuturesV5AdjustMarginReq,
+  FuturesV5AlgoOpenOrdersReq,
+  FuturesV5AlgoOrderHistoryReq,
+  FuturesV5AlgoOrderInfoReq,
   FuturesV5BillsReq,
   FuturesV5CancelAfterReq,
+  FuturesV5CancelAlgoOrderReq,
   FuturesV5CancelAllOrdersReq,
   FuturesV5CancelBatchOrdersReq,
   FuturesV5CancelOrderReq,
@@ -210,6 +214,7 @@ import type {
   FuturesV5OrderInfoReq,
   FuturesV5RiskLimitReq,
   FuturesV5SetLeverageReq,
+  FuturesV5SubmitAlgoOrderReq,
   FuturesV5SubmitOrderReq,
 } from './types/request/futures.types.js';
 import type {
@@ -378,11 +383,13 @@ import type {
   FuturesTriggerOpenOrders,
   FuturesUnifiedAccountInfo,
   FuturesV5AccountBalance,
+  FuturesV5AlgoOrder,
   FuturesV5AssetMode,
   FuturesV5AssetModeGet,
   FuturesV5AssetsDeductionCurrencyResp,
   FuturesV5Bill,
   FuturesV5CancelAfterResp,
+  FuturesV5CancelAlgoOrderResp,
   FuturesV5ClosePositionResp,
   FuturesV5FeeDeductionCurrency,
   FuturesV5LeverListEntry,
@@ -390,6 +397,7 @@ import type {
   FuturesV5MultiAssetsMarginResp,
   FuturesV5Order,
   FuturesV5OrderExecutionDetail,
+  FuturesV5PlaceAlgoOrderResp,
   FuturesV5PlaceBatchOrderRespItem,
   FuturesV5PlaceOrderResp,
   FuturesV5Position,
@@ -2529,6 +2537,57 @@ export class FuturesClient extends BaseRestClient {
     params: FuturesV5CancelAfterReq,
   ): Promise<FuturesAPISuccessResponse<FuturesV5CancelAfterResp>> {
     return this.postPrivate('/v5/trade/cancel-after', { body: params });
+  }
+
+  /**
+   *
+   * USDT Margined Futures Multi Asset - Strategy (v5 API)
+   *
+   */
+
+  /**
+   * Place algo order
+   */
+  submitMultiAssetAlgoOrder(
+    params: FuturesV5SubmitAlgoOrderReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5PlaceAlgoOrderResp>> {
+    return this.postPrivate('/v5/algo/order', { body: params });
+  }
+
+  /**
+   * Cancel algo order
+   */
+  cancelMultiAssetAlgoOrders(
+    orders: FuturesV5CancelAlgoOrderReq[],
+  ): Promise<FuturesAPISuccessResponse<FuturesV5CancelAlgoOrderResp[]>> {
+    return this.postPrivate('/v5/algo/cancel_orders', { body: orders });
+  }
+
+  /**
+   * Algo order details
+   */
+  getMultiAssetAlgoOrder(
+    params: FuturesV5AlgoOrderInfoReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5AlgoOrder>> {
+    return this.getPrivate('/v5/algo/order', params);
+  }
+
+  /**
+   * Algo pending order list
+   */
+  getMultiAssetAlgoOpenOrders(
+    params: FuturesV5AlgoOpenOrdersReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5AlgoOrder[]>> {
+    return this.getPrivate('/v5/algo/order/opens', params);
+  }
+
+  /**
+   * Algo order history
+   */
+  getMultiAssetAlgoOrderHistory(
+    params: FuturesV5AlgoOrderHistoryReq,
+  ): Promise<FuturesAPISuccessResponse<FuturesV5AlgoOrder[]>> {
+    return this.getPrivate('/v5/algo/order/history', params);
   }
 
   /**

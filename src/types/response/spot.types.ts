@@ -536,6 +536,7 @@ export interface SpotAccountHistory {
   currency: string;
   'record-id': number;
   'transact-amt': string;
+  /** Includes loan-disburse, loan-repay, loan-interest-refund, loan-interest-pay. */
   'transact-type': string;
   'avail-balance': string;
   'acct-balance': string;
