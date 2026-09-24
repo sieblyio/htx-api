@@ -1,6 +1,16 @@
 import { FuturesClient } from '../../../src/index.js';
 import { getTestProxy } from '../proxy.util.js';
 
+function validateFuturesKeyPermissionException(e: unknown) {
+  const err = e as { body?: Record<string, unknown> };
+  expect(err).toBeDefined();
+  expect(err.body).toBeDefined();
+  // Linear-swap now returns HTTP 200 + { status: "error", err_code: 403, err_msg: null }.
+  // Signature is valid; the key has no trade permission. Do not require err_msg text.
+  expect(err.body?.status).toBe('error');
+  expect(err.body?.err_code).toBe(403);
+}
+
 describe('REST PRIVATE FUTURES WRITE', () => {
   const account = {
     key: process.env.API_FUTURES_KEY,
@@ -60,13 +70,8 @@ describe('REST PRIVATE FUTURES WRITE', () => {
         expect(res.data).toBeDefined();
       } catch (e: unknown) {
         // Expected: invalid key permission error
-        const body = (e as { body?: Record<string, unknown> })?.body;
-
         // console.log(`err "${expect.getState().currentTestName}"`, { body, e });
-        expect(body).toBeDefined();
-
-        const errorMsg = body?.err_msg;
-        expect(errorMsg).toMatch(/no permission/i);
+        validateFuturesKeyPermissionException(e);
       }
     });
 
@@ -98,16 +103,11 @@ describe('REST PRIVATE FUTURES WRITE', () => {
         expect(res.data).toBeDefined();
       } catch (e: unknown) {
         // Expected: invalid key permission error
-        const body = (e as { body?: Record<string, unknown> })?.body;
-
         // console.error(`err "${expect.getState().currentTestName}"`, {
         //   body,
         //   e,
         // });
-        expect(body).toBeDefined();
-
-        const errorMsg = body?.err_msg;
-        expect(errorMsg).toMatch(/no permission/i);
+        validateFuturesKeyPermissionException(e);
       }
     });
 
@@ -121,11 +121,7 @@ describe('REST PRIVATE FUTURES WRITE', () => {
         expect(res).toBeDefined();
       } catch (e: unknown) {
         // Expected: order not found - validates signature
-        const body = (e as { body?: Record<string, unknown> })?.body;
-        expect(body).toBeDefined();
-
-        const errorMsg = body?.err_msg;
-        expect(errorMsg).toMatch(/no permission/i);
+        validateFuturesKeyPermissionException(e);
       }
     });
 
@@ -139,11 +135,7 @@ describe('REST PRIVATE FUTURES WRITE', () => {
         expect(res).toBeDefined();
       } catch (e: unknown) {
         // Expected: order not found - validates signature
-        const body = (e as { body?: Record<string, unknown> })?.body;
-        expect(body).toBeDefined();
-
-        const errorMsg = body?.err_msg;
-        expect(errorMsg).toMatch(/no permission/i);
+        validateFuturesKeyPermissionException(e);
       }
     });
   });
