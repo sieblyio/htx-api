@@ -306,6 +306,7 @@ export abstract class BaseWebsocketClient<
 
     this.options = {
       pongTimeout: 5000,
+      // Futures public WS closes a socket with no ping for 25s. Default 10s stays under that.
       pingInterval: 10000,
       reconnectTimeout: 500,
       recvWindow: 5000,

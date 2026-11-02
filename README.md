@@ -322,6 +322,8 @@ client
   });
 ```
 
+Accounts already upgraded to the unified V5 account can get error 6023 ("The current API version has expired. Please upgrade to the V5 interface") on legacy USDT-M private calls such as `getLinearSwapCrossAccountInfo` and `submitLinearSwapCrossOrder`. Use the `getMultiAsset*` and `submitMultiAsset*` methods (cancel, update, close, and margin helpers are named the same way). Accounts that are not on the unified V5 account can keep the legacy methods. Those methods stay in the SDK.
+
 See [FuturesClient](./src/FuturesClient.ts) for further information.
 
 ## WebSockets
@@ -339,7 +341,7 @@ Key WebSocket features:
 
 - Event driven messaging
 - Smart WebSocket persistence with automatic reconnection
-- Heartbeat mechanisms to detect disconnections
+- Heartbeat mechanisms to detect disconnections. Futures public sockets (`linearSwapPublic`) allow 200 concurrent connections per IP per backend instance, with no minute-level connect-rate limit. Going over that cap returns error 4000. A connection with no ping for 25 seconds is closed without notice. The SDK default `pingInterval` is 10 seconds.
 - Automatic resubscription after reconnection
 - Support for Spot and Derivatives markets (linear swap, coin swap, delivery)
 - Support for both public and private WebSocket streams
@@ -402,6 +404,11 @@ wsClient.subscribe(
   ],
   WS_KEY_MAP.linearSwapPublic,
 );
+
+// Futures public WS (linearSwapPublic): 200 connections per IP per backend
+// instance, no per-minute connect cap. Over the cap returns error 4000.
+// A socket with no ping for 25s is closed with no notice. The SDK pings
+// on pingInterval (default 10s) and answers server pings.
 
 // Derivatives index/mark price streams
 wsClient.subscribe(

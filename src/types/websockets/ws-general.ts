@@ -15,7 +15,10 @@ export interface WSClientConfigurableOptions {
   /** Define a recv window when preparing a private websocket signature. This is in milliseconds, so 5000 == 5 seconds. */
   recvWindow?: number;
 
-  /** How often to check if the connection is alive */
+  /**
+   * How often to check if the connection is alive.
+   * Futures public WS closes a connection that has had no ping for 25s, without notice. Keep this under 25s. The SDK default is 10s.
+   */
   pingInterval?: number;
 
   /** How long to wait for a pong (heartbeat reply) before assuming the connection is dead */

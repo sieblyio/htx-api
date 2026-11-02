@@ -15,7 +15,11 @@ export const WS_KEY_MAP = {
   /** Spot WS API */
   spotTrade: 'spotTrade',
 
-  /** Linear futures market data */
+  /**
+   * Linear futures public market data (`/linear-swap-ws`).
+   * 200 concurrent connections per IP per backend instance. No minute-level connect-rate limit.
+   * Over that cap the server returns error 4000. A connection with no ping for 25s is closed without notice.
+   */
   linearSwapPublic: 'linearSwapPublic',
   /** Linear futures account events */
   linearSwapPrivate: 'linearSwapPrivate',
