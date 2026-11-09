@@ -282,6 +282,12 @@ export interface SpotV1ChainInfo {
   'replace-chain-popup-desc'?: string;
   ca?: string;
   cct?: number;
+  /** Whether the chain is a stock chain */
+  isc?: boolean;
+  /** On-chain token name; empty for non-stock chains */
+  tkn?: string;
+  /** Issuer name; empty for non-stock chains */
+  isrn?: string;
   'withdraw-tips-desc'?: string;
   'suspend-visible-desc'?: string;
 }
