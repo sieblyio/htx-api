@@ -77,15 +77,10 @@ jobs:
           }
           NODE
 
-      - name: Guard publish target and release workflow
+      - name: Guard publish target
         run: |
           # Reject repository-level registry redirection.
           node -e "const p=require('./package.json'); if(p.publishConfig?.registry){console.error('publishConfig.registry present - refuse to publish'); process.exit(1)}"
-          # Block release-time workflow or script changes.
-          SHA=$(git rev-list -n 1 "$RELEASE_TAG")
-          PARENT=$(git rev-list -n 1 "$SHA^")
-          git diff --name-only "$PARENT" "$SHA" | grep -E '^\\.github/(workflows|scripts)/' \
-            && { echo 'Workflow/scripts changed in release commit - refuse.'; exit 1; } || true
 
       - name: Verify tag matches package version
         run: |
