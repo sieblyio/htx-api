@@ -19,7 +19,9 @@
 
 [1]: https://www.npmjs.com/package/@siebly/htx-api
 
-Complete & robust JavaScript & Node.js SDK for the HTX REST APIs and WebSockets:
+Complete & robust JavaScript & Node.js SDK for the HTX REST APIs and WebSockets.
+
+Take a look at our dedicated [HTX API quickstart guides for major frameworks and JavaScript runtimes](#frameworks--quickstart-guides).
 
 - Professional, robust & complete HTX SDK for all JavaScript runtimes.
 - Complete integration with HTX REST APIs and WebSockets.
@@ -45,6 +47,7 @@ Complete & robust JavaScript & Node.js SDK for the HTX REST APIs and WebSockets:
 ## Table of Contents
 
 - [Installation](#installation)
+  - [Frameworks & Quickstart Guides](#frameworks--quickstart-guides)
 - [Why not raw ws?](#why-not-raw-ws)
 - [Examples](#examples)
 - [Issues & Discussion](#issues--discussion)
@@ -78,6 +81,20 @@ npm install --save @siebly/htx-api
 Install **`@siebly/htx-api`**. That is the package name for this SDK. The unscoped npm package `htx-api` is a different package (a stale 0.0.9 pre-release).
 
 Node.js usage requires Node 22.13.0 or newer. Browser applications should follow the public-data and credential-safety guidance below.
+
+### Frameworks & Quickstart Guides
+
+Our complete HTX SDK supports all the major JavaScript runtimes. For maximum convenience, we've included guides to quickly get you started with the most popular runtimes. If you're not sure how to use this SDK with a runtime or framework not listed here, feel free to [open an issue on GitHub](https://github.com/sieblyio/htx-api/issues).
+
+| Runtime                    | Details                                                                                                                                                                                                                                                                                                                                                                                      |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend (trading bots)     | Using [Node.js and JavaScript](https://sieblyio.github.io/docs/htx/environments/node.html), [Node.js and TypeScript](https://sieblyio.github.io/docs/htx/environments/typescript.html), [Bun](https://sieblyio.github.io/docs/htx/environments/bun.html), or [Deno](https://sieblyio.github.io/docs/htx/environments/deno.html). This is the recommendation for algorithmic trading systems. |
+| Frontend / Web Development | Using [React with Vite](https://sieblyio.github.io/docs/htx/environments/react.html) or [Vite with plain JavaScript](https://sieblyio.github.io/docs/htx/environments/vite.html). Display REST and WebSocket prices in the browser.                                                                                                                                                          |
+| Next.js App Router         | Using the [Next.js App Router](https://sieblyio.github.io/docs/htx/environments/next.html) to serve the price from a Route Handler running on Node.js.                                                                                                                                                                                                                                       |
+| Mobile (iOS & Android)     | Using [React Native with Expo for iOS and Android](https://sieblyio.github.io/docs/htx/environments/expo.html). The example guides you to display the current btcusdt price from HTX and stream updates over WebSockets.                                                                                                                                                                     |
+| Cloudflare Workers         | [Cloudflare Workers](https://sieblyio.github.io/docs/htx/environments/cloudflare-workers.html). Return a public price from a Worker, with a separate example for authenticated orders.                                                                                                                                                                                                       |
+
+Refer to [runtime setup](https://sieblyio.github.io/docs/htx/compatibility.html) for installation commands, project configuration, and public price examples.
 
 ## Why not raw ws?
 
@@ -128,11 +145,13 @@ Check out our JavaScript/TypeScript/Node.js SDKs & Projects:
 
 ## Documentation
 
+The [HTX SDK documentation](https://sieblyio.github.io/docs/htx/) covers installation, client setup, public market data, authenticated trading, and WebSocket subscriptions.
+
 Most methods accept JS objects. These can be populated using parameters specified by HTX's API documentation, or check the type definition in each class within this repository.
 
 ### API Documentation Links
 
-- [HTX API Documentation](https://www.htx.com/en-us/opend/newApiPages/)
+- [HTX exchange API reference](https://www.htx.com/en-us/opend/newApiPages/)
   - [Spot Trading API](https://www.htx.com/en-us/opend/newApiPages/)
   - [Derivatives Trading API](https://www.htx.com/en-us/opend/newApiPages/)
 - [REST Endpoint Function List](./docs/endpointFunctionList.md)
