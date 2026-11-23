@@ -61,10 +61,10 @@ Complete & robust JavaScript & Node.js SDK for the HTX REST APIs and WebSockets:
     - [WebSocket API (WebsocketAPIClient)](#websocket-api-websocketapiclient)
 - [Customise Logging](#customise-logging)
 - [Browser/Frontend Usage](#browserfrontend-usage)
-  - [React and Vite](#react-and-vite)
-  - [Webpack](#webpack)
-  - [Browser Requirements](#browser-requirements)
-  - [Security and CORS](#security-and-cors)
+  - [Vite and React](#vite-and-react)
+  - [Next.js and server-side requests](#nextjs-and-server-side-requests)
+  - [React Native and Expo](#react-native-and-expo)
+  - [Standalone Webpack bundle](#standalone-webpack-bundle)
 - [LLMs & AI](#use-with-llms--ai)
 - [Used By](#used-by)
 - [Contributions & Thanks](#contributions--thanks)
@@ -545,72 +545,31 @@ In rare situations, you may want to see the raw HTTP requests being built as wel
 
 ## Browser/Frontend Usage
 
-The package's ESM entry can be imported directly by modern frontend bundlers. Do not build or copy a separate SDK bundle into your application.
+The npm package includes ES module and CommonJS builds. You do not need a standalone Webpack bundle to use it in a frontend project. Choose the setup for your application below.
 
-Browser applications should use the SDK only for public market data. Keep API keys, API secrets, authenticated REST calls, private WebSocket subscriptions, and WebSocket API trading on a trusted backend.
+### Vite and React
 
-### React and Vite
+Use the [Vite guide](https://sieblyio.github.io/docs/htx/environments/vite.html) or [React guide](https://sieblyio.github.io/docs/htx/environments/react.html) for a complete public market-data project that imports `@siebly/htx-api` from npm.
 
-Install and import the package normally; no SDK-specific Vite plugin or Node.js polyfill is required:
+Keep the supplied bundler configuration with the example: it provides EventEmitter through the `events` alias and configures dependency optimization for the SDK's browser transport mappings. These browser examples use public HTX market data. Keep API keys and secrets in a secure server-side environment and make authenticated REST calls, private WebSocket subscriptions, and WebSocket API trading calls there.
 
-```bash
-npm install @siebly/htx-api
-```
+Browser REST requests also depend on HTX's CORS policy and regional availability. If a request is blocked, call the SDK through your application's server route instead. A development proxy does not solve CORS for a deployed application.
 
-```tsx
-import { useEffect, useState } from 'react';
-import { SpotClient, WebsocketClient, WS_KEY_MAP } from '@siebly/htx-api';
+Use a modern browser with native `WebSocket`, `TextEncoder`, `TextDecoder`, and `DecompressionStream` support. Public HTX WebSocket messages require decompression. If your Content Security Policy restricts connections, allow the required HTX `https://` and `wss://` origins in `connect-src`.
 
-export function BtcTicker() {
-  const [ticker, setTicker] = useState<unknown>();
+### Next.js and server-side requests
 
-  useEffect(() => {
-    const restClient = new SpotClient();
-    const wsClient = new WebsocketClient();
+The [Next.js guide](https://sieblyio.github.io/docs/htx/environments/next.html) runs the SDK in a Node.js Route Handler and returns the result to the frontend. Use this pattern when requests need credentials or cannot be made directly from the browser.
 
-    restClient.getTicker({ symbol: 'btcusdt' }).then(setTicker);
+### React Native and Expo
 
-    const onMessage = (message: unknown) => setTicker(message);
-    wsClient.on('message', onMessage);
-    wsClient.subscribe('market.btcusdt.ticker', WS_KEY_MAP.spotPublic);
+Follow the [Expo guide](https://sieblyio.github.io/docs/htx/environments/expo.html) for its Metro configuration and HTTP polyfills. Browser bundler configuration is not interchangeable with Metro configuration. HTX compressed WebSocket messages require `DecompressionStream`, which the guide does not polyfill; confirm support in your target runtime or relay market data through your backend. The example uses public HTX market data; keep authenticated operations on your server.
 
-    return () => {
-      wsClient.off('message', onMessage);
-      wsClient.closeAll();
-    };
-  }, []);
+### Standalone Webpack bundle
 
-  return <pre>{JSON.stringify(ticker, null, 2)}</pre>;
-}
-```
+This repository does not include a standalone Webpack configuration, a `pack` script, or a UMD bundle with a global name. From a checkout, `npm install` followed by `npm run build` produces ES module and CommonJS builds in `dist/mjs` and `dist/cjs`. Use npm imports through your application's bundler for browser usage.
 
-The cleanup is important during navigation, hot reloads, and React Strict Mode development checks so that an old socket is not left reconnecting in the background.
-
-### Webpack
-
-Webpack 5 can consume the same package entry directly:
-
-```javascript
-import { SpotClient, WebsocketClient } from '@siebly/htx-api';
-```
-
-Use a normal `target: 'web'` application build. The SDK does not require a checked-in UMD bundle or `resolve.fallback` shims for Node.js core modules.
-
-Direct `<script>`-tag globals are not supported. Use the package through an ESM-aware bundler or application build instead.
-
-### Browser Requirements
-
-Use a modern browser with native `WebSocket`, `TextEncoder`, `TextDecoder`, and `DecompressionStream` support. Secure-context Web Crypto support (`globalThis.crypto.subtle`) is required by signing code, although credentials should not be used in a frontend application.
-
-Browser WebSockets do not expose Node.js-only operations such as custom agents, protocol-level `ping()`, or `terminate()`. The SDK uses browser-safe behavior for these cases. If your Content Security Policy restricts connections, allow the required HTX `https://` and `wss://` origins in `connect-src`.
-
-### Security and CORS
-
-- Never place an API key or secret in browser code, local storage, or frontend environment variables such as `VITE_*` or `REACT_APP_*`; those values are visible to users.
-- Send authenticated REST and WebSocket API operations through your own backend. Expose only the narrow application operations the frontend needs.
-- HTX controls which REST endpoints and headers are permitted by CORS. A browser cannot bypass a rejected preflight request; use a same-origin backend endpoint instead of disabling browser security.
-- Do not expose an unrestricted forwarding proxy. Validate destinations, authentication, request shapes, and rate limits on the backend.
-- Browser support does not imply that every HTX endpoint is suitable for direct frontend access. Public REST and public market-data WebSockets are the intended use cases.
+Webpack 5 can consume the package entry with a normal `target: 'web'` application build. The SDK does not require `resolve.fallback` shims for Node.js core modules. Direct `<script>`-tag globals are not supported. Browser configuration, runtime requirements, and HTX API access restrictions still apply.
 
 ## Use with LLMs & AI
 
