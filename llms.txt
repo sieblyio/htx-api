@@ -4480,6 +4480,737 @@ async function start()
 // https://siebly.io/reference/glossary#custom-order-id
 
 ================
+File: src/lib/BaseWSClient.ts
+================
+import WebSocketImplementation from 'isomorphic-ws';
+⋮----
+import {
+  isMessageEvent,
+  MessageEventLike,
+} from '../types/websockets/ws-events.js';
+import {
+  WebsocketClientOptions,
+  WSClientConfigurableOptions,
+  WsEventInternalSrc,
+} from '../types/websockets/ws-general.js';
+import {
+  EventListener,
+  WebSocketLike,
+  WSConnectionOptions,
+} from '../types/websockets/ws-portable.js';
+import { WSTopic } from '../types/websockets/ws-subscriptions.js';
+import { EventEmitter } from './event-emitter.js';
+import { isObjectLike } from './misc-util.js';
+import { checkWebCryptoAPISupported } from './webCryptoAPI.js';
+import { DefaultLogger } from './websocket/logger.js';
+import {
+  decompressMessageEvent,
+  isBufferMessageEvent,
+  safeTerminateWs,
+  WSOperation,
+  WSTopicRequest,
+  WSTopicRequestOrStringTopic,
+} from './websocket/websocket-util.js';
+import { WsStore } from './websocket/WsStore.js';
+import {
+  DeferredPromise,
+  WSConnectedResult,
+  WsConnectionStateEnum,
+} from './websocket/WsStore.types.js';
+⋮----
+interface WebSocketConstructor {
+  new (
+    url: string,
+    protocols?: string | string[],
+    options?: Omit<WSConnectionOptions, 'protocols'>,
+  ): WebSocketLike;
+}
+⋮----
+function isNativeBrowserWebSocket(ws: WebSocketLike): boolean
+⋮----
+type UseTheExceptionEventInstead = never;
+type WSClientEventPayload<WsKey extends string> = Record<string, unknown> & {
+  wsKey: WsKey;
+};
+⋮----
+type WSClientEventPayloadOrArray<WsKey extends string> =
+  | WSClientEventPayload<WsKey>
+  | WSClientEventPayload<WsKey>[];
+⋮----
+interface WSClientEventMap<WsKey extends string> {
+  /** Connection opened. If this connection was previously opened and reconnected, expect the reconnected event instead */
+  open: (evt: {
+    wsKey: WsKey;
+    event: unknown;
+    wsUrl: string;
+    ws: WebSocketLike;
+  }) => void;
+
+  /** Reconnecting a dropped connection */
+  reconnecting: (evt: { wsKey: WsKey; event: unknown }) => void;
+
+  /** Successfully reconnected a connection that dropped */
+  reconnected: (evt: {
+    wsKey: WsKey;
+    event: unknown;
+    wsUrl: string;
+    ws: WebSocketLike;
+  }) => void;
+
+  /** Connection closed */
+  close: (evt: { wsKey: WsKey; event: unknown }) => void;
+
+  /** Received reply to websocket command (e.g. after subscribing to topics) */
+  response: (response: WSClientEventPayloadOrArray<WsKey>) => void;
+
+  /** Received data for topic */
+  message: (response: WSClientEventPayloadOrArray<WsKey>) => void;
+
+  /** Exception from ws client OR custom listeners (e.g. if you throw inside your event handler) */
+  exception: (response: WSClientEventPayloadOrArray<WsKey>) => void;
+
+  /**
+   * See for more information: https://github.com/tiagosiebler/bybit-api/issues/413
+   * @deprecated Use the 'exception' event instead. The 'error' event had the unintended consequence of throwing an unhandled promise rejection.
+   */
+  error: UseTheExceptionEventInstead;
+
+  /** Confirmation that a connection successfully authenticated */
+  authenticated: (event: WSClientEventPayload<WsKey>) => void;
+}
+⋮----
+/** Connection opened. If this connection was previously opened and reconnected, expect the reconnected event instead */
+⋮----
+/** Reconnecting a dropped connection */
+⋮----
+/** Successfully reconnected a connection that dropped */
+⋮----
+/** Connection closed */
+⋮----
+/** Received reply to websocket command (e.g. after subscribing to topics) */
+⋮----
+/** Received data for topic */
+⋮----
+/** Exception from ws client OR custom listeners (e.g. if you throw inside your event handler) */
+⋮----
+/**
+   * See for more information: https://github.com/tiagosiebler/bybit-api/issues/413
+   * @deprecated Use the 'exception' event instead. The 'error' event had the unintended consequence of throwing an unhandled promise rejection.
+   */
+⋮----
+/** Confirmation that a connection successfully authenticated */
+⋮----
+export interface EmittableEvent<
+  TEventType extends keyof WSClientEventMap<string> =
+    keyof WSClientEventMap<string>,
+> {
+  eventType:
+    | TEventType
+    | 'pong'
+    | 'connectionReady' // tied to "requireConnectionReadyConfirmation";
+    | 'connectionReadyForAuth'; // tied to specific events we need to wait for, before we can begin post-connect auth
+  event: Parameters<WSClientEventMap<string>[TEventType]>[0];
+  isWSAPIResponse?: boolean;
+}
+⋮----
+| 'connectionReady' // tied to "requireConnectionReadyConfirmation";
+| 'connectionReadyForAuth'; // tied to specific events we need to wait for, before we can begin post-connect auth
+⋮----
+// Type safety for on and emit handlers: https://stackoverflow.com/a/61609010/880837
+export interface BaseWebsocketClient<
+  TWSKey extends string,
+  TWSRequestEvent extends object,
+> {
+  /** @internal preserves the request-event generic on the merged class type. */
+  readonly __requestEventType?: TWSRequestEvent;
+
+  on<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+
+  addListener<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+
+  once<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+
+  prependListener<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+
+  prependOnceListener<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+
+  off<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+
+  removeListener<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+
+  removeAllListeners(event?: keyof WSClientEventMap<TWSKey>): this;
+
+  listeners(event: keyof WSClientEventMap<TWSKey>): EventListener[];
+
+  listenerCount(
+    event: keyof WSClientEventMap<TWSKey>,
+    listener?: WSClientEventMap<TWSKey>[keyof WSClientEventMap<TWSKey>],
+  ): number;
+
+  emit<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    ...args: Parameters<WSClientEventMap<TWSKey>[U]>
+  ): boolean;
+}
+⋮----
+/** @internal preserves the request-event generic on the merged class type. */
+⋮----
+on<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+⋮----
+addListener<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+⋮----
+once<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+⋮----
+prependListener<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+⋮----
+prependOnceListener<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+⋮----
+off<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+⋮----
+removeListener<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    listener: WSClientEventMap<TWSKey>[U],
+  ): this;
+⋮----
+removeAllListeners(event?: keyof WSClientEventMap<TWSKey>): this;
+⋮----
+listeners(event: keyof WSClientEventMap<TWSKey>): EventListener[];
+⋮----
+listenerCount(
+    event: keyof WSClientEventMap<TWSKey>,
+    listener?: WSClientEventMap<TWSKey>[keyof WSClientEventMap<TWSKey>],
+  ): number;
+⋮----
+emit<U extends keyof WSClientEventMap<TWSKey>>(
+    event: U,
+    ...args: Parameters<WSClientEventMap<TWSKey>[U]>
+  ): boolean;
+⋮----
+/**
+ * A midflight WS request event (e.g. subscribe to these topics).
+ *
+ * - requestKey: unique identifier for this request, if available. Can be anything as a string.
+ * - requestEvent: the raw request, as an object, that will be sent on the ws connection. This may contain multiple topics/requests in one object, if the exchange supports it.
+ */
+export interface MidflightWsRequestEvent<TEvent = object> {
+  requestKey: string | number;
+  requestEvent: TEvent;
+}
+⋮----
+/**
+ * Appends wsKey and isWSAPIResponse to all events.
+ * Some events are arrays, this handles that nested scenario too.
+ */
+function getFinalEmittable<TWSKey extends string>(
+  emittable: EmittableEvent,
+  wsKey: TWSKey,
+  isWSAPIResponse?: boolean,
+): WSClientEventPayload<TWSKey>;
+function getFinalEmittable<TWSKey extends string>(
+  emittable: EmittableEvent[],
+  wsKey: TWSKey,
+  isWSAPIResponse?: boolean,
+): WSClientEventPayload<TWSKey>[];
+function getFinalEmittable<TWSKey extends string>(
+  emittable: EmittableEvent | EmittableEvent[],
+  wsKey: TWSKey,
+  isWSAPIResponse?: boolean,
+): WSClientEventPayload<TWSKey> | WSClientEventPayload<TWSKey>[]
+⋮----
+// Some topics just emit an array.
+// This is consistent with how it was before the WS API upgrade:
+⋮----
+// const { event, ...others } = emittable;
+// return {
+//   ...others,
+//   event: event.map((subEvent) =>
+//     getFinalEmittable(subEvent, wsKey, isWSAPIResponse),
+//   ),
+// };
+⋮----
+/**
+ * Users can conveniently pass topics as strings or objects (object has topic name + optional params).
+ *
+ * This method normalises topics into objects (object has topic name + optional params).
+ */
+function getNormalisedTopicRequests(
+  wsTopicRequests: WSTopicRequestOrStringTopic<WSTopic>[],
+): WSTopicRequest<WSTopic>[]
+⋮----
+// passed as string, convert to object
+⋮----
+// already a normalised object, thanks to user
+⋮----
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+export abstract class BaseWebsocketClient<
+TWSKey extends string,
+⋮----
+constructor(
+    options?: WSClientConfigurableOptions & { wsLoggerCategory: string },
+    logger?: DefaultLogger,
+  )
+⋮----
+// Futures public WS closes a socket with no ping for 25s. Default 10s stays under that.
+⋮----
+// Requires a confirmation "response" from the ws connection before assuming it is ready
+⋮----
+// Automatically auth after opening a connection?
+⋮----
+// Automatically include auth/sign/token with every WS request.
+// Automatically handled during getWsRequestEvents.
+⋮----
+// Automatically re-auth WS API, if we were auth'd before and get reconnected
+⋮----
+// Whether to use native heartbeats (depends on the exchange)
+⋮----
+// Check Web Crypto API support when credentials are provided and no custom sign function is used
+⋮----
+/**
+   * Return true if this wsKey connection should automatically authenticate immediately after connecting
+   */
+protected abstract isAuthOnConnectWsKey(wsKey: TWSKey): boolean;
+⋮----
+protected abstract isCustomReconnectionNeeded(wsKey: TWSKey): boolean;
+⋮----
+protected abstract triggerCustomReconnectionWorkflow(
+    wsKey: TWSKey,
+  ): Promise<void>;
+⋮----
+protected abstract sendPingEvent(wsKey: TWSKey, ws: WebSocketLike): boolean;
+⋮----
+protected abstract sendPongEvent(
+    wsKey: TWSKey,
+    ws: WebSocketLike,
+    event?: unknown,
+  ): void;
+⋮----
+protected abstract isWsPing(data: unknown): boolean;
+⋮----
+protected abstract isWsPong(data: unknown): boolean;
+⋮----
+protected abstract authPrivateConnectionsOnConnect(_wsKey: TWSKey): boolean;
+⋮----
+/**
+   * Return the event sent to the server to trigger authentication. If the event requires waiting for another event first (e.g. a challenge), return 'waitForEvent' and the library will wait for that event before calling this method again.
+   *
+   * Usually only called once per connection, unless the connection drops/is reset.
+   */
+protected abstract getWsAuthRequestEvent(
+    wsKey: TWSKey,
+    eventToAuth?: object,
+  ): Promise<object | string | 'waitForEvent' | void>;
+⋮----
+protected abstract isPrivateTopicRequest(
+    request: WSTopicRequest<WSTopic>,
+    wsKey: TWSKey,
+  ): boolean;
+⋮----
+protected abstract getPrivateWSKeys(): TWSKey[];
+⋮----
+protected abstract getWsUrl(wsKey: TWSKey): Promise<string>;
+⋮----
+protected abstract getMaxTopicsPerSubscribeEvent(
+    wsKey: TWSKey,
+  ): number | null;
+⋮----
+/**
+   * @returns one or more correctly structured request events for performing a operations over WS. This can vary per exchange spec.
+   */
+protected abstract getWsRequestEvents(
+    wsKey: TWSKey,
+    operation: WSOperation,
+    requests: WSTopicRequest<WSTopic>[],
+  ): Promise<MidflightWsRequestEvent<TWSRequestEvent>[]>;
+⋮----
+/**
+   * Abstraction called to sort ws events into emittable event types (response to a request, data update, etc)
+   */
+protected abstract resolveEmittableEvents(
+    wsKey: TWSKey,
+    event: MessageEventLike,
+  ): EmittableEvent[];
+⋮----
+/**
+   * Request connection of all dependent (public & private) websockets, instead of waiting for automatic connection by library
+   */
+protected abstract connectAll(): Promise<WSConnectedResult | undefined>[];
+⋮----
+protected isPrivateWsKey(wsKey: TWSKey): boolean
+⋮----
+/** Returns auto-incrementing request ID, used to track promise references for async requests */
+protected getNewRequestId(): number
+⋮----
+protected abstract sendWSAPIRequest(
+    wsKey: TWSKey,
+    operation: string,
+    params?: unknown,
+  ): Promise<unknown>;
+⋮----
+protected abstract sendWSAPIRequest(
+    wsKey: TWSKey,
+    channel: string,
+    params: unknown,
+  ): Promise<unknown>;
+⋮----
+public getTimeOffsetMs()
+⋮----
+public setTimeOffsetMs(newOffset: number)
+⋮----
+/**
+   * Don't call directly! Use subscribe() instead!
+   *
+   * Subscribe to one or more topics on a WS connection (identified by WS Key).
+   *
+   * - Topics are automatically cached
+   * - Connections are automatically opened, if not yet connected
+   * - Authentication is automatically handled
+   * - Topics are automatically resubscribed to, if something happens to the connection, unless you call unsubsribeTopicsForWsKey(topics, key).
+   *
+   * @param wsTopicRequests array of topics to subscribe to
+   * @param wsKey ws key referring to the ws connection these topics should be subscribed on
+   */
+protected async subscribeTopicsForWsKey(
+    wsTopicRequests: WSTopicRequestOrStringTopic<WSTopic>[],
+    wsKey: TWSKey,
+  )
+⋮----
+// Store topics, so future automation (post-auth, post-reconnect) has everything needed to resubscribe automatically
+⋮----
+// start connection process if it hasn't yet begun. Topics are automatically subscribed to on-connect
+⋮----
+// Subscribe should happen automatically once connected, nothing to do here after topics are added to wsStore.
+⋮----
+/**
+       * Are we in the process of connection? Nothing to send yet.
+       */
+⋮----
+// We're connected. Check if auth is needed and if already authenticated
+⋮----
+/**
+       * If not authenticated yet and auth is required, don't request topics yet.
+       *
+       * Auth should already automatically be in progress, so no action needed from here. Topics will automatically subscribe post-auth success.
+       */
+⋮----
+// Finally, request subscription to topics if the connection is healthy and ready
+⋮----
+protected async unsubscribeTopicsForWsKey(
+    wsTopicRequests: WSTopicRequestOrStringTopic<WSTopic>[],
+    wsKey: TWSKey,
+  ): Promise<unknown>
+⋮----
+// Store topics, so future automation (post-auth, post-reconnect) has everything needed to resubscribe automatically
+⋮----
+// If not connected, don't need to do anything.
+// Removing the topic from the store is enough to stop it from being resubscribed to on reconnect.
+⋮----
+// We're connected. Check if auth is needed and if already authenticated
+⋮----
+/**
+       * If not authenticated yet and auth is required, don't need to do anything.
+       * We don't subscribe to topics until auth is complete anyway.
+       */
+⋮----
+// Finally, request subscription to topics if the connection is healthy and ready
+⋮----
+/**
+   * Splits topic requests into two groups, public & private topic requests
+   */
+private sortTopicRequestsIntoPublicPrivate(
+    wsTopicRequests: WSTopicRequest<WSTopic>[],
+    wsKey: TWSKey,
+  ): {
+    publicReqs: WSTopicRequest<WSTopic>[];
+    privateReqs: WSTopicRequest<WSTopic>[];
+  }
+⋮----
+/** Get the WsStore that tracks websockets & topics */
+public getWsStore(): WsStore<TWSKey, WSTopicRequest<WSTopic>>
+⋮----
+public close(wsKey: TWSKey, force?: boolean)
+⋮----
+public closeAll(force?: boolean)
+⋮----
+public isConnected(wsKey: TWSKey): boolean
+⋮----
+/**
+   * Request connection to a specific websocket, instead of waiting for automatic connection.
+   */
+public async connect(
+    wsKey: TWSKey,
+    customUrl?: string | undefined,
+    throwOnError?: boolean,
+  ): Promise<WSConnectedResult | undefined>
+⋮----
+// Important: don't check for RECONNECTING here, or this clashes with reconnectWithDelay()!
+⋮----
+private connectToWsUrl(url: string, wsKey: TWSKey): WebSocketLike
+⋮----
+// Event handlers for native heartbeats / ping/pong frames
+⋮----
+private parseWsError(
+    context: string,
+    error: unknown,
+    wsKey: TWSKey,
+  ): boolean
+⋮----
+// Allow retry by default (in some places that call this). Prevent deadloop in hard failure (401)
+⋮----
+/** Get a signature, build the auth request and send it */
+private async sendAuthRequest(
+    wsKey: TWSKey,
+    eventToAuth?: object,
+  ): Promise<unknown>
+⋮----
+private async advanceAuthRequest(
+    wsKey: TWSKey,
+    authPromise: DeferredPromise<WSConnectedResult & { event: unknown }>,
+    eventToAuth?: object,
+  ): Promise<unknown>
+⋮----
+// If not required, this won't return anything
+⋮----
+// Short-circuit this for the next time it's called
+⋮----
+private reconnectWithDelay(wsKey: TWSKey, connectionDelayMs: number)
+⋮----
+// Some streams need a specialist reconnection workflow.
+// E.g. the user data stream can't just be reconnected as is.
+⋮----
+private ping(wsKey: TWSKey)
+⋮----
+/**
+   * Closes a connection, if it's even open. If open, this will trigger a reconnect asynchronously.
+   * If closed, trigger a reconnect immediately
+   */
+protected executeReconnectableClose(wsKey: TWSKey, reason: string)
+⋮----
+private clearTimers(wsKey: TWSKey)
+⋮----
+// Send a ping at intervals
+private clearPingTimer(wsKey: TWSKey)
+⋮----
+// Expect a pong within a time limit
+private clearPongTimer(wsKey: TWSKey)
+⋮----
+// this.logger.trace(`Cleared pong timeout for "${wsKey}"`);
+⋮----
+// this.logger.trace(`No active pong timer for "${wsKey}"`);
+⋮----
+private clearReconnectTimer(wsKey: TWSKey)
+⋮----
+/**
+   * Returns a list of string events that can be individually sent upstream to complete subscribing/unsubscribing/etc to these topics
+   *
+   * If events are an object, these should be stringified (`return JSON.stringify(event);`)
+   * Each event returned by this will be sent one at a time
+   *
+   * Events are automatically split into smaller batches, by this method, if needed.
+   */
+protected async getWsOperationEventsForTopics(
+    topics: WSTopicRequest<WSTopic>[],
+    wsKey: TWSKey,
+    operation: WSOperation,
+  ): Promise<MidflightWsRequestEvent<TWSRequestEvent>[]>
+⋮----
+// Events that are ready to send (usually stringified JSON)
+⋮----
+/**
+   * Simply builds and sends subscribe events for a list of topics for a ws key
+   *
+   * @private Use the `subscribe(topics)` or `subscribeTopicsForWsKey(topics, wsKey)` method to subscribe to topics. Send WS message to subscribe to topics.
+   */
+private async requestSubscribeTopics(
+    wsKey: TWSKey,
+    wsTopicRequests: WSTopicRequest<WSTopic>[],
+  )
+⋮----
+// Automatically splits requests into smaller batches, if needed
+⋮----
+`Subscribing to ${wsTopicRequests.length} "${wsKey}" topics in ${subscribeWsMessages.length} batches.`, // Events: "${JSON.stringify(topics)}"
+⋮----
+/**
+   * Simply builds and sends unsubscribe events for a list of topics for a ws key
+   *
+   * @private Use the `unsubscribe(topics)` method to unsubscribe from topics. Send WS message to unsubscribe from topics.
+   */
+private async requestUnsubscribeTopics(
+    wsKey: TWSKey,
+    wsTopicRequests: WSTopicRequest<WSTopic>[],
+  )
+⋮----
+/**
+   * Try sending a string event on a WS connection (identified by the WS Key)
+   */
+private tryWsSendWithResult(
+    wsKey: TWSKey,
+    wsMessage: string,
+    throwExceptions?: boolean,
+  ): boolean
+⋮----
+public tryWsSend(
+    wsKey: TWSKey,
+    wsMessage: string,
+    throwExceptions?: boolean,
+  ): void
+⋮----
+/** Send a message while reporting whether it reached the socket API. */
+protected tryWsSendWithStatus(
+    wsKey: TWSKey,
+    wsMessage: string,
+    throwExceptions?: boolean,
+  ): boolean
+⋮----
+private async onWsOpen(
+    event: unknown,
+    wsKey: TWSKey,
+    url: string,
+    ws: WebSocketLike,
+  )
+⋮----
+private resolveConnectionInProgressPromise(wsKey: TWSKey)
+⋮----
+// Resolve & cleanup deferred "connection attempt in progress" promise
+⋮----
+/**
+   * Called automatically once a connection is ready.
+   * - Some exchanges are ready immediately after the connections open.
+   * - Some exchanges send an event to confirm the connection is ready for us.
+   *
+   * This method is called to act when the connection is ready. Use `requireConnectionReadyConfirmation` to control how this is called.
+   */
+private async onWsReadyForEvents(wsKey: TWSKey)
+⋮----
+// Some websockets require an auth packet to be sent after opening the connection
+⋮----
+// Reconnect to topics known before it connected
+⋮----
+// Request sub to public topics, if any
+⋮----
+// Request sub to private topics, if auth on connect isn't needed
+⋮----
+/**
+   * Handle subscription to private topics _after_ authentication successfully completes asynchronously.
+   *
+   * Only used for exchanges that require auth before sending private topic subscription requests
+   */
+private onWsAuthenticated(wsKey: TWSKey, event: unknown)
+⋮----
+// Resolve & cleanup deferred "auth attempt in progress" promise
+⋮----
+// Remove before continuing, in case there's more requests queued
+⋮----
+private onWsPing(
+    event: unknown,
+    wsKey: TWSKey,
+    ws: WebSocketLike,
+    source: WsEventInternalSrc,
+  )
+⋮----
+private onWsPong(event: unknown, wsKey: TWSKey, source: WsEventInternalSrc)
+⋮----
+// Necessary when native heartbeats are used
+⋮----
+private async onWsMessage(
+    event: unknown,
+    wsKey: TWSKey,
+    ws: WebSocketLike,
+    didDecompress = false,
+  ): Promise<unknown>
+⋮----
+// console.log('onMessageRaw: ', (event as any).data);
+// any message can clear the pong timer - wouldn't get a message if the ws wasn't working
+⋮----
+// console.log(`raw event: `, { data, dataType, emittableEvents });
+⋮----
+// Other event types are automatically emitted here
+⋮----
+// this.logger.trace(
+//   `onWsMessage().emit(${emittable.eventType}).done()`,
+//   emittableFinalEvent,
+// );
+⋮----
+// this.logger.trace('Decompressed message event from buffer', {
+//   ...this.WS_LOGGER_CATEGORY,
+//   wsKey,
+//   decompressed,
+// });
+⋮----
+private onWsClose(event: unknown, wsKey: TWSKey)
+⋮----
+// unintentional close, attempt recovery
+⋮----
+// clean up any pending promises for this connection
+⋮----
+// this.clearTopicsPendingSubscriptions(wsKey, true, 'WS Closed');
+⋮----
+// intentional close - clean up
+// clean up any pending promises for this connection
+⋮----
+// This was an intentional close, delete all state for this connection, as if it never existed:
+⋮----
+private getWs(wsKey: TWSKey)
+⋮----
+private setWsState(wsKey: TWSKey, state: WsConnectionStateEnum)
+⋮----
+/**
+   * Promise-driven method to assert that a ws has successfully connected (will await until connection is open)
+   */
+protected async assertIsConnected(wsKey: TWSKey): Promise<unknown>
+⋮----
+// Already in progress? Await shared promise and retry
+⋮----
+// Start connection, it should automatically store/return a promise.
+⋮----
+/**
+   * Promise-driven method to assert that a ws has been successfully authenticated (will await until auth is confirmed)
+   */
+public async assertIsAuthenticated(wsKey: TWSKey): Promise<unknown>
+⋮----
+// Already in progress? Await shared promise and retry
+⋮----
+// Start authentication, it should automatically store/return a promise.
+
+================
 File: src/types/request/futures.types.ts
 ================
 /**
@@ -10015,6 +10746,351 @@ export type WSTopic =
 export function isPrivateTopic(topic: string): boolean
 
 ================
+File: src/WebsocketClient.ts
+================
+import {
+  BaseWebsocketClient,
+  EmittableEvent,
+  MidflightWsRequestEvent,
+} from './lib/BaseWSClient.js';
+import {
+  getStringOrUndefined,
+  isRecord,
+  omitKeys,
+  removeInternalParamFields,
+} from './lib/misc-util.js';
+import {
+  APIIDMain,
+  generateNewOrderID,
+  getOrderIdPrefix,
+  logInvalidOrderId,
+  REST_CLIENT_TYPE_ENUM,
+  serializeParams,
+  validateWSAPICustomOrderID,
+  validateWSAPIDerivativesChannelKey,
+} from './lib/requestUtils.js';
+import {
+  getSignKeyType,
+  SignAlgorithm,
+  SignEncodeMethod,
+  signMessage as signRawMessage,
+} from './lib/webCryptoAPI.js';
+import { DefaultLogger } from './lib/websocket/logger.js';
+import {
+  getPromiseRefForWSAPIRequest,
+  getPromiseRefPrefixForWSAPIRequest,
+  getWsUrl as getHtxWsUrl,
+  HTXDerivativesWSAPIRawRequest,
+  HTXDerivativesWSRequest,
+  HTXSpotPrivateWSRequest,
+  HTXSpotWSAPIRawRequest,
+  HTXWSAPIRawRequest,
+  HtxWSNetwork,
+  HTXWSRequest,
+  isPrivateWsKey,
+  PRIVATE_WS_KEYS,
+  TRADE_WS_KEYS,
+  WS_KEY_MAP,
+  WS_KEY_PATH_MAP,
+  WsKey,
+  WSOperation,
+  WSTopicRequest,
+} from './lib/websocket/websocket-util.js';
+import { WSConnectedResult } from './lib/websocket/WsStore.types.js';
+import {
+  SpotV1OrderAutoPlaceReq,
+  SpotV1OrderPlaceReq,
+} from './types/request/spot.types.js';
+import { OrderIdProperty } from './types/response/shared.types.js';
+import {
+  Exact,
+  WS_API_Operations,
+  WSAPIDerivativesOperation,
+  WSAPIOperation,
+  WSAPISpotOperation,
+  WSAPITopicRequestParamMap,
+  WSAPITopicResponseMap,
+  WSAPIWsKey,
+  WSAPIWsKeyTopicMap,
+} from './types/websockets/ws-api.js';
+import { MessageEventLike } from './types/websockets/ws-events.js';
+import {
+  ParsedWsMessage,
+  WSClientConfigurableOptions,
+  WsDerivativesAuthParams,
+  WsSpotAuthParams,
+} from './types/websockets/ws-general.js';
+import {
+  WebSocketLike,
+  WebSocketReadyState,
+} from './types/websockets/ws-portable.js';
+import {
+  isPrivateTopic,
+  WSTopic,
+} from './types/websockets/ws-subscriptions.js';
+⋮----
+export interface WSAPIRequestFlags {
+  /** If true, will skip auth requirement for this WS API request. */
+  authIsOptional?: boolean | undefined;
+  /** Optional caller-supplied correlation id. Generated automatically when omitted. */
+  cid?: string;
+}
+⋮----
+/** If true, will skip auth requirement for this WS API request. */
+⋮----
+/** Optional caller-supplied correlation id. Generated automatically when omitted. */
+⋮----
+interface WsEndpointParts {
+  url: string;
+  host: string;
+  path: string;
+}
+⋮----
+interface WSAPIInflightRequestRef {
+  wsKey: WSAPIWsKey;
+  operation: WSAPIOperation;
+  cid: string;
+}
+⋮----
+export class WebsocketClient extends BaseWebsocketClient<
+⋮----
+constructor(options?: WSClientConfigurableOptions, logger?: DefaultLogger)
+⋮----
+// For most connections, heartbeats are messages for HTX, not WS-level frames
+⋮----
+/**
+   * Request connection of all market/private sockets that are useful for subscriptions.
+   * Trade-command sockets are intentionally opened lazily by sendWSAPIRequest().
+   */
+public connectAll(): Promise<WSConnectedResult | undefined>[]
+⋮----
+/**
+   * Ensures a WS API connection is active and, unless skipped, authenticated.
+   */
+public connectWSAPI(
+    wsKey: WSAPIWsKey = WS_KEY_MAP.spotTrade,
+    skipAuth?: boolean,
+  ): Promise<unknown>
+⋮----
+public subscribe(
+    requests:
+      | (WSTopicRequest<WSTopic> | WSTopic)
+      | (WSTopicRequest<WSTopic> | WSTopic)[],
+    wsKey: WsKey,
+  )
+⋮----
+public unsubscribe(
+    requests:
+      | (WSTopicRequest<WSTopic> | WSTopic)
+      | (WSTopicRequest<WSTopic> | WSTopic)[],
+    wsKey: WsKey,
+  )
+⋮----
+/**
+   * WS API Methods - similar to the REST API, but via WebSockets
+   */
+⋮----
+/**
+   * Send a Websocket API event on a connection. Returns a promise that resolves on reply.
+   *
+   * Returned promise is rejected if an exception is detected in the reply OR the connection disconnects for any reason (even if automatic reconnect will happen).
+   *
+   * After a fresh connection, you should always send a login request first.
+   *
+   * If you authenticated once and you're reconnected later (e.g. connection temporarily lost), the SDK will by default automatically:
+   * - Detect you were authenticated to the WS API before
+   * - Try to re-authenticate (up to 5 times, in case something (bad timestamp) goes wrong)
+   * - If it succeeds, it will emit the 'authenticated' event.
+   * - If it fails and gives up, it will emit an 'exception' event (type: 'wsapi.auth', reason: detailed text).
+   *
+   * You can turn off the automatic re-auth WS API logic using `reauthWSAPIOnReconnect: false` in the WSClient config.
+   *
+   * @param wsKey - The connection this event is for.
+   * @param channel - The channel this event is for (e.g. "spot.login" to authenticate)
+   * @param params - Any request parameters for the payload (contents of req_param in the docs). Signature generation is automatic, only send parameters such as order ID as per the docs.
+   * @returns Promise - tries to resolve with async WS API response. Rejects if disconnected or exception is seen in async WS API response
+   */
+async sendWSAPIRequest<
+    TWSKey extends keyof WSAPIWsKeyTopicMap,
+    TWSOperation extends keyof WSAPITopicRequestParamMap &
+      WSAPIWsKeyTopicMap[TWSKey],
+    TWSParams extends Exact<WSAPITopicRequestParamMap[TWSOperation]>,
+    TWSAPIResponse extends WSAPITopicResponseMap[TWSOperation] | object =
+      WSAPITopicResponseMap[TWSOperation],
+  >(
+    wsKey: TWSKey,
+    operation: TWSOperation,
+    params?: TWSParams,
+    requestFlags?: WSAPIRequestFlags,
+  ): Promise<TWSAPIResponse>;
+⋮----
+async sendWSAPIRequest<
+    TWSKey extends keyof WSAPIWsKeyTopicMap,
+    TWSOperation extends keyof WSAPITopicRequestParamMap &
+      WSAPIWsKeyTopicMap[TWSKey],
+    TWSParams extends Exact<WSAPITopicRequestParamMap[TWSOperation]>,
+    TWSAPIResponse extends WSAPITopicResponseMap[TWSOperation] | object =
+      WSAPITopicResponseMap[TWSOperation],
+  >(
+    wsKey: TWSKey,
+    operation: TWSOperation,
+    params: TWSParams & { signRequest?: boolean },
+    requestFlags?: WSAPIRequestFlags,
+  ): Promise<TWSAPIResponse>
+⋮----
+// Used by other exchanges for commands that don't require authentication.
+⋮----
+protected isCustomReconnectionNeeded(): boolean
+⋮----
+public generateNewOrderID(): string
+⋮----
+public getOrderIdPrefix(): string
+⋮----
+protected async triggerCustomReconnectionWorkflow(): Promise<void>
+⋮----
+protected async getWsUrl(wsKey: WsKey): Promise<string>
+⋮----
+protected sendPingEvent(wsKey: WsKey, ws: WebSocketLike): boolean
+⋮----
+// These WS Keys use native ping frames, since the JSON ping is not supported for these websocket endpoints (confirmed by HTX)
+⋮----
+protected sendPongEvent(wsKey: WsKey, _ws: WebSocketLike, event?: unknown)
+⋮----
+protected isWsPing(event: unknown): boolean
+⋮----
+protected isWsPong(event: unknown): boolean
+⋮----
+protected resolveEmittableEvents(
+    wsKey: WsKey,
+    event: MessageEventLike,
+  ): EmittableEvent[]
+⋮----
+protected isPrivateTopicRequest(
+    request: WSTopicRequest<WSTopic>,
+    wsKey: WsKey,
+  ): boolean
+⋮----
+protected getPrivateWSKeys(): WsKey[]
+⋮----
+protected authPrivateConnectionsOnConnect(wsKey: WsKey): boolean
+⋮----
+protected isAuthOnConnectWsKey(wsKey: WsKey): boolean
+⋮----
+protected getMaxTopicsPerSubscribeEvent(): number | null
+⋮----
+protected async getWsRequestEvents(
+    wsKey: WsKey,
+    operation: WSOperation,
+    requests: WSTopicRequest<WSTopic>[],
+  ): Promise<MidflightWsRequestEvent<HTXWSRequest>[]>
+⋮----
+protected async getWsAuthRequestEvent(
+    wsKey: WsKey,
+  ): Promise<object | string | void>
+⋮----
+private getWsApiRequestEvent<
+    TWSKey extends keyof WSAPIWsKeyTopicMap,
+    TWSOperation extends keyof WSAPITopicRequestParamMap &
+      WSAPIWsKeyTopicMap[TWSKey],
+    TWSParams extends Exact<WSAPITopicRequestParamMap[TWSOperation]>,
+  >(
+    wsKey: TWSKey,
+    operation: TWSOperation,
+    params: TWSParams | undefined,
+    cid: string,
+  ): HTXWSAPIRawRequest
+⋮----
+private resolveWSAPIResponse(
+    wsKey: WsKey,
+    parsed: ParsedWsMessage,
+  ): EmittableEvent[]
+⋮----
+private async getSpotAuthParams(wsKey: WsKey): Promise<WsSpotAuthParams>
+⋮----
+private async getDerivativesAuthParams(
+    wsKey: WsKey,
+  ): Promise<WsDerivativesAuthParams>
+⋮----
+private async signHtxParams(
+    host: string,
+    path: string,
+    params: Record<string, string>,
+  ): Promise<string>
+⋮----
+private async signMessage(
+    paramsStr: string,
+    secret: string,
+    method: SignEncodeMethod,
+    algorithm: SignAlgorithm,
+  ): Promise<string>
+⋮----
+private getSignatureMethod(): 'HmacSHA256' | 'Ed25519'
+⋮----
+private getTimestampForSignature(): string
+⋮----
+private async getWsEndpointParts(wsKey: WsKey): Promise<WsEndpointParts>
+⋮----
+private getWsNetwork(): HtxWSNetwork
+⋮----
+private isMarketProtocolWsKey(wsKey: WsKey): boolean
+⋮----
+private isSpotPrivateProtocolWsKey(wsKey: WsKey): boolean
+⋮----
+private isDerivativesTopicProtocolWsKey(wsKey: WsKey): boolean
+⋮----
+private isDerivativesOperationProtocolWsKey(wsKey: WsKey): boolean
+⋮----
+private parseWsMessage(event: unknown): ParsedWsMessage | undefined
+⋮----
+private getHeartbeatTimestamp(parsed?: ParsedWsMessage): string | number
+⋮----
+private getPayloadRecord(payload: unknown): Record<string, unknown>
+⋮----
+private getPayloadStringOrNumber(
+    payload: Record<string, unknown>,
+    key: string,
+  ): string | number | undefined
+⋮----
+private isAuthResponse(parsed: ParsedWsMessage): boolean
+⋮----
+private isWSAPIResponse(wsKey: WsKey, parsed: ParsedWsMessage): boolean
+⋮----
+private isSubscriptionResponse(parsed: ParsedWsMessage): boolean
+⋮----
+private isRequestResponse(parsed: ParsedWsMessage): boolean
+⋮----
+private isErrorEvent(parsed: ParsedWsMessage): boolean
+⋮----
+private getEventOperation(parsed: ParsedWsMessage): string | undefined
+⋮----
+private trackWSAPIRequestRef(
+    promiseRef: string,
+    wsKey: WSAPIWsKey,
+    operation: WSAPIOperation,
+    cid: string,
+  ): void
+⋮----
+private getPromiseRefForWSAPIResponse(
+    wsKey: WsKey,
+    parsed: ParsedWsMessage,
+  ): string | undefined
+⋮----
+/**
+   *
+   * Misc Utility Methods
+   *
+   */
+⋮----
+/**
+   * Validate syntax meets requirements set by HTX.
+   * Log warning if not.
+   */
+public validateOrderId(
+    params: SpotV1OrderPlaceReq | SpotV1OrderAutoPlaceReq,
+    orderIdProperty: OrderIdProperty,
+  ): void
+
+================
 File: src/lib/websocket/websocket-util.ts
 ================
 import { MessageEventLike } from '../../types/websockets/ws-events.js';
@@ -10177,737 +11253,6 @@ export type WebSocketCompressionFormat = 'deflate' | 'deflate-raw' | 'gzip';
 function isNodeBuffer(data: unknown): data is Uint8Array
 ⋮----
 Buffer?:
-
-================
-File: src/lib/BaseWSClient.ts
-================
-import WebSocketImplementation from 'isomorphic-ws';
-⋮----
-import {
-  isMessageEvent,
-  MessageEventLike,
-} from '../types/websockets/ws-events.js';
-import {
-  WebsocketClientOptions,
-  WSClientConfigurableOptions,
-  WsEventInternalSrc,
-} from '../types/websockets/ws-general.js';
-import {
-  EventListener,
-  WebSocketLike,
-  WSConnectionOptions,
-} from '../types/websockets/ws-portable.js';
-import { WSTopic } from '../types/websockets/ws-subscriptions.js';
-import { EventEmitter } from './event-emitter.js';
-import { isObjectLike } from './misc-util.js';
-import { checkWebCryptoAPISupported } from './webCryptoAPI.js';
-import { DefaultLogger } from './websocket/logger.js';
-import {
-  decompressMessageEvent,
-  isBufferMessageEvent,
-  safeTerminateWs,
-  WSOperation,
-  WSTopicRequest,
-  WSTopicRequestOrStringTopic,
-} from './websocket/websocket-util.js';
-import { WsStore } from './websocket/WsStore.js';
-import {
-  DeferredPromise,
-  WSConnectedResult,
-  WsConnectionStateEnum,
-} from './websocket/WsStore.types.js';
-⋮----
-interface WebSocketConstructor {
-  new (
-    url: string,
-    protocols?: string | string[],
-    options?: Omit<WSConnectionOptions, 'protocols'>,
-  ): WebSocketLike;
-}
-⋮----
-function isNativeBrowserWebSocket(ws: WebSocketLike): boolean
-⋮----
-type UseTheExceptionEventInstead = never;
-type WSClientEventPayload<WsKey extends string> = Record<string, unknown> & {
-  wsKey: WsKey;
-};
-⋮----
-type WSClientEventPayloadOrArray<WsKey extends string> =
-  | WSClientEventPayload<WsKey>
-  | WSClientEventPayload<WsKey>[];
-⋮----
-interface WSClientEventMap<WsKey extends string> {
-  /** Connection opened. If this connection was previously opened and reconnected, expect the reconnected event instead */
-  open: (evt: {
-    wsKey: WsKey;
-    event: unknown;
-    wsUrl: string;
-    ws: WebSocketLike;
-  }) => void;
-
-  /** Reconnecting a dropped connection */
-  reconnecting: (evt: { wsKey: WsKey; event: unknown }) => void;
-
-  /** Successfully reconnected a connection that dropped */
-  reconnected: (evt: {
-    wsKey: WsKey;
-    event: unknown;
-    wsUrl: string;
-    ws: WebSocketLike;
-  }) => void;
-
-  /** Connection closed */
-  close: (evt: { wsKey: WsKey; event: unknown }) => void;
-
-  /** Received reply to websocket command (e.g. after subscribing to topics) */
-  response: (response: WSClientEventPayloadOrArray<WsKey>) => void;
-
-  /** Received data for topic */
-  message: (response: WSClientEventPayloadOrArray<WsKey>) => void;
-
-  /** Exception from ws client OR custom listeners (e.g. if you throw inside your event handler) */
-  exception: (response: WSClientEventPayloadOrArray<WsKey>) => void;
-
-  /**
-   * See for more information: https://github.com/tiagosiebler/bybit-api/issues/413
-   * @deprecated Use the 'exception' event instead. The 'error' event had the unintended consequence of throwing an unhandled promise rejection.
-   */
-  error: UseTheExceptionEventInstead;
-
-  /** Confirmation that a connection successfully authenticated */
-  authenticated: (event: WSClientEventPayload<WsKey>) => void;
-}
-⋮----
-/** Connection opened. If this connection was previously opened and reconnected, expect the reconnected event instead */
-⋮----
-/** Reconnecting a dropped connection */
-⋮----
-/** Successfully reconnected a connection that dropped */
-⋮----
-/** Connection closed */
-⋮----
-/** Received reply to websocket command (e.g. after subscribing to topics) */
-⋮----
-/** Received data for topic */
-⋮----
-/** Exception from ws client OR custom listeners (e.g. if you throw inside your event handler) */
-⋮----
-/**
-   * See for more information: https://github.com/tiagosiebler/bybit-api/issues/413
-   * @deprecated Use the 'exception' event instead. The 'error' event had the unintended consequence of throwing an unhandled promise rejection.
-   */
-⋮----
-/** Confirmation that a connection successfully authenticated */
-⋮----
-export interface EmittableEvent<
-  TEventType extends keyof WSClientEventMap<string> =
-    keyof WSClientEventMap<string>,
-> {
-  eventType:
-    | TEventType
-    | 'pong'
-    | 'connectionReady' // tied to "requireConnectionReadyConfirmation";
-    | 'connectionReadyForAuth'; // tied to specific events we need to wait for, before we can begin post-connect auth
-  event: Parameters<WSClientEventMap<string>[TEventType]>[0];
-  isWSAPIResponse?: boolean;
-}
-⋮----
-| 'connectionReady' // tied to "requireConnectionReadyConfirmation";
-| 'connectionReadyForAuth'; // tied to specific events we need to wait for, before we can begin post-connect auth
-⋮----
-// Type safety for on and emit handlers: https://stackoverflow.com/a/61609010/880837
-export interface BaseWebsocketClient<
-  TWSKey extends string,
-  TWSRequestEvent extends object,
-> {
-  /** @internal preserves the request-event generic on the merged class type. */
-  readonly __requestEventType?: TWSRequestEvent;
-
-  on<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-
-  addListener<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-
-  once<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-
-  prependListener<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-
-  prependOnceListener<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-
-  off<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-
-  removeListener<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-
-  removeAllListeners(event?: keyof WSClientEventMap<TWSKey>): this;
-
-  listeners(event: keyof WSClientEventMap<TWSKey>): EventListener[];
-
-  listenerCount(
-    event: keyof WSClientEventMap<TWSKey>,
-    listener?: WSClientEventMap<TWSKey>[keyof WSClientEventMap<TWSKey>],
-  ): number;
-
-  emit<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    ...args: Parameters<WSClientEventMap<TWSKey>[U]>
-  ): boolean;
-}
-⋮----
-/** @internal preserves the request-event generic on the merged class type. */
-⋮----
-on<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-⋮----
-addListener<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-⋮----
-once<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-⋮----
-prependListener<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-⋮----
-prependOnceListener<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-⋮----
-off<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-⋮----
-removeListener<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    listener: WSClientEventMap<TWSKey>[U],
-  ): this;
-⋮----
-removeAllListeners(event?: keyof WSClientEventMap<TWSKey>): this;
-⋮----
-listeners(event: keyof WSClientEventMap<TWSKey>): EventListener[];
-⋮----
-listenerCount(
-    event: keyof WSClientEventMap<TWSKey>,
-    listener?: WSClientEventMap<TWSKey>[keyof WSClientEventMap<TWSKey>],
-  ): number;
-⋮----
-emit<U extends keyof WSClientEventMap<TWSKey>>(
-    event: U,
-    ...args: Parameters<WSClientEventMap<TWSKey>[U]>
-  ): boolean;
-⋮----
-/**
- * A midflight WS request event (e.g. subscribe to these topics).
- *
- * - requestKey: unique identifier for this request, if available. Can be anything as a string.
- * - requestEvent: the raw request, as an object, that will be sent on the ws connection. This may contain multiple topics/requests in one object, if the exchange supports it.
- */
-export interface MidflightWsRequestEvent<TEvent = object> {
-  requestKey: string | number;
-  requestEvent: TEvent;
-}
-⋮----
-/**
- * Appends wsKey and isWSAPIResponse to all events.
- * Some events are arrays, this handles that nested scenario too.
- */
-function getFinalEmittable<TWSKey extends string>(
-  emittable: EmittableEvent,
-  wsKey: TWSKey,
-  isWSAPIResponse?: boolean,
-): WSClientEventPayload<TWSKey>;
-function getFinalEmittable<TWSKey extends string>(
-  emittable: EmittableEvent[],
-  wsKey: TWSKey,
-  isWSAPIResponse?: boolean,
-): WSClientEventPayload<TWSKey>[];
-function getFinalEmittable<TWSKey extends string>(
-  emittable: EmittableEvent | EmittableEvent[],
-  wsKey: TWSKey,
-  isWSAPIResponse?: boolean,
-): WSClientEventPayload<TWSKey> | WSClientEventPayload<TWSKey>[]
-⋮----
-// Some topics just emit an array.
-// This is consistent with how it was before the WS API upgrade:
-⋮----
-// const { event, ...others } = emittable;
-// return {
-//   ...others,
-//   event: event.map((subEvent) =>
-//     getFinalEmittable(subEvent, wsKey, isWSAPIResponse),
-//   ),
-// };
-⋮----
-/**
- * Users can conveniently pass topics as strings or objects (object has topic name + optional params).
- *
- * This method normalises topics into objects (object has topic name + optional params).
- */
-function getNormalisedTopicRequests(
-  wsTopicRequests: WSTopicRequestOrStringTopic<WSTopic>[],
-): WSTopicRequest<WSTopic>[]
-⋮----
-// passed as string, convert to object
-⋮----
-// already a normalised object, thanks to user
-⋮----
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-export abstract class BaseWebsocketClient<
-TWSKey extends string,
-⋮----
-constructor(
-    options?: WSClientConfigurableOptions & { wsLoggerCategory: string },
-    logger?: DefaultLogger,
-  )
-⋮----
-// Futures public WS closes a socket with no ping for 25s. Default 10s stays under that.
-⋮----
-// Requires a confirmation "response" from the ws connection before assuming it is ready
-⋮----
-// Automatically auth after opening a connection?
-⋮----
-// Automatically include auth/sign/token with every WS request.
-// Automatically handled during getWsRequestEvents.
-⋮----
-// Automatically re-auth WS API, if we were auth'd before and get reconnected
-⋮----
-// Whether to use native heartbeats (depends on the exchange)
-⋮----
-// Check Web Crypto API support when credentials are provided and no custom sign function is used
-⋮----
-/**
-   * Return true if this wsKey connection should automatically authenticate immediately after connecting
-   */
-protected abstract isAuthOnConnectWsKey(wsKey: TWSKey): boolean;
-⋮----
-protected abstract isCustomReconnectionNeeded(wsKey: TWSKey): boolean;
-⋮----
-protected abstract triggerCustomReconnectionWorkflow(
-    wsKey: TWSKey,
-  ): Promise<void>;
-⋮----
-protected abstract sendPingEvent(wsKey: TWSKey, ws: WebSocketLike): boolean;
-⋮----
-protected abstract sendPongEvent(
-    wsKey: TWSKey,
-    ws: WebSocketLike,
-    event?: unknown,
-  ): void;
-⋮----
-protected abstract isWsPing(data: unknown): boolean;
-⋮----
-protected abstract isWsPong(data: unknown): boolean;
-⋮----
-protected abstract authPrivateConnectionsOnConnect(_wsKey: TWSKey): boolean;
-⋮----
-/**
-   * Return the event sent to the server to trigger authentication. If the event requires waiting for another event first (e.g. a challenge), return 'waitForEvent' and the library will wait for that event before calling this method again.
-   *
-   * Usually only called once per connection, unless the connection drops/is reset.
-   */
-protected abstract getWsAuthRequestEvent(
-    wsKey: TWSKey,
-    eventToAuth?: object,
-  ): Promise<object | string | 'waitForEvent' | void>;
-⋮----
-protected abstract isPrivateTopicRequest(
-    request: WSTopicRequest<WSTopic>,
-    wsKey: TWSKey,
-  ): boolean;
-⋮----
-protected abstract getPrivateWSKeys(): TWSKey[];
-⋮----
-protected abstract getWsUrl(wsKey: TWSKey): Promise<string>;
-⋮----
-protected abstract getMaxTopicsPerSubscribeEvent(
-    wsKey: TWSKey,
-  ): number | null;
-⋮----
-/**
-   * @returns one or more correctly structured request events for performing a operations over WS. This can vary per exchange spec.
-   */
-protected abstract getWsRequestEvents(
-    wsKey: TWSKey,
-    operation: WSOperation,
-    requests: WSTopicRequest<WSTopic>[],
-  ): Promise<MidflightWsRequestEvent<TWSRequestEvent>[]>;
-⋮----
-/**
-   * Abstraction called to sort ws events into emittable event types (response to a request, data update, etc)
-   */
-protected abstract resolveEmittableEvents(
-    wsKey: TWSKey,
-    event: MessageEventLike,
-  ): EmittableEvent[];
-⋮----
-/**
-   * Request connection of all dependent (public & private) websockets, instead of waiting for automatic connection by library
-   */
-protected abstract connectAll(): Promise<WSConnectedResult | undefined>[];
-⋮----
-protected isPrivateWsKey(wsKey: TWSKey): boolean
-⋮----
-/** Returns auto-incrementing request ID, used to track promise references for async requests */
-protected getNewRequestId(): number
-⋮----
-protected abstract sendWSAPIRequest(
-    wsKey: TWSKey,
-    operation: string,
-    params?: unknown,
-  ): Promise<unknown>;
-⋮----
-protected abstract sendWSAPIRequest(
-    wsKey: TWSKey,
-    channel: string,
-    params: unknown,
-  ): Promise<unknown>;
-⋮----
-public getTimeOffsetMs()
-⋮----
-public setTimeOffsetMs(newOffset: number)
-⋮----
-/**
-   * Don't call directly! Use subscribe() instead!
-   *
-   * Subscribe to one or more topics on a WS connection (identified by WS Key).
-   *
-   * - Topics are automatically cached
-   * - Connections are automatically opened, if not yet connected
-   * - Authentication is automatically handled
-   * - Topics are automatically resubscribed to, if something happens to the connection, unless you call unsubsribeTopicsForWsKey(topics, key).
-   *
-   * @param wsTopicRequests array of topics to subscribe to
-   * @param wsKey ws key referring to the ws connection these topics should be subscribed on
-   */
-protected async subscribeTopicsForWsKey(
-    wsTopicRequests: WSTopicRequestOrStringTopic<WSTopic>[],
-    wsKey: TWSKey,
-  )
-⋮----
-// Store topics, so future automation (post-auth, post-reconnect) has everything needed to resubscribe automatically
-⋮----
-// start connection process if it hasn't yet begun. Topics are automatically subscribed to on-connect
-⋮----
-// Subscribe should happen automatically once connected, nothing to do here after topics are added to wsStore.
-⋮----
-/**
-       * Are we in the process of connection? Nothing to send yet.
-       */
-⋮----
-// We're connected. Check if auth is needed and if already authenticated
-⋮----
-/**
-       * If not authenticated yet and auth is required, don't request topics yet.
-       *
-       * Auth should already automatically be in progress, so no action needed from here. Topics will automatically subscribe post-auth success.
-       */
-⋮----
-// Finally, request subscription to topics if the connection is healthy and ready
-⋮----
-protected async unsubscribeTopicsForWsKey(
-    wsTopicRequests: WSTopicRequestOrStringTopic<WSTopic>[],
-    wsKey: TWSKey,
-  ): Promise<unknown>
-⋮----
-// Store topics, so future automation (post-auth, post-reconnect) has everything needed to resubscribe automatically
-⋮----
-// If not connected, don't need to do anything.
-// Removing the topic from the store is enough to stop it from being resubscribed to on reconnect.
-⋮----
-// We're connected. Check if auth is needed and if already authenticated
-⋮----
-/**
-       * If not authenticated yet and auth is required, don't need to do anything.
-       * We don't subscribe to topics until auth is complete anyway.
-       */
-⋮----
-// Finally, request subscription to topics if the connection is healthy and ready
-⋮----
-/**
-   * Splits topic requests into two groups, public & private topic requests
-   */
-private sortTopicRequestsIntoPublicPrivate(
-    wsTopicRequests: WSTopicRequest<WSTopic>[],
-    wsKey: TWSKey,
-  ): {
-    publicReqs: WSTopicRequest<WSTopic>[];
-    privateReqs: WSTopicRequest<WSTopic>[];
-  }
-⋮----
-/** Get the WsStore that tracks websockets & topics */
-public getWsStore(): WsStore<TWSKey, WSTopicRequest<WSTopic>>
-⋮----
-public close(wsKey: TWSKey, force?: boolean)
-⋮----
-public closeAll(force?: boolean)
-⋮----
-public isConnected(wsKey: TWSKey): boolean
-⋮----
-/**
-   * Request connection to a specific websocket, instead of waiting for automatic connection.
-   */
-public async connect(
-    wsKey: TWSKey,
-    customUrl?: string | undefined,
-    throwOnError?: boolean,
-  ): Promise<WSConnectedResult | undefined>
-⋮----
-// Important: don't check for RECONNECTING here, or this clashes with reconnectWithDelay()!
-⋮----
-private connectToWsUrl(url: string, wsKey: TWSKey): WebSocketLike
-⋮----
-// Event handlers for native heartbeats / ping/pong frames
-⋮----
-private parseWsError(
-    context: string,
-    error: unknown,
-    wsKey: TWSKey,
-  ): boolean
-⋮----
-// Allow retry by default (in some places that call this). Prevent deadloop in hard failure (401)
-⋮----
-/** Get a signature, build the auth request and send it */
-private async sendAuthRequest(
-    wsKey: TWSKey,
-    eventToAuth?: object,
-  ): Promise<unknown>
-⋮----
-private async advanceAuthRequest(
-    wsKey: TWSKey,
-    authPromise: DeferredPromise<WSConnectedResult & { event: unknown }>,
-    eventToAuth?: object,
-  ): Promise<unknown>
-⋮----
-// If not required, this won't return anything
-⋮----
-// Short-circuit this for the next time it's called
-⋮----
-private reconnectWithDelay(wsKey: TWSKey, connectionDelayMs: number)
-⋮----
-// Some streams need a specialist reconnection workflow.
-// E.g. the user data stream can't just be reconnected as is.
-⋮----
-private ping(wsKey: TWSKey)
-⋮----
-/**
-   * Closes a connection, if it's even open. If open, this will trigger a reconnect asynchronously.
-   * If closed, trigger a reconnect immediately
-   */
-protected executeReconnectableClose(wsKey: TWSKey, reason: string)
-⋮----
-private clearTimers(wsKey: TWSKey)
-⋮----
-// Send a ping at intervals
-private clearPingTimer(wsKey: TWSKey)
-⋮----
-// Expect a pong within a time limit
-private clearPongTimer(wsKey: TWSKey)
-⋮----
-// this.logger.trace(`Cleared pong timeout for "${wsKey}"`);
-⋮----
-// this.logger.trace(`No active pong timer for "${wsKey}"`);
-⋮----
-private clearReconnectTimer(wsKey: TWSKey)
-⋮----
-/**
-   * Returns a list of string events that can be individually sent upstream to complete subscribing/unsubscribing/etc to these topics
-   *
-   * If events are an object, these should be stringified (`return JSON.stringify(event);`)
-   * Each event returned by this will be sent one at a time
-   *
-   * Events are automatically split into smaller batches, by this method, if needed.
-   */
-protected async getWsOperationEventsForTopics(
-    topics: WSTopicRequest<WSTopic>[],
-    wsKey: TWSKey,
-    operation: WSOperation,
-  ): Promise<MidflightWsRequestEvent<TWSRequestEvent>[]>
-⋮----
-// Events that are ready to send (usually stringified JSON)
-⋮----
-/**
-   * Simply builds and sends subscribe events for a list of topics for a ws key
-   *
-   * @private Use the `subscribe(topics)` or `subscribeTopicsForWsKey(topics, wsKey)` method to subscribe to topics. Send WS message to subscribe to topics.
-   */
-private async requestSubscribeTopics(
-    wsKey: TWSKey,
-    wsTopicRequests: WSTopicRequest<WSTopic>[],
-  )
-⋮----
-// Automatically splits requests into smaller batches, if needed
-⋮----
-`Subscribing to ${wsTopicRequests.length} "${wsKey}" topics in ${subscribeWsMessages.length} batches.`, // Events: "${JSON.stringify(topics)}"
-⋮----
-/**
-   * Simply builds and sends unsubscribe events for a list of topics for a ws key
-   *
-   * @private Use the `unsubscribe(topics)` method to unsubscribe from topics. Send WS message to unsubscribe from topics.
-   */
-private async requestUnsubscribeTopics(
-    wsKey: TWSKey,
-    wsTopicRequests: WSTopicRequest<WSTopic>[],
-  )
-⋮----
-/**
-   * Try sending a string event on a WS connection (identified by the WS Key)
-   */
-private tryWsSendWithResult(
-    wsKey: TWSKey,
-    wsMessage: string,
-    throwExceptions?: boolean,
-  ): boolean
-⋮----
-public tryWsSend(
-    wsKey: TWSKey,
-    wsMessage: string,
-    throwExceptions?: boolean,
-  ): void
-⋮----
-/** Send a message while reporting whether it reached the socket API. */
-protected tryWsSendWithStatus(
-    wsKey: TWSKey,
-    wsMessage: string,
-    throwExceptions?: boolean,
-  ): boolean
-⋮----
-private async onWsOpen(
-    event: unknown,
-    wsKey: TWSKey,
-    url: string,
-    ws: WebSocketLike,
-  )
-⋮----
-private resolveConnectionInProgressPromise(wsKey: TWSKey)
-⋮----
-// Resolve & cleanup deferred "connection attempt in progress" promise
-⋮----
-/**
-   * Called automatically once a connection is ready.
-   * - Some exchanges are ready immediately after the connections open.
-   * - Some exchanges send an event to confirm the connection is ready for us.
-   *
-   * This method is called to act when the connection is ready. Use `requireConnectionReadyConfirmation` to control how this is called.
-   */
-private async onWsReadyForEvents(wsKey: TWSKey)
-⋮----
-// Some websockets require an auth packet to be sent after opening the connection
-⋮----
-// Reconnect to topics known before it connected
-⋮----
-// Request sub to public topics, if any
-⋮----
-// Request sub to private topics, if auth on connect isn't needed
-⋮----
-/**
-   * Handle subscription to private topics _after_ authentication successfully completes asynchronously.
-   *
-   * Only used for exchanges that require auth before sending private topic subscription requests
-   */
-private onWsAuthenticated(wsKey: TWSKey, event: unknown)
-⋮----
-// Resolve & cleanup deferred "auth attempt in progress" promise
-⋮----
-// Remove before continuing, in case there's more requests queued
-⋮----
-private onWsPing(
-    event: unknown,
-    wsKey: TWSKey,
-    ws: WebSocketLike,
-    source: WsEventInternalSrc,
-  )
-⋮----
-private onWsPong(event: unknown, wsKey: TWSKey, source: WsEventInternalSrc)
-⋮----
-// Necessary when native heartbeats are used
-⋮----
-private async onWsMessage(
-    event: unknown,
-    wsKey: TWSKey,
-    ws: WebSocketLike,
-    didDecompress = false,
-  ): Promise<unknown>
-⋮----
-// console.log('onMessageRaw: ', (event as any).data);
-// any message can clear the pong timer - wouldn't get a message if the ws wasn't working
-⋮----
-// console.log(`raw event: `, { data, dataType, emittableEvents });
-⋮----
-// Other event types are automatically emitted here
-⋮----
-// this.logger.trace(
-//   `onWsMessage().emit(${emittable.eventType}).done()`,
-//   emittableFinalEvent,
-// );
-⋮----
-// this.logger.trace('Decompressed message event from buffer', {
-//   ...this.WS_LOGGER_CATEGORY,
-//   wsKey,
-//   decompressed,
-// });
-⋮----
-private onWsClose(event: unknown, wsKey: TWSKey)
-⋮----
-// unintentional close, attempt recovery
-⋮----
-// clean up any pending promises for this connection
-⋮----
-// this.clearTopicsPendingSubscriptions(wsKey, true, 'WS Closed');
-⋮----
-// intentional close - clean up
-// clean up any pending promises for this connection
-⋮----
-// This was an intentional close, delete all state for this connection, as if it never existed:
-⋮----
-private getWs(wsKey: TWSKey)
-⋮----
-private setWsState(wsKey: TWSKey, state: WsConnectionStateEnum)
-⋮----
-/**
-   * Promise-driven method to assert that a ws has successfully connected (will await until connection is open)
-   */
-protected async assertIsConnected(wsKey: TWSKey): Promise<unknown>
-⋮----
-// Already in progress? Await shared promise and retry
-⋮----
-// Start connection, it should automatically store/return a promise.
-⋮----
-/**
-   * Promise-driven method to assert that a ws has been successfully authenticated (will await until auth is confirmed)
-   */
-public async assertIsAuthenticated(wsKey: TWSKey): Promise<unknown>
-⋮----
-// Already in progress? Await shared promise and retry
-⋮----
-// Start authentication, it should automatically store/return a promise.
 
 ================
 File: src/types/request/spot.types.ts
@@ -12254,351 +12599,6 @@ export interface SpotUniversalTransferRecordsReq {
   limit?: number;
   direct?: 'prev' | 'next';
 }
-
-================
-File: src/WebsocketClient.ts
-================
-import {
-  BaseWebsocketClient,
-  EmittableEvent,
-  MidflightWsRequestEvent,
-} from './lib/BaseWSClient.js';
-import {
-  getStringOrUndefined,
-  isRecord,
-  omitKeys,
-  removeInternalParamFields,
-} from './lib/misc-util.js';
-import {
-  APIIDMain,
-  generateNewOrderID,
-  getOrderIdPrefix,
-  logInvalidOrderId,
-  REST_CLIENT_TYPE_ENUM,
-  serializeParams,
-  validateWSAPICustomOrderID,
-  validateWSAPIDerivativesChannelKey,
-} from './lib/requestUtils.js';
-import {
-  getSignKeyType,
-  SignAlgorithm,
-  SignEncodeMethod,
-  signMessage as signRawMessage,
-} from './lib/webCryptoAPI.js';
-import { DefaultLogger } from './lib/websocket/logger.js';
-import {
-  getPromiseRefForWSAPIRequest,
-  getPromiseRefPrefixForWSAPIRequest,
-  getWsUrl as getHtxWsUrl,
-  HTXDerivativesWSAPIRawRequest,
-  HTXDerivativesWSRequest,
-  HTXSpotPrivateWSRequest,
-  HTXSpotWSAPIRawRequest,
-  HTXWSAPIRawRequest,
-  HtxWSNetwork,
-  HTXWSRequest,
-  isPrivateWsKey,
-  PRIVATE_WS_KEYS,
-  TRADE_WS_KEYS,
-  WS_KEY_MAP,
-  WS_KEY_PATH_MAP,
-  WsKey,
-  WSOperation,
-  WSTopicRequest,
-} from './lib/websocket/websocket-util.js';
-import { WSConnectedResult } from './lib/websocket/WsStore.types.js';
-import {
-  SpotV1OrderAutoPlaceReq,
-  SpotV1OrderPlaceReq,
-} from './types/request/spot.types.js';
-import { OrderIdProperty } from './types/response/shared.types.js';
-import {
-  Exact,
-  WS_API_Operations,
-  WSAPIDerivativesOperation,
-  WSAPIOperation,
-  WSAPISpotOperation,
-  WSAPITopicRequestParamMap,
-  WSAPITopicResponseMap,
-  WSAPIWsKey,
-  WSAPIWsKeyTopicMap,
-} from './types/websockets/ws-api.js';
-import { MessageEventLike } from './types/websockets/ws-events.js';
-import {
-  ParsedWsMessage,
-  WSClientConfigurableOptions,
-  WsDerivativesAuthParams,
-  WsSpotAuthParams,
-} from './types/websockets/ws-general.js';
-import {
-  WebSocketLike,
-  WebSocketReadyState,
-} from './types/websockets/ws-portable.js';
-import {
-  isPrivateTopic,
-  WSTopic,
-} from './types/websockets/ws-subscriptions.js';
-⋮----
-export interface WSAPIRequestFlags {
-  /** If true, will skip auth requirement for this WS API request. */
-  authIsOptional?: boolean | undefined;
-  /** Optional caller-supplied correlation id. Generated automatically when omitted. */
-  cid?: string;
-}
-⋮----
-/** If true, will skip auth requirement for this WS API request. */
-⋮----
-/** Optional caller-supplied correlation id. Generated automatically when omitted. */
-⋮----
-interface WsEndpointParts {
-  url: string;
-  host: string;
-  path: string;
-}
-⋮----
-interface WSAPIInflightRequestRef {
-  wsKey: WSAPIWsKey;
-  operation: WSAPIOperation;
-  cid: string;
-}
-⋮----
-export class WebsocketClient extends BaseWebsocketClient<
-⋮----
-constructor(options?: WSClientConfigurableOptions, logger?: DefaultLogger)
-⋮----
-// For most connections, heartbeats are messages for HTX, not WS-level frames
-⋮----
-/**
-   * Request connection of all market/private sockets that are useful for subscriptions.
-   * Trade-command sockets are intentionally opened lazily by sendWSAPIRequest().
-   */
-public connectAll(): Promise<WSConnectedResult | undefined>[]
-⋮----
-/**
-   * Ensures a WS API connection is active and, unless skipped, authenticated.
-   */
-public connectWSAPI(
-    wsKey: WSAPIWsKey = WS_KEY_MAP.spotTrade,
-    skipAuth?: boolean,
-  ): Promise<unknown>
-⋮----
-public subscribe(
-    requests:
-      | (WSTopicRequest<WSTopic> | WSTopic)
-      | (WSTopicRequest<WSTopic> | WSTopic)[],
-    wsKey: WsKey,
-  )
-⋮----
-public unsubscribe(
-    requests:
-      | (WSTopicRequest<WSTopic> | WSTopic)
-      | (WSTopicRequest<WSTopic> | WSTopic)[],
-    wsKey: WsKey,
-  )
-⋮----
-/**
-   * WS API Methods - similar to the REST API, but via WebSockets
-   */
-⋮----
-/**
-   * Send a Websocket API event on a connection. Returns a promise that resolves on reply.
-   *
-   * Returned promise is rejected if an exception is detected in the reply OR the connection disconnects for any reason (even if automatic reconnect will happen).
-   *
-   * After a fresh connection, you should always send a login request first.
-   *
-   * If you authenticated once and you're reconnected later (e.g. connection temporarily lost), the SDK will by default automatically:
-   * - Detect you were authenticated to the WS API before
-   * - Try to re-authenticate (up to 5 times, in case something (bad timestamp) goes wrong)
-   * - If it succeeds, it will emit the 'authenticated' event.
-   * - If it fails and gives up, it will emit an 'exception' event (type: 'wsapi.auth', reason: detailed text).
-   *
-   * You can turn off the automatic re-auth WS API logic using `reauthWSAPIOnReconnect: false` in the WSClient config.
-   *
-   * @param wsKey - The connection this event is for.
-   * @param channel - The channel this event is for (e.g. "spot.login" to authenticate)
-   * @param params - Any request parameters for the payload (contents of req_param in the docs). Signature generation is automatic, only send parameters such as order ID as per the docs.
-   * @returns Promise - tries to resolve with async WS API response. Rejects if disconnected or exception is seen in async WS API response
-   */
-async sendWSAPIRequest<
-    TWSKey extends keyof WSAPIWsKeyTopicMap,
-    TWSOperation extends keyof WSAPITopicRequestParamMap &
-      WSAPIWsKeyTopicMap[TWSKey],
-    TWSParams extends Exact<WSAPITopicRequestParamMap[TWSOperation]>,
-    TWSAPIResponse extends WSAPITopicResponseMap[TWSOperation] | object =
-      WSAPITopicResponseMap[TWSOperation],
-  >(
-    wsKey: TWSKey,
-    operation: TWSOperation,
-    params?: TWSParams,
-    requestFlags?: WSAPIRequestFlags,
-  ): Promise<TWSAPIResponse>;
-⋮----
-async sendWSAPIRequest<
-    TWSKey extends keyof WSAPIWsKeyTopicMap,
-    TWSOperation extends keyof WSAPITopicRequestParamMap &
-      WSAPIWsKeyTopicMap[TWSKey],
-    TWSParams extends Exact<WSAPITopicRequestParamMap[TWSOperation]>,
-    TWSAPIResponse extends WSAPITopicResponseMap[TWSOperation] | object =
-      WSAPITopicResponseMap[TWSOperation],
-  >(
-    wsKey: TWSKey,
-    operation: TWSOperation,
-    params: TWSParams & { signRequest?: boolean },
-    requestFlags?: WSAPIRequestFlags,
-  ): Promise<TWSAPIResponse>
-⋮----
-// Used by other exchanges for commands that don't require authentication.
-⋮----
-protected isCustomReconnectionNeeded(): boolean
-⋮----
-public generateNewOrderID(): string
-⋮----
-public getOrderIdPrefix(): string
-⋮----
-protected async triggerCustomReconnectionWorkflow(): Promise<void>
-⋮----
-protected async getWsUrl(wsKey: WsKey): Promise<string>
-⋮----
-protected sendPingEvent(wsKey: WsKey, ws: WebSocketLike): boolean
-⋮----
-// These WS Keys use native ping frames, since the JSON ping is not supported for these websocket endpoints (confirmed by HTX)
-⋮----
-protected sendPongEvent(wsKey: WsKey, _ws: WebSocketLike, event?: unknown)
-⋮----
-protected isWsPing(event: unknown): boolean
-⋮----
-protected isWsPong(event: unknown): boolean
-⋮----
-protected resolveEmittableEvents(
-    wsKey: WsKey,
-    event: MessageEventLike,
-  ): EmittableEvent[]
-⋮----
-protected isPrivateTopicRequest(
-    request: WSTopicRequest<WSTopic>,
-    wsKey: WsKey,
-  ): boolean
-⋮----
-protected getPrivateWSKeys(): WsKey[]
-⋮----
-protected authPrivateConnectionsOnConnect(wsKey: WsKey): boolean
-⋮----
-protected isAuthOnConnectWsKey(wsKey: WsKey): boolean
-⋮----
-protected getMaxTopicsPerSubscribeEvent(): number | null
-⋮----
-protected async getWsRequestEvents(
-    wsKey: WsKey,
-    operation: WSOperation,
-    requests: WSTopicRequest<WSTopic>[],
-  ): Promise<MidflightWsRequestEvent<HTXWSRequest>[]>
-⋮----
-protected async getWsAuthRequestEvent(
-    wsKey: WsKey,
-  ): Promise<object | string | void>
-⋮----
-private getWsApiRequestEvent<
-    TWSKey extends keyof WSAPIWsKeyTopicMap,
-    TWSOperation extends keyof WSAPITopicRequestParamMap &
-      WSAPIWsKeyTopicMap[TWSKey],
-    TWSParams extends Exact<WSAPITopicRequestParamMap[TWSOperation]>,
-  >(
-    wsKey: TWSKey,
-    operation: TWSOperation,
-    params: TWSParams | undefined,
-    cid: string,
-  ): HTXWSAPIRawRequest
-⋮----
-private resolveWSAPIResponse(
-    wsKey: WsKey,
-    parsed: ParsedWsMessage,
-  ): EmittableEvent[]
-⋮----
-private async getSpotAuthParams(wsKey: WsKey): Promise<WsSpotAuthParams>
-⋮----
-private async getDerivativesAuthParams(
-    wsKey: WsKey,
-  ): Promise<WsDerivativesAuthParams>
-⋮----
-private async signHtxParams(
-    host: string,
-    path: string,
-    params: Record<string, string>,
-  ): Promise<string>
-⋮----
-private async signMessage(
-    paramsStr: string,
-    secret: string,
-    method: SignEncodeMethod,
-    algorithm: SignAlgorithm,
-  ): Promise<string>
-⋮----
-private getSignatureMethod(): 'HmacSHA256' | 'Ed25519'
-⋮----
-private getTimestampForSignature(): string
-⋮----
-private async getWsEndpointParts(wsKey: WsKey): Promise<WsEndpointParts>
-⋮----
-private getWsNetwork(): HtxWSNetwork
-⋮----
-private isMarketProtocolWsKey(wsKey: WsKey): boolean
-⋮----
-private isSpotPrivateProtocolWsKey(wsKey: WsKey): boolean
-⋮----
-private isDerivativesTopicProtocolWsKey(wsKey: WsKey): boolean
-⋮----
-private isDerivativesOperationProtocolWsKey(wsKey: WsKey): boolean
-⋮----
-private parseWsMessage(event: unknown): ParsedWsMessage | undefined
-⋮----
-private getHeartbeatTimestamp(parsed?: ParsedWsMessage): string | number
-⋮----
-private getPayloadRecord(payload: unknown): Record<string, unknown>
-⋮----
-private getPayloadStringOrNumber(
-    payload: Record<string, unknown>,
-    key: string,
-  ): string | number | undefined
-⋮----
-private isAuthResponse(parsed: ParsedWsMessage): boolean
-⋮----
-private isWSAPIResponse(wsKey: WsKey, parsed: ParsedWsMessage): boolean
-⋮----
-private isSubscriptionResponse(parsed: ParsedWsMessage): boolean
-⋮----
-private isRequestResponse(parsed: ParsedWsMessage): boolean
-⋮----
-private isErrorEvent(parsed: ParsedWsMessage): boolean
-⋮----
-private getEventOperation(parsed: ParsedWsMessage): string | undefined
-⋮----
-private trackWSAPIRequestRef(
-    promiseRef: string,
-    wsKey: WSAPIWsKey,
-    operation: WSAPIOperation,
-    cid: string,
-  ): void
-⋮----
-private getPromiseRefForWSAPIResponse(
-    wsKey: WsKey,
-    parsed: ParsedWsMessage,
-  ): string | undefined
-⋮----
-/**
-   *
-   * Misc Utility Methods
-   *
-   */
-⋮----
-/**
-   * Validate syntax meets requirements set by HTX.
-   * Log warning if not.
-   */
-public validateOrderId(
-    params: SpotV1OrderPlaceReq | SpotV1OrderAutoPlaceReq,
-    orderIdProperty: OrderIdProperty,
-  ): void
 
 ================
 File: src/types/response/futures.types.ts
@@ -22487,10 +22487,10 @@ Complete & robust JavaScript & Node.js SDK for the HTX REST APIs and WebSockets:
     - [WebSocket API (WebsocketAPIClient)](#websocket-api-websocketapiclient)
 - [Customise Logging](#customise-logging)
 - [Browser/Frontend Usage](#browserfrontend-usage)
-  - [React and Vite](#react-and-vite)
-  - [Webpack](#webpack)
-  - [Browser Requirements](#browser-requirements)
-  - [Security and CORS](#security-and-cors)
+  - [Vite and React](#vite-and-react)
+  - [Next.js and server-side requests](#nextjs-and-server-side-requests)
+  - [React Native and Expo](#react-native-and-expo)
+  - [Standalone Webpack bundle](#standalone-webpack-bundle)
 - [LLMs & AI](#use-with-llms--ai)
 - [Used By](#used-by)
 - [Contributions & Thanks](#contributions--thanks)
@@ -22971,72 +22971,31 @@ In rare situations, you may want to see the raw HTTP requests being built as wel
 
 ## Browser/Frontend Usage
 
-The package's ESM entry can be imported directly by modern frontend bundlers. Do not build or copy a separate SDK bundle into your application.
+The npm package includes ES module and CommonJS builds. You do not need a standalone Webpack bundle to use it in a frontend project. Choose the setup for your application below.
 
-Browser applications should use the SDK only for public market data. Keep API keys, API secrets, authenticated REST calls, private WebSocket subscriptions, and WebSocket API trading on a trusted backend.
+### Vite and React
 
-### React and Vite
+Use the [Vite guide](https://sieblyio.github.io/docs/htx/environments/vite.html) or [React guide](https://sieblyio.github.io/docs/htx/environments/react.html) for a complete public market-data project that imports `@siebly/htx-api` from npm.
 
-Install and import the package normally; no SDK-specific Vite plugin or Node.js polyfill is required:
+Keep the supplied bundler configuration with the example: it provides EventEmitter through the `events` alias and configures dependency optimization for the SDK's browser transport mappings. These browser examples use public HTX market data. Keep API keys and secrets in a secure server-side environment and make authenticated REST calls, private WebSocket subscriptions, and WebSocket API trading calls there.
 
-```bash
-npm install @siebly/htx-api
-```
+Browser REST requests also depend on HTX's CORS policy and regional availability. If a request is blocked, call the SDK through your application's server route instead. A development proxy does not solve CORS for a deployed application.
 
-```tsx
-import { useEffect, useState } from 'react';
-import { SpotClient, WebsocketClient, WS_KEY_MAP } from '@siebly/htx-api';
+Use a modern browser with native `WebSocket`, `TextEncoder`, `TextDecoder`, and `DecompressionStream` support. Public HTX WebSocket messages require decompression. If your Content Security Policy restricts connections, allow the required HTX `https://` and `wss://` origins in `connect-src`.
 
-export function BtcTicker() {
-  const [ticker, setTicker] = useState<unknown>();
+### Next.js and server-side requests
 
-  useEffect(() => {
-    const restClient = new SpotClient();
-    const wsClient = new WebsocketClient();
+The [Next.js guide](https://sieblyio.github.io/docs/htx/environments/next.html) runs the SDK in a Node.js Route Handler and returns the result to the frontend. Use this pattern when requests need credentials or cannot be made directly from the browser.
 
-    restClient.getTicker({ symbol: 'btcusdt' }).then(setTicker);
+### React Native and Expo
 
-    const onMessage = (message: unknown) => setTicker(message);
-    wsClient.on('message', onMessage);
-    wsClient.subscribe('market.btcusdt.ticker', WS_KEY_MAP.spotPublic);
+Follow the [Expo guide](https://sieblyio.github.io/docs/htx/environments/expo.html) for its Metro configuration and HTTP polyfills. Browser bundler configuration is not interchangeable with Metro configuration. HTX compressed WebSocket messages require `DecompressionStream`, which the guide does not polyfill; confirm support in your target runtime or relay market data through your backend. The example uses public HTX market data; keep authenticated operations on your server.
 
-    return () => {
-      wsClient.off('message', onMessage);
-      wsClient.closeAll();
-    };
-  }, []);
+### Standalone Webpack bundle
 
-  return <pre>{JSON.stringify(ticker, null, 2)}</pre>;
-}
-```
+This repository does not include a standalone Webpack configuration, a `pack` script, or a UMD bundle with a global name. From a checkout, `npm install` followed by `npm run build` produces ES module and CommonJS builds in `dist/mjs` and `dist/cjs`. Use npm imports through your application's bundler for browser usage.
 
-The cleanup is important during navigation, hot reloads, and React Strict Mode development checks so that an old socket is not left reconnecting in the background.
-
-### Webpack
-
-Webpack 5 can consume the same package entry directly:
-
-```javascript
-import { SpotClient, WebsocketClient } from '@siebly/htx-api';
-```
-
-Use a normal `target: 'web'` application build. The SDK does not require a checked-in UMD bundle or `resolve.fallback` shims for Node.js core modules.
-
-Direct `<script>`-tag globals are not supported. Use the package through an ESM-aware bundler or application build instead.
-
-### Browser Requirements
-
-Use a modern browser with native `WebSocket`, `TextEncoder`, `TextDecoder`, and `DecompressionStream` support. Secure-context Web Crypto support (`globalThis.crypto.subtle`) is required by signing code, although credentials should not be used in a frontend application.
-
-Browser WebSockets do not expose Node.js-only operations such as custom agents, protocol-level `ping()`, or `terminate()`. The SDK uses browser-safe behavior for these cases. If your Content Security Policy restricts connections, allow the required HTX `https://` and `wss://` origins in `connect-src`.
-
-### Security and CORS
-
-- Never place an API key or secret in browser code, local storage, or frontend environment variables such as `VITE_*` or `REACT_APP_*`; those values are visible to users.
-- Send authenticated REST and WebSocket API operations through your own backend. Expose only the narrow application operations the frontend needs.
-- HTX controls which REST endpoints and headers are permitted by CORS. A browser cannot bypass a rejected preflight request; use a same-origin backend endpoint instead of disabling browser security.
-- Do not expose an unrestricted forwarding proxy. Validate destinations, authentication, request shapes, and rate limits on the backend.
-- Browser support does not imply that every HTX endpoint is suitable for direct frontend access. Public REST and public market-data WebSockets are the intended use cases.
+Webpack 5 can consume the package entry with a normal `target: 'web'` application build. The SDK does not require `resolve.fallback` shims for Node.js core modules. Direct `<script>`-tag globals are not supported. Browser configuration, runtime requirements, and HTX API access restrictions still apply.
 
 ## Use with LLMs & AI
 
@@ -23097,7 +23056,7 @@ File: package.json
 ================
 {
   "name": "@siebly/htx-api",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Complete & robust Node.js SDK for HTX's REST APIs and WebSockets, with TypeScript & strong end to end tests.",
   "scripts": {
     "clean": "node scripts/clean.mjs",
