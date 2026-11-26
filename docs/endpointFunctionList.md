@@ -73,6 +73,7 @@ This table includes all endpoints from the official Exchange API docs and corres
 | [getAssetValuation()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L413) | :closed_lock_with_key:  | GET | `/v2/account/asset-valuation` |
 | [submitTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L424) | :closed_lock_with_key:  | POST | `/v1/account/transfer` |
 | [getAccountHistory()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L435) | :closed_lock_with_key:  | GET | `/v1/account/history` |
+| [getFinanceHistory()](../examples/apidoc/SpotClient/getFinanceHistory.js) (undocumented, used by HTX Financial Records) | :closed_lock_with_key:  | GET | `/v1/query/finance-history` |
 | [getAccountLedger()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L448) | :closed_lock_with_key:  | GET | `/v2/account/ledger` |
 | [submitV2AccountTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L461) | :closed_lock_with_key:  | POST | `/v2/account/transfer` |
 | [submitUniversalTransfer()](https://github.com/sieblyio/htx-api/blob/main/src/SpotClient.ts#L472) | :closed_lock_with_key:  | POST | `/v5/account/universal_transfer` |

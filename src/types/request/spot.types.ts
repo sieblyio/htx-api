@@ -109,6 +109,21 @@ export interface SpotGetAccountHistoryReq {
   'from-id'?: number;
 }
 
+/** Query parameters used by the HTX Financial Records page. */
+export interface SpotGetFinanceHistoryReq {
+  /** Comma-separated financial record types, e.g. api-brokerage-auto-brokerage-to-spot. */
+  types?: string;
+  currency?: string;
+  /** Unix timestamp in milliseconds. */
+  'start-time'?: number;
+  /** Unix timestamp in milliseconds. */
+  'end-time'?: number;
+  size?: number;
+  direction?: 'next' | 'prev';
+  /** Inclusive record ID. Pass the first unconsumed record's id for the next page. */
+  from?: number | string;
+}
+
 export interface SpotV2PointTransferReq {
   /** Transferer UID */
   fromUid: string;

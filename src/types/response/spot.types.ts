@@ -549,6 +549,30 @@ export interface SpotAccountHistory {
   'transact-time': number;
 }
 
+/** Financial Records entry from GET /v1/query/finance-history. */
+export interface SpotFinanceHistoryRecord {
+  id: number;
+  'transaction-id': number;
+  'created-at': number;
+  'updated-at': number;
+  currency: string;
+  'currency-display-name'?: string;
+  'candidate-currency'?: string | null;
+  type: string;
+  'group-type'?: string;
+  'business-line'?: string;
+  direction: string;
+  amount: string;
+  state: string;
+  fees?: string;
+  'error-code'?: string;
+  'error-msg'?: string;
+  'to-address'?: string;
+  'to-addr-tag'?: string;
+  'tx-hash'?: string;
+  extra?: unknown;
+}
+
 /** Ledger row from GET /v2/account/ledger */
 export interface SpotV2AccountLedger {
   accountId: number;
