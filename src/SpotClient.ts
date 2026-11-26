@@ -21,6 +21,7 @@ import type {
   SpotGetAssetValuationReq,
   SpotGetChainsReq,
   SpotGetDepthReq,
+  SpotGetFinanceHistoryReq,
   SpotGetKlineReq,
   SpotGetMatchResultsReq,
   SpotGetOpenOrdersReq,
@@ -81,6 +82,7 @@ import {
   SpotEarnRedeemResult,
   SpotEarnSubscribeResult,
   SpotEarnUserAsset,
+  SpotFinanceHistoryRecord,
   SpotKline,
   SpotLastTrade,
   SpotMarginAccountBalance,
@@ -438,6 +440,17 @@ export class SpotClient extends BaseRestClient {
     SpotAPISuccessResponse<SpotAccountHistory[]> & { 'next-id'?: number }
   > {
     return this.getPrivate('/v1/account/history', params);
+  }
+
+  /**
+   * @deprecated Use getAccountHistory() instead. This endpoint is undocumented and may change without notice. Use at your own risk.
+   *
+   * Get Financial Records, as used by the HTX website. No published API specification.
+   */
+  getFinanceHistory(
+    params?: SpotGetFinanceHistoryReq,
+  ): Promise<SpotAPISuccessResponse<SpotFinanceHistoryRecord[]>> {
+    return this.getPrivate('/v1/query/finance-history', params);
   }
 
   /**
